@@ -1,0 +1,276 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<title>LAMSL - Division C Standings</title>
+
+<style>
+
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
+    background-color: #eef4ea;
+    background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    background-size: min(60vw, 540px);
+    background-attachment: fixed;
+    color: #333;
+}
+
+h1, h2, h3 {
+    margin-bottom: 10px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* ===== NAVBAR ===== */
+header {
+    background: #12324A;
+    color: white;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar li {
+    margin-left: 20px;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    color: #F1D27A;
+}
+
+/* ===== CARDS ===== */
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+/* ===== FOOTER ===== */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #12324A;
+    color: white;
+    margin-top: 20px;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .navbar li {
+        margin: 10px 0;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="navbar container">
+        <h2>LAMSL</h2>
+        <ul>
+            <li><a href="LASML.html">Home</a></li>
+            <li><a href="standings.html">Standings</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="administrators.html">Admin</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</header>
+
+<!-- MAIN -->
+<div class="container">
+
+    <main>
+        <section class="card">
+            <h2>Division C-2025 Standings</h2>
+            <p>Updated 08/04/25 - Top 5 teams advance to playoffs</p>
+            <table border="1" style="width:100%; border-collapse: collapse;">
+                <tr>
+                    <th>Team</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>T</th>
+                    <th>GB</th>
+                </tr>
+                <tr>
+                    <td>Diablos</td>
+                    <td>12</td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Brewers</td>
+                    <td>8</td>
+                    <td>6</td>
+                    <td>0</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Coyotes</td>
+                    <td>8</td>
+                    <td>6</td>
+                    <td>0</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Goodfellas</td>
+                    <td>8</td>
+                    <td>6</td>
+                    <td>0</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Bandits</td>
+                    <td>6</td>
+                    <td>8</td>
+                    <td>0</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Salvajes</td>
+                    <td>5</td>
+                    <td>9</td>
+                    <td>0</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Balls Out</td>
+                    <td>5</td>
+                    <td>9</td>
+                    <td>0</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Orioles</td>
+                    <td>3</td>
+                    <td>11</td>
+                    <td>0</td>
+                    <td></td>
+                </tr>
+            </table>
+            <h3>Division C & D Scores</h3>
+            <p>Regular Season - Teams on the left are home.</p>
+            <table border="1" style="width:100%; border-collapse: collapse;">
+                <tr>
+                    <th>Date</th>
+                    <th>Home Team</th>
+                    <th>Away Team</th>
+                    <th>Score</th>
+                </tr>
+                <tr><td>March 23, 2025</td><td>Salvajes</td><td>Coyotes</td><td>20-25</td></tr>
+                <tr><td>March 23, 2025</td><td>Goodfellas</td><td>Diablos</td><td>12-14</td></tr>
+                <tr><td>March 23, 2025</td><td>Balls Out</td><td>Orioles</td><td>11-15</td></tr>
+                <tr><td>March 23, 2025</td><td>Bandits</td><td>Brewers</td><td>Postponed</td></tr>
+                <tr><td>March 30, 2025</td><td>Orioles</td><td>Goodfellas</td><td>6-11</td></tr>
+                <tr><td>March 30, 2025</td><td>Salvajes</td><td>Brewers</td><td>12-22</td></tr>
+                <tr><td>March 30, 2025</td><td>Diablos</td><td>Balls Out</td><td>25-13</td></tr>
+                <tr><td>March 30, 2025</td><td>Coyotes</td><td>Bandits</td><td>13-10</td></tr>
+                <tr><td>April 6, 2025</td><td>Orioles</td><td>Bandits</td><td>7-9</td></tr>
+                <tr><td>April 6, 2025</td><td>Goodfellas</td><td>Balls Out</td><td>13-19</td></tr>
+                <tr><td>April 6, 2025</td><td>Brewers</td><td>Coyotes</td><td>15-21</td></tr>
+                <tr><td>April 6, 2025</td><td>Salvajes</td><td>Diablos</td><td>7-23</td></tr>
+                <tr><td>April 13, 2025</td><td>Salvajes</td><td>Balls Out</td><td>24-14</td></tr>
+                <tr><td>April 13, 2025</td><td>Brewers</td><td>Orioles</td><td>15-16</td></tr>
+                <tr><td>April 13, 2025</td><td>Goodfellas</td><td>Bandits</td><td>19-9</td></tr>
+                <tr><td>April 13, 2025</td><td>Diablos</td><td>Coyotes</td><td>12-9</td></tr>
+                <tr><td>April 27, 2025</td><td>Bandits</td><td>Los Diablos</td><td>Rained Out</td></tr>
+                <tr><td>April 27, 2025</td><td>Balls Out</td><td>Coyotes</td><td></td></tr>
+                <tr><td>April 27, 2025</td><td>Brewers</td><td>Goodfellas</td><td></td></tr>
+                <tr><td>April 27, 2025</td><td>Orioles</td><td>Salvajes</td><td></td></tr>
+                <tr><td>May 4, 2025</td><td>Goodfellas</td><td>Salvajes</td><td>5-20</td></tr>
+                <tr><td>May 4, 2025</td><td>Orioles</td><td>Coyotes</td><td>23-19</td></tr>
+                <tr><td>May 4, 2025</td><td>Bandits</td><td>Balls Out</td><td>19-14</td></tr>
+                <tr><td>May 4, 2025</td><td>Brewers</td><td>Diablos</td><td>Postponed</td></tr>
+                <tr><td>May 18, 2025</td><td>Coyotes</td><td>Goodfellas</td><td>9-0</td></tr>
+                <tr><td>May 18, 2025</td><td>Brewers</td><td>Balls Out</td><td>15-20</td></tr>
+                <tr><td>May 18, 2025</td><td>Orioles</td><td>Diablos</td><td>5-20</td></tr>
+                <tr><td>May 18, 2025</td><td>Bandits</td><td>Salvajes</td><td>6-25</td></tr>
+                <tr><td>June 1, 2025</td><td>Coyotes</td><td>Balls Out</td><td>17-19</td></tr>
+                <tr><td>June 1, 2025</td><td>Diablos</td><td>Bandits</td><td>21-14</td></tr>
+                <tr><td>June 1, 2025</td><td>Salvajes</td><td>Orioles</td><td>12-7</td></tr>
+                <tr><td>June 1, 2025</td><td>Goodfellas</td><td>Brewers</td><td>12-10</td></tr>
+                <tr><td>June 8, 2025</td><td>Orioles</td><td>Balls Out</td><td>18-22</td></tr>
+                <tr><td>June 8, 2025</td><td>Coyotes</td><td>Salvajes</td><td>27-13</td></tr>
+                <tr><td>June 8, 2025</td><td>Goodfellas</td><td>Diablos</td><td>7-22</td></tr>
+                <tr><td>June 8, 2025</td><td>Brewers</td><td>Bandits</td><td>19-9</td></tr>
+                <tr><td>June 22, 2025</td><td>Diablos</td><td>Brewers</td><td>27-10</td></tr>
+                <tr><td>June 22, 2025</td><td>Goodfellas</td><td>Orioles</td><td>19-7</td></tr>
+                <tr><td>June 22, 2025</td><td>Coyotes</td><td>Bandits</td><td>13-20</td></tr>
+                <tr><td>June 22, 2025</td><td>Salvajes</td><td>Balls Out</td><td>Postponed</td></tr>
+                <tr><td>June 29, 2025</td><td>Goodfellas</td><td>Coyotes</td><td>22-21</td></tr>
+                <tr><td>June 29, 2025</td><td>Diablos</td><td>Balls Out</td><td>20-13</td></tr>
+                <tr><td>June 29, 2025</td><td>Bandits</td><td>Salvajes</td><td>22-13</td></tr>
+                <tr><td>June 29, 2025</td><td>Brewers</td><td>Orioles</td><td>18-4</td></tr>
+                <tr><td>July 13, 2025</td><td>Diablos</td><td>Salvajes</td><td>12-11</td></tr>
+                <tr><td>July 13, 2025</td><td>Coyotes</td><td>Orioles</td><td>9-0 Forfeit</td></tr>
+                <tr><td>July 13, 2025</td><td>Bandits</td><td>Balls Out</td><td>19-23</td></tr>
+                <tr><td>July 13, 2025</td><td>Brewers</td><td>Goodfellas</td><td>24-8</td></tr>
+                <tr><td>July 20, 2025</td><td>Diablos</td><td>Orioles</td><td>9-0 Forfeit</td></tr>
+                <tr><td>July 20, 2025</td><td>Salvajes</td><td>Balls Out</td><td>28-12</td></tr>
+                <tr><td>July 27, 2025</td><td>Coyotes</td><td>Diablos</td><td></td></tr>
+                <tr><td>July 27, 2025</td><td>Balls Out</td><td>Goodfellas</td><td>12-17</td></tr>
+                <tr><td>July 27, 2025</td><td>Brewers</td><td>Salvajes</td><td>12-10</td></tr>
+                <tr><td>July 27, 2025</td><td>Brewers</td><td>Bandits</td><td>10-32</td></tr>
+                <tr><td>August 3, 2025</td><td>Diablos</td><td>Brewers</td><td>12-14</td></tr>
+                <tr><td>August 3, 2025</td><td>Salvajes</td><td>Goodfellas</td><td>10-15</td></tr>
+                <tr><td>August 3, 2025</td><td>Coyotes</td><td>Balls Out</td><td>21-17</td></tr>
+                <tr><td>August 3, 2025</td><td>Bandits</td><td>Orioles</td><td>17-11</td></tr>
+            </table>
+        </section>
+    </main>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>Â© Latino Men's Softball League (LAMSL)</p>
+</footer>
+
+</body>
+</html>

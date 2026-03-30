@@ -1,0 +1,513 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<title>LAMSL - League Administrators</title>
+
+<style>
+
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
+    background-color: #eef4ea;
+    background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    background-size: min(60vw, 540px);
+    background-attachment: fixed;
+    color: #333;
+}
+
+h1, h2, h3 {
+    margin-bottom: 10px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* ===== NAVBAR ===== */
+header {
+    background: #12324A;
+    color: white;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar li {
+    margin-left: 20px;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    color: #F1D27A;
+}
+
+/* ===== CARDS ===== */
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.admin-status {
+    margin: 0 0 12px;
+    color: #304b64;
+}
+
+.admin-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.admin-form input,
+.admin-form textarea {
+    padding: 8px;
+    border: 1px solid #c5d0da;
+    border-radius: 6px;
+    font-family: inherit;
+}
+
+.admin-form textarea {
+    min-height: 90px;
+    resize: vertical;
+    grid-column: span 2;
+}
+
+.admin-form button,
+.admin-inline button {
+    background: #12324A;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 9px 12px;
+    cursor: pointer;
+}
+
+.admin-form button:hover,
+.admin-inline button:hover {
+    background: #004080;
+}
+
+.admin-inline {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.admin-inline input {
+    padding: 8px;
+    border: 1px solid #c5d0da;
+    border-radius: 6px;
+}
+
+.admin-only {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #dbe2ea;
+}
+
+.admin-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+}
+
+.admin-list li {
+    background: #eef2f7;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.admin-list .archive-btn {
+    background: #7f1313;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.admin-list .archive-btn:hover {
+    background: #5e0d0d;
+}
+
+/* ===== FOOTER ===== */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #12324A;
+    color: white;
+    margin-top: 20px;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .navbar li {
+        margin: 10px 0;
+    }
+
+    .admin-form {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-form textarea {
+        grid-column: span 1;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="navbar container">
+        <h2>LAMSL</h2>
+        <ul>
+            <li><a href="LASML.html">Home</a></li>
+            <li><a href="standings.html">Standings</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="meetingnotes.html">Meeting Notes</a></li>
+            <li><a href="administrators.html">Admin</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</header>
+
+<!-- MAIN -->
+<div class="container">
+
+    <main>
+        <section class="card">
+            <h2>User Administration</h2>
+            <p class="admin-status" id="auth-status">Not signed in.</p>
+
+            <div class="admin-inline" id="login-row">
+                <input id="login-username" type="text" placeholder="Username" value="admin">
+                <input id="login-password" type="password" placeholder="Password" value="admin">
+                <button id="login-btn" type="button">Sign In</button>
+            </div>
+
+            <div class="admin-inline" id="logout-row" style="display:none;">
+                <button id="logout-btn" type="button">Sign Out</button>
+            </div>
+
+            <div class="admin-only" id="admin-tools" style="display:none;">
+                <h3>Add Announcement</h3>
+                <form class="admin-form" id="announcement-form">
+                    <input id="announcement-title" type="text" placeholder="Announcement title" required>
+                    <input id="announcement-date" type="date" required>
+                    <textarea id="announcement-message" placeholder="Announcement details" required></textarea>
+                    <button type="submit">Publish Announcement</button>
+                </form>
+
+                <h3>Active Announcements</h3>
+                <ul id="active-announcements" class="admin-list"></ul>
+
+                <h3>Create Additional Admin User</h3>
+                <div class="admin-inline">
+                    <input id="new-admin-username" type="text" placeholder="New admin username">
+                    <input id="new-admin-password" type="password" placeholder="New admin password">
+                    <button id="create-admin-btn" type="button">Create Admin User</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>League Administrators</h2>
+            <h4>Founder</h4>
+            <p>Arturo Padilla, Sr. (RIP)</p>
+            <h4>President</h4>
+            <p>Arturo Padilla, Jr.</p>
+            <p>Cell/Text: 310-754-5950</p>
+            <p>E-mail: artpadilla19@gmail.com</p>
+            <h4>Vice-President</h4>
+            <p>Gilbert Cuevas</p>
+            <p>Cell/Text: 323-228-1112</p>
+            <p>E-mail: gilbertcuevas2010@gmail.com</p>
+            <h4>League Administrative Assistant</h4>
+            <p>Alejandra Pierce Padilla</p>
+            <p>Cell/Text: (562) 299-3978</p>
+            <p>E-mail: lamsl1976@gmail.com</p>
+            <h4>Women's Modified Coordinator</h4>
+            <p>Alyssa Ruiz</p>
+            <p>Cell/Text: (323) 348-6329</p>
+            <p>E-mail: alyssa15ruiz@icloud.com</p>
+            <h4>Social Media Coordinator</h4>
+            <p>Belen Rocha</p>
+            <p>IG: lamsl_league</p>
+        </section>
+    </main>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>Â© Latino Men's Softball League (LAMSL)</p>
+</footer>
+
+<script>
+const USERS_KEY = 'lamslUsersV1';
+const SESSION_KEY = 'lamslSessionV1';
+const ANNOUNCEMENTS_KEY = 'lamslAnnouncementsV1';
+const ARCHIVE_KEY = 'lamslArchivedAnnouncementsV1';
+
+const authStatus = document.getElementById('auth-status');
+const loginRow = document.getElementById('login-row');
+const logoutRow = document.getElementById('logout-row');
+const adminTools = document.getElementById('admin-tools');
+const loginButton = document.getElementById('login-btn');
+const logoutButton = document.getElementById('logout-btn');
+const loginUsername = document.getElementById('login-username');
+const loginPassword = document.getElementById('login-password');
+const announcementForm = document.getElementById('announcement-form');
+const announcementTitle = document.getElementById('announcement-title');
+const announcementDate = document.getElementById('announcement-date');
+const announcementMessage = document.getElementById('announcement-message');
+const activeAnnouncementsList = document.getElementById('active-announcements');
+const createAdminButton = document.getElementById('create-admin-btn');
+const newAdminUsername = document.getElementById('new-admin-username');
+const newAdminPassword = document.getElementById('new-admin-password');
+
+function readJson(key, fallback) {
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+    } catch (error) {
+        return fallback;
+    }
+}
+
+function writeJson(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+}
+
+function ensureDefaults() {
+    const users = readJson(USERS_KEY, []);
+    if (!users.some(user => user.username === 'admin')) {
+        users.push({ username: 'admin', password: 'admin', role: 'admin' });
+        writeJson(USERS_KEY, users);
+    }
+
+    const announcements = readJson(ANNOUNCEMENTS_KEY, null);
+    if (!announcements) {
+        writeJson(ANNOUNCEMENTS_KEY, [
+            {
+                id: 'ann-1',
+                title: 'TO ALL REGULAR SEASON MANAGERS',
+                date: '2026-03-20',
+                message: 'MANDATORY MANAGERS MEETING FRIDAY MARCH 20th @ 7:30 P.M. 7527 Otis Ave. Cudahy, 90201'
+            },
+            {
+                id: 'ann-2',
+                title: '2026 50th Anniversary Regular Season',
+                date: '2026-03-15',
+                message: 'Early Registration: $600 due no later than 2/28/26. Regular Registration: $650 due 3/1/26 through 3/15/26.'
+            }
+        ]);
+    }
+
+    const archives = readJson(ARCHIVE_KEY, null);
+    if (!archives) {
+        writeJson(ARCHIVE_KEY, []);
+    }
+}
+
+function getSession() {
+    return readJson(SESSION_KEY, null);
+}
+
+function isAdminLoggedIn() {
+    const session = getSession();
+    return !!(session && session.role === 'admin');
+}
+
+function renderAnnouncements() {
+    const announcements = readJson(ANNOUNCEMENTS_KEY, []);
+    activeAnnouncementsList.innerHTML = '';
+
+    if (!announcements.length) {
+        const empty = document.createElement('li');
+        empty.textContent = 'No active announcements.';
+        activeAnnouncementsList.appendChild(empty);
+        return;
+    }
+
+    announcements.forEach(item => {
+        const li = document.createElement('li');
+        const text = document.createElement('div');
+        text.innerHTML = `<strong>${item.title}</strong><br>${item.date}<br>${item.message}`;
+
+        const archiveButton = document.createElement('button');
+        archiveButton.type = 'button';
+        archiveButton.className = 'archive-btn';
+        archiveButton.textContent = 'Archive';
+        archiveButton.addEventListener('click', () => {
+            if (!isAdminLoggedIn()) {
+                authStatus.textContent = 'Sign in as admin to archive announcements.';
+                return;
+            }
+
+            const remaining = announcements.filter(announcement => announcement.id !== item.id);
+            const archived = readJson(ARCHIVE_KEY, []);
+            archived.unshift({ ...item, archivedAt: new Date().toISOString() });
+            writeJson(ANNOUNCEMENTS_KEY, remaining);
+            writeJson(ARCHIVE_KEY, archived);
+            renderAnnouncements();
+            authStatus.textContent = 'Announcement archived to Meeting Notes.';
+        });
+
+        li.appendChild(text);
+        li.appendChild(archiveButton);
+        activeAnnouncementsList.appendChild(li);
+    });
+}
+
+function renderAuthState() {
+    const session = getSession();
+    const loggedIn = isAdminLoggedIn();
+
+    loginRow.style.display = loggedIn ? 'none' : 'flex';
+    logoutRow.style.display = loggedIn ? 'flex' : 'none';
+    adminTools.style.display = loggedIn ? 'block' : 'none';
+
+    if (loggedIn) {
+        authStatus.textContent = `Signed in as ${session.username}. Admin tools unlocked.`;
+    } else {
+        authStatus.textContent = 'Not signed in.';
+    }
+}
+
+loginButton.addEventListener('click', () => {
+    const username = loginUsername.value.trim();
+    const password = loginPassword.value;
+    const users = readJson(USERS_KEY, []);
+    const user = users.find(entry => entry.username === username && entry.password === password && entry.role === 'admin');
+
+    if (!user) {
+        authStatus.textContent = 'Invalid username or password.';
+        return;
+    }
+
+    writeJson(SESSION_KEY, {
+        username: user.username,
+        role: user.role,
+        loggedInAt: new Date().toISOString()
+    });
+
+    renderAuthState();
+    renderAnnouncements();
+});
+
+logoutButton.addEventListener('click', () => {
+    localStorage.removeItem(SESSION_KEY);
+    renderAuthState();
+});
+
+announcementForm.addEventListener('submit', event => {
+    event.preventDefault();
+    if (!isAdminLoggedIn()) {
+        authStatus.textContent = 'Sign in as admin to publish announcements.';
+        return;
+    }
+
+    const title = announcementTitle.value.trim();
+    const date = announcementDate.value;
+    const message = announcementMessage.value.trim();
+    if (!title || !date || !message) {
+        authStatus.textContent = 'Please complete all announcement fields.';
+        return;
+    }
+
+    const announcements = readJson(ANNOUNCEMENTS_KEY, []);
+    announcements.unshift({
+        id: `ann-${Date.now()}`,
+        title,
+        date,
+        message
+    });
+    writeJson(ANNOUNCEMENTS_KEY, announcements);
+    announcementForm.reset();
+    renderAnnouncements();
+    authStatus.textContent = 'Announcement published.';
+});
+
+createAdminButton.addEventListener('click', () => {
+    if (!isAdminLoggedIn()) {
+        authStatus.textContent = 'Sign in as admin to create admin users.';
+        return;
+    }
+
+    const username = newAdminUsername.value.trim();
+    const password = newAdminPassword.value;
+    if (!username || !password) {
+        authStatus.textContent = 'Enter a username and password for the new admin user.';
+        return;
+    }
+
+    const users = readJson(USERS_KEY, []);
+    if (users.some(user => user.username.toLowerCase() === username.toLowerCase())) {
+        authStatus.textContent = 'That username already exists.';
+        return;
+    }
+
+    users.push({ username, password, role: 'admin' });
+    writeJson(USERS_KEY, users);
+    newAdminUsername.value = '';
+    newAdminPassword.value = '';
+    authStatus.textContent = `Admin user ${username} created.`;
+});
+
+ensureDefaults();
+renderAuthState();
+renderAnnouncements();
+</script>
+
+</body>
+</html>

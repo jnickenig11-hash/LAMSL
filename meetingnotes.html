@@ -1,0 +1,603 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<title>LAMSL - Meeting Notes</title>
+
+<style>
+
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
+    background-color: #eef4ea;
+    background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    background-size: min(60vw, 540px);
+    background-attachment: fixed;
+    color: #333;
+}
+
+h1, h2, h3 {
+    margin-bottom: 10px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* ===== NAVBAR ===== */
+header {
+    background: #12324A;
+    color: white;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar li {
+    margin-left: 20px;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    color: #F1D27A;
+}
+/* ===== BANNER ===== */
+.banner {
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-content: start;
+    column-gap: 8px;
+    text-align: center;
+}
+
+.banner h1 {
+    font-size: 42px;
+    font-style: italic;
+    margin: 10px 0;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0;
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+.banner h1,
+.banner .subtitle,
+.banner .tagline {
+    grid-column: 2;
+}
+
+.banner-logo {
+    width: 240px;
+    height: 160px;
+    object-fit: contain;
+    margin: 0;
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    justify-self: center;
+}
+
+.meeting-date {
+    background: #12324A;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+    margin-bottom: 0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+    user-select: none;
+}
+
+.meeting-date:hover {
+    background: #004080;
+}
+
+.meeting-date.active {
+    background: #004080;
+}
+
+.meeting-toggle {
+    font-size: 20px;
+}
+
+.meeting-content {
+    background: #f9f9f9;
+    padding: 20px;
+    border-left: 4px solid #12324A;
+    margin-bottom: 10px;
+    display: none;
+}
+
+.meeting-content.active {
+    display: block;
+}
+
+.meeting-topic {
+    margin-bottom: 15px;
+}
+
+.meeting-topic h4 {
+    color: #12324A;
+    margin: 10px 0 8px 0;
+    font-size: 16px;
+}
+
+.meeting-topic ul {
+    margin: 5px 0;
+    padding-left: 20px;
+}
+
+.meeting-topic li {
+    margin: 4px 0;
+    line-height: 1.5;
+}
+
+.meeting-topic p {
+    margin: 5px 0;
+    line-height: 1.5;
+}
+
+.archived-announcements {
+    background: #f4f8fc;
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 18px;
+}
+
+.archived-announcements ul {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+}
+
+.archived-announcements li {
+    background: #eef2f7;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+}
+
+/* ===== FOOTER ===== */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #12324A;
+    color: white;
+    margin-top: 20px;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .navbar li {
+        margin: 10px 0;
+    }
+
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+        row-gap: 6px;
+    }
+
+    .banner-logo {
+        width: 150px;
+        height: 120px;
+        grid-column: 1;
+        grid-row: auto;
+        justify-self: center;
+    }
+
+    .banner h1 {
+        grid-column: 1;
+        font-size: 28px;
+    }
+
+    .banner .subtitle {
+        grid-column: 1;
+        font-size: 14px;
+    }
+
+    .banner .tagline {
+        grid-column: 1;
+        font-size: 12px;
+    }
+
+    .meeting-date {
+        font-size: 16px;
+    }
+
+    .meeting-content {
+        padding: 15px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- BANNER -->
+<div class="banner">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
+    <h1>Latin American Men's Softball League</h1>
+    <div class="subtitle">Established 1976</div>
+    <div class="tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+</div>
+
+<!-- HEADER -->
+<header>
+    <div class="navbar container">
+        <h2>LAMSL</h2>
+        <ul>
+            <li><a href="LASML.html">Home</a></li>
+            <li><a href="standings.html">Standings</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="meetingnotes.html">Meeting Notes</a></li>
+            <li><a href="administrators.html">Admin</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</header>
+
+<!-- MAIN -->
+<div class="container">
+    <main>
+        <section class="card">
+            <h2>Meeting Notes</h2>
+            <p>Click on a date to expand/collapse meeting details.</p>
+
+            <div class="archived-announcements">
+                <h3>Archived Announcements</h3>
+                <ul id="archived-announcements-list">
+                    <li>No archived announcements yet.</li>
+                </ul>
+            </div>
+
+            <!-- April 19, 2024 Meeting -->
+            <div class="meeting-date active" onclick="toggleMeeting(this)">
+                <span>April 19, 2024</span>
+                <span class="meeting-toggle">âˆ’</span>
+            </div>
+            <div class="meeting-content active">
+                <div class="meeting-topic">
+                    <h4>General</h4>
+                    <ul>
+                        <li>Roll call done in Division order</li>
+                        <li>Teams to discuss division concerns with Art after meeting if needed</li>
+                        <li>Regular Season starts 4/28/24</li>
+                        <li>Monthly meetings to be held at the clubhouse</li>
+                        <li>Next meeting: Friday, May 31st</li>
+                        <li>Every team must have one representative (one person per team)</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Umpires</h4>
+                    <ul>
+                        <li>Umpires will meet with Gil separately</li>
+                        <li>Rules will be provided to all umpires</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Bats</h4>
+                    <ul>
+                        <li>Bats will be provided by the league (unanimous agreement)</li>
+                        <li>If bats need replacement, teams agree to collectively pay</li>
+                        <li>Bats will be tested periodically</li>
+                        <li>League can buy bats off teams if new/semi-new and bought within the last year</li>
+                        <li>Bats must pass 200 compressions</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Parks</h4>
+                    <ul>
+                        <li>Los Nietos secured until end of June</li>
+                        <li>Trying to secure Little Lake (upcoming meeting with SFS)</li>
+                        <li>Salt Lake Park and Ford Park may be future options</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Rules & Disputes</h4>
+                    <ul>
+                        <li>Registration agreement letter to be sent by Art to managers</li>
+                        <li>Council to be created for disputes/protests regarding calls or game problems</li>
+                        <li>Possibly one manager from each division on council</li>
+                        <li>Volunteers for council should reach out to Art</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Clubhouse</h4>
+                    <ul>
+                        <li>$20/month fee to help sustain clubhouse for league use only</li>
+                        <li>Available for managers/players to use for private events</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Uniforms & Code of Conduct</h4>
+                    <ul>
+                        <li>Rules regarding uniforms and "no bottle use" will be enforced</li>
+                        <li>Fines will be created for violations</li>
+                        <li>All teams must be in full uniform by 3rd game</li>
+                        <li>No disrespectful or hot-headed behavior during games</li>
+                        <li>Friendly banter acceptable, but keep it respectful</li>
+                        <li>Cannot risk losing parks due to player misbehavior</li>
+                        <li>Consequences for players who don't adhere to rules</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Other</h4>
+                    <ul>
+                        <li>Looking into filming games to promote league and showcase teams</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- May 31, 2024 Meeting -->
+            <div class="meeting-date" onclick="toggleMeeting(this)">
+                <span>May 31, 2024</span>
+                <span class="meeting-toggle">+</span>
+            </div>
+            <div class="meeting-content">
+                <div class="meeting-topic">
+                    <h4>General</h4>
+                    <ul>
+                        <li>Teams to provide email addresses for pitcher's waivers</li>
+                        <li>Meeting notes now available on LAMSL website</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Playoff Scenarios</h4>
+                    <p><strong>Division A & B:</strong></p>
+                    <ul>
+                        <li>Wild card Sunday: 6th vs 7th seed, winner plays 5th seed (single elimination)</li>
+                        <li>Following Sunday: winner vs 4th seed (single elimination)</li>
+                        <li>Then standard playoff scenario</li>
+                        <li>Winter league: everyone makes playoffs to keep motivated</li>
+                    </ul>
+                    <p><strong>Division C & D:</strong></p>
+                    <ul>
+                        <li>Everyone plays each other once, then split</li>
+                        <li>Top 5 go to Division C, bottom 6 go to Division D</li>
+                        <li>Each division plays another round if season allows</li>
+                        <li>Playoffs start after split if season is lagging</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Byes</h4>
+                    <ul>
+                        <li>Most divisions have odd number of teams, so byes already scheduled</li>
+                        <li>Teams allowed one "emergency" bye per season (not enough players)</li>
+                        <li>Additional emergency byes require paying both team fees or forfeit</li>
+                        <li>No byes in playoffs (only true emergencies considered)</li>
+                        <li>In 2 of 3 playoff games: emergency bye gives loss, must be true emergency</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Father's Day</h4>
+                    <ul>
+                        <li>Teams can opt out of playing on Father's Day</li>
+                        <li>Does not count against team byes</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Rules Clarifications</h4>
+                    <p><strong>Hit-by-Pitch:</strong></p>
+                    <ul>
+                        <li>Umpire's discretion if batter could have avoided being hit</li>
+                        <li>Speed of pitch doesn't matter if batter in batter's box</li>
+                        <li>Players cannot argue with umpire (same as strike calls)</li>
+                    </ul>
+                    <p><strong>Double Play Obstruction:</strong></p>
+                    <ul>
+                        <li>Players must slide or run to right field to clear double play</li>
+                        <li>Cannot wait until last minute to move</li>
+                        <li>Umpires will call automatic double play if obstruction appears close</li>
+                    </ul>
+                    <p><strong>Dead Ball:</strong></p>
+                    <ul>
+                        <li>Anything in front of plate = dead ball</li>
+                        <li>Anything crossing plate = live ball</li>
+                        <li>Umpire's call (angle may vary)</li>
+                    </ul>
+                    <p><strong>Umpires:</strong></p>
+                    <ul>
+                        <li>Some umpires work other leagues; rules will be reviewed with new umpires</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Schedules</h4>
+                    <ul>
+                        <li>Season schedule posts 2 weeks out</li>
+                        <li>Give advance notice for byes; hard to reschedule after posting</li>
+                        <li>Schedule sent out showing teams, byes, and opponents (not time or park)</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Team Photo IDs</h4>
+                    <ul>
+                        <li>All teams must send player photos with names</li>
+                        <li>Preferably in email with name under each photo</li>
+                        <li>Teams have max player limit per roster</li>
+                        <li>IDs crucial for playoffs to prevent extra players</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Game Day Procedures</h4>
+                    <ul>
+                        <li>Sign-in sheets must be signed every week</li>
+                        <li>Ask umpire if not provided</li>
+                        <li>Pitcher's waivers needed for those not wearing mask</li>
+                        <li>As of 6/9/24: all teams must be in full uniform with tucked shirts</li>
+                        <li>Fines for not tucking in shirts</li>
+                        <li>Shirts must be tucked all the way around, not just front</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Uniforms & Equipment</h4>
+                    <ul>
+                        <li>No metal spikes on cleats - NO EXCEPTIONS</li>
+                        <li>Composite spikes allowed</li>
+                        <li>City officials inspect parks; want to present good impression</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>NO BOTTLES AT PARKS</h4>
+                    <ul>
+                        <li>Tell fans and players, especially young ones</li>
+                        <li>Teams caught with bottles will not be scheduled at that park</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Rainouts</h4>
+                    <ul>
+                        <li>Expect to play until games are canceled</li>
+                        <li>Decision made Sunday morning unless heavy rain forecasted for hours</li>
+                        <li>8:00 AM games may show in questionable weather</li>
+                        <li>Do not text asking about cancellations; announcement will be sent</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Sportsmanship</h4>
+                    <ul>
+                        <li>Encourage good sportsmanship from players</li>
+                        <li>Do not contest balls and strikes</li>
+                        <li>Park staff reports to officials; losing parks due to bad behavior</li>
+                        <li>Managers must control players</li>
+                        <li>Only 2 players at plate when game time called can act as managers</li>
+                        <li>Control fans; they're extension of team</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Meeting Attendance</h4>
+                    <ul>
+                        <li>Missing a meeting = fine + visitor status following month</li>
+                        <li>Will be posted on website</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const ARCHIVE_KEY = 'lamslArchivedAnnouncementsV1';
+        const archivedAnnouncementsList = document.getElementById('archived-announcements-list');
+
+        function readArchive() {
+            try {
+                const raw = localStorage.getItem(ARCHIVE_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function renderArchivedAnnouncements() {
+            const archive = readArchive();
+            archivedAnnouncementsList.innerHTML = '';
+
+            if (!archive.length) {
+                const emptyItem = document.createElement('li');
+                emptyItem.textContent = 'No archived announcements yet.';
+                archivedAnnouncementsList.appendChild(emptyItem);
+                return;
+            }
+
+            archive.forEach(item => {
+                const li = document.createElement('li');
+                const archivedDate = item.archivedAt ? new Date(item.archivedAt).toLocaleDateString() : 'Unknown';
+                li.innerHTML = `<strong>${item.title}</strong><br>${item.date}<br>${item.message}<br><em>Archived on ${archivedDate}</em>`;
+                archivedAnnouncementsList.appendChild(li);
+            });
+        }
+
+        function toggleMeeting(element) {
+            const content = element.nextElementSibling;
+            const toggle = element.querySelector('.meeting-toggle');
+            
+            element.classList.toggle('active');
+            content.classList.toggle('active');
+            
+            toggle.textContent = element.classList.contains('active') ? 'âˆ’' : '+';
+        }
+
+        renderArchivedAnnouncements();
+    </script>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2024 LAMSL. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

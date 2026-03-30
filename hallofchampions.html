@@ -1,0 +1,1871 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<title>LAMSL - Hall of Champions</title>
+
+<style>
+
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
+    background-color: #eef4ea;
+    background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    background-size: min(60vw, 540px);
+    background-attachment: fixed;
+    color: #333;
+}
+
+h1, h2, h3 {
+    margin-bottom: 10px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* ===== NAVBAR ===== */
+header {
+    background: #12324A;
+    color: white;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar li {
+    margin-left: 20px;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    color: #F1D27A;
+}
+
+/* ===== BANNER ===== */
+.banner {
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-content: start;
+    column-gap: 8px;
+    text-align: center;
+}
+
+.banner h1 {
+    font-size: 42px;
+    font-style: italic;
+    margin: 10px 0;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0;
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+.banner h1,
+.banner .subtitle,
+.banner .tagline {
+    grid-column: 2;
+}
+
+
+.banner-logo {
+    width: 240px;
+    height: 160px;
+    object-fit: contain;
+    margin: 0;
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    justify-self: center;
+}
+
+/* ===== CARDS ===== */
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+/* ===== YEAR HEADERS ===== */
+.year-header {
+    background: #12324A;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 15px;
+    margin-bottom: 0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+    user-select: none;
+}
+
+.year-header:hover {
+    background: #004080;
+}
+
+.year-header.active {
+    background: #004080;
+}
+
+.year-toggle {
+    font-size: 20px;
+}
+
+.year-content {
+    background: #f9f9f9;
+    padding: 20px;
+    border-left: 4px solid #12324A;
+    margin-bottom: 10px;
+    display: none;
+}
+
+.year-content.active {
+    display: block;
+}
+
+/* ===== SEASON TYPE ===== */
+.season-type {
+    background: #e8ecf1;
+    padding: 12px 15px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #12324A;
+    border-left: 4px solid #12324A;
+}
+
+.season-type:first-of-type {
+    margin-top: 0;
+}
+
+/* ===== DIVISION GRID ===== */
+.divisions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.division-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.division-title {
+    font-weight: bold;
+    color: #12324A;
+    margin-bottom: 10px;
+    font-size: 14px;
+    text-transform: uppercase;
+    border-bottom: 2px solid #12324A;
+    padding-bottom: 8px;
+}
+
+.placement {
+    margin-bottom: 10px;
+    font-size: 13px;
+}
+
+.placement-label {
+    font-weight: bold;
+    color: #666;
+    display: inline-block;
+    width: 100px;
+    vertical-align: top;
+}
+
+.placement-team {
+    display: inline-block;
+    color: #333;
+    max-width: calc(100% - 110px);
+    word-wrap: break-word;
+}
+
+.champion {
+    color: #C86A2F;
+    font-weight: bold;
+}
+
+.runner-up {
+    color: #c0c0c0;
+    font-weight: bold;
+}
+
+/* ===== SECTION NOTE ===== */
+.section-note {
+    background: #e8ecf1;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+    border-left: 4px solid #12324A;
+    font-style: italic;
+    color: #555;
+}
+
+.section-note p {
+    margin: 0;
+}
+
+/* ===== LIMITED DATA ===== */
+.limited-data {
+    color: #888;
+    font-style: italic;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 3px;
+    margin: 10px 0;
+}
+
+/* ===== FOOTER ===== */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #12324A;
+    color: white;
+    margin-top: 20px;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .navbar li {
+        margin: 10px 0;
+    }
+
+    .divisions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .year-header {
+        font-size: 16px;
+    }
+
+    .year-content {
+        padding: 15px;
+    }
+
+    .placement-label {
+        display: block;
+        width: 100%;
+        margin-bottom: 3px;
+    }
+
+    .placement-team {
+        max-width: 100%;
+    }
+
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+        row-gap: 6px;
+    }
+
+    .banner-logo {
+        width: 150px;
+        height: 120px;
+        grid-column: 1;
+        grid-row: auto;
+        justify-self: center;
+    }
+
+    .banner h1 {
+        grid-column: 1;
+        font-size: 28px;
+    }
+
+    .banner .subtitle {
+        grid-column: 1;
+        font-size: 14px;
+    }
+
+    .banner .tagline {
+        grid-column: 1;
+        font-size: 12px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- BANNER -->
+<div class="banner">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
+    <h1>Latin American Men's Softball League</h1>
+    <div class="subtitle">Established 1976</div>
+    <div class="tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+</div>
+
+<!-- HEADER -->
+<header>
+    <div class="navbar container">
+        <h2>LAMSL</h2>
+        <ul>
+            <li><a href="LASML.html">Home</a></li>
+            <li><a href="standings.html">Standings</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="administrators.html">Admin</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</header>
+
+<!-- MAIN -->
+<div class="container">
+
+    <main>
+        <section class="card">
+            <h2>Hall of Champions</h2>
+            <p>Click on a year to expand/collapse championship records. Data organized by regular season and winter league.</p>
+
+            <!-- 2018 -->
+            <div class="year-header active" onclick="toggleYear(this)">
+                <span>2018</span>
+                <span class="year-toggle">âˆ’</span>
+            </div>
+            <div class="year-content active">
+                <div class="season-type">Regular Season</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division A</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Cudahy</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Brewers</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division C Majors</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Pitch Slappers</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Leones</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division C Minors</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Dope Boyz</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Nasty Boyz</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division D</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Legends</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Cudahy</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division E</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Pitch Slappers</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Avalos</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="season-type">Winter 2017/2018</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division 1 Majors</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Titans</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">ROSO</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 1 Minors</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Coyotes</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Diablos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2017 -->
+            <div class="year-header" onclick="toggleYear(this)">
+                <span>2017</span>
+                <span class="year-toggle">+</span>
+            </div>
+            <div class="year-content">
+                <div class="season-type">Regular Season</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division A</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">ROSO</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">White Sox</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division B</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Bandits</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Misfits</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division C</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Doom Squad</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Los Potros</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division D</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Nasty Boyz</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Los Primos</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division E</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Orioles</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Brewers</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="season-type">Winter 2016/2017</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division 1 Majors</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">ROSO</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Titans</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 1 Minors</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Paramount</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Cardinals</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 2 Majors</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Astros</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Coyotes</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 2 Minors</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Hustlers</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Alacranes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2016 -->
+            <div class="year-header" onclick="toggleYear(this)">
+                <span>2016</span>
+                <span class="year-toggle">+</span>
+            </div>
+            <div class="year-content">
+                <div class="season-type">Regular Season</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division A</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">White Sox</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">ROSO</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division B</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Paramount</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Bandits</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division C</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Misfits</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Cubs</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division D</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">No Chance</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">LA Blues</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division E</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Zacatecas</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Orioles</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="season-type">Winter 2015/2016</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division 1</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">ROSO</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Titans</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 2 Majors</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Astros</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Coyotes</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 2 Minors</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Bandits</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Los Toros</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2015 -->
+            <div class="year-header" onclick="toggleYear(this)">
+                <span>2015</span>
+                <span class="year-toggle">+</span>
+            </div>
+            <div class="year-content">
+                <div class="season-type">Regular Season</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division A</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">White Sox</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Chicanos</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division B</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Bandits</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Bomb Squad</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division C</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Pitch Slappers</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Orioles</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division D</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Misfits</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Zacatecas</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division E</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Borrachos</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Antrax</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="season-type">Winter 2014/2015</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division 1 Majors</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Titans</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Chicanos</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 1 Minors</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Black Sox</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Mavericks</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 2 Majors</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Mexico</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Coyotes</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 2 Minors</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Lunatix</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Camarones</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2014 -->
+            <div class="year-header" onclick="toggleYear(this)">
+                <span>2014</span>
+                <span class="year-toggle">+</span>
+            </div>
+            <div class="year-content">
+                <div class="season-type">Regular Season</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division A</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Punishers</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Diamond Cutters</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division B</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Demons</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Wolves</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division C</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Orioles</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Paramount Pirates</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division D</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Bomb Squad</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Cerveceros</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="season-type">Winter 2013/2014</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division 1</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Mavericks</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Titans</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 2</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Orioles</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Cardinals</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 3</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Lunatix</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Param'nt Pirates</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2013 -->
+            <div class="year-header" onclick="toggleYear(this)">
+                <span>2013</span>
+                <span class="year-toggle">+</span>
+            </div>
+            <div class="year-content">
+                <div class="season-type">Regular Season</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division A</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">White Sox</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Pirates</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division B</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Mavericks</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Diamond Cutters</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division C</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Wolves</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Balls Out</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division D</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Salt Lake</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">The LA Blues</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division E</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Cerveceros</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Zacatecas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="season-type">Winter 2012/2013</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division 1</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Bandits</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Mavericks</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 2</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Indians</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Balls Out</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2012 -->
+            <div class="year-header" onclick="toggleYear(this)">
+                <span>2012</span>
+                <span class="year-toggle">+</span>
+            </div>
+            <div class="year-content">
+                <div class="season-type">Regular Season</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division A</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Punishers</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">White Sox</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division B</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Doom Squad</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Wolves</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division C</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Indians</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Orioles</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division D</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Trucha</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Tampa Bay</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division E</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Salt Lake</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Zacatecas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="season-type">Winter 2011/2012</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division 1</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Bandits</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Mavericks</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 2</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Coyotes</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Tigers</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2011 -->
+            <div class="year-header" onclick="toggleYear(this)">
+                <span>2011</span>
+                <span class="year-toggle">+</span>
+            </div>
+            <div class="year-content">
+                <div class="season-type">Regular Season</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division A Majors</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">White Sox</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Nationals</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division A Minors</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Red Sox</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Phillies</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division B</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Mavericks</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Bandits</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division C</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Braves</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Twins</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division D</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Hit n' Run</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">The LA Blues</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="season-type">Winter 2010/2011</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division 1</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Titans</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Nationals</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 2</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Bandits</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Coyotes</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 3</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Twins</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Cardinals</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2010 -->
+            <div class="year-header" onclick="toggleYear(this)">
+                <span>2010</span>
+                <span class="year-toggle">+</span>
+            </div>
+            <div class="year-content">
+                <div class="season-type">Regular Season</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division A</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">White Sox</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Nationals</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division B</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Phillies</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Titans</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division C</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Expos</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Bandits</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division D</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Mavericks</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Showtime</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division E</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Tampa Bay</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Peloteros</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division F</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">NY Yankees</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Braves</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="season-type">Winter 2009/2010</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division 1</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Mixed Blood</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Dodgers</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 2</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Bandits</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Coyotes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2009 -->
+            <div class="year-header" onclick="toggleYear(this)">
+                <span>2009</span>
+                <span class="year-toggle">+</span>
+            </div>
+            <div class="year-content">
+                <div class="season-type">Regular Season</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division A</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Cobras</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">White Sox</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division B</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Phillies</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Orioles</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division C</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Chicanos</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Wolves</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division D</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Bandits</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Beavers</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division E</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Venados</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Rangers</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="season-type">Winter 2008/2009</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division 1</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Cobras</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Dodgers</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 2</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Venados</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Diamond Cutters</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2008 -->
+            <div class="year-header" onclick="toggleYear(this)">
+                <span>2008</span>
+                <span class="year-toggle">+</span>
+            </div>
+            <div class="year-content">
+                <div class="season-type">Regular Season</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division A</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Nationals</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">White Sox</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division B</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Phillies</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Riots</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division C</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Titans</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Orioles</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division D</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">SG Scorpions</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Royals</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division E</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Bell</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Rangers</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="season-type">Winter 2007/2008</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division 1</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Washington</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Cobras</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 2</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">SG Scorpions</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Titans</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2007 -->
+            <div class="year-header" onclick="toggleYear(this)">
+                <span>2007</span>
+                <span class="year-toggle">+</span>
+            </div>
+            <div class="year-content">
+                <div class="season-type">Regular Season</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division A</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Washington</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">I.E. Nicas</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division B</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Aztecs</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Vernon</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division C</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Phillies</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Riots</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division D</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Outlaws</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Orioles</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division E</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">A's</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Tigers</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="season-type">Winter 2006/2007</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division 1</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Yankees</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Boer</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 2/3</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Blue Balls</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Balls Out</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2006 -->
+            <div class="year-header" onclick="toggleYear(this)">
+                <span>2006</span>
+                <span class="year-toggle">+</span>
+            </div>
+            <div class="year-content">
+                <div class="season-type">Regular Season</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division A</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">White Sox</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Bonanza</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division B</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Untouchables</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Reds</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division C</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Vernon</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Riots</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division D</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Outlaws</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Coyotes</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division E</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Angels</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Demons</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="season-type">Winter 2005/2006</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division 1</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Yankees</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Reds</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 2</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">SG Scorpions</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Balls Out</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2005 -->
+            <div class="year-header" onclick="toggleYear(this)">
+                <span>2005</span>
+                <span class="year-toggle">+</span>
+            </div>
+            <div class="year-content">
+                <div class="season-type">Regular Season</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division A</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Bonanza</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">White Sox</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division B</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Cobras</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Yankees</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division C</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Vernon</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Chicanos</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division D</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Coyotes</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Beavers</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division E</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Mariners</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Angels</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division F</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Royals</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">No Limit</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="season-type">Winter 2004/2005</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division 1</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Coyotes</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Poundum</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division 2</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Young Guns</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Mariners</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2004 -->
+            <div class="year-header" onclick="toggleYear(this)">
+                <span>2004</span>
+                <span class="year-toggle">+</span>
+            </div>
+            <div class="year-content">
+                <div class="season-type">Regular Season</div>
+                <div class="divisions-grid">
+                    <div class="division-card">
+                        <div class="division-title">Division A</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">White Sox</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Red Sox</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division B</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Poundum</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">South Gate</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division C</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Yankees</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Vernon</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division D</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Chicanos</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Outlaws</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division E</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Raiders</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Angels</span>
+                        </div>
+                    </div>
+                    <div class="division-card">
+                        <div class="division-title">Division F</div>
+                        <div class="placement">
+                            <span class="placement-label champion">Champion:</span>
+                            <span class="placement-team">Tigers</span>
+                        </div>
+                        <div class="placement">
+                            <span class="placement-label runner-up">Runner-up:</span>
+                            <span class="placement-team">Beaver Fever</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historical Note -->
+            <div class="section-note">
+                <p><em>The Hall of Champions recognizes LAMSL teams' achievements since the league's founding in 2004. Complete championship records for all years are under ongoing documentation. If you have historical championship information to contribute, please contact the league.</em></p>
+            </div>
+
+        </section>
+    </main>
+
+    <script>
+        function toggleYear(element) {
+            const content = element.nextElementSibling;
+            const toggle = element.querySelector('.year-toggle');
+            
+            element.classList.toggle('active');
+            content.classList.toggle('active');
+            
+            toggle.textContent = element.classList.contains('active') ? 'âˆ’' : '+';
+        }
+    </script>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2024 LAMSL. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
+
+</pre>
+        </section>
+    </main>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>Â© Latino Men's Softball League (LAMSL)</p>
+</footer>
+
+</body>
+</html>

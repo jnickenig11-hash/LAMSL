@@ -1,0 +1,271 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<title>LAMSL - Division D Standings</title>
+
+<style>
+
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
+    background-color: #eef4ea;
+    background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    background-size: min(60vw, 540px);
+    background-attachment: fixed;
+    color: #333;
+}
+
+h1, h2, h3 {
+    margin-bottom: 10px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* ===== NAVBAR ===== */
+header {
+    background: #12324A;
+    color: white;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar li {
+    margin-left: 20px;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    color: #F1D27A;
+}
+
+/* ===== CARDS ===== */
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+/* ===== FOOTER ===== */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #12324A;
+    color: white;
+    margin-top: 20px;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .navbar li {
+        margin: 10px 0;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="navbar container">
+        <h2>LAMSL</h2>
+        <ul>
+            <li><a href="LASML.html">Home</a></li>
+            <li><a href="standings.html">Standings</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="administrators.html">Admin</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</header>
+
+<!-- MAIN -->
+<div class="container">
+
+    <main>
+        <section class="card">
+            <h2>Division D Standings - Updated 8/11/25 - Top 5 teams make playoffs.</h2>
+            <table border="1" style="width:100%; border-collapse: collapse;">
+                <tr>
+                    <th>Team</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>T</th>
+                    <th>GB</th>
+                </tr>
+                <tr>
+                    <td>Viejones</td>
+                    <td>13</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>No Chance</td>
+                    <td>9</td>
+                    <td>4</td>
+                    <td>1</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Los Pericos</td>
+                    <td>9</td>
+                    <td>5</td>
+                    <td>0</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Wild Hogz</td>
+                    <td>8</td>
+                    <td>5</td>
+                    <td>1</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Strokes</td>
+                    <td>8</td>
+                    <td>5</td>
+                    <td>1</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Dawgz</td>
+                    <td>4</td>
+                    <td>9</td>
+                    <td>1</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Xolos</td>
+                    <td>2</td>
+                    <td>12</td>
+                    <td>0</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Desvelados</td>
+                    <td>1</td>
+                    <td>13</td>
+                    <td>0</td>
+                    <td>Eliminated</td>
+                </tr>
+            </table>
+            <h3>Division D Scores</h3>
+            <p>Regular Season</p>
+            <table border="1" style="width:100%; border-collapse: collapse;">
+                <tr>
+                    <th>Date</th>
+                    <th>Home Team</th>
+                    <th>Away Team</th>
+                    <th>Score</th>
+                </tr>
+                <tr><td>March 23, 2025</td><td>No Chance</td><td>Los Pericos</td><td>10-19</td></tr>
+                <tr><td>March 23, 2025</td><td>Wild Hogz</td><td>Viejones</td><td>10-15</td></tr>
+                <tr><td>March 23, 2025</td><td>Desvelados</td><td>Strokes</td><td>4-19</td></tr>
+                <tr><td>March 23, 2025</td><td>Dawgz</td><td>Xolos</td><td>Postponed</td></tr>
+                <tr><td>March 30, 2025</td><td>Strokes</td><td>No Chance</td><td>4-4 Tied</td></tr>
+                <tr><td>March 30, 2025</td><td>Los Pericos</td><td>Viejones</td><td>12-14</td></tr>
+                <tr><td>March 30, 2025</td><td>Xolos</td><td>Dawgz</td><td>7-22</td></tr>
+                <tr><td>March 30, 2025</td><td>Desvelados</td><td>Wild Hogz</td><td>15-27</td></tr>
+                <tr><td>April 6, 2025</td><td>Desvelados</td><td>Xolos</td><td>11-19</td></tr>
+                <tr><td>April 6, 2025</td><td>Dawgz</td><td>Strokes</td><td>12-34</td></tr>
+                <tr><td>April 6, 2025</td><td>Wild Hogz</td><td>Los Pericos</td><td>13-22</td></tr>
+                <tr><td>April 6, 2025</td><td>No Chance</td><td>Viejones</td><td>9-10</td></tr>
+                <tr><td>April 13, 2025</td><td>No Chance</td><td>Dawgz</td><td>25-5</td></tr>
+                <tr><td>April 13, 2025</td><td>Viejones</td><td>Xolos</td><td>19-4</td></tr>
+                <tr><td>April 13, 2025</td><td>Wild Hogz</td><td>Strokes</td><td>15-13</td></tr>
+                <tr><td>April 13, 2025</td><td>Desvelados</td><td>Los Pericos</td><td>Postponed</td></tr>
+                <tr><td>April 27, 2025</td><td>Desvelados</td><td>Dawgz</td><td></td></tr>
+                <tr><td>May 4, 2025</td><td>No Chance</td><td>Desvelados</td><td>21-10</td></tr>
+                <tr><td>May 4, 2025</td><td>Wild Hogz</td><td>Dawgz</td><td>13-13 Tied</td></tr>
+                <tr><td>May 4, 2025</td><td>Strokes</td><td>Viejones</td><td>9-25</td></tr>
+                <tr><td>May 4, 2025</td><td>Los Pericos</td><td>Xolos</td><td>27-14</td></tr>
+                <tr><td>May 18, 2025</td><td>Dawgz</td><td>Los Pericos</td><td></td></tr>
+                <tr><td>May 18, 2025</td><td>No Chance</td><td>Wild Hogz</td><td>8-7</td></tr>
+                <tr><td>May 18, 2025</td><td>Strokes</td><td>Xolos</td><td>22-6</td></tr>
+                <tr><td>May 18, 2025</td><td>Viejones</td><td>Desvelados</td><td>17-1</td></tr>
+                <tr><td>June 1, 2025</td><td>Wild Hogz</td><td>Xolos</td><td>9-6</td></tr>
+                <tr><td>June 1, 2025</td><td>Strokes</td><td>Los Pericos</td><td>22-11</td></tr>
+                <tr><td>June 1, 2025</td><td>Viejones</td><td>Dawgz</td><td>12-11</td></tr>
+                <tr><td>June 1, 2025</td><td>Desvelados</td><td>No Chance</td><td></td></tr>
+                <tr><td>June 8, 2025</td><td>Xolos</td><td>No Chance</td><td>13-21</td></tr>
+                <tr><td>June 8, 2025</td><td>Viejones</td><td>Wild Hogz</td><td>17-11</td></tr>
+                <tr><td>June 8, 2025</td><td>Desvelados</td><td>Los Pericos</td><td>18-27</td></tr>
+                <tr><td>June 8, 2025</td><td>Dawgz</td><td>Strokes</td><td>6-5</td></tr>
+                <tr><td>June 22, 2025</td><td>No Chance</td><td>Viejones</td><td>5-7</td></tr>
+                <tr><td>June 22, 2025</td><td>Xolos</td><td>Dawgz</td><td>16-30</td></tr>
+                <tr><td>June 22, 2025</td><td>Desvelados</td><td>Strokes</td><td>19-23</td></tr>
+                <tr><td>June 22, 2025</td><td>Los Pericos</td><td>Wild Hogz</td><td>16-8</td></tr>
+                <tr><td>June 29, 2025</td><td>No Chance</td><td>Strokes</td><td>11-10</td></tr>
+                <tr><td>June 29, 2025</td><td>Los Pericos</td><td>Viejones</td><td>2-22</td></tr>
+                <tr><td>June 29, 2025</td><td>Desvelados</td><td>Dawgz</td><td>6-24</td></tr>
+                <tr><td>June 29, 2025</td><td>Wild Hogz</td><td>Xolos</td><td>28-17</td></tr>
+                <tr><td>July 13, 2025</td><td>Desvelados</td><td>Viejones</td><td>5-21</td></tr>
+                <tr><td>July 13, 2025</td><td>Strokes</td><td>Wild Hogz</td><td>4-8</td></tr>
+                <tr><td>July 13, 2025</td><td>Dawgz</td><td>Los Pericos</td><td>6-18</td></tr>
+                <tr><td>July 13, 2025</td><td>Xolos</td><td>No Chance</td><td>12-21</td></tr>
+                <tr><td>July 20, 2025</td><td>Viejones</td><td>Dawgz</td><td>22-8</td></tr>
+                <tr><td>July 20, 2025</td><td>Strokes</td><td>Xolos</td><td>14-4</td></tr>
+                <tr><td>July 20, 2025</td><td>Wild Hogz</td><td>No Chance</td><td>6-5</td></tr>
+                <tr><td>July 20, 2025</td><td>Los Pericos</td><td>Desvelados</td><td>9-0</td></tr>
+                <tr><td>July 27, 2025</td><td>Strokes</td><td>Viejones</td><td></td></tr>
+                <tr><td>July 27, 2025</td><td>Xolos</td><td>Desvelados</td><td></td></tr>
+                <tr><td>July 27, 2025</td><td>No Chance</td><td>Los Pericos</td><td></td></tr>
+                <tr><td>July 27, 2025</td><td>Wild Hogz</td><td>Dawgz</td><td></td></tr>
+                <tr><td>August 3, 2025</td><td>Xolos</td><td>Desvelados</td><td>19-5</td></tr>
+            </table>
+        </section>
+    </main>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>Â© Latino Men's Softball League (LAMSL)</p>
+</footer>
+
+</body>
+</html>

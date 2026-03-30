@@ -1,0 +1,237 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<title>LAMSL - Winter Division 2 Standings</title>
+
+<style>
+
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
+    background-color: #eef4ea;
+    background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    background-size: min(60vw, 540px);
+    background-attachment: fixed;
+    color: #333;
+}
+
+h1, h2, h3 {
+    margin-bottom: 10px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* ===== NAVBAR ===== */
+header {
+    background: #12324A;
+    color: white;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar li {
+    margin-left: 20px;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    color: #F1D27A;
+}
+
+/* ===== CARDS ===== */
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+/* ===== FOOTER ===== */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #12324A;
+    color: white;
+    margin-top: 20px;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .navbar li {
+        margin: 10px 0;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="navbar container">
+        <h2>LAMSL</h2>
+        <ul>
+            <li><a href="LASML.html">Home</a></li>
+            <li><a href="standings.html">Standings</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="administrators.html">Admin</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</header>
+
+<!-- MAIN -->
+<div class="container">
+
+    <main>
+        <section class="card">
+            <h2>Division 2 Standings</h2>
+            <h3>Division 2 Uppers</h3>
+            <table border="1" style="width:100%; border-collapse: collapse;">
+                <tr>
+                    <th>Team</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>T</th>
+                    <th>GB</th>
+                </tr>
+                <tr>
+                    <td>Wild Hogz</td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Showtime</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Diablos</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Balls Out</td>
+                    <td>0</td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>-</td>
+                </tr>
+            </table>
+            <h3>Division 2 Lowers</h3>
+            <table border="1" style="width:100%; border-collapse: collapse;">
+                <tr>
+                    <th>Team</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>T</th>
+                    <th>GB</th>
+                </tr>
+                <tr>
+                    <td>Peloteros</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Hitmen</td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Bastards</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Coyotes</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>-</td>
+                </tr>
+            </table>
+            <h3>Division 2 Scores</h3>
+            <p>2/1/26</p>
+            <p>Wild Hogz vs Balls Out</p>
+            <p>Peloteros vs Coyotes - Pending</p>
+            <p>Hitmen vs Bastards</p>
+            <p>Diablos vs Showtime - Postponed</p>
+            <p>2/15/26</p>
+            <p>Balls Out 8, Wild Hogz 27</p>
+            <p>Showtime, Diablos</p>
+            <p>Batards 10, Hitmen 19</p>
+            <p>Peloteros, Coyotes</p>
+            <p>Balls Out & Bastrards - Eliminated</p>
+            <pre>Date
+Team, Team
+Team, Team
+Team, Team
+Team, Team
+Team, Team
+Bye: Team</pre>
+        </section>
+    </main>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>Â© Latino Men's Softball League (LAMSL)</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,488 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<title>LAMSL - Rules</title>
+
+<style>
+
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
+    background-color: #eef4ea;
+    background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    background-size: min(60vw, 540px);
+    background-attachment: fixed;
+    color: #333;
+}
+
+h1, h2, h3 {
+    margin-bottom: 10px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* ===== NAVBAR ===== */
+header {
+    background: #12324A;
+    color: white;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar li {
+    margin-left: 20px;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    color: #F1D27A;
+}
+
+/* ===== BANNER ===== */
+.banner {
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-content: start;
+    column-gap: 8px;
+    text-align: center;
+}
+
+.banner h1 {
+    font-size: 42px;
+    font-style: italic;
+    margin: 10px 0;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0;
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+.banner h1,
+.banner .subtitle,
+.banner .tagline {
+    grid-column: 2;
+}
+
+
+.banner-logo {
+    width: 240px;
+    height: 160px;
+    object-fit: contain;
+    margin: 0;
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    justify-self: center;
+}
+
+/* ===== RULE HEADERS ===== */
+.rule-header {
+    background: #12324A;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 15px;
+    margin-bottom: 0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+    user-select: none;
+}
+
+.rule-header:hover {
+    background: #004080;
+}
+
+.rule-header.active {
+    background: #004080;
+}
+
+.rule-toggle {
+    font-size: 20px;
+}
+
+.rule-content {
+    background: #f9f9f9;
+    padding: 20px;
+    border-left: 4px solid #12324A;
+    margin-bottom: 10px;
+    display: none;
+}
+
+.rule-content.active {
+    display: block;
+}
+
+.rule-content p {
+    margin: 12px 0;
+    line-height: 1.6;
+}
+
+.rule-content ol, .rule-content ul {
+    margin: 12px 0;
+    padding-left: 24px;
+}
+
+.rule-content li {
+    margin: 8px 0;
+    line-height: 1.6;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #12324A;
+    color: white;
+    margin-top: 20px;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .navbar li {
+        margin: 10px 0;
+    }
+
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+        row-gap: 6px;
+    }
+
+    .banner-logo {
+        width: 150px;
+        height: 120px;
+        grid-column: 1;
+        grid-row: auto;
+        justify-self: center;
+    }
+
+    .banner h1 {
+        grid-column: 1;
+        font-size: 28px;
+    }
+
+    .banner .subtitle {
+        grid-column: 1;
+        font-size: 14px;
+    }
+
+    .banner .tagline {
+        grid-column: 1;
+        font-size: 12px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- BANNER -->
+<div class="banner">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
+    <h1>Latin American Men's Softball League</h1>
+    <div class="subtitle">Established 1976</div>
+    <div class="tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+</div>
+
+<!-- HEADER -->
+<header>
+    <div class="navbar container">
+        <h2>LAMSL</h2>
+        <ul>
+            <li><a href="LASML.html">Home</a></li>
+            <li><a href="standings.html">Standings</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="administrators.html">Admin</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</header>
+
+<!-- MAIN -->
+<div class="container">
+
+    <main>
+        <section class="card">
+            <h2>League Rules</h2>
+            <p>Click on a rule category to expand/collapse. Last Revised: March 10, 2010</p>
+
+            <!-- Managers' Meetings -->
+            <div class="rule-header" onclick="toggleRule(this)">
+                <span>Managers' Meetings</span>
+                <span class="rule-toggle">+</span>
+            </div>
+            <div class="rule-content">
+                <p><strong>1.</strong> Every team is required to send the team manager [or representative] that is on the roster to the managers' meeting. Meetings will be held every other Saturday at 1:00 P.M. at LAMSL Field (Maywood Park). The league will give plenty of notice if the day, location or time will be changed. Certain exceptions will be made for representatives that are not on the roster (i.e., team sponsors). This must be approved by the league president, vice president and council.</p>
+                <p><strong>2.</strong> Any team that is not represented will be fined $25.00. The league will determine if the absence of a team manager or representative is excused (proof may be required).</p>
+                <p><strong>3.</strong> Starting time will be 1:00 P.M. with a 10 minute grace period. <strong>No Exceptions.</strong> Three late arrivals during the season will result in a $25.00 fine. The league reserves the right to exercise discretion and excuse a late arrival.</p>
+                <p><strong>4.</strong> Although the league allows drinking during meetings, we expect all managers or representatives to act in a professional and courteous manner during the meeting. No obscene language or behavior will be allowed during the meeting. Any person found doing so will not be allowed to participate in the meeting and fined $25.00.</p>
+                <p><strong>5.</strong> A two-dollar donation will be asked from all representatives at the time of the meeting. Although this is not mandatory, we ask that all teams participate in order pay for club house expenses used for our meetings. The two-dollar donation will also entitle the representative the chance to participate in a raffle in which the representative will have the opportunity to win a cash prize or other prize.</p>
+                <p><strong>6.</strong> Managers, or any representative, must be present at all managers meetings. Failure to do so will result in a $25.00 fine. This fine must be paid at the start of the next game or the manager must sit out of the dugout and may not participate in any part of the game. (6/20/14)</p>
+            </div>
+
+            <!-- Game Time Requirements/General Game Rules -->
+            <div class="rule-header" onclick="toggleRule(this)">
+                <span>Game Time Requirements/General Game Rules</span>
+                <span class="rule-toggle">+</span>
+            </div>
+            <div class="rule-content">
+                <p><strong>1.</strong> Every team is required to present the following to the umpire before game time:</p>
+                <ol>
+                    <li>Roster with player pictures AVAILABLE ON THE LAMSL HOME PAGE</li>
+                    <li><span style="text-decoration: line-through;">Umpire Fees (fees may vary)</span> (6/20/14)</li>
+                    <li>Notification to umpire of how many players will bat. NOTE: Every starter must have a cap and jersey.</li>
+                </ol>
+                <p>Once the number of batters is given to the umpire, any other changes will have to be made by substitution. Names of players that are not starters or arrive late shall be given to the umpire and opposing manager.</p>
+                <p><strong>2.</strong> Any player named in the starting lineup can move freely while on defense. Note: Batting order must remain the same throughout the game unless there are substitutions from the bench.</p>
+                <p><strong>3.</strong> The color of the shirt and uniform must be the same for the entire team. Logos and letters must all be the same. The shirt must contain a visible number on the back, sleeve or front. Names are optional. Baseball pants must be worn. (No sweats allowed). The color of the baseball pants do not have to be the same.</p>
+                <p><strong>4.</strong> Teams must pay the umpire fees no later than the 2nd inning or the umpire can call a forfeit. (6/20/14)</p>
+                <p><strong>NOTE</strong></p>
+                <ol>
+                    <li>It is unorthodox for a team to have more than 1 of any number. However, if a team has a repeated number, this must be brought to the attention of the umpire and the opposing manager. This information must be shared prior to when the second (third, fourth, etc.) player with the repeated number steps into the batters box. Failure to inform of a repeated number to the specified personnel will result in an out as the player with the same number steps into the batters box.</li>
+                    <li>It is unorthodox for a team to engage in mass changing of numbers while the game is in progress. However, if a team engages in such activity, each player with a new number must inform the umpire and opposing manager of his new number prior to stepping into the batters box. Failure to inform of a number change appropriately will result in an out for the first infraction. NOTE: The respective players may continue to wear their new number without announcement after their first at bat with the new number.</li>
+                    <li>A benched player who enters the game with a number already used during the game must announce his number prior to stepping into the batters box. Failure to do so will result in an out for the first infraction.</li>
+                </ol>
+                <p><strong>5.</strong> Sleeveless jerseys must be worn with the same color sleeved undershirt by the starters.</p>
+                <p><strong>6.</strong> No metal cleats will be allowed. <strong>NO EXCEPTIONS.</strong> Any player found doing so will be automatically ejected. No warning is needed.</p>
+                <p><strong>7.</strong> A team must have at least nine players present at game time or it will be a forfeit. The official game time is determined by the umpire's time. Teams will only be allowed to finish a game with eight players if it is due to injury. An ejection with only nine players present will be an automatic forfeit. You must always begin with at least nine players. <strong>NO EXCEPTIONS.</strong></p>
+                <p><strong>8.</strong> Any player that steps foot on the field once the game has started with the wrong uniform will be ejected from the game. (Umpire will be allowed to use discretion).</p>
+                <p><strong>9.</strong> Catchers do not have to wear a hat on the field but must prove that they have one available. The umpire may ask that the hat is hung up in the dugout in a visible location.</p>
+                <p><strong>10.</strong> Only a team manager or designated team captain may question a call made by the umpire. Any other player doing so is subject to being ejected without prior warning from the umpire.</p>
+                <p><strong>11.</strong> All players must be in the dugout during the game. Any player found outside the dugout for an extended period of time will not be allowed to return to the game. Only players on the roster are allowed to participate in the game. First and third base coaches must be in full uniform. (No Exceptions)</p>
+                <p><strong>12.</strong> Any player that is removed from the game for a substitution may not re-enter the game. <strong>Any player that is found doing so will be suspended for one game and the manager will be fined $50.00. If the player completes an at-bat or steps foot defensively before being noticed, this will be cause for a forfeiture of the game.</strong></p>
+                <p><strong>13.</strong> Both new balls will be used in the first inning. One new ball will be used in the top and one new ball in the bottom of the inning.</p>
+                <p><strong>14.</strong> There is a 10 minute grace period for the first game only. <strong>The umpire should use his best discretion before calling a forfeit (i.e., player is visible, in parking lot or running to the field).</strong> NOTE: This discretion will be used for all games.</p>
+                <p><strong>15.</strong> All REGULAR SEASON games, regardless of the start time of the game, will have a two hour limit OR will go 9 innings. If a tied game has gone the 9 innings and is under the 2-hour time limit, the umpire can allow the game to continue using his best judgment. An extra umpire fee will be charged for extra innings. Fee: $2 per extra inning per team. This rule applies to Regular Season Games. Playoff Games and Championship Games do not have a time limit. (9/28/14)</p>
+                <p><strong>16.</strong> Mercy Rule Specifications: 15-run lead after 4 1/2 or 5 innings. The Mercy Rule will be used in all games: Regular Season Games, Playoffs and Championships. (9/21/14)</p>
+                <p><strong>17.</strong> No special arrangements are to be made between managers in regards to any league rule. Any manager found doing so will be fined and the game will be considered a loss for both teams. Any umpire that agrees to a manager arrangement will also be fined and suspended for one day. The umpire will the only shall initiate an agreement between both managers. This will be done only with the approval of the President or Vice-President prior to contacting both managers. This will be done only under circumstance that will not benefit either team (i.e., discolored jersey or cap).</p>
+                <p><strong>18.</strong> A sign-in sheet will be provided by the league which will require a printed and signed name for each player participating in that game.</p>
+                <p><strong>19.</strong> <strong>Women's League Designated Runner Rule (for the Catcher):</strong> A runner can be designated for the catcher no matter how many outs there are. The runner must be the last out.</p>
+                <p><strong>20.</strong> <strong>Women's League Designated Runner Rule (for any player):</strong> One runner per inning will be allowed for any player no matter how many outs there are. The runner must be the last out. This will be allowed whether the catcher has already utilized her runner in the same inning or not. In a situation where the last out has been utilized for the catcher, the second to the last out will be utilized for that runner.</p>
+                <p><strong>21.</strong> If a batter walks up to bat with the wrong hat, he is called out and ejected unless he can present the correct hat. If the correct hat is presented, then the player may continue to play in the game in his lineup order (after recording the out for the hat violation). A total of 9 matching hats is needed to be within uniform rule compliance. Matching hats: same hat color and same logo on the front.</p>
+            </div>
+
+            <!-- Protests -->
+            <div class="rule-header" onclick="toggleRule(this)">
+                <span>Protests</span>
+                <span class="rule-toggle">+</span>
+            </div>
+            <div class="rule-content">
+                <p><strong>1.</strong> All protests must be brought to the umpire's attention at the time of an incident or circumstance. The team then has up to the 9th inning to turn in its protest in writing with a $25.00 protest fee. The umpire must notify the opposing team that the game is being played under protest immediately after he is notified. The protest will be discussed at the following managers' meeting. If the team protesting fails to turn in his money or protest in writing before the end of the game, the protest will be invalid. All parties involved must appear at the meeting for the protest. Only the team manager or captain on the roster may discuss the protest. Failure to appear by the team will automatically favor the opposing team. If the protesting team wins the protest, the $25.00 fee will be refunded.</p>
+                <p><strong>2.</strong> Team players or managers will not discuss the protest with league officials before the meeting. Failure to follow this rule will also cause the loss of the protest.</p>
+                <p><strong>3.</strong> A protest made against an umpire for the interpretation of a rule or unjust ejection does not necessarily require the umpire to be present at the managers' meeting. This will be determined by the league.</p>
+                <p><strong>4.</strong> A protest will be handled in the following manner: Protest will be handed to umpire with the $25.00 protest fee. Umpire will turn in the written protest and fee to league president or vice-president. The protest will be read to the council members and discussed. The council will have the final decision along with the input from the league president and vice president. The final decision will be announced at the following meeting. The council's decision is final at the time of the meeting and will not be up for discussion. The league president and vice-president <strong>cannot</strong> overturn a council's decision. <strong>NO EXCEPTIONS.</strong></p>
+                <p><strong>5.</strong> After all previous protest procedures have been followed, the protesting team must e-mail the details or reason for the protest to the LAMSL Vice-President: lamsl1976@gmail.com. That e-mail will be distributed to all council members. After review, the council will come to a decision and e-mail the manager or team representative the results and reason for decision. (5/18/14)</p>
+                <p><strong>6.</strong> All teams will be required to submit ID pictures for every player on their rosters. E-mail ID pictures (with team name and player name) to the LAMSL Webmaster, Jose Reynoso: info@lamsl.com. Every registered LAMSL player's ID picture must be submitted, whether they wish to be posted on the website or not. Failure to submit an ID picture will result in a forfeit if the opposing team protests due to lack of ID availability. LAMSL must have an ID picture on file if a player prefers not to have his picture posted on the league's website. (5/18/14)</p>
+                <p>Note: Certain circumstances may require immediate attention to a matter before a meeting is held. The league holds the right to determine when that is necessary and will give the explanation for doing so at the meeting.</p>
+            </div>
+
+            <!-- Cancellation of Games -->
+            <div class="rule-header" onclick="toggleRule(this)">
+                <span>Cancellation of Games</span>
+                <span class="rule-toggle">+</span>
+            </div>
+            <div class="rule-content">
+                <p><strong>1.</strong> The League may postpone any game with at least a 48 hour notice due to circumstances beyond its control.</p>
+                <p><strong>2.</strong> No games will be rescheduled or scheduled at certain times for special needs of the team. If the team is not able to appear to a scheduled game, it will be considered a forfeit. The forfeiting team will be responsible for both teams' game fees. These fees will be due prior to the forfeiting team's next scheduled game. If both team managers agree on a mutual postponement, and it is approved by the league, it will be allowed.</p>
+                <p><strong>3.</strong> In case of rain, you can contact the league president at (323) 574-1207 to find out if the fields are in playing condition. In certain circumstances the league officials will contact the managers to notify them of any cancellations due to rain. The first scheduled team will have to be present if they have not received any notice of cancellation.</p>
+                <p><strong>4.</strong> Games will be played at the umpire's discretion (i.e., field conditions, rain, wet field, etc.). No decision is needed by league officials.</p>
+                <p><strong>5.</strong> If necessary, any games suspended for any reason will be made up at the end of the season. The schedules will remain the same and if possible we will schedule double headers during the season to make up those postponed games.</p>
+            </div>
+
+            <!-- Fines, Suspensions, Etc. -->
+            <div class="rule-header" onclick="toggleRule(this)">
+                <span>Fines, Suspensions, Etc.</span>
+                <span class="rule-toggle">+</span>
+            </div>
+            <div class="rule-content">
+                <p><strong>1.</strong> The league holds the right to suspend any player that it feels has violated any rule or has acted in a demeanor not acceptable by the league.</p>
+                <p><strong>2.</strong> All fines must be paid no later then the following game after it was issued. Failure to do so may result in the forfeit of that game regardless if the fine is for a certain individual. Fines may be doubled if they are not paid accordingly.</p>
+                <p><strong>3.</strong> Having illegal players participate during the season that are not on the roster will be cause for the ejection of the entire team for the season.</p>
+                <p><strong>4.</strong> Any player that commits unsportsmanlike conduct determined by the umpire will be ejected from the game and must leave the dugout. If the ejected player persists with unsportsmanlike conduct, the umpire has the right to eject from the playing field vicinity. Player may be subject to additional fines and suspensions if this should occur. If the umpire should turn in a report about the player, the league will then determine his punishment at the following managers' meeting. Depending on the severity, the player may be suspended before the managers' meeting by the league officials. If no report is made the player's punishment will end that same game of ejection and would be eligible to play the following scheduled game. Addendum (6/3/13): An official record will now be posted on the website of any player that is ejected regardless if an umpire report was filed or not. Players that are ejected two times in one season will automatically be suspended for one game following their second ejection and fined $25.00. Players ejected 3 times in a season will be fined $50.00 and suspended until they meet with the league's council to determine appropriate disciplinary actions.</p>
+                <p><strong>5.</strong> Any player that has been banned by the league council for severe circumstances has the right to appear before the council to appeal its decision. The league council will determine if he should return to the league or decide the severity of his punishment.</p>
+                <p><strong>6.</strong> Players, members and fans associated with a team who drink out of a bottle at any park will be fined $25.00. Managers will be held accountable for the payment at the following managers' meeting. Failure to pay will be cause for forfeit for the following scheduled game.</p>
+                <p><strong>7.</strong> Any team leaving trash in the dugouts or in its area will be fined $25.00. This fine will be doubled each time that it is committed.</p>
+                <p><strong>8.</strong> No player is allowed to drink alcohol before or during the game. Any player found doing so will be ejected from the game and fined $25.00.</p>
+                <p><strong>9.</strong> Any player or member urinating in public will be suspended for two games and fined $50.00.</p>
+                <p><strong>10.</strong> No player or league member should confront or argue league decisions to a league official unless they are present at a managers' meeting and is with his team manager. Any player found doing so will be fined and suspended depending on the severity. NOTE: A weekly open forum has been set to have any member from the league attend to discuss concerns or give suggestions for league improvement.</p>
+                <p><strong>11.</strong> The league holds a zero tolerance for team fights or brawls on or off the field. This goes for any individual fight as well. If two players are involved in a fight the player who throws the first punch will automatically be suspended for two games. Any player suspended does not need to be present on the field during his suspension. Depending on the circumstances, the player that returns the punch will be suspended for one game. The umpire may determine how many other players will also face fines or suspensions. Automatic fine for more then one player on the same team involved in a fight (i.e., bench-clearing brawl) will be $200.00, regardless of who started the fight.</p>
+                <p><strong>12.</strong> Umpires are not to be threatened, ridiculed, physically assaulted, spit on or any other inappropriate behavior. Any player found doing so will be subject from being banned from the league regardless of the circumstances (Council decision). Umpires fall under the same criteria towards players or managers.</p>
+                <p><strong>13.</strong> Any player that displays an action that can be interpreted by the other team as a demonstration of ridicule or aggressiveness will be ejected from the game. These actions will be left up to the umpire's discretion. Examples of such actions can be, snapping of the glove after making a catch, slamming the ball on the ground and staring at the opposing team, etc. Again, this will be left to the discretion of the umpire. (4/11/13)</p>
+            </div>
+
+            <!-- Other General Rules and Regulations -->
+            <div class="rule-header" onclick="toggleRule(this)">
+                <span>Other General Rules and Regulations</span>
+                <span class="rule-toggle">+</span>
+            </div>
+            <div class="rule-content">
+                <p><strong>1.</strong> Any team that forfeits two games in-a-row, or 3 in a season, will be removed from the league unless they pay a $150.00 non-refundable deposit. This fee will be due once the team forfeits its second game, weather or not the forfeits are consecutive. (6/17/13)</p>
+                <p><strong>2.</strong> A team from a lower division is only allowed three players from a higher division before it is forced to move up a division. The league will also determine what division a team should be placed in depending on the team's performance regardless of the players or division that it is in.</p>
+                <p><strong>3.</strong> The base runners may only advance after the ball has been released from the pitcher's hand.</p>
+                <p><strong>4.</strong> The runner may advance if the ball has gone behind the catcher in between the lines that have been designated. If the ball goes out the lines after hitting the backstop, it is still a live ball.</p>
+                <p><strong>5.</strong> Any pitched ball that touches the ground before reaching the plate will be considered a dead ball. NOTE: A base runner may not advance on a dead ball. The umpire must announce a ball is dead. Otherwise, a catcher must assume the ball is live if it were to go behind him.</p>
+                <p><strong>6.</strong> 18 players are allowed as eligible players on the roster. NOTE: <strong>2-Round Season</strong>: If a team has not filled a 18-player roster, it may continue to add players up until the last game of the FIRST round. <strong>3-Round Season</strong>: If a team has not filled a 18-player roster, it may continue to add players up until the last game of the SECOND round. Any roster additions or deletions must be submitted and approved by the league president or vice-president. These changes will only be accepted at the manager's meeting, unless special circumstances apply. Those circumstances will be determined by league administrators. Any additions or changes to the roaster will require a $10 fee per player once the final roster has been submitted. Final rosters are due prior to the first game of the season.</p>
+                <p><strong>7.</strong> Any team that forfeits a game must pay both teams' game fees unless the opposing team agrees to play a practice game of 5 innings in which they will both split the entire game fee.</p>
+                <p><strong>8.</strong> 1st place will be considered home team throughout the playoffs. The championship game will be decided by a coin toss. Fields will be determined by the league or will be raffled off.</p>
+                <p><strong>9.</strong> The league umpires must be aware of each and every league rule and should always carry a copy with them.</p>
+                <p><strong>10.</strong> A player must be on the roster and play a minimum of 50% of the season in order to be eligible for the playoffs. (2/18/12)</p>
+                <p><strong>11.</strong> In the event a player is injured, incarcerated or has a work schedule change, it is the manager's responsibility to report the player's status to the league. The manager must obtain a confirmation that the league received the status change for the player. (2/18/12)</p>
+                <p><strong>12.</strong> Sign-in sheets will be given to each manager. After both teams have signed the sign-in sheet, the umpire will initial the top of the sheet and provide a copy to each manager. Managers are responsible for saving their copy for any future reference regarding ineligible players. (6/20/14)</p>
+                <p><strong>13.</strong> Players are no longer allowed to play in multiple divisions. (6/20/13)</p>
+                <p><strong>14.</strong> <strong>Designated Runner Rule - Weeknight Men's Leagues:</strong><br/>-Only one designated runner is allowed each inning. The designated runner must be the last out.<br/>-Exception: The designated runner for the catcher can be any player. However, if a designated runner has to be REPLACED by another runner in order for him to bat, he will be called out and not allowed to bat. (1/9/14)</p>
+                <p><strong>15.</strong> <strong>Revised Designated Runner Rule - Sunday Men's League:</strong> A designated runner is allowed for ANY PLAYER in the line-up. The designated runner may be used once per inning and he must be the last out. However, the designated runner for the catcher may be any eligible player on the roster. Note: A designated runner for the catcher is OUT if his turn to bat comes up while he is on a base (due to mismanagement). (6/20/14)</p>
+                <p><strong>16.</strong> <strong>Byes or Requests for Byes:</strong> Teams that are in divisions that have an even amount of teams do not have byes, regularly. However, teams may request one bye per round of games. A request for a bye must be made a MINIMUM or 2 weeks prior to the requested date. Failure to do so will result in a forfeit and the team will be responsible for covering the forfeit fee of $130.00. No Exceptions. Any byes past the limited amount allowed will have to be approved by the council. (6/20/14)</p>
+                <p><strong>17.</strong> <strong>Courtesy Runner:</strong> In order to save time, the hitter does not have to touch the base when walked prior to requesting a courtesy runner. The request can be made immediately after the hitter has been walked. The request must be made prior to the next first pitch being made. No runners will be allowed after doing so except for the catcher. A request for a runner for the catcher can be made at any time. (12/9/14)</p>
+            </div>
+
+            <!-- Pitching Rules -->
+            <div class="rule-header" onclick="toggleRule(this)">
+                <span>Pitching Rules</span>
+                <span class="rule-toggle">+</span>
+            </div>
+            <div class="rule-content">
+                <p><strong>Pitching Note:</strong> This is the way the pitching rule is written as the modified fast pitch rule found on a Google search. Please remind your pitchers that although we have allowed some modifications to the rule, it is not a free-for-all and we are still a modified fast pitch league. The umpires have been instructed to enforce the following:</p>
+                <p>As in baseball or fast-pitch softball, the pitcher must begin his or her delivery by coming to a full stop for at least one-second while standing with both feet contacting the pitching rubber. There are limitations on the pitcher's windup to keep the speed of the pitch lower than it would be in a typical fast-pitch softball game. The pitcher cannot rotate his or her arm in a windmill motion to generate speed or rock back and forth before starting the windup.</p>
+                <p><strong>League Interpretation and Enforcement:</strong></p>
+                <ol>
+                    <li>Although the pitcher is allowed to take a step back, he must only take one step forward as the pitch is being released. While doing so the pitcher must keep one foot on the rubber at all times. Any movement from the planted foot can be interpreted as the pitcher removing his foot from the rubber, which will be a cause for an illegal pitch.</li>
+                    <li>The pitch must be presented with the palm upward. There should be no twist of the hand or covering of the ball as it is being delivered. The pitcher is not allowed to strike any part of his leg as he is preparing to deliver the ball. This usually causes a movement in the ball or velocity in the pitch.</li>
+                    <li>The pitcher is allowed to twist his upper body to the side as long as both feet remain facing forward and the pitch is made on a straight delivery. (i.e., at the time of delivery, the pitchers arm must be completely straight as it is coming forward, even with the leg just prior to delivery.</li>
+                    <li>As the pitcher brings his arm back, he must not raise his shoulder, elbow or arm above neck level.</li>
+                </ol>
+                <p>Any of the above violations will be cause for an illegal pitch. After the third illegal pitch is made, the pitcher will no longer be allowed to pitch but can play a different position.</p>
+                <p>We must keep this league a fun and safe league to play in. We welcome new pitchers that can bring some excitement to the league and competitiveness. We must remember that players signed up to play modified fast pitch and that is what we must enforce.</p>
+                <p><strong>Amendments:</strong><br/>
+                Pitchers are allowed to have one foot on the mound, but can only push off from that foot on delivery. The foot (or complete step) cannot be made prior to releasing the ball. (6/12/12)<br/>
+                Intentional Walks: The pitcher must pitch to the batter on an intentional walk. (6/12/12)<br/>
+                Hit-By-Pitch Rule: Any batter that is hit by a pitch regardless of the division will be granted a base if the umpire determines the batter was unable to avoid being hit by a pitch. This is a judgment call by the umpire. If he feels the batter took the hit intentionally, he can just call it a ball. The ball is also dead and runners are not allowed to advance. (11/9/12)</p>
+            </div>
+
+            <!-- Illegal Bat Rule -->
+            <div class="rule-header" onclick="toggleRule(this)">
+                <span>Illegal Bat Rule</span>
+                <span class="rule-toggle">+</span>
+            </div>
+            <div class="rule-content">
+                <p><strong>Posted Wednesday, June 22, 2011</strong></p>
+                <p><strong>1.</strong> Any bat that is suspected of being shaved or altered in any way in order to increase the velocity of the ball coming off of the bat shall be brought to the umpire's attention. Players that suspect illegal bats shall bring it to the attention of their manager at which time the manager shall point out the bat in question. The umpire will notify the opposing team's manager with the bat in questions and ask who the owner of the bat is. Once the person is pointed out, the umpire will write the individual's name on his score sheet. Umpire will be required to obtain player's full name and phone number. The umpire will proceed to instruct the manager to remove the bat in question from the game. If the manager refuses to do so, the umpire shall allow the bat to be used for the remainder of the game but will confiscate the bat after. If the manager chooses to continue to use the bat for the remainder of the game and refuses to turn in the bat to the umpire after the game, this shall be interpreted as a sign of dishonesty and will give the league no choice but to come to the conclusion the bat in question is illegal. The council will then determine the appropriate discipline for the player or team in question.</p>
+                <p><strong>2.</strong> If a player is found using a shaved or altered bat, the player will be subject to suspension for the entire season. The game in which the bat was used will be considered a forfeit. Managers are responsible for knowing what bats their players are using and should hold their own players accountable for using or bringing shaved/altered bats onto their teams.</p>
+                <p><strong>3.</strong> Any player that knowingly uses a shaved or altered bat and injures any player will be held accountable for their actions. All of their information will be given to the proper authorities. Any player knowingly using a shaved or altered bat can easily be proven to have had the intent to injure a player and can be charged with 245 of the California Penal Code - Assault with a deadly weapon. The league will cooperate fully with authorities during their investigation.</p>
+                <p><strong>4.</strong> "Fast-Pitch" bats are only allowed in Division A. (9/21/14)</p>
+                <p><strong>5. 4/26/16 - Bats Provided vs. Compression Machine Decision:</strong> A decision has been made regarding the purchase of the compression machine vs. having the league supply the bats. The league obtained 19 to 17 votes in favor of the compression machine. The league also understands that the 17 votes in favor of the bats being provided can not be ignored. Although there were valid reasons on both sides, ultimately we can not go wrong in doing everything possible to keep our pitchers and players safe. The above illegal bat rule will remain with the addition of the following:</p>
+                <p>All teams are hereby placed on notice that effective the <strong>2017 Regular Season</strong>, the league will be supplying bats for all divisions. This shall give all returning teams enough notice not to purchase any bats to be used for the LAMSL Sunday Modified League.</p>
+                <p>An additional fee of $70 will be collected from each team in order to cover the machine, delivery, setup and regular calibration and maintenance of the machine needed to last the entire season.</p>
+                <p>The league hereby deems all umpires as experts. Umpires can determine if a bat is unsafe without a manager bringing it to his attention. Please note that a bat that has been broken in can also be considered unsafe and could possibly not pass a compression test. As noted above, a manager can request for a bat that he feels is unsafe to be removed from a game. Failure to do so by the other team will result in the umpire confiscating the bat for inspection by the league.</p>
+                <p>Once a bat has been inspected by the league, a sticker or seal will be placed on the bat. Until then, any bat that is questionable can be requested to be tested by the league. The umpire must take the bat in question and bring it to the league headquarters in Maywood to be inspected.</p>
+                <p>If the bat does not pass the compression test and was used in the game, the game will be considered a forfeit. In order to avoid this from happening, please remove any questionable bats from the game unless you as the manager know for certain the bat has not been tampered with.</p>
+                <p>If a player is found with a shaved or altered bat after the league has placed its seal on it, that player will be banned for life and the team will be fined $300. The manager will also be suspended for 2 games.</p>
+            </div>
+
+            <!-- Weeknight Modified League Rule Modifications -->
+            <div class="rule-header" onclick="toggleRule(this)">
+                <span>Weeknight Modified League Rule Modifications</span>
+                <span class="rule-toggle">+</span>
+            </div>
+            <div class="rule-content">
+                <p><strong>Posted Tuesday, October 18, 2011</strong></p>
+                <p>Most Sunday LAMSL rules will apply except for the following:</p>
+                <ol>
+                    <li>There will be no grace period for any game. The Umpire will use his best discretion to allow the game to be delayed for absent players.</li>
+                    <li>4 outfielders will be used. The fourth outfielder may play anywhere in the outfield but will not be allowed to play in the dirt field.</li>
+                    <li>Games will be 1:15 games. No new inning will be started 5 minutes before end of regulation.</li>
+                    <li>Uniform rule will not be enforced but we strongly encourage all players to wear a numbered jersey, baseball pants and baseball cap.</li>
+                    <li>Pitch count will start at 0-0 but the player will only have one foul ball to waist after two strikes.</li>
+                    <li>No infield warm ups after the first inning. Pitcher is only allowed one warm up pitch after the first inning.</li>
+                    <li>Always refer to Sunday rules when necessary. In case of any questionable rule, play the game under protest and the league Vice-President will address it at the appropriate time.</li>
+                    <li>Top seeded teams will have home field advantage throughout the playoffs including the Championship game. In the case of a tie in the standings, head to head between tied teams will determine higher seed. If there is a tie head to head then we will revert to runs allowed.</li>
+                    <li>First round will be one-game elimination. All other games will be best two-out-of-three. Format will begin with 1 VS 8, 2 VS 7, 3 VS 6, and 4 VS 5.</li>
+                    <li>Prizes: Championship Team - Customized Sweatshirts (12 Maximum) - Trophy that will rotate team each season.</li>
+                </ol>
+            </div>
+
+            <!-- Note -->
+            <div class="rule-header" onclick="toggleRule(this)">
+                <span>Note</span>
+                <span class="rule-toggle">+</span>
+            </div>
+            <div class="rule-content">
+                <p>The rules and regulations are subject to change depending on the need or circumstances of the league. The league holds the rights to add, amend or modify any rule during the season. The league will only accept suggestions on changes or amendments at the managers' meeting. Any change will be presented at a managers' meeting along with the attached amendment or documentation once it has been approved.</p>
+                <p>Umpires will use their best discretion in enforcing the rules and regulations. Umpires that are unable to do so will be fined, suspended or removed from their duties.</p>
+            </div>
+
+        </section>
+    </main>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2024 LAMSL. All rights reserved.</p>
+</footer>
+
+    <script>
+        function toggleRule(element) {
+            const content = element.nextElementSibling;
+            const toggle = element.querySelector('.rule-toggle');
+            
+            element.classList.toggle('active');
+            content.classList.toggle('active');
+            
+            toggle.textContent = element.classList.contains('active') ? 'âˆ’' : '+';
+        }
+    </script>

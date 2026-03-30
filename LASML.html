@@ -1,0 +1,837 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<title>LAMSL - Latino Men's Softball League</title>
+
+<style>
+
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
+    background-color: #eef4ea;
+    background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    background-size: min(60vw, 540px);
+    background-attachment: fixed;
+    color: #333;
+}
+
+h1, h2, h3 {
+    margin-bottom: 10px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* ===== BANNER ===== */
+.banner {
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-content: start;
+    column-gap: 8px;
+    text-align: center;
+}
+
+.banner h1 {
+    font-size: 42px;
+    font-style: italic;
+    margin: 10px 0;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0;
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+.banner h1,
+.banner .subtitle,
+.banner .tagline {
+    grid-column: 2;
+}
+
+
+.banner-logo {
+    width: 240px;
+    height: 160px;
+    object-fit: contain;
+    margin: 0;
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    justify-self: center;
+}
+
+/* ===== SLIDESHOW ===== */
+.slideshow {
+    position: relative;
+    max-width: 1200px;
+    margin: 20px auto;
+    background: #12324A;
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 20px;
+}
+
+.slides {
+    position: relative;
+    height: 400px;
+    overflow: hidden;
+}
+
+.slide {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.slide.active {
+    display: block;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.indicators {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.indicator {
+    cursor: pointer;
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background: #ccc;
+    border-radius: 50%;
+    margin: 0 5px;
+    transition: background 0.3s;
+}
+
+.indicator.active {
+    background: #C86A2F;
+}
+
+.prev, .next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #12324A;
+    color: white;
+    border: 2px solid #C86A2F;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 18px;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.prev:hover, .next:hover {
+    background: #C86A2F;
+    color: #12324A;
+}
+
+.prev {
+    left: 20px;
+}
+
+.next {
+    right: 20px;
+}
+
+.upload-form {
+    margin-top: 20px;
+    text-align: center;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.upload-form h3 {
+    margin-top: 0;
+    color: #12324A;
+}
+
+.upload-form input[type="file"] {
+    margin: 10px 0;
+}
+
+.upload-form button {
+    background: #12324A;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.upload-form button:hover {
+    background: #C86A2F;
+    color: #12324A;
+}
+
+.upload-form p {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 0;
+}
+
+/* ===== PAYMENT LINKS ===== */
+.payment-section {
+    border: 3px solid #C86A2F;
+    border-radius: 10px;
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.payment-section > h2 {
+    color: #12324A;
+    margin-top: 0;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+}
+.payment-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+.payment-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #12324A;
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 7px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
+}
+.payment-link-btn:hover {
+    background: #C86A2F;
+}
+.payment-edit-form {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 8px 12px;
+    align-items: center;
+    border-top: 1px solid #ddd;
+    padding-top: 14px;
+}
+.payment-edit-form label {
+    font-weight: 700;
+    font-size: 13px;
+    color: #12324A;
+    text-transform: uppercase;
+}
+.payment-edit-form input {
+    padding: 7px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+.payment-save-btn {
+    grid-column: 1 / -1;
+    background: #C86A2F;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    padding: 9px 20px;
+    cursor: pointer;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+    transition: background 0.2s;
+}
+.payment-save-btn:hover {
+    background: #12324A;
+}
+
+/* ===== NAVBAR ===== */
+header {
+    background: #12324A;
+    color: white;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar li {
+    margin-left: 20px;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    color: #F1D27A;
+}
+
+/* ===== LAYOUT ===== */
+.main-layout {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 20px;
+}
+
+/* ===== CARDS ===== */
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+/* ===== ANNOUNCEMENT ===== */
+.highlight {
+    color: red;
+    font-weight: bold;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar img {
+    width: 100%;
+    border-radius: 8px;
+}
+
+/* ===== FOOTER ===== */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #12324A;
+    color: white;
+    margin-top: 20px;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .main-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .navbar li {
+        margin: 10px 0;
+    }
+
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+        row-gap: 6px;
+    }
+
+    .banner-logo {
+        width: 150px;
+        height: 120px;
+        grid-column: 1;
+        grid-row: auto;
+        justify-self: center;
+    }
+
+    .banner h1 {
+        grid-column: 1;
+        font-size: 28px;
+    }
+
+    .banner .subtitle {
+        grid-column: 1;
+        font-size: 14px;
+    }
+
+    .banner .tagline {
+        grid-column: 1;
+        font-size: 12px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- BANNER -->
+<div class="banner">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
+    <h1>Latin American Men's Softball League</h1>
+    <div class="subtitle">Established 1976</div>
+    <div class="tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+</div>
+
+<!-- HEADER -->
+<header>
+    <div class="navbar container">
+        <h2 style="margin: 0; font-size: 20px;">LAMSL</h2>
+        <ul>
+            <li><a href="LASML.html">Home</a></li>
+            <li><a href="standings.html">Standings</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="meetingnotes.html">Meeting Notes</a></li>
+            <li><a href="administrators.html">Admin</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</header>
+
+<!-- MAIN -->
+<div class="container main-layout">
+
+    <!-- MAIN CONTENT -->
+    <main>
+
+        <!-- NEXT MEETING -->
+        <section class="card">
+            <h2>LAMSL Announcements</h2>
+            <p>League updates are managed in the Administrators section.</p>
+            <p><a href="Images/Non_Approved_Batlist_2024.pdf" target="_blank" rel="noopener noreferrer">Banned Bat List</a></p>
+            <div id="announcements-list"></div>
+        </section>
+
+        <!-- PAYMENT LINKS -->
+        <section class="payment-section">
+            <h2>League Registration Fee &mdash; Click Link to Submit Payment</h2>
+            <div class="payment-links" id="payment-links-display"></div>
+            <div class="payment-edit-form" id="payment-edit-form" style="display:none;">
+                <label>Zelle</label>
+                <input id="pay-zelle" type="url" placeholder="Zelle link or phone/email...">
+                <label>PayPal</label>
+                <input id="pay-paypal" type="url" placeholder="https://paypal.me/...">
+                <label>Google Pay</label>
+                <input id="pay-googlepay" type="url" placeholder="https://pay.google.com/...">
+                <label>Venmo</label>
+                <input id="pay-venmo" type="url" placeholder="https://venmo.com/...">
+                <button class="payment-save-btn" onclick="savePaymentLinks()">Save Payment Links</button>
+            </div>
+        </section>
+
+<!-- SLIDESHOW -->
+<section class="slideshow">
+    <div class="slides">
+        <div class="slide active"><img src="SlideshowImages/DonArturoPadillaLAMSLPresident2.jpg" alt="Game Photo 1"></div>
+        <div class="slide"><img src="SlideshowImages/DonArturoPadillaLAMSLPresident2 (1).jpg" alt="Game Photo 2"></div>
+        <div class="slide"><img src="SlideshowImages/LAMSLClubhouseCartoonPic.jpg" alt="Game Photo 3"></div>
+        <div class="slide"><img src="SlideshowImages/400dpiMariachiConservatory.jpg" alt="Game Photo 4"></div>
+        <div class="slide"><img src="SlideshowImages/Estylo Hair Salon2.jpg" alt="Game Photo 5"></div>
+    </div>
+    <div class="indicators">
+        <span class="indicator active" data-slide="0"></span>
+        <span class="indicator" data-slide="1"></span>
+        <span class="indicator" data-slide="2"></span>
+        <span class="indicator" data-slide="3"></span>
+        <span class="indicator" data-slide="4"></span>
+    </div>
+    <button class="prev">&lt;</button>
+    <button class="next">&gt;</button>
+    <div class="upload-form">
+        <h3>Upload New Photo</h3>
+        <form id="slideshow-upload-form" enctype="multipart/form-data">
+            <input id="slideshow-photo-input" type="file" name="photo" accept="image/*" required>
+            <button type="submit">Upload</button>
+        </form>
+        <p id="upload-status"><em>Uploads are saved to the SlideshowImages folder.</em></p>
+    </div>
+</section>
+
+    </main>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="card">
+            <h3>Founder</h3>
+            <img src="Images/DonArturoPadillaLAMSLPresident2.jpg" alt="">
+            <img src="Images/DonArturoPadillaLAMSLPresident2 (1).jpg" alt="" style="margin-top: 10px;">
+            <p>Arturo Padilla, Sr.</p>
+        </div>
+
+        <div class="card">
+            <h3>Clubhouse</h3>
+            <img src="Images/LAMSLClubhouseCartoonPic.jpg" alt="">
+            <p>Thursdayâ€“Saturday: 7pm<br>Sunday: 2pm</p>
+            <img src="Images/400dpiMariachiConservatory.jpg" alt="" style="margin-top: 10px;">
+            <p>Mariachi Conservatory</p>
+        </div>
+
+        <div class="card">
+            <h3>Advertisement</h3>
+            <img src="Images/Estylo Hair Salon2.jpg" alt="">
+            <p>Members receive 20% discount</p>
+            <img src="Images/RealEstateCard1.jpg" alt="" style="margin-top: 15px;">
+            <p>Contact for real estate services</p>
+        </div>
+
+    </aside>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>Â© Latino Men's Softball League (LAMSL)</p>
+</footer>
+
+<script>
+const USERS_KEY = 'lamslUsersV1';
+const SESSION_KEY = 'lamslSessionV1';
+const ANNOUNCEMENTS_KEY = 'lamslAnnouncementsV1';
+const PAYMENT_KEY = 'lamslPaymentLinksV1';
+
+let currentSlide = 0;
+const indicatorsContainer = document.querySelector('.indicators');
+const slidesContainer = document.querySelector('.slides');
+const uploadForm = document.getElementById('slideshow-upload-form');
+const uploadInput = document.getElementById('slideshow-photo-input');
+const uploadStatus = document.getElementById('upload-status');
+const announcementsList = document.getElementById('announcements-list');
+const paymentLinksDisplay = document.getElementById('payment-links-display');
+const paymentEditForm = document.getElementById('payment-edit-form');
+
+function readJson(key, fallback) {
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+    } catch (error) {
+        return fallback;
+    }
+}
+
+function writeJson(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+}
+
+function ensureDefaults() {
+    const users = readJson(USERS_KEY, []);
+    if (!users.some(user => user.username === 'admin')) {
+        users.push({ username: 'admin', password: 'admin', role: 'admin' });
+        writeJson(USERS_KEY, users);
+    }
+
+    const announcements = readJson(ANNOUNCEMENTS_KEY, null);
+    if (!announcements) {
+        writeJson(ANNOUNCEMENTS_KEY, [
+            {
+                id: 'ann-1',
+                title: 'TO ALL REGULAR SEASON MANAGERS',
+                date: '2026-03-20',
+                message: 'MANDATORY MANAGERS MEETING FRIDAY MARCH 20th @ 7:30 P.M. 7527 Otis Ave. Cudahy, 90201'
+            },
+            {
+                id: 'ann-2',
+                title: '2026 50th Anniversary Regular Season',
+                date: '2026-03-15',
+                message: 'Early Registration: $600 due no later than 2/28/26. Regular Registration: $650 due 3/1/26 through 3/15/26. Late Registration incurs additional weekly fee.'
+            }
+        ]);
+    }
+}
+
+function isAdminLoggedIn() {
+    const session = readJson(SESSION_KEY, null);
+    return !!(session && session.role === 'admin');
+}
+
+// ===== PAYMENT LINKS =====
+const PAYMENT_PROVIDERS = [
+    { key: 'zelle',     inputId: 'pay-zelle',     label: '💸 Zelle'      },
+    { key: 'paypal',    inputId: 'pay-paypal',    label: '🅿 PayPal'     },
+    { key: 'googlepay', inputId: 'pay-googlepay', label: '🇬 Google Pay' },
+    { key: 'venmo',     inputId: 'pay-venmo',     label: '✔ Venmo'      },
+];
+
+function renderPaymentLinks() {
+    const links = readJson(PAYMENT_KEY, {});
+    paymentLinksDisplay.innerHTML = '';
+    let hasAny = false;
+    PAYMENT_PROVIDERS.forEach(p => {
+        const url = links[p.key];
+        if (url) {
+            hasAny = true;
+            const a = document.createElement('a');
+            a.href = url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.className = 'payment-link-btn';
+            a.textContent = p.label;
+            paymentLinksDisplay.appendChild(a);
+        }
+    });
+    if (!hasAny) {
+        paymentLinksDisplay.innerHTML = '<em style="color:#888;font-size:14px;">Payment links not yet configured by admin.</em>';
+    }
+    // Populate edit inputs
+    PAYMENT_PROVIDERS.forEach(p => {
+        const input = document.getElementById(p.inputId);
+        if (input) input.value = links[p.key] || '';
+    });
+}
+
+function savePaymentLinks() {
+    if (!isAdminLoggedIn()) return;
+    const links = {};
+    PAYMENT_PROVIDERS.forEach(p => {
+        const input = document.getElementById(p.inputId);
+        if (input && input.value.trim()) links[p.key] = input.value.trim();
+    });
+    writeJson(PAYMENT_KEY, links);
+    renderPaymentLinks();
+}
+
+function applyPaymentSection() {
+    paymentEditForm.style.display = isAdminLoggedIn() ? 'grid' : 'none';
+}
+
+function renderAnnouncements() {
+    const announcements = readJson(ANNOUNCEMENTS_KEY, []);
+    announcementsList.innerHTML = '';
+
+    if (!announcements.length) {
+        const emptyCard = document.createElement('div');
+        emptyCard.className = 'card';
+        emptyCard.textContent = 'No announcements posted yet.';
+        announcementsList.appendChild(emptyCard);
+        return;
+    }
+
+    announcements.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `<h3>${item.title}</h3><p><strong>${item.date}</strong></p><p>${item.message}</p>`;
+        announcementsList.appendChild(card);
+    });
+}
+
+function applyUploadPermissions() {
+    const isAdmin = isAdminLoggedIn();
+    uploadInput.disabled = !isAdmin;
+    uploadForm.querySelector('button[type="submit"]').disabled = !isAdmin;
+    uploadStatus.textContent = isAdmin
+        ? 'Uploads are saved to the SlideshowImages folder.'
+        : 'Admin sign-in required to upload slideshow pictures. Sign in at administrators.html.';
+}
+
+function getSlides() {
+    return Array.from(document.querySelectorAll('.slide'));
+}
+
+function getIndicators() {
+    return Array.from(document.querySelectorAll('.indicator'));
+}
+
+function buildSlides(imagePaths) {
+    slidesContainer.innerHTML = '';
+    indicatorsContainer.innerHTML = '';
+
+    imagePaths.forEach((path, index) => {
+        const slide = document.createElement('div');
+        slide.className = index === 0 ? 'slide active' : 'slide';
+
+        const img = document.createElement('img');
+        img.src = path;
+        img.alt = `Game Photo ${index + 1}`;
+        slide.appendChild(img);
+        slidesContainer.appendChild(slide);
+
+        const indicator = document.createElement('span');
+        indicator.className = index === 0 ? 'indicator active' : 'indicator';
+        indicator.dataset.slide = String(index);
+        indicatorsContainer.appendChild(indicator);
+    });
+
+    currentSlide = 0;
+}
+
+async function loadSlidesFromFolder() {
+    try {
+        const response = await fetch('/slideshow-images');
+        const result = await response.json();
+        if (!response.ok || !result.success || !Array.isArray(result.images)) {
+            return;
+        }
+
+        const paths = result.images.map(name => `SlideshowImages/${name}`);
+        if (paths.length) {
+            buildSlides(paths);
+        }
+    } catch (error) {
+        // Keep existing fallback slides if endpoint is unavailable.
+    }
+}
+
+function showSlide(index) {
+    const slides = getSlides();
+    const indicators = getIndicators();
+    if (!slides.length) {
+        return;
+    }
+
+    const safeIndex = ((index % slides.length) + slides.length) % slides.length;
+    slides.forEach(slide => slide.classList.remove('active'));
+    indicators.forEach(ind => ind.classList.remove('active'));
+    slides[safeIndex].classList.add('active');
+    if (indicators[safeIndex]) {
+        indicators[safeIndex].classList.add('active');
+    }
+    currentSlide = safeIndex;
+}
+
+function nextSlide() {
+    const slides = getSlides();
+    if (!slides.length) {
+        return;
+    }
+    currentSlide = (currentSlide + 1) % slides.length;
+    showSlide(currentSlide);
+}
+
+function prevSlide() {
+    const slides = getSlides();
+    if (!slides.length) {
+        return;
+    }
+    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+    showSlide(currentSlide);
+}
+
+function addSlide(imagePath) {
+    const slides = getSlides();
+    const newIndex = slides.length;
+
+    const slide = document.createElement('div');
+    slide.className = 'slide';
+
+    const img = document.createElement('img');
+    img.src = imagePath;
+    img.alt = `Game Photo ${newIndex + 1}`;
+    slide.appendChild(img);
+    slidesContainer.appendChild(slide);
+
+    const indicator = document.createElement('span');
+    indicator.className = 'indicator';
+    indicator.dataset.slide = String(newIndex);
+    indicatorsContainer.appendChild(indicator);
+
+    showSlide(newIndex);
+}
+
+document.querySelector('.next').addEventListener('click', nextSlide);
+document.querySelector('.prev').addEventListener('click', prevSlide);
+
+indicatorsContainer.addEventListener('click', (event) => {
+    if (!event.target.classList.contains('indicator')) {
+        return;
+    }
+    const index = Number(event.target.dataset.slide);
+    if (!Number.isNaN(index)) {
+        showSlide(index);
+    }
+});
+
+uploadForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!isAdminLoggedIn()) {
+        uploadStatus.textContent = 'Admin sign-in required for uploads.';
+        return;
+    }
+
+    if (!uploadInput.files || !uploadInput.files[0]) {
+        uploadStatus.textContent = 'Please choose an image file.';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('photo', uploadInput.files[0]);
+
+    uploadStatus.textContent = 'Uploading image...';
+
+    try {
+        const response = await fetch('/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Upload failed.');
+        }
+
+        const cacheBustedPath = `${result.path}?t=${Date.now()}`;
+        addSlide(cacheBustedPath);
+        uploadForm.reset();
+        uploadStatus.textContent = `Uploaded: ${result.filename}`;
+    } catch (error) {
+        uploadStatus.textContent = `Upload failed: ${error.message}`;
+    }
+});
+
+ensureDefaults();
+renderAnnouncements();
+renderPaymentLinks();
+applyPaymentSection();
+applyUploadPermissions();
+loadSlidesFromFolder();
+
+// Autoplay every 15 seconds
+setInterval(nextSlide, 15000);
+</script>
+
+</body>
+</html>

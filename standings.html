@@ -123,6 +123,83 @@ header {
     margin-bottom: 20px;
 }
 
+/* ===== DIVISION TABS ===== */
+.division-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    background: #12324A;
+    padding: 14px 16px;
+    border-radius: 10px 10px 0 0;
+}
+
+.tab-btn {
+    background: transparent;
+    color: #a8c4d8;
+    border: 2px solid transparent;
+    padding: 8px 18px;
+    cursor: pointer;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-radius: 5px;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+}
+
+.tab-btn:hover {
+    color: #F1D27A;
+    border-color: #C86A2F;
+}
+
+.tab-btn.active {
+    background: #C86A2F;
+    color: white;
+    border-color: #C86A2F;
+}
+
+.tab-content-panel {
+    background: white;
+    border-radius: 0 0 10px 10px;
+    padding: 24px 20px;
+    min-height: 200px;
+}
+
+.tab-content-panel table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+}
+
+.tab-content-panel th,
+.tab-content-panel td {
+    border: 1px solid #dde4eb;
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.tab-content-panel th {
+    background: #12324A;
+    color: white;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.tab-content-panel tr:nth-child(even) td {
+    background: #f4f8fb;
+}
+
+.tab-loading {
+    padding: 40px;
+    text-align: center;
+    color: #888;
+    font-size: 15px;
+}
+
 /* ===== FOOTER ===== */
 footer {
     text-align: center;
@@ -176,6 +253,16 @@ footer {
         grid-column: 1;
         font-size: 12px;
     }
+
+    .division-tabs {
+        gap: 4px;
+        padding: 10px;
+    }
+
+    .tab-btn {
+        padding: 7px 12px;
+        font-size: 12px;
+    }
 }
 
 </style>
@@ -200,6 +287,7 @@ footer {
             <li><a href="standings.html">Standings</a></li>
             <li><a href="schedule.html">Schedule</a></li>
             <li><a href="rules.html">Rules</a></li>
+            <li><a href="events.html">Events &amp; Fundraisers</a></li>
             <li><a href="administrators.html">Admin</a></li>
             <li><a href="about.html">About</a></li>
         </ul>
@@ -210,37 +298,73 @@ footer {
 <div class="container">
 
     <main>
-        <section class="card">
-            <h2>Team Standings</h2>
-            
-            <h3>Current Season Divisions</h3>
-            <ul>
-                <li><a href="divisionA.html">Division A</a></li>
-                <li><a href="divisionB.html">Division B</a></li>
-                <li><a href="divisionC.html">Division C</a></li>
-                <li><a href="divisionD.html">Division D</a></li>
-                <li><a href="divisionE.html">Division E</a></li>
-            </ul>
-            
-            <h3>Hall of Champions</h3>
-            <ul>
-                <li><a href="hallofchampions.html">Hall of Champions</a></li>
-            </ul>
-            
-            <h3>Winter Season Divisions</h3>
-            <ul>
-                <li><a href="winter1.html">Winter Division 1</a></li>
-                <li><a href="winter2.html">Winter Division 2</a></li>
-            </ul>
-        </section>
+        <h2 style="margin-top: 24px; color: #12324A;">Team Standings</h2>
+
+        <!-- TAB BUTTONS — always visible -->
+        <div class="division-tabs" role="tablist">
+            <button class="tab-btn active" role="tab" aria-selected="true"  data-src="divisionA.html">Division A</button>
+            <button class="tab-btn"        role="tab" aria-selected="false" data-src="divisionB.html">Division B</button>
+            <button class="tab-btn"        role="tab" aria-selected="false" data-src="divisionC.html">Division C</button>
+            <button class="tab-btn"        role="tab" aria-selected="false" data-src="divisionD.html">Division D</button>
+            <button class="tab-btn"        role="tab" aria-selected="false" data-src="divisionE.html">Division E</button>
+            <button class="tab-btn"        role="tab" aria-selected="false" data-src="hallofchampions.html">Hall of Champions</button>
+            <button class="tab-btn"        role="tab" aria-selected="false" data-src="winter1.html">Winter Div 1</button>
+            <button class="tab-btn"        role="tab" aria-selected="false" data-src="winter2.html">Winter Div 2</button>
+        </div>
+
+        <!-- CONTENT PANEL — updates on tab click -->
+        <div class="tab-content-panel" id="tab-content-panel" role="tabpanel">
+            <div class="tab-loading">Loading Division A&hellip;</div>
+        </div>
     </main>
 
 </div>
 
 <!-- FOOTER -->
 <footer>
-    <p>Â© Latino Men's Softball League (LAMSL)</p>
+    <p>&copy; Latino Men's Softball League (LAMSL)</p>
 </footer>
+
+<script>
+const tabButtons   = document.querySelectorAll('.tab-btn');
+const contentPanel = document.getElementById('tab-content-panel');
+const cache        = {};
+
+async function loadTab(src) {
+    if (cache[src]) {
+        contentPanel.innerHTML = cache[src];
+        return;
+    }
+    contentPanel.innerHTML = '<div class="tab-loading">Loading&hellip;</div>';
+    try {
+        const response = await fetch(src);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const html = await response.text();
+        const doc  = new DOMParser().parseFromString(html, 'text/html');
+        const main = doc.querySelector('main');
+        const content = main ? main.innerHTML : '<p>Content unavailable.</p>';
+        cache[src] = content;
+        contentPanel.innerHTML = content;
+    } catch (e) {
+        contentPanel.innerHTML = `<p style="color:#c00;">Could not load content: ${e.message}</p>`;
+    }
+}
+
+tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        tabButtons.forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        loadTab(btn.dataset.src);
+    });
+});
+
+// Load the first tab on page load
+loadTab(document.querySelector('.tab-btn.active').dataset.src);
+</script>
 
 </body>
 </html>

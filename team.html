@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<title>LAMSL - Team Profile</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
+    background-color: #eef4ea;
+    background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    background-size: min(60vw, 540px);
+    background-attachment: fixed;
+    color: #333;
+}
+
+h1, h2, h3 {
+    margin-bottom: 10px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+header {
+    background: #12324A;
+    color: white;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar li {
+    margin-left: 20px;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    color: #F1D27A;
+}
+
+.banner {
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-content: start;
+    column-gap: 8px;
+    text-align: center;
+}
+
+.banner h1 {
+    font-size: 42px;
+    font-style: italic;
+    margin: 10px 0;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0;
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+.banner h1,
+.banner .subtitle,
+.banner .tagline {
+    grid-column: 2;
+}
+
+.banner-logo {
+    width: 240px;
+    height: 160px;
+    object-fit: contain;
+    margin: 0;
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    justify-self: center;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.team-hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 14px;
+}
+
+.team-chip {
+    background: #12324A;
+    color: white;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    vertical-align: middle;
+}
+
+.status-scheduled { background: #d4edda; color: #1a7a1a; }
+.status-postponed { background: #fde8d8; color: #C86A2F; }
+.status-cancelled { background: #f8d7da; color: #9a1616; }
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 16px;
+}
+
+.info-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.info-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #e7edf3;
+    font-size: 15px;
+}
+
+.info-list li:last-child {
+    border-bottom: none;
+}
+
+.score-highlight {
+    color: #0f5f1f;
+    font-weight: 700;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    border: 1px solid #dbe2ea;
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 14px;
+}
+
+th {
+    background: #12324A;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+tr:nth-child(even) td {
+    background: #f6f9fc;
+}
+
+.roster-controls {
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    background: #f7fbff;
+    padding: 14px;
+    margin-bottom: 14px;
+}
+
+.roster-controls input[type="file"] {
+    margin: 8px 0;
+}
+
+.roster-controls button {
+    background: #12324A;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+}
+
+.roster-controls button:hover {
+    background: #004080;
+}
+
+.muted {
+    color: #6c7680;
+    font-size: 14px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #12324A;
+    color: white;
+    margin-top: 20px;
+}
+
+@media (max-width: 900px) {
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .navbar li {
+        margin: 10px 0;
+    }
+
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+        row-gap: 6px;
+    }
+
+    .banner-logo {
+        width: 150px;
+        height: 120px;
+        grid-column: 1;
+        grid-row: auto;
+        justify-self: center;
+    }
+
+    .banner h1 {
+        grid-column: 1;
+        font-size: 28px;
+    }
+
+    .banner .subtitle {
+        grid-column: 1;
+        font-size: 14px;
+    }
+
+    .banner .tagline {
+        grid-column: 1;
+        font-size: 12px;
+    }
+
+    .team-hero {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="banner">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
+    <h1>Latin American Men's Softball League</h1>
+    <div class="subtitle">Established 1976</div>
+    <div class="tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+</div>
+
+<header>
+    <div class="navbar container">
+        <h2>LAMSL</h2>
+        <ul>
+            <li><a href="LASML.html">Home</a></li>
+            <li><a href="standings.html">Standings</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="events.html">Events &amp; Fundraisers</a></li>
+            <li><a href="administrators.html">Admin</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</header>
+
+<div class="container">
+    <main>
+        <section class="card">
+            <div class="team-hero">
+                <div>
+                    <h2 id="team-title">Team Profile</h2>
+                    <p class="muted" id="team-subtitle">Select a team from a division standings page.</p>
+                </div>
+                <div class="team-chip" id="team-division-chip">Division -</div>
+            </div>
+        </section>
+
+        <section class="card summary-grid">
+            <div>
+                <h3>Standings Snapshot</h3>
+                <ul class="info-list" id="standings-summary"></ul>
+            </div>
+            <div>
+                <h3>Latest Results</h3>
+                <ul class="info-list" id="latest-results"></ul>
+            </div>
+        </section>
+
+        <section class="card">
+            <h3>Team Schedule</h3>
+            <p class="muted">Includes regular schedule and practice/scrimmage games.</p>
+            <div id="team-schedule-wrap"></div>
+        </section>
+
+        <section class="card">
+            <h3>Team Roster</h3>
+            <div class="roster-controls">
+                <p id="roster-admin-status" class="muted">Admin sign-in required to upload roster spreadsheets.</p>
+                <input id="roster-file" type="file" accept=".xlsx,.xls,.csv">
+                <button id="upload-roster-btn" type="button">Upload Roster Spreadsheet</button>
+                <p class="muted">Spreadsheet tip: use column headers like Name, Number, Position, Phone.</p>
+            </div>
+            <div id="roster-table-wrap"></div>
+        </section>
+    </main>
+</div>
+
+<footer>
+    <p>&copy; Latino Men's Softball League (LAMSL)</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+const SESSION_KEY = 'lamslSessionV1';
+const SCHEDULE_KEY = 'lamslWeeklyScheduleV3';
+const PRACTICE_KEY = 'lamslPracticeScheduleV1';
+const ROSTER_KEY = 'lamslTeamRostersV1';
+
+const standingsByDivision = {
+    A: [
+        { team: 'Titans', w: 10, l: 2, t: 0, gb: '' },
+        { team: 'Doom Squad', w: 9, l: 3, t: 0, gb: '' },
+        { team: 'Legends', w: 8, l: 3, t: 1, gb: '' },
+        { team: 'Nasty Boyz', w: 8, l: 4, t: 0, gb: '' },
+        { team: 'Black Sox', w: 7, l: 4, t: 1, gb: '' },
+        { team: 'White Sox', w: 7, l: 5, t: 0, gb: '' },
+        { team: 'Dodgers', w: 7, l: 5, t: 0, gb: '' }
+    ],
+    B: [
+        { team: 'Charros', w: 5, l: 7, t: 0, gb: '' },
+        { team: 'Toxic', w: 5, l: 7, t: 0, gb: '' },
+        { team: 'Primos', w: 2, l: 6, t: 3, gb: '' },
+        { team: 'Demons', w: 4, l: 8, t: 0, gb: '' },
+        { team: 'Cubs', w: 3, l: 8, t: 1, gb: '' },
+        { team: 'Borrachos', w: 0, l: 12, t: 0, gb: '' }
+    ],
+    C: [
+        { team: 'Diablos', w: 12, l: 2, t: 0, gb: '' },
+        { team: 'Brewers', w: 8, l: 6, t: 0, gb: '' },
+        { team: 'Coyotes', w: 8, l: 6, t: 0, gb: '' },
+        { team: 'Goodfellas', w: 8, l: 6, t: 0, gb: '' },
+        { team: 'Bandits', w: 6, l: 8, t: 0, gb: '' },
+        { team: 'Salvajes', w: 5, l: 9, t: 0, gb: '' },
+        { team: 'Balls Out', w: 5, l: 9, t: 0, gb: '' },
+        { team: 'Orioles', w: 3, l: 11, t: 0, gb: '' }
+    ],
+    D: [
+        { team: 'Viejones', w: 13, l: 1, t: 0, gb: '' },
+        { team: 'No Chance', w: 9, l: 4, t: 1, gb: '' },
+        { team: 'Los Pericos', w: 9, l: 5, t: 0, gb: '' },
+        { team: 'Wild Hogz', w: 8, l: 5, t: 1, gb: '' },
+        { team: 'Strokes', w: 8, l: 5, t: 1, gb: '' },
+        { team: 'Dawgz', w: 4, l: 9, t: 1, gb: '' },
+        { team: 'Xolos', w: 2, l: 12, t: 0, gb: '' },
+        { team: 'Desvelados', w: 1, l: 13, t: 0, gb: 'Eliminated' }
+    ],
+    W1: [
+        { team: 'Titans', w: 9, l: 1, t: 0, gb: '' },
+        { team: 'La Tribu', w: 9, l: 1, t: 1, gb: '' },
+        { team: 'Legends', w: 8, l: 3, t: 0, gb: '' },
+        { team: 'LAMSL OG\'s', w: 7, l: 3, t: 0, gb: '' },
+        { team: 'Charros', w: 6, l: 4, t: 0, gb: '' },
+        { team: 'Goodfellas', w: 4, l: 5, t: 0, gb: '' }
+    ],
+    W2: [
+        { team: 'Wild Hogz', w: 2, l: 0, t: 0, gb: '-' },
+        { team: 'Showtime', w: 0, l: 1, t: 0, gb: '-' },
+        { team: 'Diablos', w: 1, l: 0, t: 0, gb: '-' },
+        { team: 'Balls Out', w: 0, l: 2, t: 0, gb: '-' },
+        { team: 'Peloteros', w: 1, l: 0, t: 0, gb: '-' },
+        { team: 'Hitmen', w: 2, l: 0, t: 0, gb: '-' },
+        { team: 'Bastards', w: 0, l: 1, t: 0, gb: '-' },
+        { team: 'Coyotes', w: 0, l: 1, t: 0, gb: '-' }
+    ]
+};
+
+const divisionLabelMap = {
+    A: 'Division A',
+    B: 'Division B',
+    C: 'Division C',
+    D: 'Division D',
+    E: 'Division E',
+    W1: 'Winter Division 1',
+    W2: 'Winter Division 2'
+};
+
+function readJson(key, fallback) {
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+    } catch (error) {
+        return fallback;
+    }
+}
+
+function writeJson(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+}
+
+function isAdminLoggedIn() {
+    const session = readJson(SESSION_KEY, null);
+    return !!(session && session.role === 'admin');
+}
+
+function toStatusLabel(status) {
+    if (!status || status === 'scheduled') return 'On Schedule';
+    return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+const params = new URLSearchParams(window.location.search);
+const team = params.get('team') || '';
+let division = (params.get('division') || '').toUpperCase();
+
+if (!division && team) {
+    for (const key of Object.keys(standingsByDivision)) {
+        if (standingsByDivision[key].some(item => item.team === team)) {
+            division = key;
+            break;
+        }
+    }
+}
+
+const teamTitle = document.getElementById('team-title');
+const teamSubtitle = document.getElementById('team-subtitle');
+const teamDivisionChip = document.getElementById('team-division-chip');
+const standingsSummary = document.getElementById('standings-summary');
+const latestResults = document.getElementById('latest-results');
+const teamScheduleWrap = document.getElementById('team-schedule-wrap');
+const rosterAdminStatus = document.getElementById('roster-admin-status');
+const rosterFileInput = document.getElementById('roster-file');
+const uploadRosterBtn = document.getElementById('upload-roster-btn');
+const rosterTableWrap = document.getElementById('roster-table-wrap');
+
+function renderHeader() {
+    if (!team) {
+        teamTitle.textContent = 'Team Profile';
+        teamSubtitle.textContent = 'Select a team by clicking its name on a division standings page.';
+        teamDivisionChip.textContent = 'Division -';
+        return;
+    }
+
+    teamTitle.textContent = team;
+    teamSubtitle.textContent = `Detailed team page: schedule, standings, and roster management.`;
+    teamDivisionChip.textContent = division ? (divisionLabelMap[division] || `Division ${division}`) : 'Division N/A';
+}
+
+function renderStandingsSummary() {
+    standingsSummary.innerHTML = '';
+    if (!team || !division || !standingsByDivision[division]) {
+        standingsSummary.innerHTML = '<li>Standings data is not available for this team.</li>';
+        return;
+    }
+
+    const divisionRows = standingsByDivision[division];
+    const row = divisionRows.find(item => item.team === team);
+    if (!row) {
+        standingsSummary.innerHTML = '<li>Team was not found in this division standings snapshot.</li>';
+        return;
+    }
+
+    const rank = divisionRows.findIndex(item => item.team === team) + 1;
+    const items = [
+        `Division: ${divisionLabelMap[division] || division}`,
+        `Rank: ${rank} of ${divisionRows.length}`,
+        `Record: ${row.w}-${row.l}-${row.t}`,
+        `Games Back: ${row.gb || 'N/A'}`
+    ];
+
+    items.forEach(text => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        standingsSummary.appendChild(li);
+    });
+}
+
+function getTeamGames() {
+    if (!team) return [];
+
+    const leagueGames = readJson(SCHEDULE_KEY, []);
+    const practiceGames = readJson(PRACTICE_KEY, []).map(item => ({
+        id: item.id,
+        date: item.date,
+        time: item.time,
+        park: item.park,
+        team1: item.team1,
+        team2: item.team2,
+        score1: '',
+        score2: '',
+        status: item.status || 'scheduled',
+        division: `${item.div1 || '?'}-${item.div2 || '?'}`,
+        gameType: 'Practice'
+    }));
+
+    return [...leagueGames.map(item => ({ ...item, gameType: 'League' })), ...practiceGames]
+        .filter(item => item.team1 === team || item.team2 === team)
+        .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+}
+
+function renderLatestResults(games) {
+    latestResults.innerHTML = '';
+
+    const recent = games
+        .filter(item => item.score1 !== '' && item.score2 !== '')
+        .slice(-5)
+        .reverse();
+
+    if (!recent.length) {
+        latestResults.innerHTML = '<li>No completed scores posted yet.</li>';
+        return;
+    }
+
+    recent.forEach(item => {
+        const li = document.createElement('li');
+        const teamIsHome = item.team1 === team;
+        const myScore = teamIsHome ? item.score1 : item.score2;
+        const oppTeam = teamIsHome ? item.team2 : item.team1;
+        const oppScore = teamIsHome ? item.score2 : item.score1;
+        li.innerHTML = `<span class="score-highlight">${myScore}-${oppScore}</span> vs ${oppTeam} (${item.date})`;
+        latestResults.appendChild(li);
+    });
+}
+
+function renderScheduleTable(games) {
+    if (!games.length) {
+        teamScheduleWrap.innerHTML = '<p class="muted">No games found for this team yet.</p>';
+        return;
+    }
+
+    const rows = games.map(item => {
+        const status = item.status || 'scheduled';
+        const scoreText = item.score1 !== '' && item.score2 !== ''
+            ? `${item.team1} ${item.score1} - ${item.score2} ${item.team2}`
+            : '-';
+        return `
+            <tr>
+                <td>${item.date}</td>
+                <td>${item.time || '-'}</td>
+                <td>${item.gameType}</td>
+                <td>${item.park || '-'}</td>
+                <td>${item.team1} vs ${item.team2}</td>
+                <td>${item.division || '-'}</td>
+                <td><span class="status-badge status-${status}">${toStatusLabel(status)}</span></td>
+                <td>${scoreText}</td>
+            </tr>
+        `;
+    }).join('');
+
+    teamScheduleWrap.innerHTML = `
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Type</th>
+                    <th>Park</th>
+                    <th>Matchup</th>
+                    <th>Division</th>
+                    <th>Status</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+        </table>
+    `;
+}
+
+function renderRoster() {
+    const store = readJson(ROSTER_KEY, {});
+    const roster = team ? store[team] : null;
+
+    if (!team) {
+        rosterTableWrap.innerHTML = '<p class="muted">Select a team to view roster details.</p>';
+        return;
+    }
+
+    if (!roster || !Array.isArray(roster.rows) || !roster.rows.length) {
+        rosterTableWrap.innerHTML = '<p class="muted">No roster uploaded yet for this team.</p>';
+        return;
+    }
+
+    const headers = roster.headers || Object.keys(roster.rows[0] || {});
+    const headHtml = headers.map(header => `<th>${header}</th>`).join('');
+
+    const bodyHtml = roster.rows.map(row => {
+        const cols = headers.map(header => `<td>${row[header] ?? ''}</td>`).join('');
+        return `<tr>${cols}</tr>`;
+    }).join('');
+
+    rosterTableWrap.innerHTML = `
+        <p class="muted">Last uploaded: ${roster.uploadedAt || 'Unknown'}</p>
+        <table>
+            <thead><tr>${headHtml}</tr></thead>
+            <tbody>${bodyHtml}</tbody>
+        </table>
+    `;
+}
+
+function applyRosterUploadAccess() {
+    const admin = isAdminLoggedIn();
+    rosterAdminStatus.textContent = admin
+        ? 'Admin access confirmed. Upload roster Excel/CSV file for this team.'
+        : 'Admin sign-in required to upload roster spreadsheets.';
+    rosterFileInput.disabled = !admin || !team;
+    uploadRosterBtn.disabled = !admin || !team;
+}
+
+uploadRosterBtn.addEventListener('click', async () => {
+    if (!isAdminLoggedIn()) {
+        rosterAdminStatus.textContent = 'Sign in as admin first.';
+        return;
+    }
+
+    if (!team) {
+        rosterAdminStatus.textContent = 'No team selected.';
+        return;
+    }
+
+    const file = rosterFileInput.files && rosterFileInput.files[0];
+    if (!file) {
+        rosterAdminStatus.textContent = 'Choose an Excel/CSV roster file first.';
+        return;
+    }
+
+    try {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+        if (!rows.length) {
+            rosterAdminStatus.textContent = 'Roster file appears empty.';
+            return;
+        }
+
+        const headers = Object.keys(rows[0]);
+        const store = readJson(ROSTER_KEY, {});
+        store[team] = {
+            headers,
+            rows,
+            uploadedAt: new Date().toLocaleString()
+        };
+        writeJson(ROSTER_KEY, store);
+
+        rosterAdminStatus.textContent = `Roster uploaded for ${team}.`;
+        renderRoster();
+    } catch (error) {
+        rosterAdminStatus.textContent = `Roster upload failed: ${error.message}`;
+    }
+});
+
+window.addEventListener('storage', event => {
+    if (event.key === SESSION_KEY) {
+        applyRosterUploadAccess();
+    }
+});
+
+renderHeader();
+renderStandingsSummary();
+const games = getTeamGames();
+renderLatestResults(games);
+renderScheduleTable(games);
+applyRosterUploadAccess();
+renderRoster();
+</script>
+</body>
+</html>

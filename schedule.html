@@ -374,6 +374,169 @@ header {
     margin-bottom: 8px;
 }
 
+/* ===== STATUS BADGES ===== */
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    vertical-align: middle;
+}
+.status-scheduled { background: #d4edda; color: #1a7a1a; }
+.status-postponed { background: #fde8d8; color: #C86A2F; }
+.status-cancelled { background: #f8d7da; color: #9a1616; }
+.game-pill.status-postponed { border-left-color: #C86A2F; background: #fff8f4; }
+.game-pill.status-cancelled { border-left-color: #9a1616; background: #fff4f4; opacity: 0.75; }
+
+/* ===== VIEW TOGGLE ===== */
+.view-toggle { display: flex; gap: 6px; margin-bottom: 14px; }
+.view-toggle-btn {
+    background: white;
+    border: 2px solid #12324A;
+    color: #12324A;
+    padding: 7px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    transition: background 0.2s, color 0.2s;
+}
+.view-toggle-btn.active { background: #12324A; color: white; }
+.view-toggle-btn:hover:not(.active) { background: #eef4ea; }
+
+/* ===== PARK VIEW ===== */
+.park-view { display: none; }
+.park-view.visible {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+.park-section { margin-bottom: 0; }
+.park-section h4 {
+    background: #12324A;
+    color: white;
+    padding: 8px 12px;
+    margin: 0;
+    border-radius: 8px 8px 0 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.park-games-list {
+    border: 1px solid #dbe2ea;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    background: white;
+}
+.park-game-row {
+    display: grid;
+    grid-template-columns: 120px 70px 1fr auto;
+    align-items: center;
+    padding: 6px 10px;
+    border-bottom: 1px solid #eef2f7;
+    font-size: 12px;
+    gap: 8px;
+}
+.park-game-row:last-child { border-bottom: none; }
+.park-empty { padding: 10px 12px; color: #888; font-size: 12px; }
+.park-col-meta { color: #55616d; }
+.park-col-division { font-weight: 700; color: #12324A; }
+.park-col-matchup { min-width: 0; }
+.park-col-score {
+    color: #0f5f1f;
+    font-weight: 700;
+    margin-left: 6px;
+}
+
+/* ===== PRACTICE SECTION ===== */
+.practice-section { margin-top: 24px; }
+.practice-header {
+    background: #1a4f2e;
+    color: white;
+    padding: 13px 20px;
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    align-items: center;
+}
+.practice-header h3 {
+    margin: 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    text-transform: uppercase;
+    font-size: 18px;
+}
+.practice-body {
+    background: white;
+    border-radius: 0 0 10px 10px;
+    padding: 20px;
+}
+.practice-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+#practice-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+#practice-form input,
+#practice-form select {
+    padding: 8px;
+    border: 1px solid #c5d0da;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+}
+#practice-form button {
+    grid-column: span 2;
+    background: #1a4f2e;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    cursor: pointer;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    transition: background 0.2s;
+}
+#practice-form button:hover { background: #143d22; }
+#practice-games-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 420px;
+    overflow-y: auto;
+}
+#practice-games-list li {
+    background: #eef2f7;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 13px;
+}
+.practice-status-select {
+    padding: 4px 8px;
+    border: 1px solid #c5d0da;
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+}
+#practice-admin-status { color: #304b64; margin: 0 0 12px; font-size: 14px; }
+
 footer {
     text-align: center;
     padding: 20px;
@@ -399,6 +562,31 @@ footer {
     #schedule-form button,
     #score-form button {
         grid-column: span 1;
+    }
+
+    .practice-layout {
+        grid-template-columns: 1fr;
+    }
+
+    #practice-form {
+        grid-template-columns: 1fr;
+    }
+
+    #practice-form button {
+        grid-column: span 1;
+    }
+
+    .park-view.visible {
+        grid-template-columns: 1fr;
+    }
+
+    .park-game-row {
+        grid-template-columns: 90px 60px 1fr;
+    }
+
+    .park-game-row .status-badge {
+        grid-column: 3;
+        justify-self: start;
     }
 }
 
@@ -466,6 +654,7 @@ footer {
             <li><a href="schedule.html">Schedule</a></li>
             <li><a href="rules.html">Rules</a></li>
             <li><a href="meetingnotes.html">Meeting Notes</a></li>
+            <li><a href="events.html">Events &amp; Fundraisers</a></li>
             <li><a href="administrators.html">Admin</a></li>
             <li><a href="about.html">About</a></li>
         </ul>
@@ -476,24 +665,36 @@ footer {
     <main>
         <section class="card">
             <h2>Weekly Game Calendar</h2>
-            <div class="calendar-controls">
-                <button id="prev-week" type="button">Previous Week</button>
-                <h3 id="week-label">Week Range</h3>
-                <button id="next-week" type="button">Next Week</button>
+            <!-- View toggle -->
+            <div class="view-toggle">
+                <button class="view-toggle-btn active" data-view="week" type="button">Week View</button>
+                <button class="view-toggle-btn" data-view="park" type="button">By Park</button>
             </div>
-            <div id="division-filter" class="division-filter">
-                <button type="button" class="filter-btn active" data-division="ALL">All Divisions</button>
-                <button type="button" class="filter-btn" data-division="A">Division A</button>
-                <button type="button" class="filter-btn" data-division="B">Division B</button>
-                <button type="button" class="filter-btn" data-division="C">Division C</button>
-                <button type="button" class="filter-btn" data-division="D">Division D</button>
-            </div>
-            <div id="week-grid" class="week-grid"></div>
 
-            <div class="day-panel">
-                <h3 id="selected-day-label">Selected Day Games</h3>
-                <ul id="selected-day-games"></ul>
+            <!-- Week calendar region -->
+            <div id="week-calendar-region">
+                <div class="calendar-controls">
+                    <button id="prev-week" type="button">Previous Week</button>
+                    <h3 id="week-label">Week Range</h3>
+                    <button id="next-week" type="button">Next Week</button>
+                </div>
+                <div id="division-filter" class="division-filter">
+                    <button type="button" class="filter-btn active" data-division="ALL">All Divisions</button>
+                    <button type="button" class="filter-btn" data-division="A">Division A</button>
+                    <button type="button" class="filter-btn" data-division="B">Division B</button>
+                    <button type="button" class="filter-btn" data-division="C">Division C</button>
+                    <button type="button" class="filter-btn" data-division="D">Division D</button>
+                    <button type="button" class="filter-btn" data-division="E">Division E</button>
+                </div>
+                <div id="week-grid" class="week-grid"></div>
+                <div class="day-panel">
+                    <h3 id="selected-day-label">Selected Day Games</h3>
+                    <ul id="selected-day-games"></ul>
+                </div>
             </div>
+
+            <!-- Park view region (hidden until toggled) -->
+            <div id="park-view" class="park-view"></div>
         </section>
 
         <section class="card management-grid">
@@ -506,7 +707,14 @@ footer {
 
                 <form id="schedule-form">
                     <input id="game-date" type="date" required>
-                    <input id="game-time" type="time" required>
+                    <select id="game-time" required>
+                        <option value="">Select Time Slot</option>
+                        <option value="08:00">08:00</option>
+                        <option value="09:30">09:30</option>
+                        <option value="11:00">11:00</option>
+                        <option value="12:30">12:30</option>
+                        <option value="14:00">14:00</option>
+                    </select>
                     <select id="game-park" required>
                         <option value="">Select Park</option>
                         <option value="Stevenson Park">Stevenson Park</option>
@@ -527,8 +735,16 @@ footer {
                     <select id="game-team2" required disabled>
                         <option value="">Select Team 2</option>
                     </select>
+                    <select id="game-status">
+                        <option value="scheduled">On Schedule</option>
+                        <option value="postponed">Postponed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
                     <button id="save-schedule-btn" type="submit">Save Scheduled Game</button>
                 </form>
+                <p class="admin-status" style="margin-top:10px;">
+                    Manual scheduling rules: Thursday/Sunday only, fixed time slots, one game per field/time slot, max 5 games per field/day.
+                </p>
 
                 <div class="generator-panel">
                     <h4>Random Schedule Generator</h4>
@@ -564,24 +780,88 @@ footer {
                 <ul id="scores-list"></ul>
             </div>
         </section>
+
+        <!-- PRACTICE & SCRIMMAGE SCHEDULE -->
+        <section class="practice-section">
+            <div class="practice-header">
+                <h3>&#9918; Practice &amp; Scrimmage Schedule</h3>
+            </div>
+            <div class="practice-body">
+                <p id="practice-admin-status">Admin sign-in required to manage practice games.</p>
+                <button id="practice-refresh-admin" type="button" style="background:#12324A;color:white;border:none;border-radius:6px;padding:7px 14px;cursor:pointer;font-family:inherit;font-size:13px;margin-bottom:14px;">Refresh Admin Access</button>
+                <div class="practice-layout">
+                    <div>
+                        <h4 style="margin:0 0 10px;color:#12324A;font-family:'Oswald','Barlow Condensed',sans-serif;text-transform:uppercase;">Schedule Practice Game</h4>
+                        <form id="practice-form">
+                            <input id="practice-date" type="date" required>
+                            <input id="practice-time" type="time" required>
+                            <select id="practice-park" required>
+                                <option value="">Select Park</option>
+                                <option value="Stevenson Park">Stevenson Park</option>
+                                <option value="Dolphin Park">Dolphin Park</option>
+                                <option value="Calas Park">Calas Park</option>
+                                <option value="Veterans Park">Veterans Park</option>
+                            </select>
+                            <select id="practice-div1">
+                                <option value="">Team 1 Division</option>
+                                <option value="A">Division A</option>
+                                <option value="B">Division B</option>
+                                <option value="C">Division C</option>
+                                <option value="D">Division D</option>
+                                <option value="E">Division E</option>
+                            </select>
+                            <select id="practice-team1" required disabled>
+                                <option value="">Select Team 1</option>
+                            </select>
+                            <select id="practice-div2">
+                                <option value="">Team 2 Division</option>
+                                <option value="A">Division A</option>
+                                <option value="B">Division B</option>
+                                <option value="C">Division C</option>
+                                <option value="D">Division D</option>
+                                <option value="E">Division E</option>
+                            </select>
+                            <select id="practice-team2" required disabled>
+                                <option value="">Select Team 2</option>
+                            </select>
+                            <select id="practice-status">
+                                <option value="scheduled">On Schedule</option>
+                                <option value="postponed">Postponed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                            <button id="save-practice-btn" type="submit">Save Practice Game</button>
+                        </form>
+                    </div>
+                    <div>
+                        <h4 style="margin:0 0 10px;color:#12324A;font-family:'Oswald','Barlow Condensed',sans-serif;text-transform:uppercase;">Practice Games</h4>
+                        <ul id="practice-games-list"></ul>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 </div>
 
 <footer>
-    <p>ï¿½ Latino Men's Softball League (LAMSL)</p>
+    <p>&copy; Latino Men's Softball League (LAMSL)</p>
 </footer>
 
 <script>
-const USERS_KEY = 'lamslUsersV1';
-const SESSION_KEY = 'lamslSessionV1';
-const SCHEDULE_KEY = 'lamslWeeklyScheduleV3';
+const USERS_KEY      = 'lamslUsersV1';
+const SESSION_KEY    = 'lamslSessionV1';
+const SCHEDULE_KEY   = 'lamslWeeklyScheduleV3';
+const PRACTICE_KEY   = 'lamslPracticeScheduleV1';
 
 const teamsByDivision = {
     A: ['Titans', 'Doom Squad', 'Legends', 'Nasty Boyz', 'Black Sox', 'White Sox', 'Dodgers'],
     B: ['Charros', 'Toxic', 'Primos', 'Demons', 'Cubs', 'Borrachos'],
     C: ['Diablos', 'Brewers', 'Coyotes', 'Goodfellas', 'Bandits', 'Salvajes', 'Balls Out', 'Orioles'],
-    D: ['Viejones', 'No Chance', 'Los Pericos', 'Wild Hogz', 'Strokes', 'Dawgz', 'Xolos', 'Desvelados']
+    D: ['Viejones', 'No Chance', 'Los Pericos', 'Wild Hogz', 'Strokes', 'Dawgz', 'Xolos', 'Desvelados'],
+    E: []
 };
+const ALL_PARKS = ['Stevenson Park', 'Dolphin Park', 'Calas Park', 'Veterans Park'];
+const GAME_TIME_SLOTS = ['08:00', '09:30', '11:00', '12:30', '14:00'];
+const ALLOWED_GAME_DAYS = [4, 0]; // Thursday, Sunday
 
 const weekLabel = document.getElementById('week-label');
 const weekGrid = document.getElementById('week-grid');
@@ -602,6 +882,7 @@ const gameParkSelect = document.getElementById('game-park');
 const gameDivisionSelect = document.getElementById('game-division');
 const gameTeam1Select = document.getElementById('game-team1');
 const gameTeam2Select = document.getElementById('game-team2');
+const gameStatusSelect = document.getElementById('game-status');
 const saveScheduleButton = document.getElementById('save-schedule-btn');
 const generatorDivisionSelect = document.getElementById('generator-division');
 const generatorStartDateInput = document.getElementById('generator-start-date');
@@ -683,9 +964,9 @@ function ensureDefaults() {
     const existing = readJson(SCHEDULE_KEY, null);
     if (!existing) {
         const seed = [
-            { id: 'game-1', date: '2026-03-30', time: '08:00', park: 'Stevenson Park', division: 'C', team1: 'Diablos', team2: 'Brewers', score1: '', score2: '' },
-            { id: 'game-2', date: '2026-03-31', time: '10:00', park: 'Dolphin Park', division: 'B', team1: 'Charros', team2: 'Primos', score1: '', score2: '' },
-            { id: 'game-3', date: '2026-04-02', time: '11:50', park: 'Veterans Park', division: 'A', team1: 'Titans', team2: 'Legends', score1: '', score2: '' }
+            { id: 'game-1', date: '2026-03-30', time: '08:00', park: 'Stevenson Park', division: 'C', team1: 'Diablos', team2: 'Brewers', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-2', date: '2026-03-31', time: '10:00', park: 'Dolphin Park', division: 'B', team1: 'Charros', team2: 'Primos', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-3', date: '2026-04-02', time: '11:50', park: 'Veterans Park', division: 'A', team1: 'Titans', team2: 'Legends', score1: '', score2: '', status: 'scheduled' }
         ];
         writeJson(SCHEDULE_KEY, seed);
     }
@@ -750,7 +1031,20 @@ function buildRoundRobinRounds(teams) {
     return rounds;
 }
 
-function generateDivisionGames(division, startDateKey) {
+function isAllowedGameDay(date) {
+    return ALLOWED_GAME_DAYS.includes(date.getDay());
+}
+
+function getNextAllowedGameDate(date) {
+    const next = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    next.setHours(0, 0, 0, 0);
+    while (!isAllowedGameDay(next)) {
+        next.setDate(next.getDate() + 1);
+    }
+    return next;
+}
+
+function generateDivisionMatchups(division) {
     const teams = teamsByDivision[division] || [];
     if (teams.length < 2) {
         return [];
@@ -764,35 +1058,98 @@ function generateDivisionGames(division, startDateKey) {
     );
 
     const allRounds = [...firstCycle, ...secondCycle];
-    const parks = ['Stevenson Park', 'Dolphin Park', 'Calas Park', 'Veterans Park'];
-    const times = ['08:00', '10:00', '11:50', '13:40'];
-    const firstDate = parseDateKey(startDateKey);
     const generated = [];
-    let parkIndex = 0;
     let sequence = 0;
 
-    allRounds.forEach((roundPairs, roundIndex) => {
-        const baseDate = addDays(firstDate, roundIndex * 7);
-        roundPairs.forEach((pair, matchIndex) => {
-            const dayOffset = Math.floor(matchIndex / times.length);
-            const slotIndex = matchIndex % times.length;
-            const gameDate = addDays(baseDate, dayOffset);
-
+    allRounds.forEach(roundPairs => {
+        roundPairs.forEach(pair => {
             generated.push({
-                id: `game-${division}-${Date.now()}-${sequence}`,
-                date: formatDateKey(gameDate),
-                time: times[slotIndex],
-                park: parks[parkIndex % parks.length],
                 division,
                 team1: pair[0],
                 team2: pair[1],
-                score1: '',
-                score2: ''
+                sequence
             });
-
-            parkIndex += 1;
             sequence += 1;
         });
+    });
+
+    return generated;
+}
+
+function validateSchedulingConstraints({ date, time, park, existingGames, ignoreId }) {
+    const day = parseDateKey(date).getDay();
+    if (!ALLOWED_GAME_DAYS.includes(day)) {
+        return 'Games can only be scheduled on Thursdays and Sundays.';
+    }
+
+    if (!GAME_TIME_SLOTS.includes(time)) {
+        return `Invalid time slot. Allowed slots: ${GAME_TIME_SLOTS.join(', ')}.`;
+    }
+
+    const comparable = existingGames.filter(game => game.id !== ignoreId);
+    const duplicateSlot = comparable.some(game =>
+        game.date === date && game.park === park && game.time === time
+    );
+    if (duplicateSlot) {
+        return 'This field/time slot is already occupied. Choose another slot.';
+    }
+
+    const sameParkDayCount = comparable.filter(game =>
+        game.date === date && game.park === park
+    ).length;
+    if (sameParkDayCount >= GAME_TIME_SLOTS.length) {
+        return `This field already has ${GAME_TIME_SLOTS.length} games for the day.`;
+    }
+
+    return '';
+}
+
+function allocateGamesToSlots(matchups, startDateKey, existingSchedule) {
+    const generated = [];
+    const occupied = new Set(
+        existingSchedule.map(game => `${game.date}|${game.park}|${game.time}`)
+    );
+
+    let currentDate = getNextAllowedGameDate(parseDateKey(startDateKey));
+
+    matchups.forEach((match, index) => {
+        let assigned = false;
+
+        while (!assigned) {
+            const dateKey = formatDateKey(currentDate);
+
+            for (const park of ALL_PARKS) {
+                for (const time of GAME_TIME_SLOTS) {
+                    const slotKey = `${dateKey}|${park}|${time}`;
+                    if (occupied.has(slotKey)) {
+                        continue;
+                    }
+
+                    occupied.add(slotKey);
+                    generated.push({
+                        id: `game-${match.division}-${Date.now()}-${index}`,
+                        date: dateKey,
+                        time,
+                        park,
+                        division: match.division,
+                        team1: match.team1,
+                        team2: match.team2,
+                        status: 'scheduled',
+                        score1: '',
+                        score2: ''
+                    });
+                    assigned = true;
+                    break;
+                }
+                if (assigned) {
+                    break;
+                }
+            }
+
+            if (!assigned) {
+                currentDate = getNextAllowedGameDate(addDays(currentDate, 1));
+            }
+        }
     });
 
     return generated;
@@ -852,11 +1209,13 @@ function renderWeekCalendar() {
         } else {
             dayGames.forEach(game => {
                 const pill = document.createElement('div');
-                pill.className = 'game-pill';
+                const status = game.status || 'scheduled';
+                pill.className = `game-pill status-${status}`;
                 const scoreText = game.score1 !== '' && game.score2 !== ''
                     ? `<div class="score">Score: ${game.team1} ${game.score1} - ${game.score2} ${game.team2}</div>`
                     : '';
-                pill.innerHTML = `<div>${game.time} | ${game.park}</div><div>Div ${game.division}: ${game.team1} vs ${game.team2}</div>${scoreText}`;
+                const badge = status !== 'scheduled' ? ` <span class="status-badge status-${status}">${status}</span>` : '';
+                pill.innerHTML = `<div>${game.time} | ${game.park}${badge}</div><div>Div ${game.division}: ${game.team1} vs ${game.team2}</div>${scoreText}`;
                 dayCard.appendChild(pill);
             });
         }
@@ -888,10 +1247,13 @@ function renderSelectedDayGames() {
 
     games.forEach(game => {
         const li = document.createElement('li');
+        const status = game.status || 'scheduled';
         const scoreText = game.score1 !== '' && game.score2 !== ''
             ? ` | Score: ${game.score1}-${game.score2}`
             : '';
-        li.textContent = `${game.time} | ${game.park} | Div ${game.division} | ${game.team1} vs ${game.team2}${scoreText}`;
+        const gameInfo = document.createElement('div');
+        gameInfo.innerHTML = `${game.time} | ${game.park} | Div ${game.division} | ${game.team1} vs ${game.team2}${scoreText} <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+        li.appendChild(gameInfo);
 
         if (isAdminUnlocked) {
             const actions = document.createElement('div');
@@ -910,6 +1272,7 @@ function renderSelectedDayGames() {
                 populateTeamsForDivision();
                 gameTeam1Select.value = game.team1;
                 gameTeam2Select.value = game.team2;
+                if (gameStatusSelect) gameStatusSelect.value = status;
                 saveScheduleButton.textContent = 'Update Scheduled Game';
             });
 
@@ -924,10 +1287,28 @@ function renderSelectedDayGames() {
                 renderSelectedDayGames();
                 renderScheduledGameOptions();
                 renderScoresList();
+                renderParkView();
+            });
+
+            // Status change selector
+            const statusSel = document.createElement('select');
+            statusSel.className = 'practice-status-select';
+            [['scheduled','On Schedule'],['postponed','Postponed'],['cancelled','Cancelled']].forEach(([val, label]) => {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.textContent = label;
+                if (val === status) opt.selected = true;
+                statusSel.appendChild(opt);
+            });
+            statusSel.addEventListener('change', () => {
+                const all = getSchedule();
+                const g = all.find(item => item.id === game.id);
+                if (g) { g.status = statusSel.value; saveSchedule(all); renderWeekCalendar(); renderSelectedDayGames(); renderParkView(); }
             });
 
             actions.appendChild(editBtn);
             actions.appendChild(deleteBtn);
+            actions.appendChild(statusSel);
             li.appendChild(actions);
         }
 
@@ -1023,7 +1404,20 @@ scheduleForm.addEventListener('submit', event => {
         return;
     }
 
+    const gameStatus = gameStatusSelect ? (gameStatusSelect.value || 'scheduled') : 'scheduled';
     const games = getSchedule();
+    const constraintError = validateSchedulingConstraints({
+        date,
+        time,
+        park,
+        existingGames: games,
+        ignoreId: editingGameId
+    });
+    if (constraintError) {
+        adminStatus.textContent = constraintError;
+        return;
+    }
+
     if (editingGameId) {
         const existing = games.find(game => game.id === editingGameId);
         if (existing) {
@@ -1033,6 +1427,7 @@ scheduleForm.addEventListener('submit', event => {
             existing.division = division;
             existing.team1 = team1;
             existing.team2 = team2;
+            existing.status = gameStatus;
         }
     } else {
         games.push({
@@ -1043,6 +1438,7 @@ scheduleForm.addEventListener('submit', event => {
             division,
             team1,
             team2,
+            status: gameStatus,
             score1: '',
             score2: ''
         });
@@ -1054,6 +1450,7 @@ scheduleForm.addEventListener('submit', event => {
     editingGameId = null;
     saveScheduleButton.textContent = 'Save Scheduled Game';
     scheduleForm.reset();
+    if (gameStatusSelect) gameStatusSelect.value = 'scheduled';
     gameTeam1Select.disabled = true;
     gameTeam2Select.disabled = true;
     gameDateInput.value = formatDateKey(selectedDate);
@@ -1062,6 +1459,7 @@ scheduleForm.addEventListener('submit', event => {
     renderSelectedDayGames();
     renderScheduledGameOptions();
     renderScoresList();
+    renderParkView();
     adminStatus.textContent = 'Schedule updated successfully.';
 });
 
@@ -1149,52 +1547,281 @@ generatorRunButton.addEventListener('click', () => {
         schedule = schedule.filter(game => !divisionsToGenerate.includes(game.division));
     }
 
-    let generatedCount = 0;
+    const allMatchups = [];
     divisionsToGenerate.forEach(division => {
-        const generated = generateDivisionGames(division, startDateKey);
-        generatedCount += generated.length;
-        schedule.push(...generated);
+        allMatchups.push(...generateDivisionMatchups(division));
     });
 
+    const generatedGames = allocateGamesToSlots(allMatchups, startDateKey, schedule);
+    const generatedCount = generatedGames.length;
+    schedule.push(...generatedGames);
+
     saveSchedule(schedule);
-    selectedDate = parseDateKey(startDateKey);
+    selectedDate = getNextAllowedGameDate(parseDateKey(startDateKey));
     currentWeekStart = getWeekStart(selectedDate);
-    gameDateInput.value = startDateKey;
+    gameDateInput.value = formatDateKey(selectedDate);
 
     renderWeekCalendar();
     renderSelectedDayGames();
     renderScheduledGameOptions();
     renderScoresList();
+    renderParkView();
 
-    adminStatus.textContent = `Generated ${generatedCount} games. Each matchup appears at most twice, with repeats only after all first-cycle matchups are complete.`;
+    adminStatus.textContent = `Generated ${generatedCount} games on Thursdays/Sundays only. Each field can host up to ${GAME_TIME_SLOTS.length} games per day, with no duplicate field/time slot assignments.`;
 });
 
 refreshAdminButton.addEventListener('click', () => {
     applyAdminPermissions();
+    applyPracticeAdminAccess();
     renderWeekCalendar();
     renderSelectedDayGames();
     renderScheduledGameOptions();
     renderScoresList();
+    renderParkView();
+    renderPracticeGames();
 });
 
 window.addEventListener('storage', event => {
     if (event.key === SESSION_KEY) {
         applyAdminPermissions();
+        applyPracticeAdminAccess();
         renderWeekCalendar();
         renderSelectedDayGames();
         renderScheduledGameOptions();
         renderScoresList();
+        renderParkView();
+        renderPracticeGames();
     }
 });
 
+// ===== PARK VIEW =====
+function renderParkView() {
+    const parkView = document.getElementById('park-view');
+    if (!parkView || !parkView.classList.contains('visible')) return;
+    const today = formatDateKey(new Date());
+    const games = getFilteredGames(getSchedule()).filter(g => g.date >= today);
+    parkView.innerHTML = '';
+    ALL_PARKS.forEach(park => {
+        const parkGames = games.filter(g => g.park === park)
+            .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+        const section = document.createElement('div');
+        section.className = 'park-section';
+        const header = document.createElement('h4');
+        header.textContent = park;
+        section.appendChild(header);
+        const list = document.createElement('div');
+        list.className = 'park-games-list';
+        if (!parkGames.length) {
+            list.innerHTML = '<div class="park-empty">No upcoming games scheduled.</div>';
+        } else {
+            parkGames.forEach(game => {
+                const status = game.status || 'scheduled';
+                const scoreText = game.score1 !== '' && game.score2 !== ''
+                    ? `<span class="park-col-score">${game.score1}-${game.score2}</span>` : '';
+                const row = document.createElement('div');
+                row.className = 'park-game-row';
+                row.innerHTML = `
+                    <span class="park-col-meta">${game.date}</span>
+                    <span class="park-col-meta">${game.time}</span>
+                    <span class="park-col-matchup"><span class="park-col-division">Div ${game.division}</span> ${game.team1} vs ${game.team2}${scoreText}</span>
+                    <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>
+                `;
+                list.appendChild(row);
+            });
+        }
+        section.appendChild(list);
+        parkView.appendChild(section);
+    });
+}
+
+// ===== VIEW TOGGLE =====
+document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const weekRegion = document.getElementById('week-calendar-region');
+        const parkRegion = document.getElementById('park-view');
+        if (btn.dataset.view === 'park') {
+            if (weekRegion) weekRegion.style.display = 'none';
+            if (parkRegion) { parkRegion.classList.add('visible'); renderParkView(); }
+        } else {
+            if (weekRegion) weekRegion.style.display = '';
+            if (parkRegion) parkRegion.classList.remove('visible');
+        }
+    });
+});
+
+// ===== PRACTICE SCHEDULE =====
+let editingPracticeId = null;
+const practiceForm         = document.getElementById('practice-form');
+const practiceDateInput    = document.getElementById('practice-date');
+const practiceTimeInput    = document.getElementById('practice-time');
+const practiceParkSelect   = document.getElementById('practice-park');
+const practiceDiv1Select   = document.getElementById('practice-div1');
+const practiceTeam1Select  = document.getElementById('practice-team1');
+const practiceDiv2Select   = document.getElementById('practice-div2');
+const practiceTeam2Select  = document.getElementById('practice-team2');
+const practiceStatusSelect = document.getElementById('practice-status');
+const savePracticeButton   = document.getElementById('save-practice-btn');
+const practiceGamesList    = document.getElementById('practice-games-list');
+const practiceAdminStatus  = document.getElementById('practice-admin-status');
+const practiceRefreshAdmin = document.getElementById('practice-refresh-admin');
+
+function getPracticeSchedule() {
+    return readJson(PRACTICE_KEY, []).sort((a, b) =>
+        `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`)
+    );
+}
+function savePracticeSchedule(games) { writeJson(PRACTICE_KEY, games); }
+
+function populatePracticeTeamsForDiv(divSelect, teamSelect) {
+    const div = divSelect.value;
+    const teams = div ? (teamsByDivision[div] || []) : [];
+    teamSelect.innerHTML = '<option value="">Select Team</option>';
+    teams.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t; opt.textContent = t;
+        teamSelect.appendChild(opt);
+    });
+    teamSelect.disabled = !teams.length;
+}
+
+function renderPracticeGames() {
+    if (!practiceGamesList) return;
+    const games = getPracticeSchedule();
+    practiceGamesList.innerHTML = '';
+    if (!games.length) {
+        const li = document.createElement('li');
+        li.textContent = 'No practice games scheduled yet.';
+        practiceGamesList.appendChild(li);
+        return;
+    }
+    games.forEach(game => {
+        const li = document.createElement('li');
+        const status = game.status || 'scheduled';
+        const info = document.createElement('div');
+        info.innerHTML = `<strong>${game.date}</strong> ${game.time} | ${game.park}<br>Div ${game.div1}: <strong>${game.team1}</strong> vs Div ${game.div2}: <strong>${game.team2}</strong> <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+        li.appendChild(info);
+        if (isAdminUnlocked) {
+            const actions = document.createElement('div');
+            actions.className = 'action-buttons';
+            const editBtn = document.createElement('button');
+            editBtn.type = 'button'; editBtn.className = 'edit-btn'; editBtn.textContent = 'Edit';
+            editBtn.addEventListener('click', () => {
+                editingPracticeId = game.id;
+                practiceDateInput.value = game.date;
+                practiceTimeInput.value = game.time;
+                practiceParkSelect.value = game.park;
+                practiceDiv1Select.value = game.div1;
+                populatePracticeTeamsForDiv(practiceDiv1Select, practiceTeam1Select);
+                practiceTeam1Select.value = game.team1;
+                practiceDiv2Select.value = game.div2;
+                populatePracticeTeamsForDiv(practiceDiv2Select, practiceTeam2Select);
+                practiceTeam2Select.value = game.team2;
+                practiceStatusSelect.value = status;
+                savePracticeButton.textContent = 'Update Practice Game';
+            });
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button'; deleteBtn.className = 'delete-btn'; deleteBtn.textContent = 'Delete';
+            deleteBtn.addEventListener('click', () => {
+                savePracticeSchedule(getPracticeSchedule().filter(g => g.id !== game.id));
+                renderPracticeGames();
+            });
+            const statusSel = document.createElement('select');
+            statusSel.className = 'practice-status-select';
+            [['scheduled','On Schedule'],['postponed','Postponed'],['cancelled','Cancelled']].forEach(([val, label]) => {
+                const opt = document.createElement('option');
+                opt.value = val; opt.textContent = label;
+                if (val === status) opt.selected = true;
+                statusSel.appendChild(opt);
+            });
+            statusSel.addEventListener('change', () => {
+                const all = getPracticeSchedule();
+                const g = all.find(item => item.id === game.id);
+                if (g) { g.status = statusSel.value; savePracticeSchedule(all); renderPracticeGames(); }
+            });
+            actions.appendChild(editBtn);
+            actions.appendChild(deleteBtn);
+            actions.appendChild(statusSel);
+            li.appendChild(actions);
+        }
+        practiceGamesList.appendChild(li);
+    });
+}
+
+function applyPracticeAdminAccess() {
+    const isAdmin = isAdminLoggedIn();
+    if (practiceAdminStatus) {
+        practiceAdminStatus.textContent = isAdmin
+            ? 'Admin access confirmed. Schedule practice and scrimmage games below.'
+            : 'Admin sign-in required to manage practice games. Sign in at administrators.html.';
+    }
+    if (practiceForm) {
+        Array.from(practiceForm.elements).forEach(el => { el.disabled = !isAdmin; });
+        if (isAdmin) {
+            practiceTeam1Select.disabled = !practiceDiv1Select.value;
+            practiceTeam2Select.disabled = !practiceDiv2Select.value;
+        }
+    }
+}
+
+if (practiceDiv1Select) practiceDiv1Select.addEventListener('change', () => populatePracticeTeamsForDiv(practiceDiv1Select, practiceTeam1Select));
+if (practiceDiv2Select) practiceDiv2Select.addEventListener('change', () => populatePracticeTeamsForDiv(practiceDiv2Select, practiceTeam2Select));
+
+if (practiceForm) {
+    practiceForm.addEventListener('submit', event => {
+        event.preventDefault();
+        if (!isAdminLoggedIn()) { practiceAdminStatus.textContent = 'Sign in as admin first.'; return; }
+        const date   = practiceDateInput.value;
+        const time   = practiceTimeInput.value;
+        const park   = practiceParkSelect.value;
+        const div1   = practiceDiv1Select.value;
+        const team1  = practiceTeam1Select.value;
+        const div2   = practiceDiv2Select.value;
+        const team2  = practiceTeam2Select.value;
+        const status = practiceStatusSelect.value || 'scheduled';
+        if (!date || !time || !park || !div1 || !team1 || !div2 || !team2) {
+            practiceAdminStatus.textContent = 'Please complete all fields.'; return;
+        }
+        const games = getPracticeSchedule();
+        if (editingPracticeId) {
+            const g = games.find(item => item.id === editingPracticeId);
+            if (g) { g.date = date; g.time = time; g.park = park; g.div1 = div1; g.team1 = team1; g.div2 = div2; g.team2 = team2; g.status = status; }
+            editingPracticeId = null;
+        } else {
+            games.push({ id: `practice-${Date.now()}`, date, time, park, div1, team1, div2, team2, status });
+        }
+        savePracticeSchedule(games);
+        practiceForm.reset();
+        practiceTeam1Select.disabled = true;
+        practiceTeam2Select.disabled = true;
+        savePracticeButton.textContent = 'Save Practice Game';
+        practiceDateInput.value = formatDateKey(new Date());
+        renderPracticeGames();
+        practiceAdminStatus.textContent = 'Practice game saved successfully.';
+    });
+}
+
+if (practiceRefreshAdmin) {
+    practiceRefreshAdmin.addEventListener('click', () => {
+        applyAdminPermissions();
+        applyPracticeAdminAccess();
+        renderPracticeGames();
+    });
+}
+
 ensureDefaults();
 applyAdminPermissions();
+applyPracticeAdminAccess();
 gameDateInput.value = formatDateKey(selectedDate);
 generatorStartDateInput.value = formatDateKey(selectedDate);
+if (document.getElementById('practice-date')) document.getElementById('practice-date').value = formatDateKey(selectedDate);
 renderWeekCalendar();
 renderSelectedDayGames();
 renderScheduledGameOptions();
 renderScoresList();
+renderParkView();
+renderPracticeGames();
 </script>
 </body>
 </html>

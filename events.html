@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<title>LAMSL - Events &amp; Fundraisers</title>
+
+<style>
+
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
+    background-color: #eef4ea;
+    background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    background-size: min(60vw, 540px);
+    background-attachment: fixed;
+    color: #333;
+}
+
+h1, h2, h3 {
+    margin-bottom: 10px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* ===== BANNER ===== */
+.banner {
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-content: start;
+    column-gap: 8px;
+    text-align: center;
+}
+
+.banner h1 {
+    font-size: 42px;
+    font-style: italic;
+    margin: 10px 0;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0;
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+.banner h1,
+.banner .subtitle,
+.banner .tagline {
+    grid-column: 2;
+}
+
+.banner-logo {
+    width: 240px;
+    height: 160px;
+    object-fit: contain;
+    margin: 0;
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    justify-self: center;
+}
+
+/* ===== NAVBAR ===== */
+header {
+    background: #12324A;
+    color: white;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar li {
+    margin-left: 20px;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    color: #F1D27A;
+}
+
+.navbar a.active-tab {
+    color: #F1D27A;
+    border-bottom: 2px solid #C86A2F;
+    padding-bottom: 2px;
+}
+
+/* ===== CARDS ===== */
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+/* ===== TWO-COLUMN LAYOUT ===== */
+.ef-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* ===== ANNOUNCEMENTS ===== */
+.announcements-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.announcements-panel .section-title {
+    background: #12324A;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px 10px 0 0;
+    margin: 0;
+    font-size: 18px;
+}
+
+.announcements-list {
+    background: white;
+    border-radius: 0 0 10px 10px;
+    padding: 16px 20px;
+    min-height: 200px;
+}
+
+.announcement-item {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 12px 0;
+}
+
+.announcement-item:last-child {
+    border-bottom: none;
+}
+
+.announcement-item h3 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    color: #12324A;
+}
+
+.announcement-item .ann-date {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 6px;
+}
+
+.announcement-item p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.archive-btn {
+    background: #7f1313;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+.archive-btn:hover {
+    background: #5e0d0d;
+}
+
+/* ===== ADMIN ANNOUNCEMENT FORM ===== */
+.ef-admin-panel {
+    background: #f0f6ff;
+    border: 1px solid #c5d0da;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-top: 16px;
+}
+
+.ef-admin-panel h3 {
+    margin-top: 0;
+    color: #12324A;
+    font-size: 15px;
+}
+
+.ef-ann-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+}
+
+.ef-ann-form input,
+.ef-ann-form textarea {
+    padding: 8px;
+    border: 1px solid #c5d0da;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.ef-ann-form textarea {
+    grid-column: span 2;
+    min-height: 80px;
+    resize: vertical;
+}
+
+.ef-ann-form button {
+    grid-column: span 2;
+    background: #12324A;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 9px 12px;
+    cursor: pointer;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
+}
+
+.ef-ann-form button:hover {
+    background: #C86A2F;
+}
+
+/* ===== SLIDESHOW PANEL ===== */
+.slideshow-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.slideshow-panel .section-title {
+    background: #12324A;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px 10px 0 0;
+    margin: 0;
+    font-size: 18px;
+}
+
+.slideshow-box {
+    background: #12324A;
+    border-radius: 0 0 10px 10px;
+    padding: 16px;
+}
+
+.slides {
+    position: relative;
+    height: 340px;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.slide {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.slide.active {
+    display: block;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.slide-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1e4060;
+    border-radius: 8px;
+    color: #8ab0c8;
+    font-size: 14px;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.indicators {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.indicator {
+    cursor: pointer;
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: #4a7a9b;
+    border-radius: 50%;
+    margin: 0 4px;
+    transition: background 0.3s;
+}
+
+.indicator.active {
+    background: #C86A2F;
+}
+
+.slideshow-nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.slideshow-nav button {
+    background: #1e4060;
+    color: white;
+    border: 2px solid #C86A2F;
+    padding: 6px 16px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.slideshow-nav button:hover {
+    background: #C86A2F;
+    color: #12324A;
+}
+
+/* ===== UPLOAD FORM ===== */
+.upload-form {
+    margin-top: 14px;
+    background: white;
+    padding: 14px;
+    border-radius: 8px;
+}
+
+.upload-form h3 {
+    margin-top: 0;
+    color: #12324A;
+    font-size: 15px;
+}
+
+.upload-form input[type="file"] {
+    display: block;
+    margin: 8px 0;
+}
+
+.upload-form button {
+    background: #12324A;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.upload-form button:hover {
+    background: #C86A2F;
+}
+
+.upload-form p {
+    font-size: 12px;
+    color: #666;
+    margin: 8px 0 0;
+}
+
+/* ===== FOOTER ===== */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #12324A;
+    color: white;
+    margin-top: 20px;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .ef-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .navbar li {
+        margin: 10px 0;
+    }
+
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+        row-gap: 6px;
+    }
+
+    .banner-logo {
+        width: 150px;
+        height: 120px;
+        grid-column: 1;
+        grid-row: auto;
+        justify-self: center;
+    }
+
+    .banner h1 {
+        grid-column: 1;
+        font-size: 28px;
+    }
+
+    .banner .subtitle {
+        grid-column: 1;
+        font-size: 14px;
+    }
+
+    .banner .tagline {
+        grid-column: 1;
+        font-size: 12px;
+    }
+
+    .ef-ann-form {
+        grid-template-columns: 1fr;
+    }
+
+    .ef-ann-form textarea,
+    .ef-ann-form button {
+        grid-column: span 1;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- BANNER -->
+<div class="banner">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
+    <h1>Latin American Men's Softball League</h1>
+    <div class="subtitle">Established 1976</div>
+    <div class="tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+</div>
+
+<!-- HEADER -->
+<header>
+    <div class="navbar container">
+        <h2 style="margin: 0; font-size: 20px;">LAMSL</h2>
+        <ul>
+            <li><a href="LASML.html">Home</a></li>
+            <li><a href="standings.html">Standings</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="meetingnotes.html">Meeting Notes</a></li>
+            <li><a href="events.html" class="active-tab">Events &amp; Fundraisers</a></li>
+            <li><a href="administrators.html">Admin</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</header>
+
+<!-- MAIN -->
+<div class="container">
+    <h2 style="margin-top: 24px; color: #12324A;">Events &amp; Fundraisers</h2>
+
+    <div class="ef-layout">
+
+        <!-- LEFT: ANNOUNCEMENTS -->
+        <div class="announcements-panel">
+            <h2 class="section-title">Announcements</h2>
+            <div class="announcements-list">
+                <div id="ef-announcements-list"></div>
+            </div>
+
+            <!-- Admin: Add Announcement (shown only when admin is signed in) -->
+            <div class="ef-admin-panel" id="ef-admin-panel" style="display:none;">
+                <h3>Post New Announcement</h3>
+                <form class="ef-ann-form" id="ef-ann-form">
+                    <input id="ef-ann-title" type="text" placeholder="Announcement title" required>
+                    <input id="ef-ann-date" type="date" required>
+                    <textarea id="ef-ann-message" placeholder="Announcement details" required></textarea>
+                    <button type="submit">Publish Announcement</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- RIGHT: SLIDESHOW -->
+        <div class="slideshow-panel">
+            <h2 class="section-title">Photo Gallery</h2>
+            <div class="slideshow-box">
+                <div class="slides" id="ef-slides">
+                    <div class="slide-placeholder" id="ef-placeholder">
+                        No photos uploaded yet. Photos will appear here once an administrator uploads them.
+                    </div>
+                </div>
+                <div class="indicators" id="ef-indicators"></div>
+                <div class="slideshow-nav">
+                    <button id="ef-prev">&lt;</button>
+                    <button id="ef-next">&gt;</button>
+                </div>
+                <div class="upload-form">
+                    <h3>Upload Event Photo</h3>
+                    <form id="ef-upload-form" enctype="multipart/form-data">
+                        <input id="ef-photo-input" type="file" name="photo" accept="image/*" required>
+                        <button type="submit">Upload</button>
+                    </form>
+                    <p id="ef-upload-status"><em>Admin sign-in required to upload photos.</em></p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; Latino Men's Softball League (LAMSL)</p>
+</footer>
+
+<script>
+const USERS_KEY      = 'lamslUsersV1';
+const SESSION_KEY    = 'lamslSessionV1';
+const EF_ANN_KEY     = 'lamslEFAnnouncementsV1';
+
+let efCurrentSlide = 0;
+const efSlidesContainer  = document.getElementById('ef-slides');
+const efIndicators       = document.getElementById('ef-indicators');
+const efPlaceholder      = document.getElementById('ef-placeholder');
+const efAnnList          = document.getElementById('ef-announcements-list');
+const efAdminPanel       = document.getElementById('ef-admin-panel');
+const efAnnForm          = document.getElementById('ef-ann-form');
+const efAnnTitle         = document.getElementById('ef-ann-title');
+const efAnnDate          = document.getElementById('ef-ann-date');
+const efAnnMessage       = document.getElementById('ef-ann-message');
+const efUploadForm       = document.getElementById('ef-upload-form');
+const efPhotoInput       = document.getElementById('ef-photo-input');
+const efUploadStatus     = document.getElementById('ef-upload-status');
+const efPrevBtn          = document.getElementById('ef-prev');
+const efNextBtn          = document.getElementById('ef-next');
+
+// ===== STORAGE HELPERS =====
+function readJson(key, fallback) {
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+    } catch (e) {
+        return fallback;
+    }
+}
+
+function writeJson(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+}
+
+function isAdminLoggedIn() {
+    const session = readJson(SESSION_KEY, null);
+    return !!(session && session.role === 'admin');
+}
+
+// ===== ANNOUNCEMENTS =====
+function renderEFAnnouncements() {
+    const announcements = readJson(EF_ANN_KEY, []);
+    efAnnList.innerHTML = '';
+
+    if (!announcements.length) {
+        efAnnList.innerHTML = '<p style="color:#888;font-size:14px;">No announcements posted yet.</p>';
+        return;
+    }
+
+    announcements.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'announcement-item';
+
+        const isAdmin = isAdminLoggedIn();
+        div.innerHTML = `
+            <h3>${item.title}</h3>
+            <div class="ann-date">${item.date}</div>
+            <p>${item.message}</p>
+            ${isAdmin ? `<button class="archive-btn" data-id="${item.id}">Archive</button>` : ''}
+        `;
+        efAnnList.appendChild(div);
+    });
+
+    // Wire up archive buttons
+    efAnnList.querySelectorAll('.archive-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (!isAdminLoggedIn()) return;
+            const id = btn.dataset.id;
+            const remaining = readJson(EF_ANN_KEY, []).filter(a => a.id !== id);
+            writeJson(EF_ANN_KEY, remaining);
+            renderEFAnnouncements();
+        });
+    });
+}
+
+function applyAdminPanel() {
+    const isAdmin = isAdminLoggedIn();
+    efAdminPanel.style.display = isAdmin ? 'block' : 'none';
+
+    efPhotoInput.disabled = !isAdmin;
+    efUploadForm.querySelector('button[type="submit"]').disabled = !isAdmin;
+    efUploadStatus.textContent = isAdmin
+        ? 'Uploads are saved to the EF_Images folder.'
+        : 'Admin sign-in required to upload photos. Sign in at administrators.html.';
+}
+
+efAnnForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!isAdminLoggedIn()) return;
+
+    const announcements = readJson(EF_ANN_KEY, []);
+    announcements.unshift({
+        id: `ef-ann-${Date.now()}`,
+        title: efAnnTitle.value.trim(),
+        date: efAnnDate.value,
+        message: efAnnMessage.value.trim()
+    });
+    writeJson(EF_ANN_KEY, announcements);
+    efAnnForm.reset();
+    renderEFAnnouncements();
+});
+
+// ===== SLIDESHOW =====
+function getEFSlides() {
+    return Array.from(efSlidesContainer.querySelectorAll('.slide'));
+}
+
+function showEFSlide(index) {
+    const slides = getEFSlides();
+    const inds   = Array.from(efIndicators.querySelectorAll('.indicator'));
+    if (!slides.length) return;
+
+    const safeIndex = ((index % slides.length) + slides.length) % slides.length;
+    slides.forEach(s => s.classList.remove('active'));
+    inds.forEach(i => i.classList.remove('active'));
+    slides[safeIndex].classList.add('active');
+    if (inds[safeIndex]) inds[safeIndex].classList.add('active');
+    efCurrentSlide = safeIndex;
+}
+
+function addEFSlide(imagePath) {
+    // Remove placeholder if present
+    if (efPlaceholder && efPlaceholder.parentNode === efSlidesContainer) {
+        efSlidesContainer.removeChild(efPlaceholder);
+    }
+
+    const slides = getEFSlides();
+    const newIndex = slides.length;
+
+    const slide = document.createElement('div');
+    slide.className = 'slide';
+    const img = document.createElement('img');
+    img.src = imagePath;
+    img.alt = `Event Photo ${newIndex + 1}`;
+    slide.appendChild(img);
+    efSlidesContainer.appendChild(slide);
+
+    const ind = document.createElement('span');
+    ind.className = 'indicator';
+    ind.dataset.slide = String(newIndex);
+    efIndicators.appendChild(ind);
+
+    showEFSlide(newIndex);
+}
+
+function buildEFSlides(imagePaths) {
+    // Clear existing slides
+    Array.from(efSlidesContainer.querySelectorAll('.slide')).forEach(s => s.remove());
+    efIndicators.innerHTML = '';
+
+    if (!imagePaths.length) {
+        if (!efSlidesContainer.contains(efPlaceholder)) {
+            efSlidesContainer.appendChild(efPlaceholder);
+        }
+        return;
+    }
+
+    // Ensure placeholder is hidden
+    if (efSlidesContainer.contains(efPlaceholder)) {
+        efSlidesContainer.removeChild(efPlaceholder);
+    }
+
+    imagePaths.forEach((path, index) => {
+        const slide = document.createElement('div');
+        slide.className = index === 0 ? 'slide active' : 'slide';
+        const img = document.createElement('img');
+        img.src = path;
+        img.alt = `Event Photo ${index + 1}`;
+        slide.appendChild(img);
+        efSlidesContainer.appendChild(slide);
+
+        const ind = document.createElement('span');
+        ind.className = index === 0 ? 'indicator active' : 'indicator';
+        ind.dataset.slide = String(index);
+        efIndicators.appendChild(ind);
+    });
+
+    efCurrentSlide = 0;
+}
+
+async function loadEFImages() {
+    try {
+        const response = await fetch('/ef-images');
+        const result = await response.json();
+        if (!response.ok || !result.success || !Array.isArray(result.images)) return;
+        const paths = result.images.map(name => `EF_Images/${name}`);
+        if (paths.length) buildEFSlides(paths);
+    } catch (e) {
+        // Server may not be running; silently keep placeholder.
+    }
+}
+
+efPrevBtn.addEventListener('click', () => {
+    const slides = getEFSlides();
+    if (!slides.length) return;
+    showEFSlide((efCurrentSlide - 1 + slides.length) % slides.length);
+});
+
+efNextBtn.addEventListener('click', () => {
+    const slides = getEFSlides();
+    if (!slides.length) return;
+    showEFSlide((efCurrentSlide + 1) % slides.length);
+});
+
+efIndicators.addEventListener('click', (event) => {
+    if (!event.target.classList.contains('indicator')) return;
+    const index = Number(event.target.dataset.slide);
+    if (!Number.isNaN(index)) showEFSlide(index);
+});
+
+efUploadForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!isAdminLoggedIn()) {
+        efUploadStatus.textContent = 'Admin sign-in required for uploads.';
+        return;
+    }
+    if (!efPhotoInput.files || !efPhotoInput.files[0]) {
+        efUploadStatus.textContent = 'Please choose an image file.';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('photo', efPhotoInput.files[0]);
+    efUploadStatus.textContent = 'Uploading image...';
+
+    try {
+        const response = await fetch('/upload-ef', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Upload failed.');
+        }
+        const cacheBustedPath = `${result.path}?t=${Date.now()}`;
+        addEFSlide(cacheBustedPath);
+        efUploadForm.reset();
+        efUploadStatus.textContent = `Uploaded: ${result.filename}`;
+    } catch (e) {
+        efUploadStatus.textContent = `Upload failed: ${e.message}`;
+    }
+});
+
+// ===== INIT =====
+renderEFAnnouncements();
+applyAdminPanel();
+loadEFImages();
+
+// Autoplay every 15 seconds
+setInterval(() => {
+    const slides = getEFSlides();
+    if (slides.length > 1) showEFSlide((efCurrentSlide + 1) % slides.length);
+}, 15000);
+</script>
+
+</body>
+</html>

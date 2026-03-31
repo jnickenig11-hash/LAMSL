@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 
 BASE_DIR = Path(__file__).resolve().parent
 SLIDESHOW_DIR = BASE_DIR / "SlideshowImages"
+EF_IMAGES_DIR = BASE_DIR / "EF_Images"
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 
 
@@ -50,10 +51,14 @@ class UploadHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self) -> None:
         parsed = urlparse(self.path)
-        if parsed.path != "/upload":
+        if parsed.path == "/upload":
+            self._handle_upload(SLIDESHOW_DIR, "SlideshowImages")
+        elif parsed.path == "/upload-ef":
+            self._handle_upload(EF_IMAGES_DIR, "EF_Images")
+        else:
             self._json_response(404, {"success": False, "error": "Not found"})
-            return
 
+    def _handle_upload(self, target_dir: Path, url_prefix: str) -> None:
         content_type = self.headers.get("Content-Type", "")
         content_length = int(self.headers.get("Content-Length", "0"))
 
@@ -83,8 +88,8 @@ class UploadHandler(SimpleHTTPRequestHandler):
         raw_filename = photo_part.get_filename() or "upload.jpg"
         safe_name = _safe_filename(raw_filename)
 
-        SLIDESHOW_DIR.mkdir(parents=True, exist_ok=True)
-        destination = _unique_path(SLIDESHOW_DIR, safe_name)
+        target_dir.mkdir(parents=True, exist_ok=True)
+        destination = _unique_path(target_dir, safe_name)
         payload = photo_part.get_payload(decode=True) or b""
         destination.write_bytes(payload)
 
@@ -93,7 +98,7 @@ class UploadHandler(SimpleHTTPRequestHandler):
             {
                 "success": True,
                 "filename": destination.name,
-                "path": f"SlideshowImages/{destination.name}",
+                "path": f"{url_prefix}/{destination.name}",
             },
         )
 
@@ -104,6 +109,16 @@ class UploadHandler(SimpleHTTPRequestHandler):
             images = [
                 item.name
                 for item in sorted(SLIDESHOW_DIR.iterdir())
+                if item.is_file() and item.suffix.lower() in ALLOWED_EXTENSIONS
+            ]
+            self._json_response(200, {"success": True, "images": images})
+            return
+
+        if parsed.path == "/ef-images":
+            EF_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+            images = [
+                item.name
+                for item in sorted(EF_IMAGES_DIR.iterdir())
                 if item.is_file() and item.suffix.lower() in ALLOWED_EXTENSIONS
             ]
             self._json_response(200, {"success": True, "images": images})

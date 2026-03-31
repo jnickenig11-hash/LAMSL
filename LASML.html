@@ -427,6 +427,7 @@ footer {
             <li><a href="schedule.html">Schedule</a></li>
             <li><a href="rules.html">Rules</a></li>
             <li><a href="meetingnotes.html">Meeting Notes</a></li>
+            <li><a href="events.html">Events &amp; Fundraisers</a></li>
             <li><a href="administrators.html">Admin</a></li>
             <li><a href="about.html">About</a></li>
         </ul>
@@ -439,7 +440,35 @@ footer {
     <!-- MAIN CONTENT -->
     <main>
 
-        <!-- NEXT MEETING -->
+        <!-- SLIDESHOW -->
+        <section class="slideshow">
+            <div class="slides">
+                <div class="slide active"><img src="SlideshowImages/DonArturoPadillaLAMSLPresident2.jpg" alt="Game Photo 1"></div>
+                <div class="slide"><img src="SlideshowImages/DonArturoPadillaLAMSLPresident2 (1).jpg" alt="Game Photo 2"></div>
+                <div class="slide"><img src="SlideshowImages/LAMSLClubhouseCartoonPic.jpg" alt="Game Photo 3"></div>
+                <div class="slide"><img src="SlideshowImages/400dpiMariachiConservatory.jpg" alt="Game Photo 4"></div>
+                <div class="slide"><img src="SlideshowImages/Estylo Hair Salon2.jpg" alt="Game Photo 5"></div>
+            </div>
+            <div class="indicators">
+                <span class="indicator active" data-slide="0"></span>
+                <span class="indicator" data-slide="1"></span>
+                <span class="indicator" data-slide="2"></span>
+                <span class="indicator" data-slide="3"></span>
+                <span class="indicator" data-slide="4"></span>
+            </div>
+            <button class="prev">&lt;</button>
+            <button class="next">&gt;</button>
+            <div class="upload-form">
+                <h3>Upload New Photo</h3>
+                <form id="slideshow-upload-form" enctype="multipart/form-data">
+                    <input id="slideshow-photo-input" type="file" name="photo" accept="image/*" required>
+                    <button type="submit">Upload</button>
+                </form>
+                <p id="upload-status"><em>Uploads are saved to the SlideshowImages folder.</em></p>
+            </div>
+        </section>
+
+        <!-- ANNOUNCEMENTS -->
         <section class="card">
             <h2>LAMSL Announcements</h2>
             <p>League updates are managed in the Administrators section.</p>
@@ -463,34 +492,6 @@ footer {
                 <button class="payment-save-btn" onclick="savePaymentLinks()">Save Payment Links</button>
             </div>
         </section>
-
-<!-- SLIDESHOW -->
-<section class="slideshow">
-    <div class="slides">
-        <div class="slide active"><img src="SlideshowImages/DonArturoPadillaLAMSLPresident2.jpg" alt="Game Photo 1"></div>
-        <div class="slide"><img src="SlideshowImages/DonArturoPadillaLAMSLPresident2 (1).jpg" alt="Game Photo 2"></div>
-        <div class="slide"><img src="SlideshowImages/LAMSLClubhouseCartoonPic.jpg" alt="Game Photo 3"></div>
-        <div class="slide"><img src="SlideshowImages/400dpiMariachiConservatory.jpg" alt="Game Photo 4"></div>
-        <div class="slide"><img src="SlideshowImages/Estylo Hair Salon2.jpg" alt="Game Photo 5"></div>
-    </div>
-    <div class="indicators">
-        <span class="indicator active" data-slide="0"></span>
-        <span class="indicator" data-slide="1"></span>
-        <span class="indicator" data-slide="2"></span>
-        <span class="indicator" data-slide="3"></span>
-        <span class="indicator" data-slide="4"></span>
-    </div>
-    <button class="prev">&lt;</button>
-    <button class="next">&gt;</button>
-    <div class="upload-form">
-        <h3>Upload New Photo</h3>
-        <form id="slideshow-upload-form" enctype="multipart/form-data">
-            <input id="slideshow-photo-input" type="file" name="photo" accept="image/*" required>
-            <button type="submit">Upload</button>
-        </form>
-        <p id="upload-status"><em>Uploads are saved to the SlideshowImages folder.</em></p>
-    </div>
-</section>
 
     </main>
 

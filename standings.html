@@ -288,6 +288,7 @@ footer {
             <li><a href="schedule.html">Schedule</a></li>
             <li><a href="rules.html">Rules</a></li>
             <li><a href="events.html">Events &amp; Fundraisers</a></li>
+            <li><a href="hallofchampions.html">Hall of Champions</a></li>
             <li><a href="administrators.html">Admin</a></li>
             <li><a href="about.html">About</a></li>
         </ul>
@@ -307,7 +308,6 @@ footer {
             <button class="tab-btn"        role="tab" aria-selected="false" data-src="divisionC.html">Division C</button>
             <button class="tab-btn"        role="tab" aria-selected="false" data-src="divisionD.html">Division D</button>
             <button class="tab-btn"        role="tab" aria-selected="false" data-src="divisionE.html">Division E</button>
-            <button class="tab-btn"        role="tab" aria-selected="false" data-src="hallofchampions.html">Hall of Champions</button>
             <button class="tab-btn"        role="tab" aria-selected="false" data-src="winter1.html">Winter Div 1</button>
             <button class="tab-btn"        role="tab" aria-selected="false" data-src="winter2.html">Winter Div 2</button>
         </div>
@@ -330,9 +330,23 @@ const tabButtons   = document.querySelectorAll('.tab-btn');
 const contentPanel = document.getElementById('tab-content-panel');
 const cache        = {};
 
+function runEmbeddedScripts(scripts) {
+    scripts.forEach(scriptContent => {
+        if (!scriptContent.trim()) {
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.textContent = scriptContent;
+        document.body.appendChild(script);
+        script.remove();
+    });
+}
+
 async function loadTab(src) {
     if (cache[src]) {
-        contentPanel.innerHTML = cache[src];
+        contentPanel.innerHTML = cache[src].content;
+        runEmbeddedScripts(cache[src].scripts);
         return;
     }
     contentPanel.innerHTML = '<div class="tab-loading">Loading&hellip;</div>';
@@ -343,8 +357,10 @@ async function loadTab(src) {
         const doc  = new DOMParser().parseFromString(html, 'text/html');
         const main = doc.querySelector('main');
         const content = main ? main.innerHTML : '<p>Content unavailable.</p>';
-        cache[src] = content;
+        const scripts = Array.from(doc.querySelectorAll('script')).map(script => script.textContent || '');
+        cache[src] = { content, scripts };
         contentPanel.innerHTML = content;
+        runEmbeddedScripts(scripts);
     } catch (e) {
         contentPanel.innerHTML = `<p style="color:#c00;">Could not load content: ${e.message}</p>`;
     }

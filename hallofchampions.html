@@ -124,20 +124,32 @@ header {
 }
 
 .year-index button {
-    background: #e8ecf1;
-    color: #12324A;
-    border: none;
+    background: linear-gradient(135deg, #12324A, #1a4666);
+    color: white;
+    border: 1px solid #0d2538;
     border-radius: 999px;
-    padding: 6px 10px;
+    padding: 7px 13px;
     font-family: inherit;
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
+    letter-spacing: 0.4px;
+    box-shadow: 0 2px 6px rgba(18, 50, 74, 0.14);
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .year-index button:hover {
-    background: #12324A;
-    color: white;
+    background: linear-gradient(135deg, #C86A2F, #df9358);
+    color: #12324A;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(200, 106, 47, 0.22);
+}
+
+.year-index button.active {
+    background: linear-gradient(135deg, #C86A2F, #e0a257);
+    color: #12324A;
+    border-color: #a75220;
+    box-shadow: 0 4px 12px rgba(200, 106, 47, 0.26);
 }
 
 .year-header {
@@ -298,6 +310,7 @@ footer {
             <li><a href="schedule.html">Schedule</a></li>
             <li><a href="rules.html">Rules</a></li>
             <li><a href="events.html">Events &amp; Fundraisers</a></li>
+            <li><a href="hallofchampions.html">Hall of Champions</a></li>
             <li><a href="administrators.html">Admin</a></li>
             <li><a href="about.html">About</a></li>
         </ul>
@@ -662,6 +675,14 @@ const CHAMPIONS_DATA = [
 const yearIndex = document.getElementById('year-index');
 const yearsWrap = document.getElementById('years-wrap');
 
+function setActiveYearButton(activeYear) {
+    const yearButtons = yearIndex.querySelectorAll('button');
+
+    yearButtons.forEach(button => {
+        button.classList.toggle('active', button.textContent === String(activeYear));
+    });
+}
+
 function renderPage() {
     yearIndex.innerHTML = '';
     yearsWrap.innerHTML = '';
@@ -714,6 +735,10 @@ function renderPage() {
             yearHeader.classList.toggle('active', !isActive);
             yearContent.classList.toggle('active', !isActive);
             yearHeader.querySelector('span:last-child').textContent = isActive ? '+' : '-';
+
+            if (!isActive) {
+                setActiveYearButton(yearEntry.year);
+            }
         });
 
         yearsWrap.appendChild(yearHeader);
@@ -726,10 +751,17 @@ function renderPage() {
             yearHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
             if (!yearHeader.classList.contains('active')) {
                 yearHeader.click();
+                return;
             }
+
+            setActiveYearButton(yearEntry.year);
         });
         yearIndex.appendChild(jumpBtn);
     });
+
+    if (CHAMPIONS_DATA.length > 0) {
+        setActiveYearButton(CHAMPIONS_DATA[0].year);
+    }
 }
 
 renderPage();

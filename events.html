@@ -725,6 +725,7 @@ const efAnnMessage       = document.getElementById('ef-ann-message');
 const efUploadForm       = document.getElementById('ef-upload-form');
 const efPhotoInput       = document.getElementById('ef-photo-input');
 const efUploadStatus     = document.getElementById('ef-upload-status');
+const efUploadButton     = efUploadForm.querySelector('button[type="submit"]');
 const efPrevBtn          = document.getElementById('ef-prev');
 const efNextBtn          = document.getElementById('ef-next');
 
@@ -788,11 +789,23 @@ function applyAdminPanel() {
     efAdminPanel.style.display = isAdmin ? 'block' : 'none';
 
     efPhotoInput.disabled = !isAdmin;
-    efUploadForm.querySelector('button[type="submit"]').disabled = !isAdmin;
+    efUploadButton.disabled = !isAdmin;
     efUploadStatus.textContent = isAdmin
         ? 'Uploads are saved to the EF_Images folder.'
         : 'Admin sign-in required to upload photos. Sign in at administrators.html.';
 }
+
+window.addEventListener('storage', (event) => {
+    if (event.key === SESSION_KEY) {
+        applyAdminPanel();
+        renderEFAnnouncements();
+    }
+});
+
+window.addEventListener('focus', () => {
+    applyAdminPanel();
+    renderEFAnnouncements();
+});
 
 efAnnForm.addEventListener('submit', (event) => {
     event.preventDefault();

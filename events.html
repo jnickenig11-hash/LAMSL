@@ -97,17 +97,20 @@ header {
 .navbar ul {
     list-style: none;
     display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
     padding: 0;
     margin: 0;
 }
 
 .navbar li {
-    margin-left: 20px;
+    margin: 0;
 }
 
 .navbar a {
     color: white;
     text-decoration: none;
+    display: block;
 }
 
 .navbar a:hover {
@@ -321,7 +324,10 @@ header {
 }
 
 .indicators {
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-top: 10px;
 }
 
@@ -332,7 +338,7 @@ header {
     height: 10px;
     background: #4a7a9b;
     border-radius: 50%;
-    margin: 0 4px;
+    margin: 0;
     transition: background 0.3s;
 }
 
@@ -382,6 +388,11 @@ header {
     margin: 8px 0;
 }
 
+.upload-form form {
+    display: grid;
+    gap: 10px;
+}
+
 .upload-form button {
     background: #12324A;
     color: white;
@@ -416,28 +427,47 @@ footer {
 
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
+    body {
+        background-attachment: scroll;
+    }
+
+    .container {
+        padding: 16px;
+    }
+
     .ef-layout {
         grid-template-columns: 1fr;
     }
 
     .navbar {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
+        gap: 12px;
+        padding: 14px 16px;
     }
 
     .navbar ul {
         flex-direction: column;
         width: 100%;
+        gap: 4px;
     }
 
     .navbar li {
-        margin: 10px 0;
+        margin: 0;
+    }
+
+    .navbar a {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 6px;
+        box-sizing: border-box;
     }
 
     .banner {
         grid-template-columns: 1fr;
         text-align: center;
         row-gap: 6px;
+        padding: 20px 16px;
     }
 
     .banner-logo {
@@ -450,7 +480,8 @@ footer {
 
     .banner h1 {
         grid-column: 1;
-        font-size: 28px;
+        font-size: clamp(24px, 8vw, 30px);
+        line-height: 1.1;
     }
 
     .banner .subtitle {
@@ -461,6 +492,27 @@ footer {
     .banner .tagline {
         grid-column: 1;
         font-size: 12px;
+    }
+
+    .slides {
+        height: min(62vw, 260px);
+    }
+
+    .slideshow-nav {
+        gap: 8px;
+        flex-direction: column;
+    }
+
+    .slideshow-nav button,
+    .upload-form button {
+        width: 100%;
+    }
+
+    .announcements-list,
+    .slideshow-box,
+    .ef-admin-panel,
+    .upload-form {
+        padding: 14px;
     }
 
     .ef-ann-form {

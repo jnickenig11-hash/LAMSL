@@ -51,21 +51,30 @@ header {
 .navbar ul {
     list-style: none;
     display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
     padding: 0;
     margin: 0;
 }
 
 .navbar li {
-    margin-left: 20px;
+    margin: 0;
 }
 
 .navbar a {
     color: white;
     text-decoration: none;
+    display: block;
 }
 
 .navbar a:hover {
     color: #F1D27A;
+}
+
+.navbar a.active-tab {
+    color: #F1D27A;
+    border-bottom: 2px solid #C86A2F;
+    padding-bottom: 2px;
 }
 
 /* ===== BANNER ===== */
@@ -171,6 +180,10 @@ header {
     line-height: 1.6;
 }
 
+.rule-content a {
+    overflow-wrap: anywhere;
+}
+
 footer {
     text-align: center;
     padding: 20px;
@@ -181,24 +194,43 @@ footer {
 
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
+    body {
+        background-attachment: scroll;
+    }
+
+    .container {
+        padding: 16px;
+    }
+
     .navbar {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
+        gap: 12px;
+        padding: 14px 16px;
     }
 
     .navbar ul {
         flex-direction: column;
         width: 100%;
+        gap: 4px;
     }
 
     .navbar li {
-        margin: 10px 0;
+        margin: 0;
+    }
+
+    .navbar a {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 6px;
+        box-sizing: border-box;
     }
 
     .banner {
         grid-template-columns: 1fr;
         text-align: center;
         row-gap: 6px;
+        padding: 20px 16px;
     }
 
     .banner-logo {
@@ -211,7 +243,8 @@ footer {
 
     .banner h1 {
         grid-column: 1;
-        font-size: 28px;
+        font-size: clamp(24px, 8vw, 30px);
+        line-height: 1.1;
     }
 
     .banner .subtitle {
@@ -222,6 +255,26 @@ footer {
     .banner .tagline {
         grid-column: 1;
         font-size: 12px;
+    }
+
+    .rule-header {
+        padding: 12px 14px;
+        font-size: 16px;
+        line-height: 1.3;
+    }
+
+    .rule-toggle {
+        margin-left: 12px;
+        flex: 0 0 auto;
+    }
+
+    .rule-content {
+        padding: 16px;
+    }
+
+    .rule-content p,
+    .rule-content li {
+        font-size: 14px;
     }
 }
 
@@ -246,7 +299,7 @@ footer {
             <li><a href="LASML.html">Home</a></li>
             <li><a href="standings.html">Standings</a></li>
             <li><a href="schedule.html">Schedule</a></li>
-            <li><a href="rules.html">Rules</a></li>
+            <li><a href="rules.html" class="active-tab">Rules</a></li>
             <li><a href="events.html">Events &amp; Fundraisers</a></li>
             <li><a href="hallofchampions.html">Hall of Champions</a></li>
             <li><a href="administrators.html">Admin</a></li>

@@ -51,21 +51,30 @@ header {
 .navbar ul {
     list-style: none;
     display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
     padding: 0;
     margin: 0;
 }
 
 .navbar li {
-    margin-left: 20px;
+    margin: 0;
 }
 
 .navbar a {
     color: white;
     text-decoration: none;
+    display: block;
 }
 
 .navbar a:hover {
     color: #F1D27A;
+}
+
+.navbar a.active-tab {
+    color: #F1D27A;
+    border-bottom: 2px solid #C86A2F;
+    padding-bottom: 2px;
 }
 
 /* ===== CARDS ===== */
@@ -87,18 +96,55 @@ footer {
 
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
+    body {
+        background-attachment: scroll;
+    }
+
+    .container {
+        padding: 16px;
+    }
+
     .navbar {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
+        gap: 12px;
+        padding: 14px 16px;
     }
 
     .navbar ul {
         flex-direction: column;
         width: 100%;
+        gap: 4px;
     }
 
     .navbar li {
-        margin: 10px 0;
+        margin: 0;
+    }
+
+    .navbar a {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 6px;
+        box-sizing: border-box;
+    }
+
+    main {
+        overflow-x: auto;
+    }
+
+    .card {
+        padding: 16px;
+    }
+
+    table {
+        display: block;
+        min-width: 480px;
+    }
+
+    th,
+    td {
+        white-space: nowrap;
+        font-size: 13px;
     }
 }
 
@@ -113,7 +159,7 @@ footer {
         <h2>LAMSL</h2>
         <ul>
             <li><a href="LASML.html">Home</a></li>
-            <li><a href="standings.html">Standings</a></li>
+            <li><a href="standings.html" class="active-tab">Standings</a></li>
             <li><a href="schedule.html">Schedule</a></li>
             <li><a href="rules.html">Rules</a></li>
             <li><a href="events.html">Events &amp; Fundraisers</a></li>

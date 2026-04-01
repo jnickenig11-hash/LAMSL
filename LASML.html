@@ -350,6 +350,30 @@ header {
     margin-bottom: 20px;
 }
 
+.social-callout {
+    margin: 14px 0 0;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #fff3e8, #f6fbff);
+    border: 1px solid #e3d7cc;
+}
+
+.social-callout p {
+    margin: 0;
+    color: #304b64;
+    font-size: 15px;
+}
+
+.social-callout a {
+    color: #C86A2F;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.social-callout a:hover {
+    color: #12324A;
+}
+
 /* ===== ANNOUNCEMENT ===== */
 .highlight {
     color: red;
@@ -369,6 +393,65 @@ header {
 
 .sidebar .card {
     margin-bottom: 0;
+}
+
+.instagram-card {
+    background: linear-gradient(180deg, #fff7f1, #ffffff);
+    border: 1px solid #ecdccf;
+}
+
+.instagram-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 12px 0 14px;
+}
+
+.instagram-preview-grid a {
+    display: block;
+    border-radius: 10px;
+    overflow: hidden;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(18, 50, 74, 0.12);
+}
+
+.instagram-preview-grid a:first-child {
+    grid-column: span 2;
+}
+
+.instagram-preview-grid img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
+}
+
+.instagram-copy {
+    margin: 0 0 14px;
+    color: #304b64;
+    line-height: 1.5;
+}
+
+.instagram-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: #C86A2F;
+    color: white;
+    text-decoration: none;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    box-sizing: border-box;
+}
+
+.instagram-link:hover {
+    background: #12324A;
 }
 
 /* ===== FOOTER ===== */
@@ -510,6 +593,10 @@ footer {
         gap: 14px;
     }
 
+    .instagram-preview-grid {
+        gap: 8px;
+    }
+
     .payment-save-btn {
         grid-column: span 1;
         width: 100%;
@@ -618,20 +705,15 @@ footer {
             <p>Arturo Padilla, Sr.</p>
         </div>
 
-        <div class="card">
-            <h3>Clubhouse</h3>
-            <img src="Images/LAMSLClubhouseCartoonPic.jpg" alt="">
-            <p>Thursdayâ€“Saturday: 7pm<br>Sunday: 2pm</p>
-            <img src="Images/400dpiMariachiConservatory.jpg" alt="" style="margin-top: 10px;">
-            <p>Mariachi Conservatory</p>
-        </div>
-
-        <div class="card">
-            <h3>Advertisement</h3>
-            <img src="Images/Estylo Hair Salon2.jpg" alt="">
-            <p>Members receive 20% discount</p>
-            <img src="Images/RealEstateCard1.jpg" alt="" style="margin-top: 15px;">
-            <p>Contact for real estate services</p>
+        <div class="card instagram-card">
+            <h3>Instagram</h3>
+            <p class="instagram-copy">Follow <strong>@lamsl_league</strong> for league photos, event highlights, and game-day updates.</p>
+            <div class="instagram-preview-grid">
+                <a href="https://www.instagram.com/lamsl_league/" target="_blank" rel="noopener noreferrer" aria-label="Open LAMSL Instagram profile">
+                    <img src="Images/LAMSLClubhouseCartoonPic.jpg" alt="LAMSL Instagram preview showing clubhouse artwork.">
+                </a>
+            </div>
+            <a class="instagram-link" href="https://www.instagram.com/lamsl_league/" target="_blank" rel="noopener noreferrer">View IG: lamsl_league</a>
         </div>
 
     </aside>

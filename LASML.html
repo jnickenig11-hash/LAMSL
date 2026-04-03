@@ -22,7 +22,7 @@ body {
 }
 
 h1, h2, h3 {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     font-family: 'Oswald', 'Barlow Condensed', sans-serif;
     letter-spacing: 0.6px;
     text-transform: uppercase;
@@ -31,14 +31,14 @@ h1, h2, h3 {
 .container {
     max-width: 1200px;
     margin: auto;
-    padding: 20px;
+    padding: 16px;
 }
 
 /* ===== BANNER ===== */
 .banner {
     background: #12324A;
     color: white;
-    padding: 24px 20px;
+    padding: 18px 16px;
     border-bottom: 4px solid #C86A2F;
     display: grid;
     grid-template-columns: 240px minmax(0, 1fr);
@@ -49,17 +49,17 @@ h1, h2, h3 {
 }
 
 .banner h1 {
-    font-size: 42px;
+    font-size: 38px;
     font-style: italic;
-    margin: 10px 0;
+    margin: 8px 0;
     font-weight: 700;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .banner .subtitle {
-    font-size: 18px;
+    font-size: 16px;
     font-style: italic;
-    margin: 8px 0;
+    margin: 6px 0;
     font-weight: 400;
     letter-spacing: 1px;
 }
@@ -85,16 +85,16 @@ h1, h2, h3 {
 .slideshow {
     position: relative;
     max-width: 1200px;
-    margin: 20px auto;
+    margin: 0;
     background: #12324A;
     border-radius: 10px;
     overflow: hidden;
-    padding: 20px;
+    padding: 14px;
 }
 
 .slides {
     position: relative;
-    height: 400px;
+    height: 340px;
     overflow: hidden;
 }
 
@@ -116,6 +116,32 @@ h1, h2, h3 {
     height: 100%;
     object-fit: cover;
     border-radius: 8px;
+}
+
+.slide-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, rgba(18, 50, 74, 0), rgba(18, 50, 74, 0.88));
+    color: white;
+    font-size: 13px;
+    line-height: 1.35;
+    border-radius: 0 0 8px 8px;
+    box-sizing: border-box;
+}
+
+.slideshow-locked {
+    display: none;
+    padding: 28px 18px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #f3f6fa;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 .indicators {
@@ -169,10 +195,10 @@ h1, h2, h3 {
 }
 
 .upload-form {
-    margin-top: 20px;
+    margin-top: 12px;
     text-align: center;
     background: white;
-    padding: 15px;
+    padding: 12px;
     border-radius: 8px;
 }
 
@@ -188,6 +214,15 @@ h1, h2, h3 {
 
 .upload-form input[type="file"] {
     margin: 10px 0;
+}
+
+.upload-form input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #c9d2dc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: inherit;
 }
 
 .upload-form button {
@@ -215,8 +250,8 @@ h1, h2, h3 {
     border: 3px solid #C86A2F;
     border-radius: 10px;
     background: white;
-    padding: 20px;
-    margin-bottom: 20px;
+    padding: 14px;
+    margin-bottom: 12px;
 }
 .payment-section > h2 {
     color: #12324A;
@@ -229,8 +264,8 @@ h1, h2, h3 {
 .payment-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 14px;
+    gap: 8px;
+    margin-top: 10px;
 }
 .payment-link-btn {
     display: inline-flex;
@@ -239,10 +274,10 @@ h1, h2, h3 {
     background: #12324A;
     color: white;
     text-decoration: none;
-    padding: 10px 20px;
+    padding: 8px 12px;
     border-radius: 7px;
     font-family: 'Oswald', 'Barlow Condensed', sans-serif;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     letter-spacing: 0.5px;
     transition: background 0.2s;
@@ -251,13 +286,13 @@ h1, h2, h3 {
     background: #C86A2F;
 }
 .payment-edit-form {
-    margin-top: 16px;
+    margin-top: 12px;
     display: grid;
     grid-template-columns: 120px 1fr;
-    gap: 8px 12px;
+    gap: 6px 10px;
     align-items: center;
     border-top: 1px solid #ddd;
-    padding-top: 14px;
+    padding-top: 10px;
 }
 .payment-edit-form label {
     font-weight: 700;
@@ -279,7 +314,7 @@ h1, h2, h3 {
     color: white;
     border: none;
     border-radius: 7px;
-    padding: 9px 20px;
+    padding: 8px 14px;
     cursor: pointer;
     font-family: 'Oswald', 'Barlow Condensed', sans-serif;
     font-size: 15px;
@@ -304,6 +339,40 @@ header {
     align-items: center;
     gap: 20px;
     padding: 15px 20px;
+}
+
+.navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+    margin: 0;
+    font-size: 20px;
+}
+
+.navbar-brand-gem {
+    width: 24px;
+    height: 18px;
+    background:
+        linear-gradient(90deg, transparent 0 22%, rgba(255, 255, 255, 0.7) 22% 28%, transparent 28% 72%, rgba(94, 108, 122, 0.24) 72% 78%, transparent 78% 100%),
+        linear-gradient(180deg, #fbfdff 0%, #dfe5ec 34%, #b5c0cb 62%, #7c8a97 100%);
+    clip-path: polygon(24% 6%, 76% 6%, 100% 35%, 67% 100%, 33% 100%, 0% 35%);
+    border: 1px solid rgba(248, 251, 255, 0.78);
+    box-shadow: 0 0 0 1px rgba(86, 96, 108, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.82), inset 0 -1px 0 rgba(85, 96, 108, 0.4);
+    position: relative;
+    display: inline-block;
+    flex: 0 0 auto;
+}
+
+.navbar-brand-gem::after {
+    content: "";
+    position: absolute;
+    inset: 2px 4px 2px 4px;
+    clip-path: polygon(50% 0%, 80% 26%, 64% 100%, 36% 100%, 20% 26%);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.15)),
+        linear-gradient(90deg, transparent 0 46%, rgba(126, 138, 151, 0.82) 46% 54%, transparent 54% 100%);
+    opacity: 0.95;
+    pointer-events: none;
 }
 
 .navbar ul {
@@ -339,15 +408,182 @@ header {
 .main-layout {
     display: grid;
     grid-template-columns: 3fr 1fr;
-    gap: 20px;
+    gap: 14px;
+}
+
+/* ===== HOME GRID ===== */
+.home-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas:
+        "schedule announcements rightstack"
+        "slideshow slideshow rightstack";
+    gap: 14px;
+    align-items: start;
+}
+
+.home-region {
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.home-region h2,
+.home-region h3 {
+    margin-top: 0;
+}
+
+.region-schedule {
+    grid-area: schedule;
+}
+
+.region-announcements {
+    grid-area: announcements;
+}
+
+.region-payment {
+    grid-area: payment;
+}
+
+.region-founder {
+    grid-area: founder;
+}
+
+.region-instagram {
+    grid-area: instagram;
+}
+
+.region-rightstack {
+    grid-area: rightstack;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.region-rightstack > .home-region {
+    height: auto;
+}
+
+.region-rightstack .payment-section {
+    margin-bottom: 0;
+}
+
+.region-slideshow {
+    grid-area: slideshow;
+}
+
+.region-slideshow .slides {
+    height: 460px;
+}
+
+.mini-schedule-panel {
+    background: white;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.founder-region img + img {
+    margin-top: 8px;
+}
+
+.founder-region p {
+    margin: 8px 0 0;
+}
+
+.mini-schedule-panel > h3 {
+    color: #12324A;
+    font-size: 13px;
+    margin: 0 0 2px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.mini-schedule-date {
+    font-size: 12px;
+    color: #C86A2F;
+    font-weight: 700;
+    margin-bottom: 8px;
+    border-bottom: 2px solid #C86A2F;
+    padding-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mini-park-section {
+    margin-bottom: 8px;
+}
+
+.mini-park-name {
+    background: #12324A;
+    color: white;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+}
+
+.mini-game-row {
+    font-size: 11px;
+    padding: 3px 2px;
+    border-bottom: 1px solid #f0f0f0;
+    display: grid;
+    grid-template-columns: 58px 38px 1fr;
+    gap: 3px;
+    align-items: center;
+}
+
+.mini-time {
+    font-weight: 700;
+    color: #12324A;
+    white-space: nowrap;
+}
+
+.mini-div {
+    color: #888;
+    font-size: 10px;
+}
+
+.mini-teams {
+    color: #333;
+    font-size: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mini-schedule-empty {
+    font-size: 12px;
+    color: #888;
+    font-style: italic;
+    text-align: center;
+    margin: 16px 0 0;
+}
+
+.mini-schedule-link {
+    display: block;
+    text-align: center;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #C86A2F;
+    text-decoration: none;
+    font-weight: 600;
+    border-top: 1px solid #eee;
+    padding-top: 8px;
+}
+
+.mini-schedule-link:hover {
+    color: #12324A;
 }
 
 /* ===== CARDS ===== */
 .card {
     background: white;
-    padding: 20px;
+    padding: 14px;
     border-radius: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .social-callout {
@@ -388,7 +624,7 @@ header {
 
 .sidebar {
     display: grid;
-    gap: 16px;
+    gap: 12px;
 }
 
 .sidebar .card {
@@ -403,8 +639,8 @@ header {
 .instagram-preview-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    margin: 12px 0 14px;
+    gap: 8px;
+    margin: 10px 0 10px;
 }
 
 .instagram-preview-grid a {
@@ -428,7 +664,7 @@ header {
 }
 
 .instagram-copy {
-    margin: 0 0 14px;
+    margin: 0 0 10px;
     color: #304b64;
     line-height: 1.5;
 }
@@ -438,7 +674,7 @@ header {
     align-items: center;
     justify-content: center;
     width: 100%;
-    padding: 10px 14px;
+    padding: 8px 12px;
     border-radius: 999px;
     background: #C86A2F;
     color: white;
@@ -457,10 +693,10 @@ header {
 /* ===== FOOTER ===== */
 footer {
     text-align: center;
-    padding: 20px;
+    padding: 14px;
     background: #12324A;
     color: white;
-    margin-top: 20px;
+    margin-top: 12px;
 }
 
 /* ===== MOBILE ===== */
@@ -535,17 +771,17 @@ footer {
     .slideshow,
     .card,
     .payment-section {
-        padding: 16px;
+        padding: 12px;
     }
 
     .slideshow {
-        margin: 16px auto;
+        margin: 0;
         border-radius: 14px;
-        padding: 14px;
+        padding: 12px;
     }
 
     .slides {
-        height: min(62vw, 280px);
+        height: min(58vw, 250px);
     }
 
     .prev,
@@ -601,6 +837,16 @@ footer {
         grid-column: span 1;
         width: 100%;
     }
+
+    .home-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "schedule"
+            "announcements"
+            "rightstack"
+            "slideshow"
+            ;
+    }
 }
 
 </style>
@@ -619,7 +865,7 @@ footer {
 <!-- HEADER -->
 <header>
     <div class="navbar container">
-        <h2 style="margin: 0; font-size: 20px;">LAMSL</h2>
+        <h2 class="navbar-brand"><span class="navbar-brand-gem" aria-hidden="true"></span>LAMSL</h2>
         <ul>
             <li><a href="LASML.html" class="active-tab">Home</a></li>
             <li><a href="standings.html">Standings</a></li>
@@ -635,49 +881,24 @@ footer {
 </header>
 
 <!-- MAIN -->
-<div class="container main-layout">
+<div class="container home-grid">
 
-    <!-- MAIN CONTENT -->
-    <main>
+    <!-- TOP ROW: Upcoming Week Games | Announcements | Payment -->
+    <section class="card mini-schedule-panel home-region region-schedule">
+        <h3>&#9918; Upcoming Week Games</h3>
+        <div id="mini-schedule-content"><p class="mini-schedule-empty">Loading&hellip;</p></div>
+        <a class="mini-schedule-link" href="schedule.html">&#8594; Full Schedule</a>
+    </section>
 
-        <!-- SLIDESHOW -->
-        <section class="slideshow">
-            <div class="slides">
-                <div class="slide active"><img src="SlideshowImages/DonArturoPadillaLAMSLPresident2.jpg" alt="Game Photo 1"></div>
-                <div class="slide"><img src="SlideshowImages/DonArturoPadillaLAMSLPresident2 (1).jpg" alt="Game Photo 2"></div>
-                <div class="slide"><img src="SlideshowImages/LAMSLClubhouseCartoonPic.jpg" alt="Game Photo 3"></div>
-                <div class="slide"><img src="SlideshowImages/400dpiMariachiConservatory.jpg" alt="Game Photo 4"></div>
-                <div class="slide"><img src="SlideshowImages/Estylo Hair Salon2.jpg" alt="Game Photo 5"></div>
-            </div>
-            <div class="indicators">
-                <span class="indicator active" data-slide="0"></span>
-                <span class="indicator" data-slide="1"></span>
-                <span class="indicator" data-slide="2"></span>
-                <span class="indicator" data-slide="3"></span>
-                <span class="indicator" data-slide="4"></span>
-            </div>
-            <button class="prev">&lt;</button>
-            <button class="next">&gt;</button>
-            <div class="upload-form">
-                <h3>Upload New Photo</h3>
-                <form id="slideshow-upload-form" enctype="multipart/form-data">
-                    <input id="slideshow-photo-input" type="file" name="photo" accept="image/*" required>
-                    <button type="submit">Upload</button>
-                </form>
-                <p id="upload-status"><em>Uploads are saved to the SlideshowImages folder.</em></p>
-            </div>
-        </section>
+    <section class="card home-region region-announcements">
+        <h2>LAMSL Announcements</h2>
+        <p>League updates are managed in the Administrators section.</p>
+        <p><a href="Images/Non_Approved_Batlist_2024.pdf" target="_blank" rel="noopener noreferrer">Banned Bat List</a></p>
+        <div id="announcements-list"></div>
+    </section>
 
-        <!-- ANNOUNCEMENTS -->
-        <section class="card">
-            <h2>LAMSL Announcements</h2>
-            <p>League updates are managed in the Administrators section.</p>
-            <p><a href="Images/Non_Approved_Batlist_2024.pdf" target="_blank" rel="noopener noreferrer">Banned Bat List</a></p>
-            <div id="announcements-list"></div>
-        </section>
-
-        <!-- PAYMENT LINKS -->
-        <section class="payment-section">
+    <div class="home-region region-rightstack">
+        <section class="payment-section home-region region-payment">
             <h2>League Registration Fee &mdash; Click Link to Submit Payment</h2>
             <div class="payment-links" id="payment-links-display"></div>
             <div class="payment-edit-form" id="payment-edit-form" style="display:none;">
@@ -693,19 +914,14 @@ footer {
             </div>
         </section>
 
-    </main>
-
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-
-        <div class="card">
+        <section class="card home-region founder-region region-founder">
             <h3>Founder</h3>
             <img src="Images/DonArturoPadillaLAMSLPresident2.jpg" alt="">
-            <img src="Images/DonArturoPadillaLAMSLPresident2 (1).jpg" alt="" style="margin-top: 10px;">
+            <img src="Images/DonArturoPadillaLAMSLPresident2 (1).jpg" alt="">
             <p>Arturo Padilla, Sr.</p>
-        </div>
+        </section>
 
-        <div class="card instagram-card">
+        <section class="card instagram-card home-region region-instagram">
             <h3>Instagram</h3>
             <p class="instagram-copy">Follow <strong>@lamsl_league</strong> for league photos, event highlights, and game-day updates.</p>
             <div class="instagram-preview-grid">
@@ -714,9 +930,38 @@ footer {
                 </a>
             </div>
             <a class="instagram-link" href="https://www.instagram.com/lamsl_league/" target="_blank" rel="noopener noreferrer">View IG: lamsl_league</a>
-        </div>
+        </section>
+    </div>
 
-    </aside>
+    <!-- MIDDLE/BOTTOM: Slideshow spans left space, Founder and Instagram on right -->
+    <section class="slideshow home-region region-slideshow">
+        <div class="slides">
+            <div class="slide active"><img src="SlideshowImages/DonArturoPadillaLAMSLPresident2.jpg" alt="Game Photo 1"></div>
+            <div class="slide"><img src="SlideshowImages/DonArturoPadillaLAMSLPresident2 (1).jpg" alt="Game Photo 2"></div>
+            <div class="slide"><img src="SlideshowImages/LAMSLClubhouseCartoonPic.jpg" alt="Game Photo 3"></div>
+            <div class="slide"><img src="SlideshowImages/400dpiMariachiConservatory.jpg" alt="Game Photo 4"></div>
+            <div class="slide"><img src="SlideshowImages/Estylo Hair Salon2.jpg" alt="Game Photo 5"></div>
+        </div>
+        <div class="indicators">
+            <span class="indicator active" data-slide="0"></span>
+            <span class="indicator" data-slide="1"></span>
+            <span class="indicator" data-slide="2"></span>
+            <span class="indicator" data-slide="3"></span>
+            <span class="indicator" data-slide="4"></span>
+        </div>
+        <button class="prev">&lt;</button>
+        <button class="next">&gt;</button>
+        <div class="upload-form">
+            <h3>Upload New Photo</h3>
+            <form id="slideshow-upload-form" enctype="multipart/form-data">
+                <input id="slideshow-photo-input" type="file" name="photo" accept="image/*" required>
+                <input id="slideshow-caption-input" type="text" name="caption" maxlength="180" placeholder="Add photo caption">
+                <button type="submit">Upload</button>
+                <button id="remove-photo-btn" type="button">Remove Current Photo</button>
+            </form>
+            <p id="upload-status"><em>Uploads are saved to the SlideshowImages folder.</em></p>
+        </div>
+    </section>
 
 </div>
 
@@ -732,11 +977,17 @@ const ANNOUNCEMENTS_KEY = 'lamslAnnouncementsV1';
 const PAYMENT_KEY = 'lamslPaymentLinksV1';
 
 let currentSlide = 0;
+let slideshowImages = [];
 const indicatorsContainer = document.querySelector('.indicators');
 const slidesContainer = document.querySelector('.slides');
 const uploadForm = document.getElementById('slideshow-upload-form');
+const uploadPanel = uploadForm.closest('.upload-form');
 const uploadInput = document.getElementById('slideshow-photo-input');
+const uploadCaptionInput = document.getElementById('slideshow-caption-input');
+const removePhotoButton = document.getElementById('remove-photo-btn');
 const uploadStatus = document.getElementById('upload-status');
+const homeSlideshowPrev = document.querySelector('.prev');
+const homeSlideshowNext = document.querySelector('.next');
 const announcementsList = document.getElementById('announcements-list');
 const paymentLinksDisplay = document.getElementById('payment-links-display');
 const paymentEditForm = document.getElementById('payment-edit-form');
@@ -855,13 +1106,35 @@ function renderAnnouncements() {
     });
 }
 
+function createSlideElement(image) {
+    const slide = document.createElement('div');
+    slide.className = 'slide';
+
+    const img = document.createElement('img');
+    img.src = image.path;
+    img.alt = image.caption || image.name || 'Game Photo';
+    slide.appendChild(img);
+
+    if (image.caption) {
+        const caption = document.createElement('div');
+        caption.className = 'slide-caption';
+        caption.textContent = image.caption;
+        slide.appendChild(caption);
+    }
+
+    return slide;
+}
+
 function applyUploadPermissions() {
     const isAdmin = isAdminLoggedIn();
     uploadInput.disabled = !isAdmin;
+    uploadCaptionInput.disabled = !isAdmin;
+    removePhotoButton.disabled = !isAdmin;
     uploadForm.querySelector('button[type="submit"]').disabled = !isAdmin;
+    uploadPanel.style.display = isAdmin ? 'block' : 'none';
     uploadStatus.textContent = isAdmin
-        ? 'Uploads are saved to the SlideshowImages folder.'
-        : 'Admin sign-in required to upload slideshow pictures. Sign in at administrators.html.';
+        ? 'Uploads are saved to the SlideshowImages folder. Add an optional caption before uploading or remove the current photo.'
+        : 'Slideshow is visible to all users. Sign in as admin at administrators.html to upload/remove photos and edit captions.';
 }
 
 function getSlides() {
@@ -872,18 +1145,26 @@ function getIndicators() {
     return Array.from(document.querySelectorAll('.indicator'));
 }
 
-function buildSlides(imagePaths) {
+function normalizeImageItem(image) {
+    if (typeof image === 'string') {
+        return { name: image, path: `SlideshowImages/${image}`, caption: '' };
+    }
+    return {
+        name: image.name || '',
+        path: image.path || '',
+        caption: image.caption || ''
+    };
+}
+
+function buildSlides(images) {
     slidesContainer.innerHTML = '';
     indicatorsContainer.innerHTML = '';
+    slideshowImages = images.map(normalizeImageItem);
 
-    imagePaths.forEach((path, index) => {
-        const slide = document.createElement('div');
-        slide.className = index === 0 ? 'slide active' : 'slide';
-
-        const img = document.createElement('img');
-        img.src = path;
-        img.alt = `Game Photo ${index + 1}`;
-        slide.appendChild(img);
+    slideshowImages.forEach((image, index) => {
+        const slide = createSlideElement(image);
+        slide.classList.toggle('active', index === 0);
+        slide.dataset.filename = image.name || '';
         slidesContainer.appendChild(slide);
 
         const indicator = document.createElement('span');
@@ -903,10 +1184,7 @@ async function loadSlidesFromFolder() {
             return;
         }
 
-        const paths = result.images.map(name => `SlideshowImages/${name}`);
-        if (paths.length) {
-            buildSlides(paths);
-        }
+        buildSlides(result.images);
     } catch (error) {
         // Keep existing fallback slides if endpoint is unavailable.
     }
@@ -947,17 +1225,15 @@ function prevSlide() {
     showSlide(currentSlide);
 }
 
-function addSlide(imagePath) {
+function addSlide(image) {
+    const normalized = normalizeImageItem(image);
+    slideshowImages.push(normalized);
     const slides = getSlides();
     const newIndex = slides.length;
 
-    const slide = document.createElement('div');
+    const slide = createSlideElement(normalized);
     slide.className = 'slide';
-
-    const img = document.createElement('img');
-    img.src = imagePath;
-    img.alt = `Game Photo ${newIndex + 1}`;
-    slide.appendChild(img);
+    slide.dataset.filename = normalized.name || '';
     slidesContainer.appendChild(slide);
 
     const indicator = document.createElement('span');
@@ -968,8 +1244,45 @@ function addSlide(imagePath) {
     showSlide(newIndex);
 }
 
-document.querySelector('.next').addEventListener('click', nextSlide);
-document.querySelector('.prev').addEventListener('click', prevSlide);
+homeSlideshowNext.addEventListener('click', nextSlide);
+homeSlideshowPrev.addEventListener('click', prevSlide);
+
+removePhotoButton.addEventListener('click', async () => {
+    if (!isAdminLoggedIn()) {
+        uploadStatus.textContent = 'Admin sign-in required to remove photos.';
+        return;
+    }
+
+    if (!slideshowImages.length) {
+        uploadStatus.textContent = 'No photo available to remove.';
+        return;
+    }
+
+    const current = slideshowImages[currentSlide];
+    if (!current || !current.name) {
+        uploadStatus.textContent = 'Unable to identify current photo for removal.';
+        return;
+    }
+
+    uploadStatus.textContent = `Removing ${current.name}...`;
+
+    try {
+        const response = await fetch('/remove-photo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: current.name })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Remove failed.');
+        }
+
+        await loadSlidesFromFolder();
+        uploadStatus.textContent = `Removed: ${current.name}`;
+    } catch (error) {
+        uploadStatus.textContent = `Remove failed: ${error.message}`;
+    }
+});
 
 indicatorsContainer.addEventListener('click', (event) => {
     if (!event.target.classList.contains('indicator')) {
@@ -995,6 +1308,7 @@ uploadForm.addEventListener('submit', async (event) => {
 
     const formData = new FormData();
     formData.append('photo', uploadInput.files[0]);
+    formData.append('caption', uploadCaptionInput.value.trim());
 
     uploadStatus.textContent = 'Uploading image...';
 
@@ -1009,13 +1323,26 @@ uploadForm.addEventListener('submit', async (event) => {
             throw new Error(result.error || 'Upload failed.');
         }
 
-        const cacheBustedPath = `${result.path}?t=${Date.now()}`;
-        addSlide(cacheBustedPath);
+        addSlide({
+            name: result.filename,
+            path: `${result.path}?t=${Date.now()}`,
+            caption: result.caption || ''
+        });
         uploadForm.reset();
         uploadStatus.textContent = `Uploaded: ${result.filename}`;
     } catch (error) {
         uploadStatus.textContent = `Upload failed: ${error.message}`;
     }
+});
+
+window.addEventListener('storage', (event) => {
+    if (event.key === SESSION_KEY) {
+        applyUploadPermissions();
+    }
+});
+
+window.addEventListener('focus', () => {
+    applyUploadPermissions();
 });
 
 ensureDefaults();
@@ -1024,9 +1351,92 @@ renderPaymentLinks();
 applyPaymentSection();
 applyUploadPermissions();
 loadSlidesFromFolder();
+renderMiniSchedule();
 
-// Autoplay every 15 seconds
-setInterval(nextSlide, 15000);
+// Autoplay every 20 seconds
+setInterval(nextSlide, 20000);
+
+// ===== MINI SCHEDULE =====
+function renderMiniSchedule() {
+    const SCHEDULE_KEY = 'lamslWeeklyScheduleV3';
+    const ALL_PARKS = ['Stevenson Park', 'Dolphin Park', 'Calas Park', 'Veterans Park'];
+    const FIRST_WEEK_START = new Date('2026-04-06T00:00:00');
+    const container = document.getElementById('mini-schedule-content');
+    if (!container) return;
+
+    const schedule = readJson(SCHEDULE_KEY, []);
+
+    // Build the upcoming week range (Mon-Sun). First valid week starts on 4/6/2026.
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const weekStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const day = weekStart.getDay();
+    const shiftToMonday = day === 0 ? -6 : 1 - day;
+    weekStart.setDate(weekStart.getDate() + shiftToMonday);
+    if (weekStart < FIRST_WEEK_START) {
+        weekStart.setTime(FIRST_WEEK_START.getTime());
+    }
+    const weekEnd = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate());
+    weekEnd.setDate(weekEnd.getDate() + 6);
+
+    const pad = n => String(n).padStart(2, '0');
+    const startKey = `${weekStart.getFullYear()}-${pad(weekStart.getMonth() + 1)}-${pad(weekStart.getDate())}`;
+    const endKey = `${weekEnd.getFullYear()}-${pad(weekEnd.getMonth() + 1)}-${pad(weekEnd.getDate())}`;
+
+    const dayGames = schedule
+        .filter(g => g.date >= startKey && g.date <= endKey && g.status !== 'cancelled')
+        .sort((a, b) => {
+            if (a.date !== b.date) return a.date.localeCompare(b.date);
+            if (a.park !== b.park) return a.park.localeCompare(b.park);
+            return a.time.localeCompare(b.time);
+        });
+
+    container.innerHTML = '';
+
+    const dateEl = document.createElement('div');
+    dateEl.className = 'mini-schedule-date';
+    const startLabel = weekStart.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    const endLabel = weekEnd.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    dateEl.textContent = `Week of ${startLabel} - ${endLabel}`;
+    container.appendChild(dateEl);
+
+    if (!dayGames.length) {
+        const empty = document.createElement('p');
+        empty.className = 'mini-schedule-empty';
+        empty.textContent = 'No games scheduled for this upcoming week.';
+        container.appendChild(empty);
+        return;
+    }
+
+    ALL_PARKS.forEach(park => {
+        const parkGames = dayGames
+            .filter(g => g.park === park)
+            .sort((a, b) => a.time.localeCompare(b.time));
+        if (!parkGames.length) return;
+
+        const section = document.createElement('div');
+        section.className = 'mini-park-section';
+
+        const header = document.createElement('div');
+        header.className = 'mini-park-name';
+        header.textContent = park;
+        section.appendChild(header);
+
+        parkGames.forEach(game => {
+            const row = document.createElement('div');
+            row.className = 'mini-game-row';
+            const [h, m] = game.time.split(':');
+            const hr = parseInt(h, 10);
+            const ampm = hr >= 12 ? 'PM' : 'AM';
+            const hr12 = hr % 12 || 12;
+            const timeStr = `${hr12}:${m} ${ampm}`;
+            row.innerHTML = `<span class="mini-time">${timeStr}</span><span class="mini-div">Div ${game.division}</span><span class="mini-teams">${game.team1} vs ${game.team2}</span>`;
+            section.appendChild(row);
+        });
+
+        container.appendChild(section);
+    });
+}
 </script>
 
 </body>

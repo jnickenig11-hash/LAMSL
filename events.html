@@ -94,6 +94,40 @@ header {
     padding: 12px 18px;
 }
 
+.navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+    margin: 0;
+    font-size: 20px;
+}
+
+.navbar-brand-gem {
+    width: 24px;
+    height: 18px;
+    background:
+        linear-gradient(90deg, transparent 0 22%, rgba(255, 255, 255, 0.7) 22% 28%, transparent 28% 72%, rgba(94, 108, 122, 0.24) 72% 78%, transparent 78% 100%),
+        linear-gradient(180deg, #fbfdff 0%, #dfe5ec 34%, #b5c0cb 62%, #7c8a97 100%);
+    clip-path: polygon(24% 6%, 76% 6%, 100% 35%, 67% 100%, 33% 100%, 0% 35%);
+    border: 1px solid rgba(248, 251, 255, 0.78);
+    box-shadow: 0 0 0 1px rgba(86, 96, 108, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.82), inset 0 -1px 0 rgba(85, 96, 108, 0.4);
+    position: relative;
+    display: inline-block;
+    flex: 0 0 auto;
+}
+
+.navbar-brand-gem::after {
+    content: "";
+    position: absolute;
+    inset: 2px 4px 2px 4px;
+    clip-path: polygon(50% 0%, 80% 26%, 64% 100%, 36% 100%, 20% 26%);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.15)),
+        linear-gradient(90deg, transparent 0 46%, rgba(126, 138, 151, 0.82) 46% 54%, transparent 54% 100%);
+    opacity: 0.95;
+    pointer-events: none;
+}
+
 .navbar ul {
     list-style: none;
     display: flex;
@@ -376,6 +410,20 @@ header {
     border-radius: 8px;
 }
 
+.slide-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, rgba(18, 50, 74, 0), rgba(18, 50, 74, 0.88));
+    color: white;
+    font-size: 13px;
+    line-height: 1.35;
+    border-radius: 0 0 8px 8px;
+    box-sizing: border-box;
+}
+
 .slide-placeholder {
     width: 100%;
     height: 100%;
@@ -388,6 +436,21 @@ header {
     font-size: 14px;
     text-align: center;
     padding: 20px;
+    box-sizing: border-box;
+}
+
+.slideshow-locked {
+    display: none;
+    min-height: 180px;
+    align-items: center;
+    justify-content: center;
+    background: #1e4060;
+    border-radius: 8px;
+    color: #d7e7f2;
+    font-size: 14px;
+    text-align: center;
+    padding: 22px;
+    line-height: 1.5;
     box-sizing: border-box;
 }
 
@@ -454,6 +517,15 @@ header {
 .upload-form input[type="file"] {
     display: block;
     margin: 8px 0;
+}
+
+.upload-form input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #c9d2dc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: inherit;
 }
 
 .upload-form form {
@@ -623,7 +695,7 @@ footer {
 <!-- HEADER -->
 <header>
     <div class="navbar container">
-        <h2 style="margin: 0; font-size: 20px;">LAMSL</h2>
+        <h2 class="navbar-brand"><span class="navbar-brand-gem" aria-hidden="true"></span>LAMSL</h2>
         <ul>
             <li><a href="LASML.html">Home</a></li>
             <li><a href="standings.html">Standings</a></li>
@@ -692,7 +764,9 @@ footer {
                     <h3>Upload Event Photo</h3>
                     <form id="ef-upload-form" enctype="multipart/form-data">
                         <input id="ef-photo-input" type="file" name="photo" accept="image/*" required>
+                        <input id="ef-caption-input" type="text" name="caption" maxlength="180" placeholder="Add photo caption">
                         <button type="submit">Upload</button>
+                        <button id="ef-remove-btn" type="button">Remove Current Photo</button>
                     </form>
                     <p id="ef-upload-status"><em>Admin sign-in required to upload photos.</em></p>
                 </div>
@@ -713,6 +787,7 @@ const SESSION_KEY    = 'lamslSessionV1';
 const EF_ANN_KEY     = 'lamslEFAnnouncementsV1';
 
 let efCurrentSlide = 0;
+let efSlideImages = [];
 const efSlidesContainer  = document.getElementById('ef-slides');
 const efIndicators       = document.getElementById('ef-indicators');
 const efPlaceholder      = document.getElementById('ef-placeholder');
@@ -723,7 +798,10 @@ const efAnnTitle         = document.getElementById('ef-ann-title');
 const efAnnDate          = document.getElementById('ef-ann-date');
 const efAnnMessage       = document.getElementById('ef-ann-message');
 const efUploadForm       = document.getElementById('ef-upload-form');
+const efUploadPanel      = efUploadForm.closest('.upload-form');
 const efPhotoInput       = document.getElementById('ef-photo-input');
+const efCaptionInput     = document.getElementById('ef-caption-input');
+const efRemoveBtn        = document.getElementById('ef-remove-btn');
 const efUploadStatus     = document.getElementById('ef-upload-status');
 const efUploadButton     = efUploadForm.querySelector('button[type="submit"]');
 const efPrevBtn          = document.getElementById('ef-prev');
@@ -789,10 +867,13 @@ function applyAdminPanel() {
     efAdminPanel.style.display = isAdmin ? 'block' : 'none';
 
     efPhotoInput.disabled = !isAdmin;
+    efCaptionInput.disabled = !isAdmin;
+    efRemoveBtn.disabled = !isAdmin;
     efUploadButton.disabled = !isAdmin;
+    efUploadPanel.style.display = isAdmin ? 'block' : 'none';
     efUploadStatus.textContent = isAdmin
-        ? 'Uploads are saved to the EF_Images folder.'
-        : 'Admin sign-in required to upload photos. Sign in at administrators.html.';
+        ? 'Uploads are saved to the EF_Images folder. Add an optional caption before uploading or remove the current photo.'
+        : 'Slideshow is visible to all users. Sign in as admin at administrators.html to upload/remove photos and edit captions.';
 }
 
 window.addEventListener('storage', (event) => {
@@ -828,6 +909,36 @@ function getEFSlides() {
     return Array.from(efSlidesContainer.querySelectorAll('.slide'));
 }
 
+function normalizeEFImage(item) {
+    if (typeof item === 'string') {
+        return { name: item, path: `EF_Images/${item}`, caption: '' };
+    }
+    return {
+        name: item.name || '',
+        path: item.path || '',
+        caption: item.caption || ''
+    };
+}
+
+function createEFSlideElement(image) {
+    const slide = document.createElement('div');
+    slide.className = 'slide';
+
+    const img = document.createElement('img');
+    img.src = image.path;
+    img.alt = image.caption || image.name || 'Event Photo';
+    slide.appendChild(img);
+
+    if (image.caption) {
+        const caption = document.createElement('div');
+        caption.className = 'slide-caption';
+        caption.textContent = image.caption;
+        slide.appendChild(caption);
+    }
+
+    return slide;
+}
+
 function showEFSlide(index) {
     const slides = getEFSlides();
     const inds   = Array.from(efIndicators.querySelectorAll('.indicator'));
@@ -841,7 +952,10 @@ function showEFSlide(index) {
     efCurrentSlide = safeIndex;
 }
 
-function addEFSlide(imagePath) {
+function addEFSlide(image) {
+    const normalized = normalizeEFImage(image);
+    efSlideImages.push(normalized);
+
     // Remove placeholder if present
     if (efPlaceholder && efPlaceholder.parentNode === efSlidesContainer) {
         efSlidesContainer.removeChild(efPlaceholder);
@@ -850,12 +964,9 @@ function addEFSlide(imagePath) {
     const slides = getEFSlides();
     const newIndex = slides.length;
 
-    const slide = document.createElement('div');
+    const slide = createEFSlideElement(normalized);
     slide.className = 'slide';
-    const img = document.createElement('img');
-    img.src = imagePath;
-    img.alt = `Event Photo ${newIndex + 1}`;
-    slide.appendChild(img);
+    slide.dataset.filename = normalized.name || '';
     efSlidesContainer.appendChild(slide);
 
     const ind = document.createElement('span');
@@ -866,12 +977,13 @@ function addEFSlide(imagePath) {
     showEFSlide(newIndex);
 }
 
-function buildEFSlides(imagePaths) {
+function buildEFSlides(images) {
     // Clear existing slides
     Array.from(efSlidesContainer.querySelectorAll('.slide')).forEach(s => s.remove());
     efIndicators.innerHTML = '';
+    efSlideImages = images.map(normalizeEFImage);
 
-    if (!imagePaths.length) {
+    if (!efSlideImages.length) {
         if (!efSlidesContainer.contains(efPlaceholder)) {
             efSlidesContainer.appendChild(efPlaceholder);
         }
@@ -883,13 +995,10 @@ function buildEFSlides(imagePaths) {
         efSlidesContainer.removeChild(efPlaceholder);
     }
 
-    imagePaths.forEach((path, index) => {
-        const slide = document.createElement('div');
-        slide.className = index === 0 ? 'slide active' : 'slide';
-        const img = document.createElement('img');
-        img.src = path;
-        img.alt = `Event Photo ${index + 1}`;
-        slide.appendChild(img);
+    efSlideImages.forEach((image, index) => {
+        const slide = createEFSlideElement(image);
+        slide.classList.toggle('active', index === 0);
+        slide.dataset.filename = image.name || '';
         efSlidesContainer.appendChild(slide);
 
         const ind = document.createElement('span');
@@ -906,8 +1015,7 @@ async function loadEFImages() {
         const response = await fetch('/ef-images');
         const result = await response.json();
         if (!response.ok || !result.success || !Array.isArray(result.images)) return;
-        const paths = result.images.map(name => `EF_Images/${name}`);
-        if (paths.length) buildEFSlides(paths);
+        buildEFSlides(result.images);
     } catch (e) {
         // Server may not be running; silently keep placeholder.
     }
@@ -923,6 +1031,43 @@ efNextBtn.addEventListener('click', () => {
     const slides = getEFSlides();
     if (!slides.length) return;
     showEFSlide((efCurrentSlide + 1) % slides.length);
+});
+
+efRemoveBtn.addEventListener('click', async () => {
+    if (!isAdminLoggedIn()) {
+        efUploadStatus.textContent = 'Admin sign-in required to remove photos.';
+        return;
+    }
+
+    if (!efSlideImages.length) {
+        efUploadStatus.textContent = 'No photo available to remove.';
+        return;
+    }
+
+    const current = efSlideImages[efCurrentSlide];
+    if (!current || !current.name) {
+        efUploadStatus.textContent = 'Unable to identify current photo for removal.';
+        return;
+    }
+
+    efUploadStatus.textContent = `Removing ${current.name}...`;
+
+    try {
+        const response = await fetch('/remove-ef-photo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: current.name })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Remove failed.');
+        }
+
+        await loadEFImages();
+        efUploadStatus.textContent = `Removed: ${current.name}`;
+    } catch (e) {
+        efUploadStatus.textContent = `Remove failed: ${e.message}`;
+    }
 });
 
 efIndicators.addEventListener('click', (event) => {
@@ -944,6 +1089,7 @@ efUploadForm.addEventListener('submit', async (event) => {
 
     const formData = new FormData();
     formData.append('photo', efPhotoInput.files[0]);
+    formData.append('caption', efCaptionInput.value.trim());
     efUploadStatus.textContent = 'Uploading image...';
 
     try {
@@ -955,8 +1101,11 @@ efUploadForm.addEventListener('submit', async (event) => {
         if (!response.ok || !result.success) {
             throw new Error(result.error || 'Upload failed.');
         }
-        const cacheBustedPath = `${result.path}?t=${Date.now()}`;
-        addEFSlide(cacheBustedPath);
+        addEFSlide({
+            name: result.filename,
+            path: `${result.path}?t=${Date.now()}`,
+            caption: result.caption || ''
+        });
         efUploadForm.reset();
         efUploadStatus.textContent = `Uploaded: ${result.filename}`;
     } catch (e) {
@@ -969,11 +1118,11 @@ renderEFAnnouncements();
 applyAdminPanel();
 loadEFImages();
 
-// Autoplay every 15 seconds
+// Autoplay every 20 seconds
 setInterval(() => {
     const slides = getEFSlides();
     if (slides.length > 1) showEFSlide((efCurrentSlide + 1) % slides.length);
-}, 15000);
+}, 20000);
 </script>
 
 </body>

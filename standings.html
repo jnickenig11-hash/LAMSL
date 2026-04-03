@@ -179,6 +179,9 @@ header {
 }
 
 .tab-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: transparent;
     color: #a8c4d8;
     border: 2px solid transparent;
@@ -194,6 +197,7 @@ header {
     white-space: nowrap;
     min-height: 40px;
     scroll-snap-align: start;
+    text-decoration: none;
 }
 
 .tab-btn:hover {
@@ -228,6 +232,18 @@ header {
     padding: 8px 12px;
     text-align: left;
     font-size: 14px;
+}
+
+.tab-content-panel a {
+    color: #12324A;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.tab-content-panel a:hover,
+.tab-content-panel a:focus-visible {
+    color: #C86A2F;
+    text-decoration: underline;
 }
 
 .tab-content-panel th {
@@ -356,7 +372,7 @@ footer {
     <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
     <h1>Latin American Men's Softball League</h1>
     <div class="subtitle">Established 1976</div>
-    <div class="tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+    <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
 </div>
 
 <!-- HEADER -->
@@ -384,13 +400,13 @@ footer {
 
         <!-- TAB BUTTONS — always visible -->
         <div class="division-tabs" role="tablist">
-            <button class="tab-btn active" role="tab" aria-selected="true"  data-src="divisionA.html">Division A</button>
-            <button class="tab-btn"        role="tab" aria-selected="false" data-src="divisionB.html">Division B</button>
-            <button class="tab-btn"        role="tab" aria-selected="false" data-src="divisionC.html">Division C</button>
-            <button class="tab-btn"        role="tab" aria-selected="false" data-src="divisionD.html">Division D</button>
-            <button class="tab-btn"        role="tab" aria-selected="false" data-src="divisionE.html">Division E</button>
-            <button class="tab-btn"        role="tab" aria-selected="false" data-src="winter1.html">Winter Div 1</button>
-            <button class="tab-btn"        role="tab" aria-selected="false" data-src="winter2.html">Winter Div 2</button>
+            <a class="tab-btn active" role="tab" aria-selected="true" href="divisionA.html" data-src="divisionA.html">Division A</a>
+            <a class="tab-btn" role="tab" aria-selected="false" href="divisionB.html" data-src="divisionB.html">Division B</a>
+            <a class="tab-btn" role="tab" aria-selected="false" href="divisionC.html" data-src="divisionC.html">Division C</a>
+            <a class="tab-btn" role="tab" aria-selected="false" href="divisionD.html" data-src="divisionD.html">Division D</a>
+            <a class="tab-btn" role="tab" aria-selected="false" href="divisionE.html" data-src="divisionE.html">Division E</a>
+            <a class="tab-btn" role="tab" aria-selected="false" href="winter1.html" data-src="winter1.html">Winter Div 1</a>
+            <a class="tab-btn" role="tab" aria-selected="false" href="winter2.html" data-src="winter2.html">Winter Div 2</a>
         </div>
 
         <!-- CONTENT PANEL — updates on tab click -->
@@ -410,6 +426,14 @@ footer {
 const tabButtons   = document.querySelectorAll('.tab-btn');
 const contentPanel = document.getElementById('tab-content-panel');
 const cache        = {};
+
+function setActiveTab(activeButton) {
+    tabButtons.forEach(button => {
+        const isActive = button === activeButton;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+}
 
 function runEmbeddedScripts(scripts) {
     scripts.forEach(scriptContent => {
@@ -448,19 +472,38 @@ async function loadTab(src) {
 }
 
 tabButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        tabButtons.forEach(b => {
-            b.classList.remove('active');
-            b.setAttribute('aria-selected', 'false');
-        });
-        btn.classList.add('active');
-        btn.setAttribute('aria-selected', 'true');
+    btn.addEventListener('click', event => {
+        if (
+            event.defaultPrevented ||
+            event.button !== 0 ||
+            event.metaKey ||
+            event.ctrlKey ||
+            event.shiftKey ||
+            event.altKey
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+        setActiveTab(btn);
         loadTab(btn.dataset.src);
     });
 });
 
 // Load the first tab on page load
 loadTab(document.querySelector('.tab-btn.active').dataset.src);
+
+// ===== SEASON BANNER =====
+(function () {
+    try {
+        const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
+        const el = document.getElementById('banner-tagline');
+        if (s && el) {
+            const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
+        }
+    } catch (e) {}
+})();
 </script>
 
 </body>

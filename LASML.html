@@ -859,7 +859,7 @@ footer {
     <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
     <h1>Latin American Men's Softball League</h1>
     <div class="subtitle">Established 1976</div>
-    <div class="tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+    <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
 </div>
 
 <!-- HEADER -->
@@ -883,9 +883,9 @@ footer {
 <!-- MAIN -->
 <div class="container home-grid">
 
-    <!-- TOP ROW: Upcoming Week Games | Announcements | Payment -->
+    <!-- TOP ROW: Next Games | Announcements | Payment -->
     <section class="card mini-schedule-panel home-region region-schedule">
-        <h3>&#9918; Upcoming Week Games</h3>
+        <h3>&#9918; Next Games</h3>
         <div id="mini-schedule-content"><p class="mini-schedule-empty">Loading&hellip;</p></div>
         <a class="mini-schedule-link" href="schedule.html">&#8594; Full Schedule</a>
     </section>
@@ -936,11 +936,11 @@ footer {
     <!-- MIDDLE/BOTTOM: Slideshow spans left space, Founder and Instagram on right -->
     <section class="slideshow home-region region-slideshow">
         <div class="slides">
-            <div class="slide active"><img src="SlideshowImages/DonArturoPadillaLAMSLPresident2.jpg" alt="Game Photo 1"></div>
-            <div class="slide"><img src="SlideshowImages/DonArturoPadillaLAMSLPresident2 (1).jpg" alt="Game Photo 2"></div>
-            <div class="slide"><img src="SlideshowImages/LAMSLClubhouseCartoonPic.jpg" alt="Game Photo 3"></div>
-            <div class="slide"><img src="SlideshowImages/400dpiMariachiConservatory.jpg" alt="Game Photo 4"></div>
-            <div class="slide"><img src="SlideshowImages/Estylo Hair Salon2.jpg" alt="Game Photo 5"></div>
+            <div class="slide active" data-filename="DonArturoPadillaLAMSLPresident2.jpg"><img src="SlideshowImages/DonArturoPadillaLAMSLPresident2.jpg" alt="Game Photo 1"></div>
+            <div class="slide" data-filename="DonArturoPadillaLAMSLPresident2 (1).jpg"><img src="SlideshowImages/DonArturoPadillaLAMSLPresident2 (1).jpg" alt="Game Photo 2"></div>
+            <div class="slide" data-filename="LAMSLClubhouseCartoonPic.jpg"><img src="SlideshowImages/LAMSLClubhouseCartoonPic.jpg" alt="Game Photo 3"></div>
+            <div class="slide" data-filename="400dpiMariachiConservatory.jpg"><img src="SlideshowImages/400dpiMariachiConservatory.jpg" alt="Game Photo 4"></div>
+            <div class="slide" data-filename="Estylo Hair Salon2.jpg"><img src="SlideshowImages/Estylo Hair Salon2.jpg" alt="Game Photo 5"></div>
         </div>
         <div class="indicators">
             <span class="indicator active" data-slide="0"></span>
@@ -1253,17 +1253,24 @@ removePhotoButton.addEventListener('click', async () => {
         return;
     }
 
-    if (!slideshowImages.length) {
+    // Resolve filename from the tracked array first, then fall back to the active DOM slide.
+    let current = slideshowImages[currentSlide];
+    if (!current || !current.name) {
+        const activeSlide = slidesContainer.querySelector('.slide.active');
+        const domFilename = activeSlide?.dataset.filename || (() => {
+            const src = activeSlide?.querySelector('img')?.src || '';
+            const raw = src.split('/').pop().split('?')[0];
+            return raw ? decodeURIComponent(raw) : '';
+        })();
+        if (domFilename) current = { name: domFilename };
+    }
+
+    if (!current || !current.name) {
         uploadStatus.textContent = 'No photo available to remove.';
         return;
     }
 
-    const current = slideshowImages[currentSlide];
-    if (!current || !current.name) {
-        uploadStatus.textContent = 'Unable to identify current photo for removal.';
-        return;
-    }
-
+    const savedIndex = currentSlide;
     uploadStatus.textContent = `Removing ${current.name}...`;
 
     try {
@@ -1278,6 +1285,10 @@ removePhotoButton.addEventListener('click', async () => {
         }
 
         await loadSlidesFromFolder();
+        // Navigate to the next available slide rather than always jumping to index 0.
+        if (slideshowImages.length > 0) {
+            showSlide(Math.min(savedIndex, slideshowImages.length - 1));
+        }
         uploadStatus.textContent = `Removed: ${current.name}`;
     } catch (error) {
         uploadStatus.textContent = `Remove failed: ${error.message}`;
@@ -1360,58 +1371,49 @@ setInterval(nextSlide, 20000);
 function renderMiniSchedule() {
     const SCHEDULE_KEY = 'lamslWeeklyScheduleV3';
     const ALL_PARKS = ['Stevenson Park', 'Dolphin Park', 'Calas Park', 'Veterans Park'];
-    const FIRST_WEEK_START = new Date('2026-04-06T00:00:00');
     const container = document.getElementById('mini-schedule-content');
     if (!container) return;
 
     const schedule = readJson(SCHEDULE_KEY, []);
 
-    // Build the upcoming week range (Mon-Sun). First valid week starts on 4/6/2026.
+    const pad = n => String(n).padStart(2, '0');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const weekStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const day = weekStart.getDay();
-    const shiftToMonday = day === 0 ? -6 : 1 - day;
-    weekStart.setDate(weekStart.getDate() + shiftToMonday);
-    if (weekStart < FIRST_WEEK_START) {
-        weekStart.setTime(FIRST_WEEK_START.getTime());
-    }
-    const weekEnd = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate());
-    weekEnd.setDate(weekEnd.getDate() + 6);
+    const todayKey = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
 
-    const pad = n => String(n).padStart(2, '0');
-    const startKey = `${weekStart.getFullYear()}-${pad(weekStart.getMonth() + 1)}-${pad(weekStart.getDate())}`;
-    const endKey = `${weekEnd.getFullYear()}-${pad(weekEnd.getMonth() + 1)}-${pad(weekEnd.getDate())}`;
-
-    const dayGames = schedule
-        .filter(g => g.date >= startKey && g.date <= endKey && g.status !== 'cancelled')
-        .sort((a, b) => {
-            if (a.date !== b.date) return a.date.localeCompare(b.date);
-            if (a.park !== b.park) return a.park.localeCompare(b.park);
-            return a.time.localeCompare(b.time);
-        });
+    // Find the earliest upcoming date that has at least one non-cancelled game.
+    const upcomingDates = [...new Set(
+        schedule
+            .filter(g => g.date >= todayKey && g.status !== 'cancelled')
+            .map(g => g.date)
+    )].sort();
 
     container.innerHTML = '';
 
-    const dateEl = document.createElement('div');
-    dateEl.className = 'mini-schedule-date';
-    const startLabel = weekStart.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-    const endLabel = weekEnd.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-    dateEl.textContent = `Week of ${startLabel} - ${endLabel}`;
-    container.appendChild(dateEl);
-
-    if (!dayGames.length) {
+    if (!upcomingDates.length) {
         const empty = document.createElement('p');
         empty.className = 'mini-schedule-empty';
-        empty.textContent = 'No games scheduled for this upcoming week.';
+        empty.textContent = 'No upcoming games scheduled.';
         container.appendChild(empty);
         return;
     }
 
+    const nextDateKey = upcomingDates[0];
+    const nextDate = new Date(`${nextDateKey}T00:00:00`);
+    const dayGames = schedule
+        .filter(g => g.date === nextDateKey && g.status !== 'cancelled')
+        .sort((a, b) => {
+            if (a.park !== b.park) return ALL_PARKS.indexOf(a.park) - ALL_PARKS.indexOf(b.park);
+            return a.time.localeCompare(b.time);
+        });
+
+    const dateEl = document.createElement('div');
+    dateEl.className = 'mini-schedule-date';
+    dateEl.textContent = nextDate.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+    container.appendChild(dateEl);
+
     ALL_PARKS.forEach(park => {
-        const parkGames = dayGames
-            .filter(g => g.park === park)
-            .sort((a, b) => a.time.localeCompare(b.time));
+        const parkGames = dayGames.filter(g => g.park === park);
         if (!parkGames.length) return;
 
         const section = document.createElement('div');
@@ -1430,13 +1432,27 @@ function renderMiniSchedule() {
             const ampm = hr >= 12 ? 'PM' : 'AM';
             const hr12 = hr % 12 || 12;
             const timeStr = `${hr12}:${m} ${ampm}`;
-            row.innerHTML = `<span class="mini-time">${timeStr}</span><span class="mini-div">Div ${game.division}</span><span class="mini-teams">${game.team1} vs ${game.team2}</span>`;
+            const statusBit = game.status === 'postponed'
+                ? ' <span style="font-size:9px;color:#C86A2F;font-weight:700;">PPD</span>' : '';
+            row.innerHTML = `<span class="mini-time">${timeStr}</span><span class="mini-div">Div ${game.division}</span><span class="mini-teams">${game.team1} vs ${game.team2}${statusBit}</span>`;
             section.appendChild(row);
         });
 
         container.appendChild(section);
     });
 }
+
+// ===== SEASON BANNER =====
+(function () {
+    try {
+        const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
+        const el = document.getElementById('banner-tagline');
+        if (s && el) {
+            const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
+        }
+    } catch (e) {}
+})();
 </script>
 
 </body>

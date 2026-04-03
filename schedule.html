@@ -339,6 +339,24 @@ header {
     border-radius: 6px;
 }
 
+.generator-division-selector {
+    grid-column: span 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.generator-division-selector label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border: 1px solid #c5d0da;
+    border-radius: 999px;
+    background: #fff;
+    font-size: 13px;
+}
+
 .generator-checkbox {
     display: flex;
     align-items: center;
@@ -358,6 +376,7 @@ header {
 .generator-grid button:hover {
     background: #004080;
 }
+
 
 .admin-controls button {
     background: #12324A;
@@ -456,10 +475,62 @@ header {
 
 /* ===== PARK VIEW ===== */
 .park-view { display: none; }
-.park-view.visible {
+.park-view.visible { display: block; }
+.park-cards-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
+    margin-top: 12px;
+}
+.park-view-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+.park-period-filter {
+    display: flex;
+    gap: 6px;
+}
+.park-filter-btn {
+    border: 2px solid #12324A;
+    background: white;
+    color: #12324A;
+    border-radius: 6px;
+    padding: 7px 18px;
+    cursor: pointer;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    transition: background 0.2s, color 0.2s;
+}
+.park-filter-btn.active { background: #12324A; color: white; }
+.park-filter-btn:hover:not(.active) { background: #eef4ea; }
+.park-nav-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.park-nav-row button {
+    background: #12324A;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 12px;
+    cursor: pointer;
+    font-size: 13px;
+}
+.park-nav-row button:hover { background: #004080; }
+#park-range-label {
+    font-weight: 700;
+    color: #12324A;
+    font-size: 14px;
+    min-width: 200px;
+    text-align: center;
 }
 .park-section { margin-bottom: 0; }
 .park-section h4 {
@@ -620,7 +691,7 @@ footer {
         grid-column: span 1;
     }
 
-    .park-view.visible {
+    .park-cards-grid {
         grid-template-columns: 1fr;
     }
 
@@ -777,6 +848,19 @@ footer {
     .park-game-row .status-badge {
         justify-self: start;
     }
+
+    .park-view-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .park-nav-row {
+        justify-content: space-between;
+    }
+
+    .park-period-filter {
+        justify-content: center;
+    }
 }
 </style>
 </head>
@@ -786,7 +870,7 @@ footer {
     <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
     <h1>Latin American Men's Softball League</h1>
     <div class="subtitle">Established 1976</div>
-    <div class="tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+    <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
 </div>
 
 <header>
@@ -839,7 +923,21 @@ footer {
             </div>
 
             <!-- Park view region (hidden until toggled) -->
-            <div id="park-view" class="park-view"></div>
+            <div id="park-view" class="park-view">
+                <div class="park-view-controls">
+                    <div class="park-period-filter">
+                        <button class="park-filter-btn active" data-period="week" type="button">Week</button>
+                        <button class="park-filter-btn" data-period="month" type="button">Month</button>
+                        <button class="park-filter-btn" data-period="day" type="button">Day</button>
+                    </div>
+                    <div class="park-nav-row">
+                        <button id="park-prev" type="button">&#8249; Prev</button>
+                        <span id="park-range-label"></span>
+                        <button id="park-next" type="button">Next &#8250;</button>
+                    </div>
+                </div>
+                <div id="park-cards" class="park-cards-grid"></div>
+            </div>
         </section>
 
         <section class="card management-grid">
@@ -872,6 +970,7 @@ footer {
                         <option value="B">Division B</option>
                         <option value="C">Division C</option>
                         <option value="D">Division D</option>
+                        <option value="E">Division E</option>
                     </select>
                     <select id="game-team1" required disabled>
                         <option value="">Select Team 1</option>
@@ -892,14 +991,16 @@ footer {
 
                 <div class="generator-panel">
                     <h4>Random Schedule Generator</h4>
+                    <p class="admin-status" style="margin:0 0 8px;">Select one or more divisions, or keep All Divisions selected.</p>
                     <div class="generator-grid">
-                        <select id="generator-division">
-                            <option value="A">Division A</option>
-                            <option value="B">Division B</option>
-                            <option value="C">Division C</option>
-                            <option value="D">Division D</option>
-                            <option value="ALL">All Divisions</option>
-                        </select>
+                        <div id="generator-division-selector" class="generator-division-selector">
+                            <label><input id="generator-div-all" type="checkbox" value="ALL" checked> All Divisions</label>
+                            <label><input class="generator-div-choice" type="checkbox" value="A" checked> Division A</label>
+                            <label><input class="generator-div-choice" type="checkbox" value="B" checked> Division B</label>
+                            <label><input class="generator-div-choice" type="checkbox" value="C" checked> Division C</label>
+                            <label><input class="generator-div-choice" type="checkbox" value="D" checked> Division D</label>
+                            <label><input class="generator-div-choice" type="checkbox" value="E" checked> Division E</label>
+                        </div>
                         <input id="generator-start-date" type="date">
                         <label class="generator-checkbox">
                             <input id="generator-replace-existing" type="checkbox" checked>
@@ -908,6 +1009,7 @@ footer {
                         <button id="generator-run-btn" type="button">Generate Random Schedule</button>
                     </div>
                 </div>
+
             </div>
 
             <div class="admin-panel">
@@ -995,14 +1097,16 @@ const USERS_KEY      = 'lamslUsersV1';
 const SESSION_KEY    = 'lamslSessionV1';
 const SCHEDULE_KEY   = 'lamslWeeklyScheduleV3';
 const PRACTICE_KEY   = 'lamslPracticeScheduleV1';
+const DIVISIONS_KEY  = 'lamslDivisionsV1';
 
-const teamsByDivision = {
+const DEFAULT_TEAMS_BY_DIVISION = {
     A: ['Titans', 'Doom Squad', 'Legends', 'Nasty Boyz', 'Black Sox', 'White Sox', 'Dodgers'],
     B: ['Charros', 'Toxic', 'Primos', 'Demons', 'Cubs', 'Borrachos'],
     C: ['Diablos', 'Brewers', 'Coyotes', 'Goodfellas', 'Bandits', 'Salvajes', 'Balls Out', 'Orioles'],
     D: ['Viejones', 'No Chance', 'Los Pericos', 'Wild Hogz', 'Strokes', 'Dawgz', 'Xolos', 'Desvelados'],
     E: []
 };
+let teamsByDivision = {};
 const ALL_PARKS = ['Stevenson Park', 'Dolphin Park', 'Calas Park', 'Veterans Park'];
 const GAME_TIME_SLOTS = ['08:00', '09:30', '11:00', '12:30'];
 const ALLOWED_GAME_DAYS = [0]; // Sunday only
@@ -1028,7 +1132,9 @@ const gameTeam1Select = document.getElementById('game-team1');
 const gameTeam2Select = document.getElementById('game-team2');
 const gameStatusSelect = document.getElementById('game-status');
 const saveScheduleButton = document.getElementById('save-schedule-btn');
-const generatorDivisionSelect = document.getElementById('generator-division');
+const generatorDivisionSelector = document.getElementById('generator-division-selector');
+let generatorAllDivisionsInput = null;
+let generatorDivisionInputs = [];
 const generatorStartDateInput = document.getElementById('generator-start-date');
 const generatorReplaceExistingInput = document.getElementById('generator-replace-existing');
 const generatorRunButton = document.getElementById('generator-run-btn');
@@ -1045,6 +1151,8 @@ let currentWeekStart = getWeekStart(new Date());
 let editingGameId = null;
 let isAdminUnlocked = false;
 let activeDivisionFilter = 'ALL';
+let parkViewPeriod = 'week';
+let parkViewDate = new Date();
 
 function readJson(key, fallback) {
     try {
@@ -1105,6 +1213,14 @@ function ensureDefaults() {
         writeJson(USERS_KEY, users);
     }
 
+    const divisions = readJson(DIVISIONS_KEY, null);
+    if (!divisions) {
+        writeJson(DIVISIONS_KEY, DEFAULT_TEAMS_BY_DIVISION);
+        teamsByDivision = JSON.parse(JSON.stringify(DEFAULT_TEAMS_BY_DIVISION));
+    } else {
+        teamsByDivision = divisions;
+    }
+
     const existing = readJson(SCHEDULE_KEY, null);
     if (!existing) {
         const seed = [
@@ -1114,6 +1230,97 @@ function ensureDefaults() {
         ];
         writeJson(SCHEDULE_KEY, seed);
     }
+}
+
+function getDivisionCodes() {
+    return Object.keys(teamsByDivision);
+}
+
+function refreshDivisionSelectOptions(selectElement, placeholder) {
+    if (!selectElement) return;
+    const previous = selectElement.value;
+    const divisions = getDivisionCodes();
+    selectElement.innerHTML = `<option value="">${placeholder}</option>`;
+    divisions.forEach(division => {
+        const option = document.createElement('option');
+        option.value = division;
+        option.textContent = `Division ${division}`;
+        selectElement.appendChild(option);
+    });
+    if (previous && divisions.includes(previous)) {
+        selectElement.value = previous;
+    }
+}
+
+function refreshDivisionFilterButtons() {
+    if (!divisionFilter) return;
+    const divisions = getDivisionCodes();
+    if (activeDivisionFilter !== 'ALL' && !divisions.includes(activeDivisionFilter)) {
+        activeDivisionFilter = 'ALL';
+    }
+
+    divisionFilter.innerHTML = '<button type="button" class="filter-btn" data-division="ALL">All Divisions</button>';
+    divisions.forEach(division => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'filter-btn';
+        button.dataset.division = division;
+        button.textContent = `Division ${division}`;
+        divisionFilter.appendChild(button);
+    });
+
+    divisionFilter.querySelectorAll('.filter-btn').forEach(button => {
+        button.classList.toggle('active', button.dataset.division === activeDivisionFilter);
+    });
+}
+
+function renderGeneratorDivisionSelector() {
+    if (!generatorDivisionSelector) return;
+
+    const selectedBefore = new Set(
+        Array.from(generatorDivisionInputs || [])
+            .filter(input => input.checked)
+            .map(input => input.value)
+    );
+    const allWasChecked = generatorAllDivisionsInput ? generatorAllDivisionsInput.checked : true;
+
+    generatorDivisionSelector.innerHTML = '';
+
+    const allLabel = document.createElement('label');
+    allLabel.innerHTML = '<input id="generator-div-all" type="checkbox" value="ALL"> All Divisions';
+    generatorDivisionSelector.appendChild(allLabel);
+
+    getDivisionCodes().forEach(division => {
+        const label = document.createElement('label');
+        label.innerHTML = `<input class="generator-div-choice" type="checkbox" value="${division}"> Division ${division}`;
+        generatorDivisionSelector.appendChild(label);
+    });
+
+    generatorAllDivisionsInput = document.getElementById('generator-div-all');
+    generatorDivisionInputs = Array.from(document.querySelectorAll('.generator-div-choice'));
+
+    if (allWasChecked || selectedBefore.size === 0) {
+        if (generatorAllDivisionsInput) generatorAllDivisionsInput.checked = true;
+        generatorDivisionInputs.forEach(input => { input.checked = true; });
+    } else {
+        generatorDivisionInputs.forEach(input => {
+            input.checked = selectedBefore.has(input.value);
+        });
+    }
+
+    initializeGeneratorDivisionSelector();
+}
+
+function refreshDivisionDependentUI() {
+    refreshDivisionSelectOptions(gameDivisionSelect, 'Select Division');
+    refreshDivisionSelectOptions(practiceDiv1Select, 'Team 1 Division');
+    refreshDivisionSelectOptions(practiceDiv2Select, 'Team 2 Division');
+    refreshDivisionFilterButtons();
+    renderGeneratorDivisionSelector();
+
+    populateTeamsForDivision();
+    if (practiceDiv1Select) populatePracticeTeamsForDiv(practiceDiv1Select, practiceTeam1Select);
+    if (practiceDiv2Select) populatePracticeTeamsForDiv(practiceDiv2Select, practiceTeam2Select);
 }
 
 function isAdminLoggedIn() {
@@ -1220,7 +1427,7 @@ function generateDivisionMatchups(division) {
     return generated;
 }
 
-function validateSchedulingConstraints({ date, time, park, existingGames, ignoreId }) {
+function validateSchedulingConstraints({ date, time, park, team1, team2, existingGames, ignoreId }) {
     const day = parseDateKey(date).getDay();
     if (!ALLOWED_GAME_DAYS.includes(day)) {
         return 'Games can only be scheduled on Sundays.';
@@ -1238,6 +1445,26 @@ function validateSchedulingConstraints({ date, time, park, existingGames, ignore
         return 'This field/time slot is already occupied. Choose another slot.';
     }
 
+    // Team can play only one game per time slot.
+    const teamSlotConflict = comparable.some(game =>
+        game.date === date &&
+        game.time === time &&
+        ([game.team1, game.team2].includes(team1) || [game.team1, game.team2].includes(team2))
+    );
+    if (teamSlotConflict) {
+        return 'A selected team is already scheduled for this date/time slot.';
+    }
+
+    // Team can only be assigned to one park per day.
+    const teamParkConflict = comparable.some(game =>
+        game.date === date &&
+        game.park !== park &&
+        ([game.team1, game.team2].includes(team1) || [game.team1, game.team2].includes(team2))
+    );
+    if (teamParkConflict) {
+        return 'A selected team is already assigned to a different park on this day.';
+    }
+
     const sameParkDayCount = comparable.filter(game =>
         game.date === date && game.park === park
     ).length;
@@ -1253,50 +1480,124 @@ function allocateGamesToSlots(matchups, startDateKey, existingSchedule) {
     const occupied = new Set(
         existingSchedule.map(game => `${game.date}|${game.park}|${game.time}`)
     );
+    const teamTimeOccupied = new Set();
+    const teamDayParkMap = new Map();
 
-    let currentDate = getNextAllowedGameDate(parseDateKey(startDateKey));
+    existingSchedule.forEach(game => {
+        if (!game.date || !game.time) return;
+        if (game.team1) teamTimeOccupied.add(`${game.date}|${game.time}|${game.team1}`);
+        if (game.team2) teamTimeOccupied.add(`${game.date}|${game.time}|${game.team2}`);
 
-    matchups.forEach((match, index) => {
-        let assigned = false;
-
-        while (!assigned) {
-            const dateKey = formatDateKey(currentDate);
-
-            for (const park of ALL_PARKS) {
-                for (const time of GAME_TIME_SLOTS) {
-                    const slotKey = `${dateKey}|${park}|${time}`;
-                    if (occupied.has(slotKey)) {
-                        continue;
-                    }
-
-                    occupied.add(slotKey);
-                    generated.push({
-                        id: `game-${match.division}-${Date.now()}-${index}`,
-                        date: dateKey,
-                        time,
-                        park,
-                        division: match.division,
-                        team1: match.team1,
-                        team2: match.team2,
-                        status: 'scheduled',
-                        score1: '',
-                        score2: ''
-                    });
-                    assigned = true;
-                    break;
-                }
-                if (assigned) {
-                    break;
-                }
-            }
-
-            if (!assigned) {
-                currentDate = getNextAllowedGameDate(addDays(currentDate, 1));
-            }
-        }
+        if (game.team1) teamDayParkMap.set(`${game.date}|${game.team1}`, game.park);
+        if (game.team2) teamDayParkMap.set(`${game.date}|${game.team2}`, game.park);
     });
 
+    const remaining = [...matchups];
+    let currentDate = getNextAllowedGameDate(parseDateKey(startDateKey));
+    const runSeed = Date.now();
+    let sequence = 0;
+
+    while (remaining.length > 0) {
+        const dateKey = formatDateKey(currentDate);
+
+        for (const park of ALL_PARKS) {
+            for (const time of GAME_TIME_SLOTS) {
+                if (!remaining.length) break;
+
+                const slotKey = `${dateKey}|${park}|${time}`;
+                if (occupied.has(slotKey)) {
+                    continue;
+                }
+
+                const matchupIndex = remaining.findIndex(match => {
+                    const team1SlotKey = `${dateKey}|${time}|${match.team1}`;
+                    const team2SlotKey = `${dateKey}|${time}|${match.team2}`;
+                    if (teamTimeOccupied.has(team1SlotKey) || teamTimeOccupied.has(team2SlotKey)) {
+                        return false;
+                    }
+
+                    const team1ParkKey = `${dateKey}|${match.team1}`;
+                    const team2ParkKey = `${dateKey}|${match.team2}`;
+                    const team1AssignedPark = teamDayParkMap.get(team1ParkKey);
+                    const team2AssignedPark = teamDayParkMap.get(team2ParkKey);
+                    if ((team1AssignedPark && team1AssignedPark !== park) || (team2AssignedPark && team2AssignedPark !== park)) {
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                if (matchupIndex === -1) {
+                    continue;
+                }
+
+                const match = remaining.splice(matchupIndex, 1)[0];
+                const team1SlotKey = `${dateKey}|${time}|${match.team1}`;
+                const team2SlotKey = `${dateKey}|${time}|${match.team2}`;
+                const team1ParkKey = `${dateKey}|${match.team1}`;
+                const team2ParkKey = `${dateKey}|${match.team2}`;
+
+                occupied.add(slotKey);
+                teamTimeOccupied.add(team1SlotKey);
+                teamTimeOccupied.add(team2SlotKey);
+                teamDayParkMap.set(team1ParkKey, park);
+                teamDayParkMap.set(team2ParkKey, park);
+
+                generated.push({
+                    id: `game-${match.division}-${runSeed}-${sequence}`,
+                    date: dateKey,
+                    time,
+                    park,
+                    division: match.division,
+                    team1: match.team1,
+                    team2: match.team2,
+                    status: 'scheduled',
+                    score1: '',
+                    score2: ''
+                });
+                sequence += 1;
+            }
+        }
+
+        currentDate = getNextAllowedGameDate(addDays(currentDate, 1));
+    }
+
     return generated;
+}
+
+function getSelectedGeneratorDivisions() {
+    const selected = generatorDivisionInputs
+        .filter(input => input.checked)
+        .map(input => input.value);
+    return selected;
+}
+
+function syncGeneratorAllStateFromDivisionSelection() {
+    if (!generatorAllDivisionsInput) return;
+    const allChecked = generatorDivisionInputs.length > 0 && generatorDivisionInputs.every(input => input.checked);
+    generatorAllDivisionsInput.checked = allChecked;
+}
+
+function initializeGeneratorDivisionSelector() {
+    if (!generatorAllDivisionsInput || !generatorDivisionInputs.length) return;
+
+    generatorAllDivisionsInput.addEventListener('change', () => {
+        generatorDivisionInputs.forEach(input => {
+            input.checked = generatorAllDivisionsInput.checked;
+        });
+    });
+
+    generatorDivisionInputs.forEach(input => {
+        input.addEventListener('change', () => {
+            const anyChecked = generatorDivisionInputs.some(item => item.checked);
+            if (!anyChecked) {
+                input.checked = true;
+            }
+            syncGeneratorAllStateFromDivisionSelection();
+        });
+    });
+
+    syncGeneratorAllStateFromDivisionSelection();
 }
 
 function populateTeamsForDivision() {
@@ -1516,7 +1817,12 @@ function applyAdminPermissions() {
 
     setFormAccess(scheduleForm, isAdminUnlocked);
     setFormAccess(scoreForm, isAdminUnlocked);
-    generatorDivisionSelect.disabled = !isAdminUnlocked;
+    if (generatorAllDivisionsInput) {
+        generatorAllDivisionsInput.disabled = !isAdminUnlocked;
+    }
+    generatorDivisionInputs.forEach(input => {
+        input.disabled = !isAdminUnlocked;
+    });
     generatorStartDateInput.disabled = !isAdminUnlocked;
     generatorReplaceExistingInput.disabled = !isAdminUnlocked;
     generatorRunButton.disabled = !isAdminUnlocked;
@@ -1554,6 +1860,8 @@ scheduleForm.addEventListener('submit', event => {
         date,
         time,
         park,
+        team1,
+        team2,
         existingGames: games,
         ignoreId: editingGameId
     });
@@ -1679,12 +1987,16 @@ generatorRunButton.addEventListener('click', () => {
         return;
     }
 
-    const selectedDivision = generatorDivisionSelect.value;
     const startDateKey = generatorStartDateInput.value || formatDateKey(new Date());
     const replaceExisting = generatorReplaceExistingInput.checked;
-    const divisionsToGenerate = selectedDivision === 'ALL'
-        ? Object.keys(teamsByDivision)
-        : [selectedDivision];
+    const divisionsToGenerate = generatorAllDivisionsInput && generatorAllDivisionsInput.checked
+        ? generatorDivisionInputs.map(input => input.value)
+        : getSelectedGeneratorDivisions();
+
+    if (!divisionsToGenerate.length) {
+        adminStatus.textContent = 'Select at least one division to generate a schedule.';
+        return;
+    }
 
     let schedule = getSchedule();
     if (replaceExisting) {
@@ -1711,7 +2023,7 @@ generatorRunButton.addEventListener('click', () => {
     renderScoresList();
     renderParkView();
 
-    adminStatus.textContent = `Generated ${generatedCount} games on Sundays only (8:00AM–12:30PM). Each field can host up to ${GAME_TIME_SLOTS.length} games per day, with no duplicate field/time slot assignments.`;
+    adminStatus.textContent = `Generated ${generatedCount} games on Sundays only (8:00AM–12:30PM). Scheduler fills next available park/time slots across all ${ALL_PARKS.length} parks before moving to the next date, with no duplicate field/time slot assignments.`;
 });
 
 refreshAdminButton.addEventListener('click', () => {
@@ -1739,12 +2051,60 @@ window.addEventListener('storage', event => {
 });
 
 // ===== PARK VIEW =====
+function getParkDateRange() {
+    const d = new Date(parkViewDate.getFullYear(), parkViewDate.getMonth(), parkViewDate.getDate());
+    if (parkViewPeriod === 'day') {
+        const key = formatDateKey(d);
+        return { start: key, end: key };
+    }
+    if (parkViewPeriod === 'month') {
+        const ms = new Date(d.getFullYear(), d.getMonth(), 1);
+        const me = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+        return { start: formatDateKey(ms), end: formatDateKey(me) };
+    }
+    // week (default)
+    const ws = getWeekStart(d);
+    const we = addDays(ws, 6);
+    return { start: formatDateKey(ws), end: formatDateKey(we) };
+}
+
+function getParkRangeLabel() {
+    const { start, end } = getParkDateRange();
+    if (parkViewPeriod === 'day') return formatDateLong(start);
+    if (parkViewPeriod === 'month') {
+        return parseDateKey(start).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    }
+    return `${parseDateKey(start).toLocaleDateString()} – ${parseDateKey(end).toLocaleDateString()}`;
+}
+
+function navigateParkView(direction) {
+    if (parkViewPeriod === 'day') {
+        parkViewDate = addDays(parkViewDate, direction);
+    } else if (parkViewPeriod === 'month') {
+        parkViewDate = new Date(parkViewDate.getFullYear(), parkViewDate.getMonth() + direction, 1);
+    } else {
+        parkViewDate = addDays(parkViewDate, direction * 7);
+    }
+}
+
 function renderParkView() {
     const parkView = document.getElementById('park-view');
     if (!parkView || !parkView.classList.contains('visible')) return;
-    const today = formatDateKey(new Date());
-    const games = getFilteredGames(getSchedule()).filter(g => g.date >= today);
-    parkView.innerHTML = '';
+
+    const rangeLabel = document.getElementById('park-range-label');
+    if (rangeLabel) rangeLabel.textContent = getParkRangeLabel();
+
+    document.querySelectorAll('.park-filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.period === parkViewPeriod);
+    });
+
+    const { start, end } = getParkDateRange();
+    const games = getFilteredGames(getSchedule()).filter(g => g.date >= start && g.date <= end);
+
+    const cardsGrid = document.getElementById('park-cards');
+    if (!cardsGrid) return;
+    cardsGrid.innerHTML = '';
+
     ALL_PARKS.forEach(park => {
         const parkGames = games.filter(g => g.park === park)
             .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
@@ -1756,7 +2116,7 @@ function renderParkView() {
         const list = document.createElement('div');
         list.className = 'park-games-list';
         if (!parkGames.length) {
-            list.innerHTML = '<div class="park-empty">No upcoming games scheduled.</div>';
+            list.innerHTML = '<div class="park-empty">No games scheduled.</div>';
         } else {
             parkGames.forEach(game => {
                 const status = game.status || 'scheduled';
@@ -1774,7 +2134,7 @@ function renderParkView() {
             });
         }
         section.appendChild(list);
-        parkView.appendChild(section);
+        cardsGrid.appendChild(section);
     });
 }
 
@@ -1786,12 +2146,40 @@ document.querySelectorAll('.view-toggle-btn').forEach(btn => {
         const weekRegion = document.getElementById('week-calendar-region');
         const parkRegion = document.getElementById('park-view');
         if (btn.dataset.view === 'park') {
+            parkViewDate = new Date();
+            parkViewPeriod = 'week';
             if (weekRegion) weekRegion.style.display = 'none';
             if (parkRegion) { parkRegion.classList.add('visible'); renderParkView(); }
         } else {
             if (weekRegion) weekRegion.style.display = '';
             if (parkRegion) parkRegion.classList.remove('visible');
         }
+    });
+});
+
+// ===== PARK NAVIGATION =====
+const parkPrevBtn = document.getElementById('park-prev');
+const parkNextBtn = document.getElementById('park-next');
+
+if (parkPrevBtn) {
+    parkPrevBtn.addEventListener('click', () => {
+        navigateParkView(-1);
+        renderParkView();
+    });
+}
+
+if (parkNextBtn) {
+    parkNextBtn.addEventListener('click', () => {
+        navigateParkView(1);
+        renderParkView();
+    });
+}
+
+document.querySelectorAll('.park-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        parkViewPeriod = btn.dataset.period || 'week';
+        parkViewDate = new Date();
+        renderParkView();
     });
 });
 
@@ -1955,6 +2343,7 @@ if (practiceRefreshAdmin) {
 }
 
 ensureDefaults();
+refreshDivisionDependentUI();
 applyAdminPermissions();
 applyPracticeAdminAccess();
 gameDateInput.value = formatDateKey(selectedDate);
@@ -1966,6 +2355,18 @@ renderScheduledGameOptions();
 renderScoresList();
 renderParkView();
 renderPracticeGames();
+
+// ===== SEASON BANNER =====
+(function () {
+    try {
+        const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
+        const el = document.getElementById('banner-tagline');
+        if (s && el) {
+            const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
+        }
+    } catch (e) {}
+})();
 </script>
 </body>
 </html>

@@ -160,11 +160,73 @@ header {
     margin-bottom: 20px;
 }
 
+.team-overview-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.9fr 0.9fr;
+    gap: 16px;
+    align-items: stretch;
+}
+
+.team-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: stretch;
+    margin-bottom: 20px;
+}
+
+.content-panel {
+    border: 1px solid #dbe2ea;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #ffffff, #f8fbfe);
+    padding: 16px;
+    min-width: 0;
+}
+
+.content-panel h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #12324A;
+    font-size: 20px;
+}
+
+.schedule-filters {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 10px 0 12px;
+}
+
+.schedule-filters select,
+.schedule-filters input[type="date"] {
+    padding: 8px;
+    border: 1px solid #c5d0da;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    background: white;
+}
+
+.overview-panel {
+    border: 1px solid #dbe2ea;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #ffffff, #f8fbfe);
+    padding: 16px;
+    min-width: 0;
+}
+
+.overview-panel h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #12324A;
+    font-size: 20px;
+}
+
 .team-hero {
     display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 14px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 16px;
 }
 
 .team-chip {
@@ -174,6 +236,74 @@ header {
     padding: 6px 14px;
     font-weight: 700;
     letter-spacing: 0.5px;
+    justify-self: start;
+    margin-top: 10px;
+}
+
+.team-photo-panel {
+    display: grid;
+    gap: 10px;
+    justify-items: center;
+}
+
+.team-photo-frame {
+    width: 220px;
+    aspect-ratio: 1 / 1;
+    border-radius: 18px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f2f7fb, #deebf5);
+    border: 1px solid #d2dde8;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    display: grid;
+    place-items: center;
+}
+
+.team-photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.team-photo-placeholder {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 18px;
+    text-align: center;
+    color: #5a6977;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.team-photo-controls {
+    width: min(100%, 220px);
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    background: #f7fbff;
+    padding: 12px;
+}
+
+.team-photo-controls input[type="file"] {
+    width: 100%;
+    margin: 8px 0;
+}
+
+.team-photo-controls button {
+    width: 100%;
+    background: #12324A;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.team-photo-controls button:hover {
+    background: #004080;
 }
 
 #team-schedule-wrap,
@@ -195,12 +325,6 @@ header {
 .status-scheduled { background: #d4edda; color: #1a7a1a; }
 .status-postponed { background: #fde8d8; color: #C86A2F; }
 .status-cancelled { background: #f8d7da; color: #9a1616; }
-
-.summary-grid {
-    display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 16px;
-}
 
 .info-list {
     list-style: none;
@@ -286,7 +410,15 @@ footer {
 }
 
 @media (max-width: 900px) {
-    .summary-grid {
+    .team-overview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .team-content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .schedule-filters {
         grid-template-columns: 1fr;
     }
 }
@@ -360,6 +492,7 @@ footer {
         gap: 10px;
     }
 
+    .team-photo-panel,
     .team-chip {
         justify-self: start;
     }
@@ -367,6 +500,10 @@ footer {
     .card,
     .roster-controls {
         padding: 16px;
+    }
+
+    .overview-panel {
+        padding: 14px;
     }
 
     .info-list li {
@@ -398,7 +535,7 @@ footer {
     <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
     <h1>Latin American Men's Softball League</h1>
     <div class="subtitle">Established 1976</div>
-    <div class="tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+    <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
 </div>
 
 <header>
@@ -419,42 +556,69 @@ footer {
 
 <div class="container">
     <main>
-        <section class="card">
-            <div class="team-hero">
-                <div>
-                    <h2 id="team-title">Team Profile</h2>
-                    <p class="muted" id="team-subtitle">Select a team from a division standings page.</p>
+        <section class="card team-overview-grid">
+            <div class="overview-panel">
+                <div class="team-hero">
+                    <div>
+                        <h2 id="team-title">Team Profile</h2>
+                        <p class="muted" id="team-subtitle">Select a team from a division standings page.</p>
+                        <div class="team-chip" id="team-division-chip">Division -</div>
+                    </div>
+                    <div class="team-photo-panel">
+                        <div class="team-photo-frame" id="team-photo-frame">
+                            <div class="team-photo-placeholder" id="team-photo-placeholder">No Team Photo</div>
+                            <img id="team-photo" alt="Team profile photo" style="display:none;">
+                        </div>
+                        <div class="team-photo-controls">
+                            <p id="team-photo-status" class="muted">Team profile photos are visible to all users. Admin sign-in required to upload.</p>
+                            <input id="team-photo-file" type="file" accept="image/*">
+                            <button id="upload-team-photo-btn" type="button">Upload Team Photo</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="team-chip" id="team-division-chip">Division -</div>
             </div>
-        </section>
-
-        <section class="card summary-grid">
-            <div>
+            <div class="overview-panel">
                 <h3>Standings Snapshot</h3>
                 <ul class="info-list" id="standings-summary"></ul>
             </div>
-            <div>
+            <div class="overview-panel">
                 <h3>Latest Results</h3>
                 <ul class="info-list" id="latest-results"></ul>
             </div>
         </section>
 
-        <section class="card">
-            <h3>Team Schedule</h3>
-            <p class="muted">Includes regular schedule and practice/scrimmage games.</p>
-            <div id="team-schedule-wrap"></div>
-        </section>
-
-        <section class="card">
-            <h3>Team Roster</h3>
-            <div class="roster-controls">
-                <p id="roster-admin-status" class="muted">Admin sign-in required to upload roster spreadsheets.</p>
-                <input id="roster-file" type="file" accept=".xlsx,.xls,.csv">
-                <button id="upload-roster-btn" type="button">Upload Roster Spreadsheet</button>
-                <p class="muted">Spreadsheet tip: use column headers like Name, Number, Position, Phone.</p>
+        <section class="team-content-grid">
+            <div class="content-panel">
+                <h3>Team Schedule</h3>
+                <p class="muted">Includes regular schedule and practice/scrimmage games.</p>
+                <div class="schedule-filters">
+                    <select id="schedule-period-filter" aria-label="Schedule period filter">
+                        <option value="all">All Dates</option>
+                        <option value="month">Month</option>
+                        <option value="week">Week</option>
+                        <option value="day">Day</option>
+                    </select>
+                    <select id="schedule-season-filter" aria-label="Schedule season filter">
+                        <option value="all">All Seasons</option>
+                        <option value="regular">Regular</option>
+                        <option value="winter">Winter</option>
+                        <option value="practice">Practice</option>
+                    </select>
+                    <input id="schedule-anchor-date" type="date" aria-label="Schedule anchor date">
+                </div>
+                <div id="team-schedule-wrap"></div>
             </div>
-            <div id="roster-table-wrap"></div>
+
+            <div class="content-panel">
+                <h3>Team Roster</h3>
+                <div class="roster-controls">
+                    <p id="roster-admin-status" class="muted">Admin sign-in required to upload roster spreadsheets.</p>
+                    <input id="roster-file" type="file" accept=".xlsx,.xls,.csv">
+                    <button id="upload-roster-btn" type="button">Upload Roster Spreadsheet</button>
+                    <p class="muted">Spreadsheet tip: use column headers like Name, Number, Position, Phone.</p>
+                </div>
+                <div id="roster-table-wrap"></div>
+            </div>
         </section>
     </main>
 </div>
@@ -577,13 +741,61 @@ if (!division && team) {
 const teamTitle = document.getElementById('team-title');
 const teamSubtitle = document.getElementById('team-subtitle');
 const teamDivisionChip = document.getElementById('team-division-chip');
+const teamPhoto = document.getElementById('team-photo');
+const teamPhotoPlaceholder = document.getElementById('team-photo-placeholder');
+const teamPhotoStatus = document.getElementById('team-photo-status');
+const teamPhotoFileInput = document.getElementById('team-photo-file');
+const uploadTeamPhotoBtn = document.getElementById('upload-team-photo-btn');
 const standingsSummary = document.getElementById('standings-summary');
 const latestResults = document.getElementById('latest-results');
 const teamScheduleWrap = document.getElementById('team-schedule-wrap');
+const schedulePeriodFilter = document.getElementById('schedule-period-filter');
+const scheduleSeasonFilter = document.getElementById('schedule-season-filter');
+const scheduleAnchorDate = document.getElementById('schedule-anchor-date');
 const rosterAdminStatus = document.getElementById('roster-admin-status');
 const rosterFileInput = document.getElementById('roster-file');
 const uploadRosterBtn = document.getElementById('upload-roster-btn');
 const rosterTableWrap = document.getElementById('roster-table-wrap');
+
+function apiUrl(path) {
+    return new URL(path, window.location.href).toString();
+}
+
+function parseDateKey(dateKey) {
+    return new Date(`${dateKey}T00:00:00`);
+}
+
+function formatDateKey(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function getSeasonType(game) {
+    if (game.gameType === 'Practice') {
+        return 'practice';
+    }
+    const div = String(game.division || '').toUpperCase();
+    return div.startsWith('W') ? 'winter' : 'regular';
+}
+
+function getWeekRange(anchorDate) {
+    const start = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), anchorDate.getDate());
+    start.setDate(start.getDate() - start.getDay());
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+    return { start, end };
+}
+
+async function readJsonResponse(response) {
+    const text = await response.text();
+    try {
+        return JSON.parse(text);
+    } catch (error) {
+        throw new Error(response.ok ? 'Invalid server response.' : text || `HTTP ${response.status}`);
+    }
+}
 
 function renderHeader() {
     if (!team) {
@@ -596,6 +808,39 @@ function renderHeader() {
     teamTitle.textContent = team;
     teamSubtitle.textContent = `Detailed team page: schedule, standings, and roster management.`;
     teamDivisionChip.textContent = division ? (divisionLabelMap[division] || `Division ${division}`) : 'Division N/A';
+}
+
+function renderTeamPhoto(photo) {
+    if (photo && photo.path) {
+        teamPhoto.src = `${photo.path}?t=${Date.now()}`;
+        teamPhoto.alt = `${team || 'Team'} profile photo`;
+        teamPhoto.style.display = 'block';
+        teamPhotoPlaceholder.style.display = 'none';
+        return;
+    }
+
+    teamPhoto.removeAttribute('src');
+    teamPhoto.style.display = 'none';
+    teamPhotoPlaceholder.style.display = 'grid';
+    teamPhotoPlaceholder.textContent = team ? `${team} Photo` : 'No Team Photo';
+}
+
+async function loadTeamPhoto() {
+    if (!team || !division) {
+        renderTeamPhoto(null);
+        return;
+    }
+
+    try {
+        const response = await fetch(apiUrl(`team-profile-photo?team=${encodeURIComponent(team)}&division=${encodeURIComponent(division)}`));
+        const result = await readJsonResponse(response);
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Unable to load team photo.');
+        }
+        renderTeamPhoto(result.photo || null);
+    } catch (error) {
+        renderTeamPhoto(null);
+    }
 }
 
 function renderStandingsSummary() {
@@ -718,6 +963,49 @@ function renderScheduleTable(games) {
     `;
 }
 
+function applyScheduleFilters(allGames) {
+    if (!Array.isArray(allGames)) {
+        renderScheduleTable([]);
+        return;
+    }
+
+    const period = schedulePeriodFilter ? schedulePeriodFilter.value : 'all';
+    const season = scheduleSeasonFilter ? scheduleSeasonFilter.value : 'all';
+    const anchorDate = scheduleAnchorDate && scheduleAnchorDate.value
+        ? parseDateKey(scheduleAnchorDate.value)
+        : new Date();
+
+    const filteredGames = allGames.filter(game => {
+        if (season !== 'all' && getSeasonType(game) !== season) {
+            return false;
+        }
+
+        if (period === 'all') {
+            return true;
+        }
+
+        const gameDate = parseDateKey(game.date);
+
+        if (period === 'day') {
+            return formatDateKey(gameDate) === formatDateKey(anchorDate);
+        }
+
+        if (period === 'week') {
+            const { start, end } = getWeekRange(anchorDate);
+            return gameDate >= start && gameDate <= end;
+        }
+
+        if (period === 'month') {
+            return gameDate.getFullYear() === anchorDate.getFullYear() &&
+                gameDate.getMonth() === anchorDate.getMonth();
+        }
+
+        return true;
+    });
+
+    renderScheduleTable(filteredGames);
+}
+
 function renderRoster() {
     const store = readJson(ROSTER_KEY, {});
     const roster = team ? store[team] : null;
@@ -756,6 +1044,12 @@ function applyRosterUploadAccess() {
         : 'Admin sign-in required to upload roster spreadsheets.';
     rosterFileInput.disabled = !admin || !team;
     uploadRosterBtn.disabled = !admin || !team;
+
+    teamPhotoStatus.textContent = admin
+        ? 'Admin access confirmed. Upload a team profile image.'
+        : 'Team profile photos are visible to all users. Admin sign-in required to upload.';
+    teamPhotoFileInput.disabled = !admin || !team;
+    uploadTeamPhotoBtn.disabled = !admin || !team;
 }
 
 uploadRosterBtn.addEventListener('click', async () => {
@@ -803,6 +1097,48 @@ uploadRosterBtn.addEventListener('click', async () => {
     }
 });
 
+uploadTeamPhotoBtn.addEventListener('click', async () => {
+    if (!isAdminLoggedIn()) {
+        teamPhotoStatus.textContent = 'Sign in as admin first.';
+        return;
+    }
+
+    if (!team || !division) {
+        teamPhotoStatus.textContent = 'No team selected.';
+        return;
+    }
+
+    const file = teamPhotoFileInput.files && teamPhotoFileInput.files[0];
+    if (!file) {
+        teamPhotoStatus.textContent = 'Choose an image file first.';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('photo', file);
+    formData.append('team', team);
+    formData.append('division', division);
+    teamPhotoStatus.textContent = `Uploading profile photo for ${team}...`;
+
+    try {
+        const response = await fetch(apiUrl('upload-team-photo'), {
+            method: 'POST',
+            body: formData
+        });
+        const result = await readJsonResponse(response);
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Upload failed.');
+        }
+
+        teamPhotoFileInput.value = '';
+        renderTeamPhoto(result);
+        const savedFolder = result.folder ? `teamProfile images/${result.folder}` : 'the team profile folder';
+        teamPhotoStatus.textContent = `Profile photo saved for ${team} in ${savedFolder}.`;
+    } catch (error) {
+        teamPhotoStatus.textContent = `Photo upload failed: ${error.message}`;
+    }
+});
+
 window.addEventListener('storage', event => {
     if (event.key === SESSION_KEY) {
         applyRosterUploadAccess();
@@ -814,8 +1150,34 @@ renderStandingsSummary();
 const games = getTeamGames();
 renderLatestResults(games);
 renderScheduleTable(games);
+if (scheduleAnchorDate) {
+    scheduleAnchorDate.value = formatDateKey(new Date());
+}
+if (schedulePeriodFilter) {
+    schedulePeriodFilter.addEventListener('change', () => applyScheduleFilters(games));
+}
+if (scheduleSeasonFilter) {
+    scheduleSeasonFilter.addEventListener('change', () => applyScheduleFilters(games));
+}
+if (scheduleAnchorDate) {
+    scheduleAnchorDate.addEventListener('change', () => applyScheduleFilters(games));
+}
+applyScheduleFilters(games);
 applyRosterUploadAccess();
 renderRoster();
+loadTeamPhoto();
+
+// ===== SEASON BANNER =====
+(function () {
+    try {
+        const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
+        const el = document.getElementById('banner-tagline');
+        if (s && el) {
+            const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
+        }
+    } catch (e) {}
+})();
 </script>
 </body>
 </html>

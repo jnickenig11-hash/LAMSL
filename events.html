@@ -689,7 +689,7 @@ footer {
     <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
     <h1>Latin American Men's Softball League</h1>
     <div class="subtitle">Established 1976</div>
-    <div class="tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+    <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
 </div>
 
 <!-- HEADER -->
@@ -1039,17 +1039,24 @@ efRemoveBtn.addEventListener('click', async () => {
         return;
     }
 
-    if (!efSlideImages.length) {
+    // Resolve filename from the tracked array first, then fall back to the active DOM slide.
+    let current = efSlideImages[efCurrentSlide];
+    if (!current || !current.name) {
+        const activeSlide = efSlidesContainer.querySelector('.slide.active');
+        const domFilename = activeSlide?.dataset.filename || (() => {
+            const src = activeSlide?.querySelector('img')?.src || '';
+            const raw = src.split('/').pop().split('?')[0];
+            return raw ? decodeURIComponent(raw) : '';
+        })();
+        if (domFilename) current = { name: domFilename };
+    }
+
+    if (!current || !current.name) {
         efUploadStatus.textContent = 'No photo available to remove.';
         return;
     }
 
-    const current = efSlideImages[efCurrentSlide];
-    if (!current || !current.name) {
-        efUploadStatus.textContent = 'Unable to identify current photo for removal.';
-        return;
-    }
-
+    const savedIndex = efCurrentSlide;
     efUploadStatus.textContent = `Removing ${current.name}...`;
 
     try {
@@ -1064,6 +1071,10 @@ efRemoveBtn.addEventListener('click', async () => {
         }
 
         await loadEFImages();
+        // Navigate to the next available slide rather than always jumping to index 0.
+        if (efSlideImages.length > 0) {
+            showEFSlide(Math.min(savedIndex, efSlideImages.length - 1));
+        }
         efUploadStatus.textContent = `Removed: ${current.name}`;
     } catch (e) {
         efUploadStatus.textContent = `Remove failed: ${e.message}`;
@@ -1123,6 +1134,18 @@ setInterval(() => {
     const slides = getEFSlides();
     if (slides.length > 1) showEFSlide((efCurrentSlide + 1) % slides.length);
 }, 20000);
+
+// ===== SEASON BANNER =====
+(function () {
+    try {
+        const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
+        const el = document.getElementById('banner-tagline');
+        if (s && el) {
+            const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
+        }
+    } catch (e) {}
+})();
 </script>
 
 </body>

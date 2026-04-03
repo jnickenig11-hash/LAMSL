@@ -208,6 +208,135 @@ header {
     background: #5e0d0d;
 }
 
+/* ===== SEASON PANEL ===== */
+.season-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+.season-form select,
+.season-form input[type="number"],
+.season-form input[type="date"] {
+    padding: 8px;
+    border: 1px solid #c5d0da;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+}
+.season-form button {
+    grid-column: span 2;
+    background: #12324A;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    cursor: pointer;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+}
+.season-form button:hover { background: #004080; }
+.season-current {
+    background: #eef4ea;
+    border: 1px solid #b8d4b8;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    color: #12324A;
+}
+.season-current strong { font-size: 16px; }
+.season-badge {
+    display: inline-block;
+    background: #12324A;
+    color: white;
+    border-radius: 999px;
+    padding: 3px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.division-manager {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #dbe2ea;
+}
+
+.division-manager-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.division-manager-grid input,
+.division-manager-grid select,
+.division-manager-grid button {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #c5d0da;
+    font-family: inherit;
+}
+
+.division-manager-grid button {
+    border: none;
+    background: #12324A;
+    color: white;
+    cursor: pointer;
+}
+
+.division-manager-grid button:hover {
+    background: #004080;
+}
+
+.division-manager-grid button.danger-btn {
+    background: #9a1616;
+}
+
+.division-manager-grid button.danger-btn:hover {
+    background: #7a1010;
+}
+
+.division-manager-grid .full-row {
+    grid-column: span 2;
+}
+
+.division-team-list {
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.division-team-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 6px 8px;
+    border: 1px solid #dbe2ea;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    background: #fff;
+}
+
+.division-team-list .remove-btn {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 5px;
+    background: #b73030;
+    color: white;
+    cursor: pointer;
+}
+
+.division-team-list .remove-btn:hover {
+    background: #922525;
+}
+
 /* ===== FOOTER ===== */
 footer {
     text-align: center;
@@ -270,6 +399,14 @@ footer {
         width: 100%;
         box-sizing: border-box;
     }
+
+    .season-form {
+        grid-template-columns: 1fr;
+    }
+
+    .season-form button {
+        grid-column: span 1;
+    }
 }
 
 </style>
@@ -331,7 +468,45 @@ footer {
                     <input id="new-admin-password" type="password" placeholder="New admin password">
                     <button id="create-admin-btn" type="button">Create Admin User</button>
                 </div>
+
+                <div class="division-manager">
+                    <h3>Division &amp; Team Manager</h3>
+                    <p id="division-manager-status" class="admin-status">Sign in as admin to manage divisions and teams.</p>
+                    <div class="division-manager-grid">
+                        <input id="new-division-name" type="text" placeholder="New Division (e.g., E or Masters)">
+                        <button id="add-division-btn" type="button">Add Division</button>
+
+                        <select id="manage-division-select"></select>
+                        <input id="rename-division-name" type="text" placeholder="Rename Selected Division">
+                        <button id="rename-division-btn" type="button">Rename Division</button>
+                        <button id="delete-division-btn" type="button" class="danger-btn">Delete Selected Division</button>
+
+                        <input id="new-team-name" type="text" placeholder="New Team Name">
+                        <button id="add-team-btn" type="button">Add Team to Selected Division</button>
+
+                        <ul id="division-team-list" class="division-team-list full-row"></ul>
+                    </div>
+                </div>
             </div>
+        </section>
+
+        <section class="card" id="season-card">
+            <h2>League Season Settings</h2>
+            <p class="admin-status" id="season-auth-note">Sign in as admin to configure the active season.</p>
+            <div id="season-current-display" class="season-current" style="display:none;"></div>
+            <form class="season-form" id="season-form" style="display:none;">
+                <select id="season-name" required>
+                    <option value="">Select Season</option>
+                    <option value="Spring">Spring</option>
+                    <option value="Summer">Summer</option>
+                    <option value="Fall">Fall</option>
+                    <option value="Winter">Winter</option>
+                </select>
+                <input id="season-year" type="number" min="2000" max="2100" placeholder="Year (e.g. 2026)" required>
+                <input id="season-start" type="date" required>
+                <input id="season-end" type="date" required>
+                <button type="submit">Save Season</button>
+            </form>
         </section>
 
         <section class="card">
@@ -372,6 +547,18 @@ const USERS_KEY = 'lamslUsersV1';
 const SESSION_KEY = 'lamslSessionV1';
 const ANNOUNCEMENTS_KEY = 'lamslAnnouncementsV1';
 const ARCHIVE_KEY = 'lamslArchivedAnnouncementsV1';
+const SEASON_KEY = 'lamslSeasonV1';
+const DIVISIONS_KEY = 'lamslDivisionsV1';
+const SCHEDULE_KEY = 'lamslWeeklyScheduleV3';
+const PRACTICE_KEY = 'lamslPracticeScheduleV1';
+
+const DEFAULT_TEAMS_BY_DIVISION = {
+    A: ['Titans', 'Doom Squad', 'Legends', 'Nasty Boyz', 'Black Sox', 'White Sox', 'Dodgers'],
+    B: ['Charros', 'Toxic', 'Primos', 'Demons', 'Cubs', 'Borrachos'],
+    C: ['Diablos', 'Brewers', 'Coyotes', 'Goodfellas', 'Bandits', 'Salvajes', 'Balls Out', 'Orioles'],
+    D: ['Viejones', 'No Chance', 'Los Pericos', 'Wild Hogz', 'Strokes', 'Dawgz', 'Xolos', 'Desvelados'],
+    E: []
+};
 
 const authStatus = document.getElementById('auth-status');
 const loginRow = document.getElementById('login-row');
@@ -389,6 +576,16 @@ const activeAnnouncementsList = document.getElementById('active-announcements');
 const createAdminButton = document.getElementById('create-admin-btn');
 const newAdminUsername = document.getElementById('new-admin-username');
 const newAdminPassword = document.getElementById('new-admin-password');
+const divisionManagerStatus = document.getElementById('division-manager-status');
+const newDivisionInput = document.getElementById('new-division-name');
+const addDivisionButton = document.getElementById('add-division-btn');
+const manageDivisionSelect = document.getElementById('manage-division-select');
+const renameDivisionInput = document.getElementById('rename-division-name');
+const renameDivisionButton = document.getElementById('rename-division-btn');
+const deleteDivisionButton = document.getElementById('delete-division-btn');
+const newTeamInput = document.getElementById('new-team-name');
+const addTeamButton = document.getElementById('add-team-btn');
+const divisionTeamList = document.getElementById('division-team-list');
 
 function readJson(key, fallback) {
     try {
@@ -431,6 +628,147 @@ function ensureDefaults() {
     const archives = readJson(ARCHIVE_KEY, null);
     if (!archives) {
         writeJson(ARCHIVE_KEY, []);
+    }
+
+    const divisions = readJson(DIVISIONS_KEY, null);
+    if (!divisions) {
+        writeJson(DIVISIONS_KEY, DEFAULT_TEAMS_BY_DIVISION);
+    }
+}
+
+function getDivisionMap() {
+    return readJson(DIVISIONS_KEY, JSON.parse(JSON.stringify(DEFAULT_TEAMS_BY_DIVISION)));
+}
+
+function saveDivisionMap(map) {
+    writeJson(DIVISIONS_KEY, map);
+}
+
+function getSchedule() {
+    return readJson(SCHEDULE_KEY, []);
+}
+
+function saveSchedule(games) {
+    writeJson(SCHEDULE_KEY, games);
+}
+
+function getPracticeSchedule() {
+    return readJson(PRACTICE_KEY, []);
+}
+
+function savePracticeSchedule(games) {
+    writeJson(PRACTICE_KEY, games);
+}
+
+function normalizeDivisionName(raw) {
+    return String(raw || '').trim().replace(/\s+/g, ' ');
+}
+
+function fillDivisionSelect(selectElement, selectedValue = '') {
+    if (!selectElement) return;
+    const divisions = Object.keys(getDivisionMap());
+    selectElement.innerHTML = '<option value="">Select Division to Manage</option>';
+    divisions.forEach(division => {
+        const option = document.createElement('option');
+        option.value = division;
+        option.textContent = `Division ${division}`;
+        selectElement.appendChild(option);
+    });
+    if (selectedValue && divisions.includes(selectedValue)) {
+        selectElement.value = selectedValue;
+    }
+}
+
+function setDivisionManagerEnabled(enabled) {
+    [newDivisionInput, addDivisionButton, manageDivisionSelect, renameDivisionInput, renameDivisionButton, deleteDivisionButton, newTeamInput, addTeamButton].forEach(el => {
+        if (el) el.disabled = !enabled;
+    });
+    if (divisionTeamList) {
+        divisionTeamList.querySelectorAll('button').forEach(button => {
+            button.disabled = !enabled;
+        });
+    }
+}
+
+function renderDivisionTeamList() {
+    if (!divisionTeamList || !manageDivisionSelect) return;
+    const divisionMap = getDivisionMap();
+    const selectedDivision = manageDivisionSelect.value;
+    divisionTeamList.innerHTML = '';
+
+    if (!selectedDivision || !divisionMap[selectedDivision]) {
+        const li = document.createElement('li');
+        li.textContent = 'Select a division to view teams.';
+        divisionTeamList.appendChild(li);
+        return;
+    }
+
+    const teams = divisionMap[selectedDivision];
+    if (!teams.length) {
+        const li = document.createElement('li');
+        li.textContent = 'No teams in this division yet.';
+        divisionTeamList.appendChild(li);
+        return;
+    }
+
+    teams.forEach(team => {
+        const li = document.createElement('li');
+        const text = document.createElement('span');
+        text.textContent = team;
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-btn';
+        removeBtn.textContent = 'Remove';
+        removeBtn.addEventListener('click', () => {
+            if (!isAdminLoggedIn()) {
+                divisionManagerStatus.textContent = 'Sign in as admin first.';
+                return;
+            }
+
+            const confirmDelete = confirm(`Delete team ${team} from Division ${selectedDivision}? This also removes related scheduled and practice games.`);
+            if (!confirmDelete) {
+                divisionManagerStatus.textContent = 'Team delete canceled.';
+                return;
+            }
+
+            const token = prompt(`Type DELETE TEAM to confirm removing ${team}.`);
+            if (token !== 'DELETE TEAM') {
+                divisionManagerStatus.textContent = 'Confirmation text did not match. Team was not deleted.';
+                return;
+            }
+
+            const latestMap = getDivisionMap();
+            latestMap[selectedDivision] = (latestMap[selectedDivision] || []).filter(item => item !== team);
+            saveDivisionMap(latestMap);
+
+            const existingGames = getSchedule();
+            const updatedGames = existingGames.filter(game => game.team1 !== team && game.team2 !== team);
+            saveSchedule(updatedGames);
+
+            const existingPractice = getPracticeSchedule();
+            const updatedPractice = existingPractice.filter(game => game.team1 !== team && game.team2 !== team);
+            savePracticeSchedule(updatedPractice);
+
+            const removedGameCount = existingGames.length - updatedGames.length;
+            const removedPracticeCount = existingPractice.length - updatedPractice.length;
+
+            renderDivisionManager(selectedDivision);
+            divisionManagerStatus.textContent = `Removed team ${team} from Division ${selectedDivision}. Cleaned up ${removedGameCount} scheduled game(s) and ${removedPracticeCount} practice game(s).`;
+        });
+
+        li.appendChild(text);
+        li.appendChild(removeBtn);
+        divisionTeamList.appendChild(li);
+    });
+
+    setDivisionManagerEnabled(isAdminLoggedIn());
+}
+
+function renderDivisionManager(selectedDivision = '') {
+    fillDivisionSelect(manageDivisionSelect, selectedDivision || (manageDivisionSelect ? manageDivisionSelect.value : ''));
+    renderDivisionTeamList();
+    if (!isAdminLoggedIn()) {
+        divisionManagerStatus.textContent = 'Sign in as admin to manage divisions and teams.';
     }
 }
 
@@ -497,6 +835,11 @@ function renderAuthState() {
     } else {
         authStatus.textContent = 'Not signed in.';
     }
+
+    setDivisionManagerEnabled(loggedIn);
+    renderDivisionManager();
+
+    renderSeasonPanel();
 }
 
 loginButton.addEventListener('click', () => {
@@ -579,9 +922,261 @@ createAdminButton.addEventListener('click', () => {
     authStatus.textContent = `Admin user ${username} created.`;
 });
 
+if (manageDivisionSelect) {
+    manageDivisionSelect.addEventListener('change', () => {
+        renderDivisionTeamList();
+    });
+}
+
+if (addDivisionButton) {
+    addDivisionButton.addEventListener('click', () => {
+        if (!isAdminLoggedIn()) {
+            divisionManagerStatus.textContent = 'Sign in as admin first.';
+            return;
+        }
+
+        const divisionName = normalizeDivisionName(newDivisionInput.value);
+        if (!divisionName) {
+            divisionManagerStatus.textContent = 'Enter a division name.';
+            return;
+        }
+
+        const divisionMap = getDivisionMap();
+        if (divisionMap[divisionName]) {
+            divisionManagerStatus.textContent = 'Division already exists.';
+            return;
+        }
+
+        divisionMap[divisionName] = [];
+        saveDivisionMap(divisionMap);
+        newDivisionInput.value = '';
+        renderDivisionManager(divisionName);
+        divisionManagerStatus.textContent = `Added Division ${divisionName}.`;
+    });
+}
+
+if (renameDivisionButton) {
+    renameDivisionButton.addEventListener('click', () => {
+        if (!isAdminLoggedIn()) {
+            divisionManagerStatus.textContent = 'Sign in as admin first.';
+            return;
+        }
+
+        const selectedDivision = manageDivisionSelect.value;
+        const renamedDivision = normalizeDivisionName(renameDivisionInput.value);
+        if (!selectedDivision) {
+            divisionManagerStatus.textContent = 'Select a division to rename.';
+            return;
+        }
+        if (!renamedDivision) {
+            divisionManagerStatus.textContent = 'Enter a new division name.';
+            return;
+        }
+        if (selectedDivision === renamedDivision) {
+            divisionManagerStatus.textContent = 'Division name is unchanged.';
+            return;
+        }
+
+        const divisionMap = getDivisionMap();
+        if (divisionMap[renamedDivision]) {
+            divisionManagerStatus.textContent = 'A division with that name already exists.';
+            return;
+        }
+
+        const updatedMap = {};
+        Object.keys(divisionMap).forEach(division => {
+            if (division === selectedDivision) {
+                updatedMap[renamedDivision] = divisionMap[division];
+            } else {
+                updatedMap[division] = divisionMap[division];
+            }
+        });
+        saveDivisionMap(updatedMap);
+
+        const schedule = getSchedule();
+        schedule.forEach(game => {
+            if (game.division === selectedDivision) {
+                game.division = renamedDivision;
+            }
+        });
+        saveSchedule(schedule);
+
+        const practice = getPracticeSchedule();
+        practice.forEach(game => {
+            if (game.div1 === selectedDivision) game.div1 = renamedDivision;
+            if (game.div2 === selectedDivision) game.div2 = renamedDivision;
+        });
+        savePracticeSchedule(practice);
+
+        renameDivisionInput.value = '';
+        renderDivisionManager(renamedDivision);
+        divisionManagerStatus.textContent = `Renamed Division ${selectedDivision} to Division ${renamedDivision}.`;
+    });
+}
+
+if (deleteDivisionButton) {
+    deleteDivisionButton.addEventListener('click', () => {
+        if (!isAdminLoggedIn()) {
+            divisionManagerStatus.textContent = 'Sign in as admin first.';
+            return;
+        }
+
+        const selectedDivision = manageDivisionSelect.value;
+        if (!selectedDivision) {
+            divisionManagerStatus.textContent = 'Select a division to delete.';
+            return;
+        }
+
+        const confirmDelete = confirm(`Delete Division ${selectedDivision}? This removes the division, its teams, and related schedule/practice games.`);
+        if (!confirmDelete) {
+            divisionManagerStatus.textContent = 'Division delete canceled.';
+            return;
+        }
+
+        const token = prompt(`Type DELETE DIVISION ${selectedDivision} to confirm.`);
+        if (token !== `DELETE DIVISION ${selectedDivision}`) {
+            divisionManagerStatus.textContent = 'Confirmation text did not match. Division was not deleted.';
+            return;
+        }
+
+        const divisionMap = getDivisionMap();
+        const teams = divisionMap[selectedDivision] || [];
+        delete divisionMap[selectedDivision];
+        saveDivisionMap(divisionMap);
+
+        const schedule = getSchedule();
+        const nextSchedule = schedule.filter(game => {
+            const teamMatch = teams.includes(game.team1) || teams.includes(game.team2);
+            return game.division !== selectedDivision && !teamMatch;
+        });
+        saveSchedule(nextSchedule);
+
+        const practice = getPracticeSchedule();
+        const nextPractice = practice.filter(game => {
+            const byDivision = game.div1 === selectedDivision || game.div2 === selectedDivision;
+            const byTeam = teams.includes(game.team1) || teams.includes(game.team2);
+            return !byDivision && !byTeam;
+        });
+        savePracticeSchedule(nextPractice);
+
+        const removedGameCount = schedule.length - nextSchedule.length;
+        const removedPracticeCount = practice.length - nextPractice.length;
+
+        renderDivisionManager();
+        divisionManagerStatus.textContent = `Deleted Division ${selectedDivision}. Removed ${teams.length} team(s), ${removedGameCount} scheduled game(s), and ${removedPracticeCount} practice game(s).`;
+    });
+}
+
+if (addTeamButton) {
+    addTeamButton.addEventListener('click', () => {
+        if (!isAdminLoggedIn()) {
+            divisionManagerStatus.textContent = 'Sign in as admin first.';
+            return;
+        }
+
+        const selectedDivision = manageDivisionSelect.value;
+        const teamName = String(newTeamInput.value || '').trim();
+        if (!selectedDivision) {
+            divisionManagerStatus.textContent = 'Select a division first.';
+            return;
+        }
+        if (!teamName) {
+            divisionManagerStatus.textContent = 'Enter a team name.';
+            return;
+        }
+
+        const divisionMap = getDivisionMap();
+        const exists = (divisionMap[selectedDivision] || []).some(team => team.toLowerCase() === teamName.toLowerCase());
+        if (exists) {
+            divisionManagerStatus.textContent = 'Team already exists in this division.';
+            return;
+        }
+
+        divisionMap[selectedDivision].push(teamName);
+        saveDivisionMap(divisionMap);
+        newTeamInput.value = '';
+        renderDivisionManager(selectedDivision);
+        divisionManagerStatus.textContent = `Added ${teamName} to Division ${selectedDivision}.`;
+    });
+}
+
+// ===== SEASON SETTINGS =====
+const seasonForm         = document.getElementById('season-form');
+const seasonNameSelect   = document.getElementById('season-name');
+const seasonYearInput    = document.getElementById('season-year');
+const seasonStartInput   = document.getElementById('season-start');
+const seasonEndInput     = document.getElementById('season-end');
+const seasonCurrentDiv   = document.getElementById('season-current-display');
+const seasonAuthNote     = document.getElementById('season-auth-note');
+
+function getActiveSeason() {
+    return readJson(SEASON_KEY, null);
+}
+
+function formatSeasonDate(dateKey) {
+    if (!dateKey) return '—';
+    const d = new Date(`${dateKey}T00:00:00`);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function renderSeasonPanel() {
+    const loggedIn = isAdminLoggedIn();
+    const season = getActiveSeason();
+
+    seasonAuthNote.style.display = loggedIn ? 'none' : 'block';
+    seasonForm.style.display = loggedIn ? 'grid' : 'none';
+
+    if (season) {
+        seasonCurrentDiv.style.display = 'block';
+        seasonCurrentDiv.innerHTML =
+            `<strong>${season.name} ${season.year}</strong><span class="season-badge">Active</span><br>` +
+            `<span style="font-size:13px;color:#555;">${formatSeasonDate(season.start)} &ndash; ${formatSeasonDate(season.end)}</span>`;
+    } else {
+        seasonCurrentDiv.style.display = loggedIn ? 'block' : 'none';
+        seasonCurrentDiv.innerHTML = '<em style="color:#888;font-size:13px;">No season configured yet.</em>';
+    }
+
+    if (loggedIn && season) {
+        seasonNameSelect.value  = season.name  || '';
+        seasonYearInput.value   = season.year  || '';
+        seasonStartInput.value  = season.start || '';
+        seasonEndInput.value    = season.end   || '';
+    }
+}
+
+seasonForm.addEventListener('submit', event => {
+    event.preventDefault();
+    if (!isAdminLoggedIn()) {
+        seasonAuthNote.textContent = 'Sign in as admin to save season settings.';
+        seasonAuthNote.style.display = 'block';
+        return;
+    }
+
+    const name  = seasonNameSelect.value;
+    const year  = parseInt(seasonYearInput.value, 10);
+    const start = seasonStartInput.value;
+    const end   = seasonEndInput.value;
+
+    if (!name || !year || !start || !end) {
+        authStatus.textContent = 'Please complete all season fields.';
+        return;
+    }
+
+    if (end < start) {
+        authStatus.textContent = 'Season end date must be on or after the start date.';
+        return;
+    }
+
+    writeJson(SEASON_KEY, { name, year, start, end });
+    renderSeasonPanel();
+    authStatus.textContent = `${name} ${year} season saved (${formatSeasonDate(start)} – ${formatSeasonDate(end)}).`;
+});
+
 ensureDefaults();
 renderAuthState();
 renderAnnouncements();
+renderSeasonPanel();
+renderDivisionManager();
 </script>
 
 </body>

@@ -896,12 +896,12 @@ footer {
             <h2>Weekly Game Calendar</h2>
             <!-- View toggle -->
             <div class="view-toggle">
-                <button class="view-toggle-btn active" data-view="week" type="button">Week View</button>
-                <button class="view-toggle-btn" data-view="park" type="button">By Park</button>
+                <button class="view-toggle-btn" data-view="week" type="button">Week View</button>
+                <button class="view-toggle-btn active" data-view="park" type="button">By Park</button>
             </div>
 
             <!-- Week calendar region -->
-            <div id="week-calendar-region">
+            <div id="week-calendar-region" style="display:none;">
                 <div class="calendar-controls">
                     <button id="prev-week" type="button">Previous Week</button>
                     <h3 id="week-label">Week Range</h3>
@@ -923,7 +923,7 @@ footer {
             </div>
 
             <!-- Park view region (hidden until toggled) -->
-            <div id="park-view" class="park-view">
+            <div id="park-view" class="park-view visible">
                 <div class="park-view-controls">
                     <div class="park-period-filter">
                         <button class="park-filter-btn active" data-period="week" type="button">Week</button>
@@ -976,7 +976,7 @@ footer {
                         <option value="">Select Home Team</option>
                     </select>
                     <select id="game-team2" required disabled>
-                        <option value="">Select Away Team</option>
+                        <option value="">Select Visitors Team</option>
                     </select>
                     <select id="game-status">
                         <option value="scheduled">On Schedule</option>
@@ -1020,7 +1020,7 @@ footer {
                         <option value="">Select Scheduled Game</option>
                     </select>
                     <input id="score-team1" type="number" min="0" placeholder="Home Team Score" required>
-                    <input id="score-team2" type="number" min="0" placeholder="Away Team Score" required>
+                    <input id="score-team2" type="number" min="0" placeholder="Visitors Team Score" required>
                     <button id="save-score-btn" type="submit">Save Score Update</button>
                 </form>
                 <ul id="scores-list"></ul>
@@ -1152,7 +1152,7 @@ let editingGameId = null;
 let isAdminUnlocked = false;
 let activeDivisionFilter = 'ALL';
 let parkViewPeriod = 'week';
-let parkViewDate = new Date();
+let parkViewDate = getNextAllowedGameDate(new Date());
 
 function readJson(key, fallback) {
     try {
@@ -1605,7 +1605,7 @@ function populateTeamsForDivision() {
     const teams = division ? teamsByDivision[division] || [] : [];
 
     gameTeam1Select.innerHTML = '<option value="">Select Home Team</option>';
-    gameTeam2Select.innerHTML = '<option value="">Select Away Team</option>';
+    gameTeam2Select.innerHTML = '<option value="">Select Visitors Team</option>';
 
     teams.forEach(team => {
         const option1 = document.createElement('option');
@@ -1660,7 +1660,7 @@ function renderWeekCalendar() {
                     ? `<div class="score">Score: ${game.team1} ${game.score1} - ${game.score2} ${game.team2}</div>`
                     : '';
                 const badge = status !== 'scheduled' ? ` <span class="status-badge status-${status}">${status}</span>` : '';
-                pill.innerHTML = `<div>${game.time} | ${game.park}${badge}</div><div>Div ${game.division}: Home ${game.team1} vs Away ${game.team2}</div>${scoreText}`;
+                pill.innerHTML = `<div>${game.time} | ${game.park}${badge}</div><div>Div ${game.division}: Home: ${game.team1} vs Visitors: ${game.team2}</div>${scoreText}`;
                 dayCard.appendChild(pill);
             });
         }
@@ -1697,7 +1697,7 @@ function renderSelectedDayGames() {
             ? ` | Score: ${game.score1}-${game.score2}`
             : '';
         const gameInfo = document.createElement('div');
-        gameInfo.innerHTML = `${game.time} | ${game.park} | Div ${game.division} | Home ${game.team1} vs Away ${game.team2}${scoreText} <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+        gameInfo.innerHTML = `${game.time} | ${game.park} | Div ${game.division} | Home: ${game.team1} vs Visitors: ${game.team2}${scoreText} <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
         li.appendChild(gameInfo);
 
         if (isAdminUnlocked) {
@@ -1769,7 +1769,7 @@ function renderScheduledGameOptions() {
     games.forEach(game => {
         const option = document.createElement('option');
         option.value = game.id;
-        option.textContent = `${game.date} ${game.time} | Div ${game.division} | Home ${game.team1} vs Away ${game.team2}`;
+        option.textContent = `${game.date} ${game.time} | Div ${game.division} | Home: ${game.team1} vs Visitors: ${game.team2}`;
         scheduledGameSelect.appendChild(option);
     });
 
@@ -1850,7 +1850,7 @@ scheduleForm.addEventListener('submit', event => {
     }
 
     if (team1 === team2) {
-        adminStatus.textContent = 'Home and Away teams must be different.';
+        adminStatus.textContent = 'Home and Visitors teams must be different.';
         return;
     }
 
@@ -1947,7 +1947,7 @@ scoreForm.addEventListener('submit', event => {
     renderSelectedDayGames();
     renderScheduledGameOptions();
     renderScoresList();
-    scoreAdminStatus.textContent = `Score saved for Home ${game.team1} vs Away ${game.team2}.`;
+    scoreAdminStatus.textContent = `Score saved for Home: ${game.team1} vs Visitors: ${game.team2}.`;
 });
 
 gameDivisionSelect.addEventListener('change', () => {
@@ -2127,7 +2127,7 @@ function renderParkView() {
                 row.innerHTML = `
                     <span class="park-col-meta">${game.date}</span>
                     <span class="park-col-meta">${game.time}</span>
-                    <span class="park-col-matchup"><span class="park-col-division">Div ${game.division}</span> Home ${game.team1} vs Away ${game.team2}${scoreText}</span>
+                    <span class="park-col-matchup"><span class="park-col-division">Div ${game.division}</span> Home: ${game.team1} vs Visitors: ${game.team2}${scoreText}</span>
                     <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>
                 `;
                 list.appendChild(row);

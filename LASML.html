@@ -1434,7 +1434,7 @@ function renderMiniSchedule() {
             const timeStr = `${hr12}:${m} ${ampm}`;
             const statusBit = game.status === 'postponed'
                 ? ' <span style="font-size:9px;color:#C86A2F;font-weight:700;">PPD</span>' : '';
-            row.innerHTML = `<span class="mini-time">${timeStr}</span><span class="mini-div">Div ${game.division}</span><span class="mini-teams">H: ${game.team1} | A: ${game.team2}${statusBit}</span>`;
+            row.innerHTML = `<span class="mini-time">${timeStr}</span><span class="mini-div">Div ${game.division}</span><span class="mini-teams">H: ${game.team1} | V: ${game.team2}${statusBit}</span>`;
             section.appendChild(row);
         });
 

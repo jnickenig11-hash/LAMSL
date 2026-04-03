@@ -973,10 +973,10 @@ footer {
                         <option value="E">Division E</option>
                     </select>
                     <select id="game-team1" required disabled>
-                        <option value="">Select Team 1</option>
+                        <option value="">Select Home Team</option>
                     </select>
                     <select id="game-team2" required disabled>
-                        <option value="">Select Team 2</option>
+                        <option value="">Select Away Team</option>
                     </select>
                     <select id="game-status">
                         <option value="scheduled">On Schedule</option>
@@ -1019,8 +1019,8 @@ footer {
                     <select id="scheduled-game-select" required>
                         <option value="">Select Scheduled Game</option>
                     </select>
-                    <input id="score-team1" type="number" min="0" placeholder="Team 1 Score" required>
-                    <input id="score-team2" type="number" min="0" placeholder="Team 2 Score" required>
+                    <input id="score-team1" type="number" min="0" placeholder="Home Team Score" required>
+                    <input id="score-team2" type="number" min="0" placeholder="Away Team Score" required>
                     <button id="save-score-btn" type="submit">Save Score Update</button>
                 </form>
                 <ul id="scores-list"></ul>
@@ -1604,8 +1604,8 @@ function populateTeamsForDivision() {
     const division = gameDivisionSelect.value;
     const teams = division ? teamsByDivision[division] || [] : [];
 
-    gameTeam1Select.innerHTML = '<option value="">Select Team 1</option>';
-    gameTeam2Select.innerHTML = '<option value="">Select Team 2</option>';
+    gameTeam1Select.innerHTML = '<option value="">Select Home Team</option>';
+    gameTeam2Select.innerHTML = '<option value="">Select Away Team</option>';
 
     teams.forEach(team => {
         const option1 = document.createElement('option');
@@ -1660,7 +1660,7 @@ function renderWeekCalendar() {
                     ? `<div class="score">Score: ${game.team1} ${game.score1} - ${game.score2} ${game.team2}</div>`
                     : '';
                 const badge = status !== 'scheduled' ? ` <span class="status-badge status-${status}">${status}</span>` : '';
-                pill.innerHTML = `<div>${game.time} | ${game.park}${badge}</div><div>Div ${game.division}: ${game.team1} vs ${game.team2}</div>${scoreText}`;
+                pill.innerHTML = `<div>${game.time} | ${game.park}${badge}</div><div>Div ${game.division}: Home ${game.team1} vs Away ${game.team2}</div>${scoreText}`;
                 dayCard.appendChild(pill);
             });
         }
@@ -1697,7 +1697,7 @@ function renderSelectedDayGames() {
             ? ` | Score: ${game.score1}-${game.score2}`
             : '';
         const gameInfo = document.createElement('div');
-        gameInfo.innerHTML = `${game.time} | ${game.park} | Div ${game.division} | ${game.team1} vs ${game.team2}${scoreText} <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+        gameInfo.innerHTML = `${game.time} | ${game.park} | Div ${game.division} | Home ${game.team1} vs Away ${game.team2}${scoreText} <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
         li.appendChild(gameInfo);
 
         if (isAdminUnlocked) {
@@ -1769,7 +1769,7 @@ function renderScheduledGameOptions() {
     games.forEach(game => {
         const option = document.createElement('option');
         option.value = game.id;
-        option.textContent = `${game.date} ${game.time} | Div ${game.division} | ${game.team1} vs ${game.team2}`;
+        option.textContent = `${game.date} ${game.time} | Div ${game.division} | Home ${game.team1} vs Away ${game.team2}`;
         scheduledGameSelect.appendChild(option);
     });
 
@@ -1850,7 +1850,7 @@ scheduleForm.addEventListener('submit', event => {
     }
 
     if (team1 === team2) {
-        adminStatus.textContent = 'Team 1 and Team 2 must be different.';
+        adminStatus.textContent = 'Home and Away teams must be different.';
         return;
     }
 
@@ -1947,7 +1947,7 @@ scoreForm.addEventListener('submit', event => {
     renderSelectedDayGames();
     renderScheduledGameOptions();
     renderScoresList();
-    scoreAdminStatus.textContent = `Score saved for ${game.team1} vs ${game.team2}.`;
+    scoreAdminStatus.textContent = `Score saved for Home ${game.team1} vs Away ${game.team2}.`;
 });
 
 gameDivisionSelect.addEventListener('change', () => {
@@ -2127,7 +2127,7 @@ function renderParkView() {
                 row.innerHTML = `
                     <span class="park-col-meta">${game.date}</span>
                     <span class="park-col-meta">${game.time}</span>
-                    <span class="park-col-matchup"><span class="park-col-division">Div ${game.division}</span> ${game.team1} vs ${game.team2}${scoreText}</span>
+                    <span class="park-col-matchup"><span class="park-col-division">Div ${game.division}</span> Home ${game.team1} vs Away ${game.team2}${scoreText}</span>
                     <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>
                 `;
                 list.appendChild(row);

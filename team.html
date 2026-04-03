@@ -911,10 +911,11 @@ function renderLatestResults(games) {
     recent.forEach(item => {
         const li = document.createElement('li');
         const teamIsHome = item.team1 === team;
+        const sideLabel = teamIsHome ? 'Home' : 'Away';
         const myScore = teamIsHome ? item.score1 : item.score2;
         const oppTeam = teamIsHome ? item.team2 : item.team1;
         const oppScore = teamIsHome ? item.score2 : item.score1;
-        li.innerHTML = `<span class="score-highlight">${myScore}-${oppScore}</span> vs ${oppTeam} (${item.date})`;
+        li.innerHTML = `<span class="score-highlight">${myScore}-${oppScore}</span> (${sideLabel}) vs ${oppTeam} (${item.date})`;
         latestResults.appendChild(li);
     });
 }
@@ -928,7 +929,7 @@ function renderScheduleTable(games) {
     const rows = games.map(item => {
         const status = item.status || 'scheduled';
         const scoreText = item.score1 !== '' && item.score2 !== ''
-            ? `${item.team1} ${item.score1} - ${item.score2} ${item.team2}`
+            ? `Home ${item.team1} ${item.score1} - ${item.score2} Away ${item.team2}`
             : '-';
         return `
             <tr>
@@ -936,7 +937,7 @@ function renderScheduleTable(games) {
                 <td>${item.time || '-'}</td>
                 <td>${item.gameType}</td>
                 <td>${item.park || '-'}</td>
-                <td>${item.team1} vs ${item.team2}</td>
+                <td>Home ${item.team1} vs Away ${item.team2}</td>
                 <td>${item.division || '-'}</td>
                 <td><span class="status-badge status-${status}">${toStatusLabel(status)}</span></td>
                 <td>${scoreText}</td>

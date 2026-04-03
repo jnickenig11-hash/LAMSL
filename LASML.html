@@ -491,14 +491,14 @@ header {
 
 .mini-schedule-panel > h3 {
     color: #12324A;
-    font-size: 13px;
+    font-size: 12pt;
     margin: 0 0 2px;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
 .mini-schedule-date {
-    font-size: 12px;
+    font-size: 12pt;
     color: #C86A2F;
     font-weight: 700;
     margin-bottom: 8px;
@@ -516,7 +516,7 @@ header {
     background: #12324A;
     color: white;
     font-family: 'Oswald', 'Barlow Condensed', sans-serif;
-    font-size: 11px;
+    font-size: 12pt;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -526,7 +526,7 @@ header {
 }
 
 .mini-game-row {
-    font-size: 11px;
+    font-size: 12pt;
     padding: 3px 2px;
     border-bottom: 1px solid #f0f0f0;
     display: grid;
@@ -543,19 +543,19 @@ header {
 
 .mini-div {
     color: #888;
-    font-size: 10px;
+    font-size: 12pt;
 }
 
 .mini-teams {
     color: #333;
-    font-size: 10px;
+    font-size: 12pt;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .mini-schedule-empty {
-    font-size: 12px;
+    font-size: 12pt;
     color: #888;
     font-style: italic;
     text-align: center;
@@ -1434,7 +1434,7 @@ function renderMiniSchedule() {
             const timeStr = `${hr12}:${m} ${ampm}`;
             const statusBit = game.status === 'postponed'
                 ? ' <span style="font-size:9px;color:#C86A2F;font-weight:700;">PPD</span>' : '';
-            row.innerHTML = `<span class="mini-time">${timeStr}</span><span class="mini-div">Div ${game.division}</span><span class="mini-teams">${game.team1} vs ${game.team2}${statusBit}</span>`;
+            row.innerHTML = `<span class="mini-time">${timeStr}</span><span class="mini-div">Div ${game.division}</span><span class="mini-teams">H: ${game.team1} | A: ${game.team2}${statusBit}</span>`;
             section.appendChild(row);
         });
 

@@ -873,7 +873,7 @@ footer {
 <body>
 <div class="banner">
     <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
-    <h1>Latin American Men's Softball League</h1>
+    <h1>Latin & american men's softball league</h1>
     <div class="subtitle">Established 1976</div>
     <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
 </div>
@@ -885,6 +885,7 @@ footer {
             <li><a href="LASML.html">Home</a></li>
             <li><a href="standings.html">Standings</a></li>
             <li><a href="schedule.html" class="active-tab">Schedule</a></li>
+            <li><a href="teams.html">Teams</a></li>
             <li><a href="rules.html">Rules</a></li>
             <li><a href="meetingnotes.html">Meeting Notes</a></li>
             <li><a href="events.html">Events &amp; Fundraisers</a></li>
@@ -991,7 +992,7 @@ footer {
                     <button id="save-schedule-btn" type="submit">Save Scheduled Game</button>
                 </form>
                 <p class="admin-status" style="margin-top:10px;">
-                    Manual scheduling rules: Sunday only, 8:00AM–12:30PM time slots, one game per field/time slot, max 4 games per field/day.
+                    Manual scheduling rules: Sunday only, 8:00AMï¿½12:30PM time slots, one game per field/time slot, max 4 games per field/day.
                 </p>
 
                 <div class="generator-panel">
@@ -1180,6 +1181,37 @@ function parseDateKey(dateKey) {
     return new Date(`${dateKey}T00:00:00`);
 }
 
+function apiUrl(path) {
+    return new URL(path, window.location.href).toString();
+}
+
+async function notifyScheduleUpdate(game, action) {
+    const users = readJson(USERS_KEY, []);
+    const recipientEmails = users
+        .filter(user => typeof user.email === 'string' && user.email.trim())
+        .map(user => user.email.trim());
+
+    const payload = {
+        action: action || 'updated',
+        game: game || {},
+        recipients: recipientEmails
+    };
+
+    try {
+        const response = await fetch(apiUrl('/notify-schedule-update'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            console.warn('Schedule notification failed', result.error || result);
+        }
+    } catch (error) {
+        console.warn('Schedule notification error', error);
+    }
+}
+
 function getWeekStart(date) {
     const copy = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     copy.setDate(copy.getDate() - copy.getDay());
@@ -1331,6 +1363,19 @@ function refreshDivisionDependentUI() {
 function isAdminLoggedIn() {
     const session = readJson(SESSION_KEY, null);
     return !!(session && session.role === 'admin');
+}
+
+function hasRole(...roles) {
+    const session = readJson(SESSION_KEY, null);
+    return !!(session && roles.includes(session.role));
+}
+
+function canManageScores() {
+    return hasRole('admin', 'umpire');
+}
+
+function canEditSchedule() {
+    return hasRole('admin');
 }
 
 function getSchedule() {
@@ -1705,42 +1750,46 @@ function renderSelectedDayGames() {
         gameInfo.innerHTML = `${game.time} | ${game.park} | Div ${game.division} | Home: ${game.team1} vs Visitors: ${game.team2}${scoreText} <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
         li.appendChild(gameInfo);
 
-        if (isAdminUnlocked) {
+        const canManage = canManageScores();
+    if (canManage) {
             const actions = document.createElement('div');
             actions.className = 'action-buttons';
 
-            const editBtn = document.createElement('button');
-            editBtn.type = 'button';
-            editBtn.className = 'edit-btn';
-            editBtn.textContent = 'Edit';
-            editBtn.addEventListener('click', () => {
-                editingGameId = game.id;
-                gameDateInput.value = game.date;
-                gameTimeInput.value = game.time;
-                gameParkSelect.value = game.park;
-                gameDivisionSelect.value = game.division;
-                populateTeamsForDivision();
-                gameTeam1Select.value = game.team1;
-                gameTeam2Select.value = game.team2;
-                if (gameStatusSelect) gameStatusSelect.value = status;
-                saveScheduleButton.textContent = 'Update Scheduled Game';
-            });
+            if (canEditSchedule()) {
+                const editBtn = document.createElement('button');
+                editBtn.type = 'button';
+                editBtn.className = 'edit-btn';
+                editBtn.textContent = 'Edit';
+                editBtn.addEventListener('click', () => {
+                    editingGameId = game.id;
+                    gameDateInput.value = game.date;
+                    gameTimeInput.value = game.time;
+                    gameParkSelect.value = game.park;
+                    gameDivisionSelect.value = game.division;
+                    populateTeamsForDivision();
+                    gameTeam1Select.value = game.team1;
+                    gameTeam2Select.value = game.team2;
+                    if (gameStatusSelect) gameStatusSelect.value = status;
+                    saveScheduleButton.textContent = 'Update Scheduled Game';
+                });
+                actions.appendChild(editBtn);
 
-            const deleteBtn = document.createElement('button');
-            deleteBtn.type = 'button';
-            deleteBtn.className = 'delete-btn';
-            deleteBtn.textContent = 'Delete';
-            deleteBtn.addEventListener('click', () => {
-                const remaining = getSchedule().filter(item => item.id !== game.id);
-                saveSchedule(remaining);
-                renderWeekCalendar();
-                renderSelectedDayGames();
-                renderScheduledGameOptions();
-                renderScoresList();
-                renderParkView();
-            });
+                const deleteBtn = document.createElement('button');
+                deleteBtn.type = 'button';
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.addEventListener('click', () => {
+                    const remaining = getSchedule().filter(item => item.id !== game.id);
+                    saveSchedule(remaining);
+                    renderWeekCalendar();
+                    renderSelectedDayGames();
+                    renderScheduledGameOptions();
+                    renderScoresList();
+                    renderParkView();
+                });
+                actions.appendChild(deleteBtn);
+            }
 
-            // Status change selector
             const statusSel = document.createElement('select');
             statusSel.className = 'practice-status-select';
             [['scheduled','On Schedule'],['postponed','Postponed'],['cancelled','Cancelled']].forEach(([val, label]) => {
@@ -1753,11 +1802,15 @@ function renderSelectedDayGames() {
             statusSel.addEventListener('change', () => {
                 const all = getSchedule();
                 const g = all.find(item => item.id === game.id);
-                if (g) { g.status = statusSel.value; saveSchedule(all); renderWeekCalendar(); renderSelectedDayGames(); renderParkView(); }
+                if (g) {
+                    g.status = statusSel.value;
+                    saveSchedule(all);
+                    renderWeekCalendar();
+                    renderSelectedDayGames();
+                    renderParkView();
+                    notifyScheduleUpdate(g, 'updated');
+                }
             });
-
-            actions.appendChild(editBtn);
-            actions.appendChild(deleteBtn);
             actions.appendChild(statusSel);
             li.appendChild(actions);
         }
@@ -1809,19 +1862,23 @@ function setFormAccess(formElement, enabled) {
 
 function applyAdminPermissions() {
     isAdminUnlocked = isAdminLoggedIn();
+    const scoreAccess = canManageScores();
     if (isAdminUnlocked) {
         adminStatus.textContent = 'Editor unlocked from admin sign-in. Scheduling and score updates enabled.';
         scoreAdminStatus.textContent = 'Admin access confirmed. Select a scheduled game and update score.';
+    } else if (scoreAccess) {
+        adminStatus.textContent = 'Score editor unlocked for umpire access. Schedule editing is disabled.';
+        scoreAdminStatus.textContent = 'Umpire access confirmed. Select a scheduled game and update score or status.';
     } else {
         adminStatus.textContent = 'Locked. Sign in at administrators.html as an admin user to edit schedules.';
-        scoreAdminStatus.textContent = 'Admin sign-in required to update scores.';
+        scoreAdminStatus.textContent = 'Admin or umpire sign-in required to update scores.';
         editingGameId = null;
         saveScheduleButton.textContent = 'Save Scheduled Game';
         scoreForm.reset();
     }
 
     setFormAccess(scheduleForm, isAdminUnlocked);
-    setFormAccess(scoreForm, isAdminUnlocked);
+    setFormAccess(scoreForm, scoreAccess);
     if (generatorAllDivisionsInput) {
         generatorAllDivisionsInput.disabled = !isAdminUnlocked;
     }
@@ -1875,6 +1932,8 @@ scheduleForm.addEventListener('submit', event => {
         return;
     }
 
+    let savedGame = null;
+    let scheduleAction = 'added';
     if (editingGameId) {
         const existing = games.find(game => game.id === editingGameId);
         if (existing) {
@@ -1885,9 +1944,11 @@ scheduleForm.addEventListener('submit', event => {
             existing.team1 = team1;
             existing.team2 = team2;
             existing.status = gameStatus;
+            savedGame = existing;
+            scheduleAction = 'updated';
         }
     } else {
-        games.push({
+        savedGame = {
             id: `game-${Date.now()}`,
             date,
             time,
@@ -1898,7 +1959,8 @@ scheduleForm.addEventListener('submit', event => {
             status: gameStatus,
             score1: '',
             score2: ''
-        });
+        };
+        games.push(savedGame);
     }
 
     saveSchedule(games);
@@ -1918,12 +1980,15 @@ scheduleForm.addEventListener('submit', event => {
     renderScoresList();
     renderParkView();
     adminStatus.textContent = 'Schedule updated successfully.';
+    if (savedGame) {
+        notifyScheduleUpdate(savedGame, scheduleAction);
+    }
 });
 
 scoreForm.addEventListener('submit', event => {
     event.preventDefault();
-    if (!isAdminUnlocked) {
-        scoreAdminStatus.textContent = 'Sign in as admin first.';
+    if (!canManageScores()) {
+        scoreAdminStatus.textContent = 'Sign in as admin or umpire first.';
         return;
     }
 
@@ -2027,8 +2092,9 @@ generatorRunButton.addEventListener('click', () => {
     renderScheduledGameOptions();
     renderScoresList();
     renderParkView();
+    notifyScheduleUpdate({ action: 'generated', count: generatedCount, sourceDivisions: divisionsToGenerate }, 'generated');
 
-    adminStatus.textContent = `Generated ${generatedCount} games on Sundays only (8:00AM–12:30PM). Scheduler fills next available park/time slots across all ${ALL_PARKS.length} parks before moving to the next date, with no duplicate field/time slot assignments.`;
+    adminStatus.textContent = `Generated ${generatedCount} games on Sundays only (8:00AMï¿½12:30PM). Scheduler fills next available park/time slots across all ${ALL_PARKS.length} parks before moving to the next date, with no duplicate field/time slot assignments.`;
 });
 
 refreshAdminButton.addEventListener('click', () => {
@@ -2079,7 +2145,7 @@ function getParkRangeLabel() {
     if (parkViewPeriod === 'month') {
         return parseDateKey(start).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
     }
-    return `${parseDateKey(start).toLocaleDateString()} – ${parseDateKey(end).toLocaleDateString()}`;
+    return `${parseDateKey(start).toLocaleDateString()} ï¿½ ${parseDateKey(end).toLocaleDateString()}`;
 }
 
 function navigateParkView(direction) {

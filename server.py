@@ -1,5 +1,8 @@
 import json
+import os
 import re
+import smtplib
+from email.message import EmailMessage
 from email.parser import BytesParser
 from email.policy import default
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -29,6 +32,17 @@ ALLOWED_EXTENSIONS = {
     ".tiff",
     ".heic",
     ".heif",
+    ".mp4",
+    ".mov",
+    ".avi",
+    ".mkv",
+    ".webm",
+    ".mp3",
+    ".wav",
+    ".ogg",
+    ".flac",
+    ".m4a",
+    ".aac",
 }
 
 CONTENT_TYPE_EXTENSION_MAP = {
@@ -45,6 +59,17 @@ CONTENT_TYPE_EXTENSION_MAP = {
     "image/tiff": ".tif",
     "image/heic": ".heic",
     "image/heif": ".heif",
+    "video/mp4": ".mp4",
+    "video/quicktime": ".mov",
+    "video/x-msvideo": ".avi",
+    "video/x-matroska": ".mkv",
+    "video/webm": ".webm",
+    "audio/mpeg": ".mp3",
+    "audio/wav": ".wav",
+    "audio/ogg": ".ogg",
+    "audio/flac": ".flac",
+    "audio/mp4": ".m4a",
+    "audio/aac": ".aac",
 }
 
 
@@ -187,6 +212,8 @@ class UploadHandler(SimpleHTTPRequestHandler):
             self._handle_upload(EF_IMAGES_DIR, "EF_Images", EF_META_FILE)
         elif route == "/upload-team-photo":
             self._handle_team_photo_upload()
+        elif route == "/notify-schedule-update":
+            self._handle_schedule_notification()
         elif route == "/remove-photo":
             self._handle_remove_photo(SLIDESHOW_DIR, SLIDESHOW_META_FILE)
         elif route == "/remove-ef-photo":
@@ -373,6 +400,86 @@ class UploadHandler(SimpleHTTPRequestHandler):
                 "path": _relative_team_profile_web_path(relative_path),
             },
         )
+
+    def _handle_schedule_notification(self) -> None:
+        content_length = int(self.headers.get("Content-Length", "0"))
+        if content_length <= 0:
+            self._json_response(400, {"success": False, "error": "Invalid request body"})
+            return
+
+        try:
+            payload = json.loads(self.rfile.read(content_length).decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            self._json_response(400, {"success": False, "error": "Invalid JSON body"})
+            return
+
+        action = str(payload.get("action", "updated")).strip() or "updated"
+        game = payload.get("game", {})
+        recipients = payload.get("recipients", [])
+        if isinstance(recipients, str):
+            recipients = [recipients]
+        recipients = [str(email).strip() for email in recipients if str(email).strip()]
+
+        env_recipients = [addr.strip() for addr in os.environ.get("NOTIFY_RECIPIENTS", "").split(",") if addr.strip()]
+        recipients = list(dict.fromkeys(recipients + env_recipients))
+
+        if not recipients:
+            self._json_response(200, {"success": True, "warning": "No recipient email addresses configured."})
+            return
+
+        if not os.environ.get("SMTP_HOST"):
+            self._json_response(200, {"success": True, "warning": "SMTP_HOST is not configured. Notification not sent."})
+            return
+
+        try:
+            self._send_schedule_notification(action, game, recipients)
+            self._json_response(200, {"success": True})
+        except Exception as error:
+            self._json_response(500, {"success": False, "error": str(error)})
+
+    def _send_schedule_notification(self, action: str, game: dict, recipients: list[str]) -> None:
+        smtp_host = os.environ.get("SMTP_HOST", "")
+        smtp_port = int(os.environ.get("SMTP_PORT", "587") or "587")
+        smtp_user = os.environ.get("SMTP_USER", "")
+        smtp_password = os.environ.get("SMTP_PASSWORD", "")
+        smtp_from = os.environ.get("SMTP_FROM", "noreply@lamsl.local")
+        smtp_use_ssl = os.environ.get("SMTP_USE_SSL", "false").lower() in ("1", "true", "yes")
+        smtp_starttls = os.environ.get("SMTP_USE_TLS", "true").lower() in ("1", "true", "yes")
+
+        if not smtp_host:
+            raise RuntimeError("SMTP_HOST is not configured on the server.")
+
+        game_description = (
+            f"{game.get('team1', 'Team 1')} vs {game.get('team2', 'Team 2')}"
+            f" on {game.get('date', 'unknown date')} at {game.get('time', 'unknown time')}"
+            f" in {game.get('park', 'unknown park')} ({game.get('division', 'unknown division')})."
+        )
+
+        subject = f"LAMSL Schedule {action.capitalize()} Notification"
+        body = (
+            f"A scheduled game has been {action} in the LAMSL schedule.\n\n"
+            f"Game: {game_description}\n"
+            f"Status: {game.get('status', 'scheduled')}\n\n"
+            f"Visit the schedule page to review the latest game details.\n"
+        )
+
+        message = EmailMessage()
+        message["Subject"] = subject
+        message["From"] = smtp_from
+        message["To"] = ", ".join(recipients)
+        message.set_content(body)
+
+        if smtp_use_ssl:
+            smtp_client = smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=10)
+        else:
+            smtp_client = smtplib.SMTP(smtp_host, smtp_port, timeout=10)
+
+        with smtp_client as smtp:
+            if not smtp_use_ssl and smtp_starttls:
+                smtp.starttls()
+            if smtp_user and smtp_password:
+                smtp.login(smtp_user, smtp_password)
+            smtp.send_message(message)
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)

@@ -169,20 +169,134 @@ header {
 
 .team-content-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    align-items: stretch;
-    margin-bottom: 20px;
-}
+        grid-template-columns: 1.35fr 1fr 0.95fr;
+        gap: 16px;
+        align-items: stretch;
+        margin-bottom: 20px;
+    }
 
-.content-panel {
-    border: 1px solid #dbe2ea;
-    border-radius: 14px;
-    background: linear-gradient(180deg, #ffffff, #f8fbfe);
-    padding: 16px;
-    min-width: 0;
-}
+    .team-manager-panel {
+        display: grid;
+        gap: 16px;
+    }
 
+    .content-panel {
+        border: 1px solid #dbe2ea;
+        border-radius: 14px;
+        background: linear-gradient(180deg, #ffffff, #f8fbfe);
+        padding: 16px;
+        min-width: 0;
+    }
+
+    .player-form-grid {
+        display: grid;
+        gap: 12px;
+    }
+
+    .player-form-grid label {
+        font-weight: 700;
+        font-size: 14px;
+        color: #12324A;
+    }
+
+    .player-form-grid input,
+    .player-form-grid textarea,
+    .player-form-grid select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #c5d0da;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 14px;
+    }
+
+    .player-form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .player-form-actions button {
+        background: #12324A;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 14px;
+        cursor: pointer;
+        font-family: inherit;
+        font-weight: 700;
+    }
+
+    .player-form-actions button.secondary {
+        background: #ced7df;
+        color: #12324A;
+    }
+
+    .player-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .player-card {
+        border: 1px solid #dbe2ea;
+        border-radius: 12px;
+        padding: 14px;
+        background: #ffffff;
+        display: grid;
+        grid-template-columns: 84px 1fr auto;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .player-card img {
+        width: 84px;
+        height: 84px;
+        border-radius: 14px;
+        object-fit: cover;
+        background: #f2f7fb;
+        border: 1px solid #d2dde8;
+    }
+
+    .player-card-content {
+        min-width: 0;
+    }
+
+    .player-card-content h4 {
+        margin: 0 0 6px;
+        font-size: 18px;
+    }
+
+    .player-card-content p {
+        margin: 4px 0;
+        font-size: 14px;
+        color: #334153;
+        line-height: 1.4;
+    }
+
+    .player-card-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-end;
+    }
+
+    .player-card-actions button {
+        background: #12324A;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 10px;
+        cursor: pointer;
+        font-size: 13px;
+    }
+
+    .player-card-actions button.danger {
+        background: #bd3a3a;
+    }
+
+    .player-profiles-empty {
+        color: #5d6c72;
+        margin: 0;
 .content-panel h3 {
     margin-top: 0;
     margin-bottom: 10px;
@@ -517,7 +631,8 @@ footer {
     }
 
     #team-schedule-wrap,
-    #roster-table-wrap {
+    #roster-table-wrap,
+    #player-checkin-panel {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
@@ -526,6 +641,75 @@ footer {
     #roster-table-wrap table {
         min-width: 640px;
     }
+
+    .schedule-row {
+        cursor: pointer;
+    }
+
+    .schedule-row:hover {
+        background: #f4f9ff;
+    }
+
+    #player-checkin-panel {
+        margin-top: 18px;
+        background: #f9fbfd;
+        border: 1px solid #dbe2ea;
+        border-radius: 14px;
+        padding: 16px;
+    }
+
+    #player-checkin-panel h4 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        color: #12324A;
+    }
+
+    .checkin-player-list {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .checkin-player-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 10px 12px;
+        border: 1px solid #d5dae1;
+        border-radius: 10px;
+        background: white;
+    }
+
+    .checkin-player-item label {
+        margin: 0;
+        flex: 1;
+        font-size: 14px;
+        color: #2f4250;
+    }
+
+    .checkin-player-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .checkin-player-actions button {
+        background: #12324A;
+        color: white;
+        border: none;
+        border-radius: 9px;
+        padding: 10px 14px;
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    .checkin-status {
+        margin: 0;
+        color: #334153;
+        font-size: 14px;
+    }
 }
 </style>
 </head>
@@ -533,7 +717,7 @@ footer {
 <body>
 <div class="banner">
     <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
-    <h1>Latin American Men's Softball League</h1>
+    <h1>Latin & american men's softball league</h1>
     <div class="subtitle">Established 1976</div>
     <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
 </div>
@@ -545,6 +729,7 @@ footer {
             <li><a href="LASML.html">Home</a></li>
             <li><a href="standings.html" class="active-tab">Standings</a></li>
             <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="teams.html">Teams</a></li>
             <li><a href="rules.html">Rules</a></li>
             <li><a href="events.html">Events &amp; Fundraisers</a></li>
             <li><a href="hallofchampions.html">Hall of Champions</a></li>
@@ -570,8 +755,8 @@ footer {
                             <img id="team-photo" alt="Team profile photo" style="display:none;">
                         </div>
                         <div class="team-photo-controls">
-                            <p id="team-photo-status" class="muted">Team profile photos are visible to all users. Admin sign-in required to upload.</p>
-                            <input id="team-photo-file" type="file" accept="image/*">
+                            <p id="team-photo-status" class="muted">Team profile media is visible to all users. Admin sign-in required to upload.</p>
+                            <input id="team-photo-file" type="file" accept="*/*">
                             <button id="upload-team-photo-btn" type="button">Upload Team Photo</button>
                         </div>
                     </div>
@@ -607,17 +792,57 @@ footer {
                     <input id="schedule-anchor-date" type="date" aria-label="Schedule anchor date">
                 </div>
                 <div id="team-schedule-wrap"></div>
+                <div id="player-checkin-panel" style="display:none;">
+                    <h4>Player Check-In</h4>
+                    <p id="checkin-game-label" class="muted">Select a scheduled game to check in players and update games played.</p>
+                    <div id="checkin-player-list" class="checkin-player-list"></div>
+                    <div class="checkin-player-actions">
+                        <button id="save-checkin-btn" type="button">Save Check-In</button>
+                        <button id="clear-checkin-btn" type="button" class="secondary">Clear Selection</button>
+                    </div>
+                    <p id="checkin-status" class="checkin-status"></p>
+                </div>
             </div>
 
             <div class="content-panel">
                 <h3>Team Roster</h3>
                 <div class="roster-controls">
                     <p id="roster-admin-status" class="muted">Admin sign-in required to upload roster spreadsheets.</p>
-                    <input id="roster-file" type="file" accept=".xlsx,.xls,.csv">
+                    <input id="roster-file" type="file" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
                     <button id="upload-roster-btn" type="button">Upload Roster Spreadsheet</button>
-                    <p class="muted">Spreadsheet tip: use column headers like Name, Number, Position, Phone.</p>
+                    <p class="muted">Spreadsheet tip: use column headers like Name, Position, Phone, Email.</p>
                 </div>
                 <div id="roster-table-wrap"></div>
+                <div id="player-profiles-wrap"></div>
+            </div>
+            <div class="content-panel team-manager-panel">
+                <h3>Team Manager Panel</h3>
+                <p class="muted">Add players and update their profile details.</p>
+                <div class="player-form-grid">
+                    <input id="player-id" type="hidden">
+                    <label for="player-name">Player Name</label>
+                    <input id="player-name" type="text" placeholder="Full name">
+
+                    <label for="player-position">Position(s)</label>
+                    <input id="player-position" type="text" placeholder="Primary positions">
+
+                    <label for="player-phone">Phone Number</label>
+                    <input id="player-phone" type="tel" placeholder="(555) 123-4567">
+
+                    <label for="player-email">Email Address</label>
+                    <input id="player-email" type="email" placeholder="name@example.com">
+
+                    <label for="player-photo-file">Player Photo</label>
+                    <input id="player-photo-file" type="file" accept="*/*">
+                </div>
+                <div class="player-form-actions">
+                    <button id="save-player-btn" type="button">Save Player</button>
+                    <button id="cancel-player-btn" type="button" class="secondary">Clear Form</button>
+                </div>
+                <section>
+                    <h4>Player Profiles</h4>
+                    <div id="player-list" class="player-list"></div>
+                </section>
             </div>
         </section>
     </main>
@@ -633,6 +858,8 @@ const SESSION_KEY = 'lamslSessionV1';
 const SCHEDULE_KEY = 'lamslWeeklyScheduleV3';
 const PRACTICE_KEY = 'lamslPracticeScheduleV1';
 const ROSTER_KEY = 'lamslTeamRostersV1';
+const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
+const TEAM_CHECKIN_KEY = 'lamslTeamGameCheckinsV1';
 
 const standingsByDivision = {
     A: [
@@ -720,6 +947,19 @@ function isAdminLoggedIn() {
     return !!(session && session.role === 'admin');
 }
 
+function hasRole(...roles) {
+    const session = readJson(SESSION_KEY, null);
+    return !!(session && roles.includes(session.role));
+}
+
+function canManageTeamContent() {
+    return hasRole('admin', 'team-manager');
+}
+
+function canCheckInPlayers() {
+    return hasRole('admin', 'team-manager', 'umpire', 'player');
+}
+
 function toStatusLabel(status) {
     if (!status || status === 'scheduled') return 'On Schedule';
     return status.charAt(0).toUpperCase() + status.slice(1);
@@ -756,6 +996,24 @@ const rosterAdminStatus = document.getElementById('roster-admin-status');
 const rosterFileInput = document.getElementById('roster-file');
 const uploadRosterBtn = document.getElementById('upload-roster-btn');
 const rosterTableWrap = document.getElementById('roster-table-wrap');
+const playerIdInput = document.getElementById('player-id');
+const playerNameInput = document.getElementById('player-name');
+const playerPositionInput = document.getElementById('player-position');
+const playerPhoneInput = document.getElementById('player-phone');
+const playerEmailInput = document.getElementById('player-email');
+const playerPhotoInput = document.getElementById('player-photo-file');
+const savePlayerBtn = document.getElementById('save-player-btn');
+const cancelPlayerBtn = document.getElementById('cancel-player-btn');
+const playerListWrap = document.getElementById('player-list');
+const playerCheckinPanel = document.getElementById('player-checkin-panel');
+const checkinGameLabel = document.getElementById('checkin-game-label');
+const checkinPlayerList = document.getElementById('checkin-player-list');
+const saveCheckinBtn = document.getElementById('save-checkin-btn');
+const clearCheckinBtn = document.getElementById('clear-checkin-btn');
+const checkinStatus = document.getElementById('checkin-status');
+
+let selectedGame = null;
+let selectedGameCheckins = [];
 
 function apiUrl(path) {
     return new URL(path, window.location.href).toString();
@@ -931,8 +1189,9 @@ function renderScheduleTable(games) {
         const scoreText = item.score1 !== '' && item.score2 !== ''
             ? `Home: ${item.team1} ${item.score1} - ${item.score2} Visitors: ${item.team2}`
             : '-';
+        const gameId = getGameId(item);
         return `
-            <tr>
+            <tr data-game-id="${gameId}" class="schedule-row">
                 <td>${item.date}</td>
                 <td>${item.time || '-'}</td>
                 <td>${item.gameType}</td>
@@ -962,6 +1221,13 @@ function renderScheduleTable(games) {
             <tbody>${rows}</tbody>
         </table>
     `;
+
+    if (selectedGame) {
+        const stillVisible = games.some(g => getGameId(g) === getGameId(selectedGame));
+        if (!stillVisible) {
+            hideCheckinPanel();
+        }
+    }
 }
 
 function applyScheduleFilters(allGames) {
@@ -1018,6 +1284,7 @@ function renderRoster() {
 
     if (!roster || !Array.isArray(roster.rows) || !roster.rows.length) {
         rosterTableWrap.innerHTML = '<p class="muted">No roster uploaded yet for this team.</p>';
+        renderPlayerProfiles();
         return;
     }
 
@@ -1036,26 +1303,311 @@ function renderRoster() {
             <tbody>${bodyHtml}</tbody>
         </table>
     `;
+    renderPlayerProfiles();
+}
+
+function getTeamPlayers() {
+    const store = readJson(TEAM_PLAYERS_KEY, {});
+    return store[team] || { players: [] };
+}
+
+function setTeamPlayers(payload) {
+    const store = readJson(TEAM_PLAYERS_KEY, {});
+    store[team] = payload;
+    writeJson(TEAM_PLAYERS_KEY, store);
+}
+
+function getTeamGameCheckins() {
+    const store = readJson(TEAM_CHECKIN_KEY, {});
+    return store[team] || {};
+}
+
+function setTeamGameCheckins(payload) {
+    const store = readJson(TEAM_CHECKIN_KEY, {});
+    store[team] = payload;
+    writeJson(TEAM_CHECKIN_KEY, store);
+}
+
+function getGameId(game) {
+    return String(game.id || `${game.date}|${game.time}|${game.team1}|${game.team2}`).trim();
+}
+
+function updateCheckinStatus(message, isError = false) {
+    checkinStatus.textContent = message || '';
+    checkinStatus.style.color = isError ? '#d32f2f' : '#2e7d32';
+}
+
+function showCheckinPanel(game) {
+    if (!game || !team || !canCheckInPlayers()) {
+        hideCheckinPanel();
+        return;
+    }
+
+    selectedGame = game;
+    const gameLabel = `${game.date} ${game.time || ''} — ${game.team1} vs ${game.team2}`;
+    checkinGameLabel.textContent = `Check in players for: ${gameLabel}`;
+    playerCheckinPanel.style.display = 'block';
+
+    const players = Array.isArray(getTeamPlayers().players) ? getTeamPlayers().players : [];
+    const gameId = getGameId(game);
+    const checkins = getTeamGameCheckins()[gameId] || { checkedIds: [] };
+    selectedGameCheckins = Array.isArray(checkins.checkedIds) ? [...checkins.checkedIds] : [];
+
+    checkinPlayerList.innerHTML = players.length
+        ? players.map(player => {
+            const checked = selectedGameCheckins.includes(player.id) ? 'checked' : '';
+            return `
+                <label class="checkin-player-item">
+                    <input type="checkbox" data-player-id="${player.id}" ${checked}>
+                    <span>${player.name} (${player.position || 'TBA'})</span>
+                </label>
+            `;
+        }).join('')
+        : '<p class="muted">Add player profiles first to use check-in.</p>';
+    updateCheckinStatus('Select the players who attended this game, then save check-in.');
+}
+
+function hideCheckinPanel() {
+    selectedGame = null;
+    selectedGameCheckins = [];
+    playerCheckinPanel.style.display = 'none';
+    checkinPlayerList.innerHTML = '';
+    updateCheckinStatus('');
+}
+
+function saveCheckinSelections() {
+    if (!canCheckInPlayers()) {
+        updateCheckinStatus('Sign in with umpire, team manager, or admin access to save check-ins.', true);
+        return;
+    }
+
+    if (!selectedGame || !team) {
+        updateCheckinStatus('No game selected for check-in.', true);
+        return;
+    }
+
+    const boxes = Array.from(checkinPlayerList.querySelectorAll('input[type="checkbox"]'));
+    const checkedIds = boxes.filter(box => box.checked).map(box => box.dataset.playerId);
+    const gameId = getGameId(selectedGame);
+    const allPlayers = Array.isArray(getTeamPlayers().players) ? getTeamPlayers().players : [];
+    const playerMap = Object.fromEntries(allPlayers.map(player => [player.id, player]));
+    const previousCheckins = Array.isArray(getTeamGameCheckins()[gameId]?.checkedIds) ? getTeamGameCheckins()[gameId].checkedIds : [];
+
+    const toAdd = checkedIds.filter(id => !previousCheckins.includes(id));
+    const toRemove = previousCheckins.filter(id => !checkedIds.includes(id));
+
+    const players = allPlayers.map(player => {
+        const current = Number(player.gamesPlayed) || 0;
+        if (toAdd.includes(player.id)) {
+            return { ...player, gamesPlayed: current + 1 };
+        }
+        if (toRemove.includes(player.id)) {
+            return { ...player, gamesPlayed: Math.max(0, current - 1) };
+        }
+        return player;
+    });
+
+    setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
+
+    const checkins = getTeamGameCheckins();
+    checkins[gameId] = {
+        gameId,
+        date: selectedGame.date,
+        time: selectedGame.time,
+        team1: selectedGame.team1,
+        team2: selectedGame.team2,
+        checkedIds
+    };
+    setTeamGameCheckins(checkins);
+
+    selectedGameCheckins = [...checkedIds];
+    renderPlayerProfiles();
+    updateCheckinStatus(`Check-in saved for ${checkedIds.length} player(s).`);
+}
+
+function clearCheckinSelection() {
+    const boxes = Array.from(checkinPlayerList.querySelectorAll('input[type="checkbox"]'));
+    boxes.forEach(box => { box.checked = false; });
+    selectedGameCheckins = [];
+    updateCheckinStatus('Selection cleared. Save to confirm no players attended this game.');
+}
+
+function normalizePlayersFromRows(rows) {
+    return rows.map((row, index) => ({
+        id: row.id || `${Date.now()}-${index}`,
+        name: String(row.Name || row['Player Name'] || row.Player || '').trim(),
+        position: String(row.Position || row.Positions || row.Pos || '').trim(),
+        phone: String(row.Phone || row['Phone Number'] || row['Contact Phone'] || '').trim(),
+        email: String(row.Email || row['Email Address'] || row.Email || '').trim(),
+        gamesPlayed: Number(row['Games Played'] || row.GamesPlayed || row['Games'] || 0) || 0,
+        photo: String(row.Photo || '').trim()
+    })).filter(player => player.name);
+}
+
+function renderPlayerProfiles() {
+    const data = getTeamPlayers();
+    const players = Array.isArray(data.players) ? data.players : [];
+    playerListWrap.innerHTML = '';
+
+    if (!team) {
+        playerListWrap.innerHTML = '<p class="player-profiles-empty">Select a team to manage player profiles.</p>';
+        return;
+    }
+
+    if (!players.length) {
+        playerListWrap.innerHTML = '<p class="player-profiles-empty">No player profiles added yet.</p>';
+        return;
+    }
+
+    players.forEach(player => {
+        const card = document.createElement('div');
+        card.className = 'player-card';
+        card.innerHTML = `
+            <img src="${player.photo || 'Images/LAMSLLogo.jpg'}" alt="${player.name}">
+            <div class="player-card-content">
+                <h4>${player.name}</h4>
+                <p><strong>Position:</strong> ${player.position || 'TBA'}</p>
+                <p><strong>Phone:</strong> ${player.phone || 'N/A'}</p>
+                <p><strong>Email:</strong> ${player.email || 'N/A'}</p>
+                <p><strong>Games Played:</strong> ${player.gamesPlayed}</p>
+            </div>
+            <div class="player-card-actions">
+                <button type="button" data-action="edit" data-player-id="${player.id}">Edit</button>
+                <button type="button" class="danger" data-action="remove" data-player-id="${player.id}">Remove</button>
+            </div>
+        `;
+        playerListWrap.appendChild(card);
+    });
+}
+
+function clearPlayerForm() {
+    playerIdInput.value = '';
+    playerNameInput.value = '';
+    playerPositionInput.value = '';
+    playerPhoneInput.value = '';
+    playerEmailInput.value = '';
+    playerPhotoInput.value = '';
+}
+
+function populatePlayerForm(player) {
+    playerIdInput.value = player.id;
+    playerNameInput.value = player.name || '';
+    playerPositionInput.value = player.position || '';
+    playerPhoneInput.value = player.phone || '';
+    playerEmailInput.value = player.email || '';
+    playerPhotoInput.value = '';
+}
+
+async function createPlayerPhotoValue(file, existingValue) {
+    if (!file) {
+        return existingValue || '';
+    }
+
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result || existingValue || '');
+        reader.onerror = () => reject(new Error('Unable to read player photo'));
+        reader.readAsDataURL(file);
+    });
+}
+
+async function savePlayer() {
+    if (!team) {
+        rosterAdminStatus.textContent = 'Select a team to save player profiles.';
+        return;
+    }
+
+    if (!canManageTeamContent()) {
+        rosterAdminStatus.textContent = 'Sign in as team manager or admin to save player profiles.';
+        return;
+    }
+
+    const name = playerNameInput.value.trim();
+    if (!name) {
+        rosterAdminStatus.textContent = 'Enter a player name before saving.';
+        return;
+    }
+
+    const store = getTeamPlayers();
+    const players = Array.isArray(store.players) ? [...store.players] : [];
+    const id = playerIdInput.value || `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const existingIndex = players.findIndex(item => item.id === id);
+    const photoValue = await createPlayerPhotoValue(playerPhotoInput.files && playerPhotoInput.files[0], existingIndex >= 0 ? players[existingIndex].photo : '');
+
+    const playerRecord = {
+        id,
+        name,
+        position: playerPositionInput.value.trim(),
+        phone: playerPhoneInput.value.trim(),
+        email: playerEmailInput.value.trim(),
+        gamesPlayed: existingIndex >= 0 ? (players[existingIndex].gamesPlayed || 0) : 0,
+        photo: photoValue
+    };
+
+    if (existingIndex >= 0) {
+        players[existingIndex] = playerRecord;
+        rosterAdminStatus.textContent = `${name} profile updated.`;
+    } else {
+        players.push(playerRecord);
+        rosterAdminStatus.textContent = `${name} added to the roster.`;
+    }
+
+    setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
+    renderPlayerProfiles();
+    clearPlayerForm();
+}
+
+function editPlayer(id) {
+    const store = getTeamPlayers();
+    const player = (store.players || []).find(item => item.id === id);
+    if (!player) {
+        return;
+    }
+    populatePlayerForm(player);
+}
+
+function removePlayer(id) {
+    const store = getTeamPlayers();
+    const players = (store.players || []).filter(item => item.id !== id);
+    setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
+    renderPlayerProfiles();
+    rosterAdminStatus.textContent = 'Player removed from roster.';
+}
+
+function normalizePlayerDataFromRoster(rows) {
+    const players = normalizePlayersFromRows(rows);
+    if (!players.length) {
+        return null;
+    }
+    return { players, updatedAt: new Date().toLocaleString() };
 }
 
 function applyRosterUploadAccess() {
-    const admin = isAdminLoggedIn();
-    rosterAdminStatus.textContent = admin
-        ? 'Admin access confirmed. Upload roster Excel/CSV file for this team.'
-        : 'Admin sign-in required to upload roster spreadsheets.';
-    rosterFileInput.disabled = !admin || !team;
-    uploadRosterBtn.disabled = !admin || !team;
+    const allowed = canManageTeamContent();
+    rosterAdminStatus.textContent = allowed
+        ? 'Manager access confirmed. Upload roster Excel/CSV file for this team.'
+        : 'Sign in as team manager or admin to upload roster spreadsheets.';
+    rosterFileInput.disabled = !allowed || !team;
+    uploadRosterBtn.disabled = !allowed || !team;
 
-    teamPhotoStatus.textContent = admin
-        ? 'Admin access confirmed. Upload a team profile image.'
-        : 'Team profile photos are visible to all users. Admin sign-in required to upload.';
-    teamPhotoFileInput.disabled = !admin || !team;
-    uploadTeamPhotoBtn.disabled = !admin || !team;
+    teamPhotoStatus.textContent = allowed
+        ? 'Manager access confirmed. Upload a team profile image.'
+        : 'Team profile photos are visible to all users. Team manager or admin sign-in required to upload.';
+    teamPhotoFileInput.disabled = !allowed || !team;
+    uploadTeamPhotoBtn.disabled = !allowed || !team;
+
+    playerNameInput.disabled = !allowed || !team;
+    playerPositionInput.disabled = !allowed || !team;
+    playerPhoneInput.disabled = !allowed || !team;
+    playerEmailInput.disabled = !allowed || !team;
+    playerPhotoInput.disabled = !allowed || !team;
+    savePlayerBtn.disabled = !allowed || !team;
+    cancelPlayerBtn.disabled = !team;
 }
 
 uploadRosterBtn.addEventListener('click', async () => {
-    if (!isAdminLoggedIn()) {
-        rosterAdminStatus.textContent = 'Sign in as admin first.';
+    if (!canManageTeamContent()) {
+        rosterAdminStatus.textContent = 'Sign in as team manager or admin first.';
         return;
     }
 
@@ -1091,16 +1643,53 @@ uploadRosterBtn.addEventListener('click', async () => {
         };
         writeJson(ROSTER_KEY, store);
 
+        const playerData = normalizePlayerDataFromRoster(rows);
+        if (playerData) {
+            setTeamPlayers(playerData);
+        }
+
         rosterAdminStatus.textContent = `Roster uploaded for ${team}.`;
         renderRoster();
+        renderPlayerProfiles();
     } catch (error) {
         rosterAdminStatus.textContent = `Roster upload failed: ${error.message}`;
     }
 });
 
+savePlayerBtn.addEventListener('click', savePlayer);
+cancelPlayerBtn.addEventListener('click', clearPlayerForm);
+playerListWrap.addEventListener('click', event => {
+    const button = event.target.closest('button');
+    if (!button) return;
+    const action = button.dataset.action;
+    const playerId = button.dataset.playerId;
+    if (!action || !playerId) return;
+    if (action === 'edit') {
+        editPlayer(playerId);
+    } else if (action === 'remove') {
+        removePlayer(playerId);
+    }
+});
+
+teamScheduleWrap.addEventListener('click', event => {
+    const row = event.target.closest('tr[data-game-id]');
+    if (!row || !canCheckInPlayers()) {
+        return;
+    }
+    const gameId = row.dataset.gameId;
+    const games = getTeamGames();
+    const selected = games.find(game => getGameId(game) === gameId);
+    if (selected) {
+        showCheckinPanel(selected);
+    }
+});
+
+saveCheckinBtn.addEventListener('click', saveCheckinSelections);
+clearCheckinBtn.addEventListener('click', clearCheckinSelection);
+
 uploadTeamPhotoBtn.addEventListener('click', async () => {
-    if (!isAdminLoggedIn()) {
-        teamPhotoStatus.textContent = 'Sign in as admin first.';
+    if (!canManageTeamContent()) {
+        teamPhotoStatus.textContent = 'Sign in as team manager or admin first.';
         return;
     }
 

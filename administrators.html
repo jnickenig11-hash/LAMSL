@@ -111,308 +111,73 @@ header {
     padding-bottom: 2px;
 }
 
-/* ===== CARDS ===== */
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-
-.admin-status {
-    margin: 0 0 12px;
-    color: #304b64;
-}
-
-.admin-form {
+/* ===== BANNER ===== */
+.banner {
+    position: relative;
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-}
-
-.admin-form input,
-.admin-form textarea {
-    padding: 8px;
-    border: 1px solid #c5d0da;
-    border-radius: 6px;
-    font-family: inherit;
-}
-
-.admin-form textarea {
-    min-height: 90px;
-    resize: vertical;
-    grid-column: span 2;
-}
-
-.admin-form button,
-.admin-inline button {
-    background: #12324A;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 9px 12px;
-    cursor: pointer;
-}
-
-.admin-form button:hover,
-.admin-inline button:hover {
-    background: #004080;
-}
-
-.admin-inline {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 12px;
-}
-
-.admin-inline input {
-    padding: 8px;
-    border: 1px solid #c5d0da;
-    border-radius: 6px;
-}
-
-.admin-only {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid #dbe2ea;
-}
-
-.admin-list {
-    list-style: none;
-    padding: 0;
-    margin: 10px 0 0;
-}
-
-.admin-list li {
-    background: #eef2f7;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 10px;
-}
-
-.admin-list .archive-btn {
-    background: #7f1313;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 10px;
-    cursor: pointer;
-}
-
-.admin-list .archive-btn:hover {
-    background: #5e0d0d;
-}
-
-/* ===== SEASON PANEL ===== */
-.season-form {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    margin-top: 10px;
-}
-.season-form select,
-.season-form input[type="number"],
-.season-form input[type="date"] {
-    padding: 8px;
-    border: 1px solid #c5d0da;
-    border-radius: 6px;
-    font-family: inherit;
-    font-size: 14px;
-}
-.season-form button {
-    grid-column: span 2;
-    background: #12324A;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 10px;
-    cursor: pointer;
-    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.4px;
-}
-.season-form button:hover { background: #004080; }
-.season-current {
-    background: #eef4ea;
-    border: 1px solid #b8d4b8;
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin-bottom: 14px;
-    font-size: 14px;
-    color: #12324A;
-}
-.season-current strong { font-size: 16px; }
-.season-badge {
-    display: inline-block;
-    background: #12324A;
-    color: white;
-    border-radius: 999px;
-    padding: 3px 12px;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-left: 6px;
-    vertical-align: middle;
-}
-
-.division-manager {
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid #dbe2ea;
-}
-
-.division-manager-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-}
-
-.division-manager-grid input,
-.division-manager-grid select,
-.division-manager-grid button {
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #c5d0da;
-    font-family: inherit;
-}
-
-.division-manager-grid button {
-    border: none;
-    background: #12324A;
-    color: white;
-    cursor: pointer;
-}
-
-.division-manager-grid button:hover {
-    background: #004080;
-}
-
-.division-manager-grid button.danger-btn {
-    background: #9a1616;
-}
-
-.division-manager-grid button.danger-btn:hover {
-    background: #7a1010;
-}
-
-.division-manager-grid .full-row {
-    grid-column: span 2;
-}
-
-.division-team-list {
-    margin: 10px 0 0;
-    padding: 0;
-    list-style: none;
-}
-
-.division-team-list li {
-    display: flex;
+    grid-template-columns: 240px minmax(0, 1fr);
     align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 6px 8px;
-    border: 1px solid #dbe2ea;
-    border-radius: 6px;
-    margin-bottom: 6px;
-    background: #fff;
-}
-
-.division-team-list .remove-btn {
-    padding: 4px 8px;
-    border: none;
-    border-radius: 5px;
-    background: #b73030;
-    color: white;
-    cursor: pointer;
-}
-
-.division-team-list .remove-btn:hover {
-    background: #922525;
-}
-
-/* ===== FOOTER ===== */
-footer {
+    justify-items: center;
+    gap: 12px;
     text-align: center;
-    padding: 20px;
-    background: #12324A;
-    color: white;
-    margin-top: 20px;
+}
+.banner h1 {
+    margin: 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0 0;
+}
+.banner .tagline {
+    margin-top: 10px;
+    font-size: 16px;
+    max-width: 620px;
+}
+.banner-logo {
+    width: 220px;
+    height: 160px;
+    object-fit: contain;
+}
+@media (max-width: 700px) {
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .banner h1 {
+        font-size: 32px;
+    }
+    .banner .subtitle,
+    .banner .tagline {
+        font-size: 14px;
+    }
+    .banner-logo {
+        width: 180px;
+        height: auto;
+    }
 }
 
-/* ===== MOBILE ===== */
-@media (max-width: 768px) {
-    body {
-        background-attachment: scroll;
-    }
-
-    .container {
-        padding: 16px;
-    }
-
-    .navbar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-        padding: 14px 16px;
-    }
-
-    .navbar ul {
-        flex-direction: column;
-        width: 100%;
-        gap: 4px;
-    }
-
-    .navbar li {
-        margin: 0;
-    }
-
-    .navbar a {
-        width: 100%;
-        padding: 8px 10px;
-        border-radius: 6px;
-        box-sizing: border-box;
-    }
-
-    .admin-form {
-        grid-template-columns: 1fr;
-    }
-
-    .admin-form textarea {
-        grid-column: span 1;
-    }
-
-    .admin-inline,
-    .admin-list li {
-        flex-direction: column;
-    }
-
-    .admin-inline input,
-    .admin-inline button,
-    .admin-list .archive-btn {
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .season-form {
-        grid-template-columns: 1fr;
-    }
-
-    .season-form button {
-        grid-column: span 1;
-    }
-}
 
 </style>
 </head>
 
 <body>
+
+<!-- BANNER -->
+<div class="banner">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
+    <h1>Latin & american men's softball league</h1>
+    <div class="subtitle">Established 1976</div>
+    <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+</div>
 
 <!-- HEADER -->
 <header>
@@ -472,7 +237,6 @@ footer {
                         <option value="admin">Admin</option>
                         <option value="umpire">Umpire</option>
                         <option value="team-manager">Team Manager</option>
-                        <option value="player">Player</option>
                     </select>
                     <button id="create-admin-btn" type="button">Create User</button>
                 </div>
@@ -917,12 +681,18 @@ loginButton.addEventListener('click', () => {
         loggedInAt: new Date().toISOString()
     });
 
+    // Set admin auth flag for other pages (like meeting notes)
+    if (user.role === 'admin') {
+        localStorage.setItem('lamslAdminAuthV1', 'true');
+    }
+
     renderAuthState();
     renderAnnouncements();
 });
 
 logoutButton.addEventListener('click', () => {
     localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem('lamslAdminAuthV1');
     renderAuthState();
 });
 
@@ -1238,6 +1008,18 @@ renderAuthState();
 renderAnnouncements();
 renderSeasonPanel();
 renderDivisionManager();
+
+// ===== SEASON BANNER =====
+(function () {
+    try {
+        const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
+        const el = document.getElementById('banner-tagline');
+        if (s && el) {
+            const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
+        }
+    } catch (e) {}
+})();
 </script>
 
 </body>

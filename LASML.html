@@ -35,51 +35,6 @@ h1, h2, h3 {
 }
 
 /* ===== BANNER ===== */
-.banner {
-    background: #12324A;
-    color: white;
-    padding: 18px 16px;
-    border-bottom: 4px solid #C86A2F;
-    display: grid;
-    grid-template-columns: 240px minmax(0, 1fr);
-    align-items: center;
-    justify-content: start;
-    column-gap: 8px;
-    text-align: center;
-}
-
-.banner h1 {
-    font-size: 38px;
-    font-style: italic;
-    margin: 8px 0;
-    font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.banner .subtitle {
-    font-size: 16px;
-    font-style: italic;
-    margin: 6px 0;
-    font-weight: 400;
-    letter-spacing: 1px;
-}
-
-.banner h1,
-.banner .subtitle,
-.banner .tagline {
-    grid-column: 2;
-}
-
-
-.banner-logo {
-    width: 240px;
-    height: 160px;
-    object-fit: contain;
-    margin: 0;
-    grid-column: 1;
-    grid-row: 1 / span 3;
-    justify-self: center;
-}
 
 /* ===== SLIDESHOW ===== */
 .slideshow {
@@ -578,276 +533,60 @@ header {
     color: #12324A;
 }
 
-/* ===== CARDS ===== */
-.card {
-    background: white;
-    padding: 14px;
-    border-radius: 10px;
-    margin-bottom: 12px;
-}
-
-.social-callout {
-    margin: 14px 0 0;
-    padding: 14px 16px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #fff3e8, #f6fbff);
-    border: 1px solid #e3d7cc;
-}
-
-.social-callout p {
-    margin: 0;
-    color: #304b64;
-    font-size: 15px;
-}
-
-.social-callout a {
-    color: #C86A2F;
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.social-callout a:hover {
-    color: #12324A;
-}
-
-/* ===== ANNOUNCEMENT ===== */
-.highlight {
-    color: red;
-    font-weight: bold;
-}
-
-/* ===== SIDEBAR ===== */
-.sidebar img {
-    width: 100%;
-    border-radius: 8px;
-}
-
-.sidebar {
+/* ===== BANNER ===== */
+.banner {
+    position: relative;
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
     display: grid;
-    gap: 12px;
-}
-
-.sidebar .card {
-    margin-bottom: 0;
-}
-
-.instagram-card {
-    background: linear-gradient(180deg, #fff7f1, #ffffff);
-    border: 1px solid #ecdccf;
-}
-
-.instagram-preview-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    margin: 10px 0 10px;
-}
-
-.instagram-preview-grid a {
-    display: block;
-    border-radius: 10px;
-    overflow: hidden;
-    text-decoration: none;
-    box-shadow: 0 4px 12px rgba(18, 50, 74, 0.12);
-}
-
-.instagram-preview-grid a:first-child {
-    grid-column: span 2;
-}
-
-.instagram-preview-grid img {
-    width: 100%;
-    height: 100%;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    display: block;
-}
-
-.instagram-copy {
-    margin: 0 0 10px;
-    color: #304b64;
-    line-height: 1.5;
-}
-
-.instagram-link {
-    display: inline-flex;
+    grid-template-columns: 240px minmax(0, 1fr);
     align-items: center;
-    justify-content: center;
-    width: 100%;
-    padding: 8px 12px;
-    border-radius: 999px;
-    background: #C86A2F;
-    color: white;
-    text-decoration: none;
-    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.4px;
-    box-sizing: border-box;
-}
-
-.instagram-link:hover {
-    background: #12324A;
-}
-
-/* ===== FOOTER ===== */
-footer {
+    justify-items: center;
+    gap: 12px;
     text-align: center;
-    padding: 14px;
-    background: #12324A;
-    color: white;
-    margin-top: 12px;
 }
-
-/* ===== MOBILE ===== */
-@media (max-width: 768px) {
-    body {
-        background-attachment: scroll;
-    }
-
-    .container {
-        padding: 16px;
-    }
-
-    .main-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .navbar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-        padding: 14px 16px;
-    }
-
-    .navbar ul {
-        flex-direction: column;
-        width: 100%;
-        gap: 4px;
-    }
-
-    .navbar li {
-        margin: 0;
-    }
-
-    .navbar a {
-        width: 100%;
-        padding: 8px 10px;
-        border-radius: 6px;
-        box-sizing: border-box;
-    }
-
+.banner h1 {
+    margin: 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0 0;
+}
+.banner .tagline {
+    margin-top: 10px;
+    font-size: 16px;
+    max-width: 620px;
+}
+.banner-logo {
+    width: 220px;
+    height: 160px;
+    object-fit: contain;
+}
+@media (max-width: 700px) {
     .banner {
         grid-template-columns: 1fr;
         text-align: center;
-        row-gap: 6px;
-        padding: 20px 16px;
     }
-
-    .banner-logo {
-        width: 150px;
-        height: 120px;
-        grid-column: 1;
-        grid-row: auto;
-        justify-self: center;
-    }
-
     .banner h1 {
-        grid-column: 1;
-        font-size: clamp(24px, 8vw, 30px);
-        line-height: 1.1;
+        font-size: 32px;
     }
-
-    .banner .subtitle {
-        grid-column: 1;
+    .banner .subtitle,
+    .banner .tagline {
         font-size: 14px;
     }
-
-    .banner .tagline {
-        grid-column: 1;
-        font-size: 12px;
-    }
-
-    .slideshow,
-    .card,
-    .payment-section {
-        padding: 12px;
-    }
-
-    .slideshow {
-        margin: 0;
-        border-radius: 14px;
-        padding: 12px;
-    }
-
-    .slides {
-        height: min(58vw, 250px);
-    }
-
-    .prev,
-    .next {
-        top: auto;
-        bottom: 110px;
-        transform: none;
-        padding: 8px 12px;
-        font-size: 16px;
-    }
-
-    .prev {
-        left: 10px;
-    }
-
-    .next {
-        right: 10px;
-    }
-
-    .payment-links {
-        flex-direction: column;
-    }
-
-    .payment-link-btn {
-        width: 100%;
-        justify-content: center;
-        box-sizing: border-box;
-    }
-
-    .payment-edit-form {
-        grid-template-columns: 1fr;
-    }
-
-    .upload-form {
-        padding: 14px;
-    }
-
-    .upload-form input[type="file"],
-    .upload-form button {
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .sidebar {
-        gap: 14px;
-    }
-
-    .instagram-preview-grid {
-        gap: 8px;
-    }
-
-    .payment-save-btn {
-        grid-column: span 1;
-        width: 100%;
-    }
-
-    .home-grid {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-            "schedule"
-            "announcements"
-            "rightstack"
-            "slideshow"
-            ;
+    .banner-logo {
+        width: 180px;
+        height: auto;
     }
 }
+
 
 </style>
 </head>

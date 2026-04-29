@@ -111,81 +111,73 @@ header {
     padding-bottom: 2px;
 }
 
-/* ===== CARDS ===== */
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-
-/* ===== FOOTER ===== */
-footer {
-    text-align: center;
-    padding: 20px;
+/* ===== BANNER ===== */
+.banner {
+    position: relative;
     background: #12324A;
     color: white;
-    margin-top: 20px;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    gap: 12px;
+    text-align: center;
+}
+.banner h1 {
+    margin: 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0 0;
+}
+.banner .tagline {
+    margin-top: 10px;
+    font-size: 16px;
+    max-width: 620px;
+}
+.banner-logo {
+    width: 220px;
+    height: 160px;
+    object-fit: contain;
+}
+@media (max-width: 700px) {
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .banner h1 {
+        font-size: 32px;
+    }
+    .banner .subtitle,
+    .banner .tagline {
+        font-size: 14px;
+    }
+    .banner-logo {
+        width: 180px;
+        height: auto;
+    }
 }
 
-/* ===== MOBILE ===== */
-@media (max-width: 768px) {
-    body {
-        background-attachment: scroll;
-    }
-
-    .container {
-        padding: 16px;
-    }
-
-    .navbar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-        padding: 14px 16px;
-    }
-
-    .navbar ul {
-        flex-direction: column;
-        width: 100%;
-        gap: 4px;
-    }
-
-    .navbar li {
-        margin: 0;
-    }
-
-    .navbar a {
-        width: 100%;
-        padding: 8px 10px;
-        border-radius: 6px;
-        box-sizing: border-box;
-    }
-
-    main {
-        overflow-x: auto;
-    }
-
-    .card {
-        padding: 16px;
-    }
-
-    table {
-        display: block;
-        min-width: 480px;
-    }
-
-    th,
-    td {
-        white-space: nowrap;
-        font-size: 13px;
-    }
-}
 
 </style>
 </head>
 
 <body>
+
+<!-- BANNER -->
+<div class="banner">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
+    <h1>Latin & american men's softball league</h1>
+    <div class="subtitle">Established 1976</div>
+    <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+</div>
 
 <!-- HEADER -->
 <header>
@@ -280,5 +272,18 @@ footer {
     <p>Â© Latino Men's Softball League (LAMSL)</p>
 </footer>
 
+<script>
+// ===== SEASON BANNER =====
+(function () {
+    try {
+        const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
+        const el = document.getElementById('banner-tagline');
+        if (s && el) {
+            const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
+        }
+    } catch (e) {}
+})();
+</script>
 </body>
 </html>

@@ -111,50 +111,6 @@ header {
     padding-bottom: 2px;
 }
 /* ===== BANNER ===== */
-.banner {
-    background: #12324A;
-    color: white;
-    padding: 24px 20px;
-    border-bottom: 4px solid #C86A2F;
-    display: grid;
-    grid-template-columns: 240px minmax(0, 1fr);
-    align-items: center;
-    justify-content: start;
-    column-gap: 8px;
-    text-align: center;
-}
-
-.banner h1 {
-    font-size: 42px;
-    font-style: italic;
-    margin: 10px 0;
-    font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.banner .subtitle {
-    font-size: 18px;
-    font-style: italic;
-    margin: 8px 0;
-    font-weight: 400;
-    letter-spacing: 1px;
-}
-
-.banner h1,
-.banner .subtitle,
-.banner .tagline {
-    grid-column: 2;
-}
-
-.banner-logo {
-    width: 240px;
-    height: 160px;
-    object-fit: contain;
-    margin: 0;
-    grid-column: 1;
-    grid-row: 1 / span 3;
-    justify-self: center;
-}
 
 .meeting-date {
     background: #12324A;
@@ -242,6 +198,76 @@ header {
     margin-bottom: 8px;
 }
 
+.admin-only {
+    background: #f0f0f0;
+    border: 2px solid #12324A;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.admin-only h3 {
+    margin-top: 0;
+    color: #12324A;
+}
+
+.admin-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.admin-form input,
+.admin-form textarea {
+    padding: 10px;
+    border: 1px solid #b8c5d2;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.admin-form textarea {
+    grid-column: span 2;
+    min-height: 120px;
+    resize: vertical;
+}
+
+.admin-form button {
+    grid-column: span 2;
+    padding: 10px 16px;
+    background: #12324A;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.admin-form button:hover {
+    background: #004080;
+}
+
+.admin-status {
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 6px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    display: none;
+}
+
+.admin-status.show {
+    display: block;
+}
+
+.meeting-timestamp {
+    font-size: 12px;
+    color: #666;
+    margin-top: 8px;
+    font-style: italic;
+}
+
 /* ===== FOOTER ===== */
 footer {
     text-align: center;
@@ -285,34 +311,15 @@ footer {
         box-sizing: border-box;
     }
 
-    .banner {
-        grid-template-columns: 1fr;
-        text-align: center;
-        row-gap: 6px;
-    }
+    
 
-    .banner-logo {
-        width: 150px;
-        height: 120px;
-        grid-column: 1;
-        grid-row: auto;
-        justify-self: center;
-    }
+    
 
-    .banner h1 {
-        grid-column: 1;
-        font-size: 28px;
-    }
+    
 
-    .banner .subtitle {
-        grid-column: 1;
-        font-size: 14px;
-    }
+    
 
-    .banner .tagline {
-        grid-column: 1;
-        font-size: 12px;
-    }
+    
 
     .meeting-date {
         font-size: 16px;
@@ -322,6 +329,61 @@ footer {
         padding: 15px;
     }
 }
+
+/* ===== BANNER ===== */
+.banner {
+    position: relative;
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    gap: 12px;
+    text-align: center;
+}
+.banner h1 {
+    margin: 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0 0;
+}
+.banner .tagline {
+    margin-top: 10px;
+    font-size: 16px;
+    max-width: 620px;
+}
+.banner-logo {
+    width: 220px;
+    height: 160px;
+    object-fit: contain;
+}
+@media (max-width: 700px) {
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .banner h1 {
+        font-size: 32px;
+    }
+    .banner .subtitle,
+    .banner .tagline {
+        font-size: 14px;
+    }
+    .banner-logo {
+        width: 180px;
+        height: auto;
+    }
+}
+
 
 </style>
 </head>
@@ -362,6 +424,18 @@ footer {
             <h2>Meeting Notes</h2>
             <p>Click on a date to expand/collapse meeting details.</p>
 
+            <!-- ADMIN SECTION -->
+            <div class="admin-only" id="admin-section" style="display: none;">
+                <h3>Add Manager Meeting Notes (Admin Only)</h3>
+                <div class="admin-form">
+                    <input type="date" id="meeting-date-input" placeholder="Meeting Date">
+                    <input type="text" id="meeting-title-input" placeholder="Meeting Title (e.g., Division A Review)">
+                    <textarea id="meeting-notes-input" placeholder="Enter meeting notes here..."></textarea>
+                    <button onclick="addMeetingNote()">Add Meeting Note</button>
+                </div>
+                <div class="admin-status" id="admin-status"></div>
+            </div>
+
             <div class="archived-announcements">
                 <h3>Archived Announcements</h3>
                 <ul id="archived-announcements-list">
@@ -369,6 +443,7 @@ footer {
                 </ul>
             </div>
 
+            <div id="meetings-container">
             <!-- April 19, 2024 Meeting -->
             <div class="meeting-date active" onclick="toggleMeeting(this)">
                 <span>April 19, 2024</span>
@@ -609,12 +684,35 @@ footer {
                     </ul>
                 </div>
             </div>
+            </div>
         </section>
     </main>
 
     <script>
         const ARCHIVE_KEY = 'lamslArchivedAnnouncementsV1';
+        const MEETING_NOTES_KEY = 'lamslManagerMeetingNotesV1';
+        const ADMIN_AUTH_KEY = 'lamslAdminAuthV1';
         const archivedAnnouncementsList = document.getElementById('archived-announcements-list');
+
+        // Check admin auth and show/hide admin section
+        function checkAdminAccess() {
+            try {
+                const adminSection = document.getElementById('admin-section');
+                if (!adminSection) return;
+
+                // Check session for admin or team-manager role
+                const session = JSON.parse(localStorage.getItem('lamslSessionV1') || '{}');
+                const hasAccess = session.role === 'admin' || session.role === 'team-manager';
+
+                if (hasAccess) {
+                    adminSection.style.display = 'block';
+                } else {
+                    adminSection.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Admin check failed:', error);
+            }
+        }
 
         function readArchive() {
             try {
@@ -623,6 +721,104 @@ footer {
             } catch (error) {
                 return [];
             }
+        }
+
+        function readMeetingNotes() {
+            try {
+                const raw = localStorage.getItem(MEETING_NOTES_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function saveMeetingNotes(notes) {
+            try {
+                localStorage.setItem(MEETING_NOTES_KEY, JSON.stringify(notes));
+            } catch (error) {
+                console.error('Failed to save meeting notes:', error);
+            }
+        }
+
+        function addMeetingNote() {
+            const dateInput = document.getElementById('meeting-date-input');
+            const titleInput = document.getElementById('meeting-title-input');
+            const notesInput = document.getElementById('meeting-notes-input');
+            const statusEl = document.getElementById('admin-status');
+
+            if (!dateInput.value || !titleInput.value || !notesInput.value) {
+                statusEl.textContent = 'Error: Please fill in all fields.';
+                statusEl.classList.add('show');
+                setTimeout(() => statusEl.classList.remove('show'), 4000);
+                return;
+            }
+
+            const meetingDate = new Date(dateInput.value + 'T00:00:00');
+            const formattedDate = meetingDate.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+
+            const note = {
+                id: Date.now().toString(),
+                date: formattedDate,
+                dateValue: dateInput.value,
+                title: titleInput.value,
+                content: notesInput.value,
+                addedAt: new Date().toISOString(),
+                addedAtFormatted: new Date().toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                })
+            };
+
+            const notes = readMeetingNotes();
+            notes.unshift(note);
+            saveMeetingNotes(notes);
+
+            dateInput.value = '';
+            titleInput.value = '';
+            notesInput.value = '';
+
+            statusEl.textContent = '✓ Meeting note added for ' + formattedDate;
+            statusEl.classList.add('show');
+            setTimeout(() => statusEl.classList.remove('show'), 3000);
+
+            renderMeetingNotes();
+        }
+
+        function renderMeetingNotes() {
+            const container = document.getElementById('meetings-container');
+            const notes = readMeetingNotes();
+
+            let html = '';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            notes.forEach(note => {
+                const noteDate = new Date(note.dateValue + 'T00:00:00');
+                const isPast = noteDate < today;
+                const isActive = !isPast;
+
+                html += '<div class="meeting-date ' + (isActive ? 'active' : '') + '" onclick="toggleMeeting(this)">';
+                html += '<span>' + note.date + (note.title ? ' - ' + note.title : '') + '</span>';
+                html += '<span class="meeting-toggle">' + (isActive ? '−' : '+') + '</span>';
+                html += '</div>';
+                html += '<div class="meeting-content ' + (isActive ? 'active' : '') + '">';
+                html += '<div class="meeting-topic">';
+                html += '<h4>Notes</h4>';
+                html += '<p>' + note.content.replace(/\n/g, '<br>') + '</p>';
+                html += '</div>';
+                html += '<div class="meeting-timestamp">Added: ' + note.addedAtFormatted + '</div>';
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
         }
 
         function renderArchivedAnnouncements() {
@@ -639,7 +835,7 @@ footer {
             archive.forEach(item => {
                 const li = document.createElement('li');
                 const archivedDate = item.archivedAt ? new Date(item.archivedAt).toLocaleDateString() : 'Unknown';
-                li.innerHTML = `<strong>${item.title}</strong><br>${item.date}<br>${item.message}<br><em>Archived on ${archivedDate}</em>`;
+                li.innerHTML = '<strong>' + item.title + '</strong><br>' + item.date + '<br>' + item.message + '<br><em>Archived on ' + archivedDate + '</em>';
                 archivedAnnouncementsList.appendChild(li);
             });
         }
@@ -651,10 +847,12 @@ footer {
             element.classList.toggle('active');
             content.classList.toggle('active');
             
-            toggle.textContent = element.classList.contains('active') ? 'âˆ’' : '+';
+            toggle.textContent = element.classList.contains('active') ? '−' : '+';
         }
 
+        renderMeetingNotes();
         renderArchivedAnnouncements();
+        checkAdminAccess();
 
         // ===== SEASON BANNER =====
         (function () {

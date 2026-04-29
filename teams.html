@@ -69,35 +69,7 @@ header {
     margin: auto;
     padding: 20px;
 }
-.banner {
-    position: relative;
-    background: #12324A;
-    color: white;
-    padding: 24px 20px;
-    border-bottom: 4px solid #C86A2F;
-    display: grid;
-    grid-template-columns: 240px minmax(0, 1fr);
-    align-items: center;
-    gap: 12px;
-}
-.banner h1 {
-    margin: 0;
-    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
-    font-size: 42px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-}
-.banner .subtitle {
-    font-size: 18px;
-    font-style: italic;
-    margin: 8px 0 0;
-}
-.banner-logo {
-    width: 220px;
-    height: 160px;
-    object-fit: contain;
-    justify-self: center;
-}
+
 .card {
     background: white;
     padding: 22px;
@@ -168,12 +140,61 @@ select {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
+/* ===== BANNER ===== */
+.banner {
+    position: relative;
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    gap: 12px;
+    text-align: center;
+}
+.banner h1 {
+    margin: 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0 0;
+}
+.banner .tagline {
+    margin-top: 10px;
+    font-size: 16px;
+    max-width: 620px;
+}
+.banner-logo {
+    width: 220px;
+    height: 160px;
+    object-fit: contain;
+}
 @media (max-width: 700px) {
     .banner {
         grid-template-columns: 1fr;
         text-align: center;
     }
+    .banner h1 {
+        font-size: 32px;
+    }
+    .banner .subtitle,
+    .banner .tagline {
+        font-size: 14px;
+    }
+    .banner-logo {
+        width: 180px;
+        height: auto;
+    }
 }
+
+
 </style>
 </head>
 <body>
@@ -191,7 +212,6 @@ select {
             <li><a href="LASML.html">Home</a></li>
             <li><a href="standings.html">Standings</a></li>
             <li><a href="schedule.html">Schedule</a></li>
-            <li><a href="teams.html">Teams</a></li>
             <li><a href="teams.html" class="active-tab">Teams</a></li>
             <li><a href="rules.html">Rules</a></li>
             <li><a href="meetingnotes.html">Meeting Notes</a></li>
@@ -285,6 +305,18 @@ window.addEventListener('load', () => {
     renderTeams(filterEl.value);
     emptyNote.textContent = 'Teams are grouped by season and division. Click any name to open the team profile.';
 });
+
+// ===== SEASON BANNER =====
+(function () {
+    try {
+        const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
+        const el = document.getElementById('banner-tagline');
+        if (s && el) {
+            const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
+        }
+    } catch (e) {}
+})();
 </script>
 </body>
 </html>

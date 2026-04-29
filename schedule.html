@@ -105,52 +105,6 @@ header {
     padding-bottom: 2px;
 }
 
-.banner {
-    background: #12324A;
-    color: white;
-    padding: 24px 20px;
-    border-bottom: 4px solid #C86A2F;
-    display: grid;
-    grid-template-columns: 240px minmax(0, 1fr);
-    align-items: center;
-    justify-content: start;
-    column-gap: 8px;
-    text-align: center;
-}
-
-.banner h1 {
-    font-size: 12pt;
-    font-style: italic;
-    margin: 10px 0;
-    font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.banner .subtitle {
-    font-size: 12pt;
-    font-style: italic;
-    margin: 8px 0;
-    font-weight: 400;
-    letter-spacing: 1px;
-}
-
-.banner h1,
-.banner .subtitle,
-.banner .tagline {
-    grid-column: 2;
-}
-
-
-.banner-logo {
-    width: 240px;
-    height: 160px;
-    object-fit: contain;
-    margin: 0;
-    grid-column: 1;
-    grid-row: 1 / span 3;
-    justify-self: center;
-}
-
 .card {
     background: white;
     padding: 20px;
@@ -377,7 +331,6 @@ header {
 .generator-grid button:hover {
     background: #004080;
 }
-
 
 .admin-controls button {
     background: #12324A;
@@ -743,34 +696,15 @@ footer {
         box-sizing: border-box;
     }
 
-    .banner {
-        grid-template-columns: 1fr;
-        text-align: center;
-        row-gap: 6px;
-    }
+    
 
-    .banner-logo {
-        width: 150px;
-        height: 120px;
-        grid-column: 1;
-        grid-row: auto;
-        justify-self: center;
-    }
+    
 
-    .banner h1 {
-        grid-column: 1;
-        font-size: 12pt;
-    }
+    
 
-    .banner .subtitle {
-        grid-column: 1;
-        font-size: 12pt;
-    }
+    
 
-    .banner .tagline {
-        grid-column: 1;
-        font-size: 12pt;
-    }
+    
 
     .card,
     .day-panel,
@@ -867,6 +801,62 @@ footer {
         justify-content: center;
     }
 }
+
+/* ===== BANNER ===== */
+.banner {
+    position: relative;
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    gap: 12px;
+    text-align: center;
+}
+.banner h1 {
+    margin: 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0 0;
+}
+.banner .tagline {
+    margin-top: 10px;
+    font-size: 16px;
+    max-width: 620px;
+}
+.banner-logo {
+    width: 220px;
+    height: 160px;
+    object-fit: contain;
+}
+@media (max-width: 700px) {
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .banner h1 {
+        font-size: 32px;
+    }
+    .banner .subtitle,
+    .banner .tagline {
+        font-size: 14px;
+    }
+    .banner-logo {
+        width: 180px;
+        height: auto;
+    }
+}
+
+
 </style>
 </head>
 
@@ -2441,5 +2431,4 @@ renderPracticeGames();
 </script>
 </body>
 </html>
-
 

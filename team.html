@@ -108,51 +108,6 @@ header {
     padding-bottom: 2px;
 }
 
-.banner {
-    background: #12324A;
-    color: white;
-    padding: 24px 20px;
-    border-bottom: 4px solid #C86A2F;
-    display: grid;
-    grid-template-columns: 240px minmax(0, 1fr);
-    align-items: center;
-    justify-content: start;
-    column-gap: 8px;
-    text-align: center;
-}
-
-.banner h1 {
-    font-size: 42px;
-    font-style: italic;
-    margin: 10px 0;
-    font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.banner .subtitle {
-    font-size: 18px;
-    font-style: italic;
-    margin: 8px 0;
-    font-weight: 400;
-    letter-spacing: 1px;
-}
-
-.banner h1,
-.banner .subtitle,
-.banner .tagline {
-    grid-column: 2;
-}
-
-.banner-logo {
-    width: 240px;
-    height: 160px;
-    object-fit: contain;
-    margin: 0;
-    grid-column: 1;
-    grid-row: 1 / span 3;
-    justify-self: center;
-}
-
 .card {
     background: white;
     padding: 20px;
@@ -169,7 +124,7 @@ header {
 
 .team-content-grid {
     display: grid;
-        grid-template-columns: 1.35fr 1fr 0.95fr;
+        grid-template-columns: 1.35fr 1fr;
         gap: 16px;
         align-items: stretch;
         margin-bottom: 20px;
@@ -297,6 +252,68 @@ header {
     .player-profiles-empty {
         color: #5d6c72;
         margin: 0;
+    }
+
+    .roster-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 16px;
+    }
+
+    .roster-card {
+        border: 1px solid #dbe2ea;
+        border-radius: 12px;
+        padding: 14px;
+        background: #ffffff;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        cursor: pointer;
+    }
+
+    .roster-card h4 {
+        margin: 0;
+        font-size: 16px;
+    }
+
+    .roster-card p {
+        margin: 2px 0;
+        font-size: 14px;
+        color: #334153;
+    }
+
+    .manager-toolbar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .manager-toolbar button {
+        background: #12324A;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 14px;
+        cursor: pointer;
+        font-family: inherit;
+        font-weight: 700;
+    }
+
+    .manager-toolbar button.danger {
+        background: #bd3a3a;
+    }
+
+    .small-manager-panel {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 16px;
+    }
+
+    .small-manager-panel .content-panel {
+        max-width: 400px;
+        width: 100%;
+    }
+
 .content-panel h3 {
     margin-top: 0;
     margin-bottom: 10px;
@@ -570,36 +587,15 @@ footer {
         box-sizing: border-box;
     }
 
-    .banner {
-        grid-template-columns: 1fr;
-        text-align: center;
-        row-gap: 6px;
-        padding: 20px 16px;
-    }
+    
 
-    .banner-logo {
-        width: 150px;
-        height: 120px;
-        grid-column: 1;
-        grid-row: auto;
-        justify-self: center;
-    }
+    
 
-    .banner h1 {
-        grid-column: 1;
-        font-size: clamp(24px, 8vw, 30px);
-        line-height: 1.1;
-    }
+    
 
-    .banner .subtitle {
-        grid-column: 1;
-        font-size: 14px;
-    }
+    
 
-    .banner .tagline {
-        grid-column: 1;
-        font-size: 12px;
-    }
+    
 
     .team-hero {
         grid-template-columns: 1fr;
@@ -711,6 +707,227 @@ footer {
         font-size: 14px;
     }
 }
+
+/* ===== BANNER ===== */
+.banner {
+    position: relative;
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    gap: 12px;
+    text-align: center;
+}
+.banner h1 {
+    margin: 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0 0;
+}
+.banner .tagline {
+    margin-top: 10px;
+    font-size: 16px;
+    max-width: 620px;
+}
+.banner-logo {
+    width: 220px;
+    height: 160px;
+    object-fit: contain;
+}
+@media (max-width: 700px) {
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .banner h1 {
+        font-size: 32px;
+    }
+    .banner .subtitle,
+    .banner .tagline {
+        font-size: 14px;
+    }
+    .banner-logo {
+        width: 180px;
+        height: auto;
+    }
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 14px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #dbe2ea;
+    background: #f8fbfe;
+    border-radius: 14px 14px 0 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #12324A;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #6c7680;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    color: #12324A;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.player-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.player-form-grid label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #12324A;
+}
+
+.player-form-grid input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #dbe2ea;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.player-form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.player-form-actions button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.player-form-actions .secondary {
+    background: #f1f3f4;
+    color: #5f6368;
+}
+
+.player-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.player-card {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid #dbe2ea;
+    border-radius: 8px;
+    background: #f8fbfe;
+}
+
+.player-card img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.player-card-content {
+    flex: 1;
+}
+
+.player-card-content h4 {
+    margin: 0 0 8px 0;
+    color: #12324A;
+}
+
+.player-card-content p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #5f6368;
+}
+
+.player-card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.player-card-actions button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.player-card-actions .danger {
+    background: #d32f2f;
+    color: white;
+}
+
+.player-profiles-empty {
+    text-align: center;
+    color: #9aa0a6;
+    font-style: italic;
+    padding: 40px;
+}
+
 </style>
 </head>
 
@@ -772,6 +989,18 @@ footer {
             </div>
         </section>
 
+        </section>
+
+        <div class="small-manager-panel">
+            <div class="content-panel">
+                <h3>Team Manager Panel</h3>
+                <div class="manager-toolbar">
+                    <button id="add-player-btn" type="button">Add Player</button>
+                    <button id="remove-player-btn" type="button" class="danger">Remove Player</button>
+                </div>
+            </div>
+        </div>
+
         <section class="team-content-grid">
             <div class="content-panel">
                 <h3>Team Schedule</h3>
@@ -810,39 +1039,11 @@ footer {
                     <p id="roster-admin-status" class="muted">Admin sign-in required to upload roster spreadsheets.</p>
                     <input id="roster-file" type="file" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
                     <button id="upload-roster-btn" type="button">Upload Roster Spreadsheet</button>
+                    <button id="upload-all-rosters-btn" type="button" style="display:none;">Upload All Rosters</button>
                     <p class="muted">Spreadsheet tip: use column headers like Name, Position, Phone, Email.</p>
                 </div>
-                <div id="roster-table-wrap"></div>
+                <div id="roster-grid-wrap" class="roster-grid"></div>
                 <div id="player-profiles-wrap"></div>
-            </div>
-            <div class="content-panel team-manager-panel">
-                <h3>Team Manager Panel</h3>
-                <p class="muted">Add players and update their profile details.</p>
-                <div class="player-form-grid">
-                    <input id="player-id" type="hidden">
-                    <label for="player-name">Player Name</label>
-                    <input id="player-name" type="text" placeholder="Full name">
-
-                    <label for="player-position">Position(s)</label>
-                    <input id="player-position" type="text" placeholder="Primary positions">
-
-                    <label for="player-phone">Phone Number</label>
-                    <input id="player-phone" type="tel" placeholder="(555) 123-4567">
-
-                    <label for="player-email">Email Address</label>
-                    <input id="player-email" type="email" placeholder="name@example.com">
-
-                    <label for="player-photo-file">Player Photo</label>
-                    <input id="player-photo-file" type="file" accept="*/*">
-                </div>
-                <div class="player-form-actions">
-                    <button id="save-player-btn" type="button">Save Player</button>
-                    <button id="cancel-player-btn" type="button" class="secondary">Clear Form</button>
-                </div>
-                <section>
-                    <h4>Player Profiles</h4>
-                    <div id="player-list" class="player-list"></div>
-                </section>
             </div>
         </section>
     </main>
@@ -860,6 +1061,554 @@ const PRACTICE_KEY = 'lamslPracticeScheduleV1';
 const ROSTER_KEY = 'lamslTeamRostersV1';
 const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
 const TEAM_CHECKIN_KEY = 'lamslTeamGameCheckinsV1';
+
+// Populate rosters from spreadsheet data
+(function() {
+    const rosterData = {
+        "Division A": {
+            "Titans": [
+                {"name": "Alex Rodriguez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "alex.rodriguez@email.com"},
+                {"name": "Carlos Martinez", "position": "Catcher", "phone": "(555) 234-5678", "email": "carlos.martinez@email.com"},
+                {"name": "Miguel Sanchez", "position": "1st Base", "phone": "(555) 345-6789", "email": "miguel.sanchez@email.com"},
+                {"name": "Jose Gonzalez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "jose.gonzalez@email.com"},
+                {"name": "Luis Ramirez", "position": "3rd Base", "phone": "(555) 567-8901", "email": "luis.ramirez@email.com"},
+                {"name": "Antonio Lopez", "position": "Shortstop", "phone": "(555) 678-9012", "email": "antonio.lopez@email.com"},
+                {"name": "Roberto Torres", "position": "Left Field", "phone": "(555) 789-0123", "email": "roberto.torres@email.com"},
+                {"name": "Fernando Diaz", "position": "Center Field", "phone": "(555) 890-1234", "email": "fernando.diaz@email.com"},
+                {"name": "Diego Morales", "position": "Right Field", "phone": "(555) 901-2345", "email": "diego.morales@email.com"},
+                {"name": "Pablo Jimenez", "position": "Utility", "phone": "(555) 012-3456", "email": "pablo.jimenez@email.com"}
+            ],
+            "Doom Squad": [
+                {"name": "Ramon Alvarez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "ramon.alvarez@email.com"},
+                {"name": "Eduardo Vargas", "position": "Catcher", "phone": "(555) 234-5678", "email": "eduardo.vargas@email.com"},
+                {"name": "Victor Mendoza", "position": "1st Base", "phone": "(555) 345-6789", "email": "victor.mendoza@email.com"},
+                {"name": "Manuel Castillo", "position": "2nd Base", "phone": "(555) 456-7890", "email": "manuel.castillo@email.com"},
+                {"name": "Francisco Ruiz", "position": "3rd Base", "phone": "(555) 567-8901", "email": "francisco.ruiz@email.com"},
+                {"name": "Javier Ortega", "position": "Shortstop", "phone": "(555) 678-9012", "email": "javier.ortega@email.com"},
+                {"name": "Ricardo Silva", "position": "Left Field", "phone": "(555) 789-0123", "email": "ricardo.silva@email.com"},
+                {"name": "Enrique Herrera", "position": "Center Field", "phone": "(555) 890-1234", "email": "enrique.herrera@email.com"},
+                {"name": "Oscar Medina", "position": "Right Field", "phone": "(555) 901-2345", "email": "oscar.medina@email.com"},
+                {"name": "Hugo Chavez", "position": "Utility", "phone": "(555) 012-3456", "email": "hugo.chavez@email.com"}
+            ],
+            "Legends": [
+                {"name": "Sergio Fernandez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "sergio.fernandez@email.com"},
+                {"name": "Mario Gutierrez", "position": "Catcher", "phone": "(555) 234-5678", "email": "mario.gutierrez@email.com"},
+                {"name": "Rafael Navarro", "position": "1st Base", "phone": "(555) 345-6789", "email": "rafael.navarro@email.com"},
+                {"name": "Pedro Delgado", "position": "2nd Base", "phone": "(555) 456-7890", "email": "pedro.delgado@email.com"},
+                {"name": "Angel Moreno", "position": "3rd Base", "phone": "(555) 567-8901", "email": "angel.moreno@email.com"},
+                {"name": "Alberto Reyes", "position": "Shortstop", "phone": "(555) 678-9012", "email": "alberto.reyes@email.com"},
+                {"name": "Daniel Vega", "position": "Left Field", "phone": "(555) 789-0123", "email": "daniel.vega@email.com"},
+                {"name": "Gabriel Soto", "position": "Center Field", "phone": "(555) 890-1234", "email": "gabriel.soto@email.com"},
+                {"name": "Adrian Cruz", "position": "Right Field", "phone": "(555) 901-2345", "email": "adrian.cruz@email.com"},
+                {"name": "Emilio Flores", "position": "Utility", "phone": "(555) 012-3456", "email": "emilio.flores@email.com"}
+            ],
+            "Nasty Boyz": [
+                {"name": "Tomas Aguilar", "position": "Pitcher", "phone": "(555) 123-4567", "email": "tomas.aguilar@email.com"},
+                {"name": "Ruben Guerrero", "position": "Catcher", "phone": "(555) 234-5678", "email": "ruben.guerrero@email.com"},
+                {"name": "Esteban Rios", "position": "1st Base", "phone": "(555) 345-6789", "email": "esteban.rios@email.com"},
+                {"name": "Ignacio Pena", "position": "2nd Base", "phone": "(555) 456-7890", "email": "ignacio.pena@email.com"},
+                {"name": "Salvador Campos", "position": "3rd Base", "phone": "(555) 567-8901", "email": "salvador.campos@email.com"},
+                {"name": "Gilberto Leon", "position": "Shortstop", "phone": "(555) 678-9012", "email": "gilberto.leon@email.com"},
+                {"name": "Armando Rubio", "position": "Left Field", "phone": "(555) 789-0123", "email": "armando.rubio@email.com"},
+                {"name": "Hector Salinas", "position": "Center Field", "phone": "(555) 890-1234", "email": "hector.salinas@email.com"},
+                {"name": "Julio Cabrera", "position": "Right Field", "phone": "(555) 901-2345", "email": "julio.cabrera@email.com"},
+                {"name": "Felipe Duran", "position": "Utility", "phone": "(555) 012-3456", "email": "felipe.duran@email.com"}
+            ],
+            "Black Sox": [
+                {"name": "Nicolas Estrada", "position": "Pitcher", "phone": "(555) 123-4567", "email": "nicolas.estrada@email.com"},
+                {"name": "Leonardo Ponce", "position": "Catcher", "phone": "(555) 234-5678", "email": "leonardo.ponce@email.com"},
+                {"name": "Cristian Vargas", "position": "1st Base", "phone": "(555) 345-6789", "email": "cristian.vargas@email.com"},
+                {"name": "Sebastian Luna", "position": "2nd Base", "phone": "(555) 456-7890", "email": "sebastian.luna@email.com"},
+                {"name": "Matias Cortes", "position": "3rd Base", "phone": "(555) 567-8901", "email": "matias.cortes@email.com"},
+                {"name": "Diego Rojas", "position": "Shortstop", "phone": "(555) 678-9012", "email": "diego.rojas@email.com"},
+                {"name": "Lucas Mendoza", "position": "Left Field", "phone": "(555) 789-0123", "email": "lucas.mendoza@email.com"},
+                {"name": "Mateo Silva", "position": "Center Field", "phone": "(555) 890-1234", "email": "mateo.silva@email.com"},
+                {"name": "Thiago Torres", "position": "Right Field", "phone": "(555) 901-2345", "email": "thiago.torres@email.com"},
+                {"name": "Bruno Alvarez", "position": "Utility", "phone": "(555) 012-3456", "email": "bruno.alvarez@email.com"}
+            ],
+            "White Sox": [
+                {"name": "Ivan Ramirez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "ivan.ramirez@email.com"},
+                {"name": "Oscar Gonzalez", "position": "Catcher", "phone": "(555) 234-5678", "email": "oscar.gonzalez@email.com"},
+                {"name": "Pablo Martinez", "position": "1st Base", "phone": "(555) 345-6789", "email": "pablo.martinez@email.com"},
+                {"name": "Adrian Lopez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "adrian.lopez@email.com"},
+                {"name": "Carlos Sanchez", "position": "3rd Base", "phone": "(555) 567-8901", "email": "carlos.sanchez@email.com"},
+                {"name": "Miguel Rodriguez", "position": "Shortstop", "phone": "(555) 678-9012", "email": "miguel.rodriguez@email.com"},
+                {"name": "Jose Torres", "position": "Left Field", "phone": "(555) 789-0123", "email": "jose.torres@email.com"},
+                {"name": "Luis Diaz", "position": "Center Field", "phone": "(555) 890-1234", "email": "luis.diaz@email.com"},
+                {"name": "Antonio Morales", "position": "Right Field", "phone": "(555) 901-2345", "email": "antonio.morales@email.com"},
+                {"name": "Roberto Jimenez", "position": "Utility", "phone": "(555) 012-3456", "email": "roberto.jimenez@email.com"}
+            ],
+            "Dodgers": [
+                {"name": "Fernando Alvarez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "fernando.alvarez@email.com"},
+                {"name": "Diego Vargas", "position": "Catcher", "phone": "(555) 234-5678", "email": "diego.vargas@email.com"},
+                {"name": "Manuel Mendoza", "position": "1st Base", "phone": "(555) 345-6789", "email": "manuel.mendoza@email.com"},
+                {"name": "Victor Castillo", "position": "2nd Base", "phone": "(555) 456-7890", "email": "victor.castillo@email.com"},
+                {"name": "Francisco Ruiz", "position": "3rd Base", "phone": "(555) 567-8901", "email": "francisco.ruiz@email.com"},
+                {"name": "Javier Ortega", "position": "Shortstop", "phone": "(555) 678-9012", "email": "javier.ortega@email.com"},
+                {"name": "Ricardo Silva", "position": "Left Field", "phone": "(555) 789-0123", "email": "ricardo.silva@email.com"},
+                {"name": "Enrique Herrera", "position": "Center Field", "phone": "(555) 890-1234", "email": "enrique.herrera@email.com"},
+                {"name": "Oscar Medina", "position": "Right Field", "phone": "(555) 901-2345", "email": "oscar.medina@email.com"},
+                {"name": "Hugo Chavez", "position": "Utility", "phone": "(555) 012-3456", "email": "hugo.chavez@email.com"}
+            ]
+        },
+        "Division B": {
+            "Borrachos": [
+                {"name": "Juan Perez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "juan.perez@email.com"},
+                {"name": "Pedro Garcia", "position": "Catcher", "phone": "(555) 234-5678", "email": "pedro.garcia@email.com"},
+                {"name": "Luis Martinez", "position": "1st Base", "phone": "(555) 345-6789", "email": "luis.martinez@email.com"},
+                {"name": "Carlos Lopez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "carlos.lopez@email.com"},
+                {"name": "Miguel Gonzalez", "position": "3rd Base", "phone": "(555) 567-8901", "email": "miguel.gonzalez@email.com"},
+                {"name": "Jose Rodriguez", "position": "Shortstop", "phone": "(555) 678-9012", "email": "jose.rodriguez@email.com"},
+                {"name": "Antonio Sanchez", "position": "Left Field", "phone": "(555) 789-0123", "email": "antonio.sanchez@email.com"},
+                {"name": "Francisco Torres", "position": "Center Field", "phone": "(555) 890-1234", "email": "francisco.torres@email.com"},
+                {"name": "Javier Ramirez", "position": "Right Field", "phone": "(555) 901-2345", "email": "javier.ramirez@email.com"},
+                {"name": "Manuel Diaz", "position": "Utility", "phone": "(555) 012-3456", "email": "manuel.diaz@email.com"}
+            ],
+            "Charros": [
+                {"name": "Roberto Morales", "position": "Pitcher", "phone": "(555) 123-4567", "email": "roberto.morales@email.com"},
+                {"name": "Fernando Jimenez", "position": "Catcher", "phone": "(555) 234-5678", "email": "fernando.jimenez@email.com"},
+                {"name": "Diego Alvarez", "position": "1st Base", "phone": "(555) 345-6789", "email": "diego.alvarez@email.com"},
+                {"name": "Victor Vargas", "position": "2nd Base", "phone": "(555) 456-7890", "email": "victor.vargas@email.com"},
+                {"name": "Eduardo Mendoza", "position": "3rd Base", "phone": "(555) 567-8901", "email": "eduardo.mendoza@email.com"},
+                {"name": "Ramon Castillo", "position": "Shortstop", "phone": "(555) 678-9012", "email": "ramon.castillo@email.com"},
+                {"name": "Sergio Ruiz", "position": "Left Field", "phone": "(555) 789-0123", "email": "sergio.ruiz@email.com"},
+                {"name": "Mario Ortega", "position": "Center Field", "phone": "(555) 890-1234", "email": "mario.ortega@email.com"},
+                {"name": "Rafael Silva", "position": "Right Field", "phone": "(555) 901-2345", "email": "rafael.silva@email.com"},
+                {"name": "Angel Herrera", "position": "Utility", "phone": "(555) 012-3456", "email": "angel.herrera@email.com"}
+            ],
+            "Cubs": [
+                {"name": "Alberto Medina", "position": "Pitcher", "phone": "(555) 123-4567", "email": "alberto.medina@email.com"},
+                {"name": "Daniel Chavez", "position": "Catcher", "phone": "(555) 234-5678", "email": "daniel.chavez@email.com"},
+                {"name": "Gabriel Flores", "position": "1st Base", "phone": "(555) 345-6789", "email": "gabriel.flores@email.com"},
+                {"name": "Adrian Aguilar", "position": "2nd Base", "phone": "(555) 456-7890", "email": "adrian.aguilar@email.com"},
+                {"name": "Emilio Guerrero", "position": "3rd Base", "phone": "(555) 567-8901", "email": "emilio.guerrero@email.com"},
+                {"name": "Hugo Rios", "position": "Shortstop", "phone": "(555) 678-9012", "email": "hugo.rios@email.com"},
+                {"name": "Tomas Pena", "position": "Left Field", "phone": "(555) 789-0123", "email": "tomas.pena@email.com"},
+                {"name": "Ruben Campos", "position": "Center Field", "phone": "(555) 890-1234", "email": "ruben.campos@email.com"},
+                {"name": "Esteban Leon", "position": "Right Field", "phone": "(555) 901-2345", "email": "esteban.leon@email.com"},
+                {"name": "Ignacio Rubio", "position": "Utility", "phone": "(555) 012-3456", "email": "ignacio.rubio@email.com"}
+            ],
+            "Demons": [
+                {"name": "Salvador Salinas", "position": "Pitcher", "phone": "(555) 123-4567", "email": "salvador.salinas@email.com"},
+                {"name": "Gilberto Cabrera", "position": "Catcher", "phone": "(555) 234-5678", "email": "gilberto.cabrera@email.com"},
+                {"name": "Armando Duran", "position": "1st Base", "phone": "(555) 345-6789", "email": "armando.duran@email.com"},
+                {"name": "Hector Estrada", "position": "2nd Base", "phone": "(555) 456-7890", "email": "hector.estrada@email.com"},
+                {"name": "Julio Ponce", "position": "3rd Base", "phone": "(555) 567-8901", "email": "julio.ponce@email.com"},
+                {"name": "Felipe Vargas", "position": "Shortstop", "phone": "(555) 678-9012", "email": "felipe.vargas@email.com"},
+                {"name": "Nicolas Cortes", "position": "Left Field", "phone": "(555) 789-0123", "email": "nicolas.cortes@email.com"},
+                {"name": "Leonardo Rojas", "position": "Center Field", "phone": "(555) 890-1234", "email": "leonardo.rojas@email.com"},
+                {"name": "Cristian Mendoza", "position": "Right Field", "phone": "(555) 901-2345", "email": "cristian.mendoza@email.com"},
+                {"name": "Sebastian Silva", "position": "Utility", "phone": "(555) 012-3456", "email": "sebastian.silva@email.com"}
+            ],
+            "Primos": [
+                {"name": "Matias Torres", "position": "Pitcher", "phone": "(555) 123-4567", "email": "matias.torres@email.com"},
+                {"name": "Thiago Alvarez", "position": "Catcher", "phone": "(555) 234-5678", "email": "thiago.alvarez@email.com"},
+                {"name": "Bruno Fernandez", "position": "1st Base", "phone": "(555) 345-6789", "email": "bruno.fernandez@email.com"},
+                {"name": "Lucas Gutierrez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "lucas.gutierrez@email.com"},
+                {"name": "Mateo Navarro", "position": "3rd Base", "phone": "(555) 567-8901", "email": "mateo.navarro@email.com"},
+                {"name": "Diego Delgado", "position": "Shortstop", "phone": "(555) 678-9012", "email": "diego.delgado@email.com"},
+                {"name": "Ivan Moreno", "position": "Left Field", "phone": "(555) 789-0123", "email": "ivan.moreno@email.com"},
+                {"name": "Oscar Reyes", "position": "Center Field", "phone": "(555) 890-1234", "email": "oscar.reyes@email.com"},
+                {"name": "Pablo Vega", "position": "Right Field", "phone": "(555) 901-2345", "email": "pablo.vega@email.com"},
+                {"name": "Adrian Soto", "position": "Utility", "phone": "(555) 012-3456", "email": "adrian.soto@email.com"}
+            ],
+            "Toxic": [
+                {"name": "Carlos Cruz", "position": "Pitcher", "phone": "(555) 123-4567", "email": "carlos.cruz@email.com"},
+                {"name": "Miguel Flores", "position": "Catcher", "phone": "(555) 234-5678", "email": "miguel.flores@email.com"},
+                {"name": "Jose Aguilar", "position": "1st Base", "phone": "(555) 345-6789", "email": "jose.aguilar@email.com"},
+                {"name": "Luis Guerrero", "position": "2nd Base", "phone": "(555) 456-7890", "email": "luis.guerrero@email.com"},
+                {"name": "Antonio Rios", "position": "3rd Base", "phone": "(555) 567-8901", "email": "antonio.rios@email.com"},
+                {"name": "Roberto Pena", "position": "Shortstop", "phone": "(555) 678-9012", "email": "roberto.pena@email.com"},
+                {"name": "Fernando Campos", "position": "Left Field", "phone": "(555) 789-0123", "email": "fernando.campos@email.com"},
+                {"name": "Diego Leon", "position": "Center Field", "phone": "(555) 890-1234", "email": "diego.leon@email.com"},
+                {"name": "Manuel Rubio", "position": "Right Field", "phone": "(555) 901-2345", "email": "manuel.rubio@email.com"},
+                {"name": "Victor Salinas", "position": "Utility", "phone": "(555) 012-3456", "email": "victor.salinas@email.com"}
+            ]
+        },
+        "Division C": {
+            "Balls Out": [
+                {"name": "Francisco Cabrera", "position": "Pitcher", "phone": "(555) 123-4567", "email": "francisco.cabrera@email.com"},
+                {"name": "Javier Duran", "position": "Catcher", "phone": "(555) 234-5678", "email": "javier.duran@email.com"},
+                {"name": "Ricardo Estrada", "position": "1st Base", "phone": "(555) 345-6789", "email": "ricardo.estrada@email.com"},
+                {"name": "Enrique Ponce", "position": "2nd Base", "phone": "(555) 456-7890", "email": "enrique.ponce@email.com"},
+                {"name": "Oscar Vargas", "position": "3rd Base", "phone": "(555) 567-8901", "email": "oscar.vargas@email.com"},
+                {"name": "Hugo Cortes", "position": "Shortstop", "phone": "(555) 678-9012", "email": "hugo.cortes@email.com"},
+                {"name": "Tomas Rojas", "position": "Left Field", "phone": "(555) 789-0123", "email": "tomas.rojas@email.com"},
+                {"name": "Ruben Mendoza", "position": "Center Field", "phone": "(555) 890-1234", "email": "ruben.mendoza@email.com"},
+                {"name": "Esteban Silva", "position": "Right Field", "phone": "(555) 901-2345", "email": "esteban.silva@email.com"},
+                {"name": "Ignacio Torres", "position": "Utility", "phone": "(555) 012-3456", "email": "ignacio.torres@email.com"}
+            ],
+            "Bandits": [
+                {"name": "Salvador Alvarez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "salvador.alvarez@email.com"},
+                {"name": "Gilberto Fernandez", "position": "Catcher", "phone": "(555) 234-5678", "email": "gilberto.fernandez@email.com"},
+                {"name": "Armando Gutierrez", "position": "1st Base", "phone": "(555) 345-6789", "email": "armando.gutierrez@email.com"},
+                {"name": "Hector Navarro", "position": "2nd Base", "phone": "(555) 456-7890", "email": "hector.navarro@email.com"},
+                {"name": "Julio Delgado", "position": "3rd Base", "phone": "(555) 567-8901", "email": "julio.delgado@email.com"},
+                {"name": "Felipe Moreno", "position": "Shortstop", "phone": "(555) 678-9012", "email": "felipe.moreno@email.com"},
+                {"name": "Nicolas Reyes", "position": "Left Field", "phone": "(555) 789-0123", "email": "nicolas.reyes@email.com"},
+                {"name": "Leonardo Vega", "position": "Center Field", "phone": "(555) 890-1234", "email": "leonardo.vega@email.com"},
+                {"name": "Cristian Soto", "position": "Right Field", "phone": "(555) 901-2345", "email": "cristian.soto@email.com"},
+                {"name": "Sebastian Cruz", "position": "Utility", "phone": "(555) 012-3456", "email": "sebastian.cruz@email.com"}
+            ],
+            "Brewers": [
+                {"name": "Matias Flores", "position": "Pitcher", "phone": "(555) 123-4567", "email": "matias.flores@email.com"},
+                {"name": "Thiago Aguilar", "position": "Catcher", "phone": "(555) 234-5678", "email": "thiago.aguilar@email.com"},
+                {"name": "Bruno Guerrero", "position": "1st Base", "phone": "(555) 345-6789", "email": "bruno.guerrero@email.com"},
+                {"name": "Lucas Rios", "position": "2nd Base", "phone": "(555) 456-7890", "email": "lucas.rios@email.com"},
+                {"name": "Mateo Pena", "position": "3rd Base", "phone": "(555) 567-8901", "email": "mateo.pena@email.com"},
+                {"name": "Ivan Campos", "position": "Shortstop", "phone": "(555) 678-9012", "email": "ivan.campos@email.com"},
+                {"name": "Oscar Leon", "position": "Left Field", "phone": "(555) 789-0123", "email": "oscar.leon@email.com"},
+                {"name": "Pablo Rubio", "position": "Center Field", "phone": "(555) 890-1234", "email": "pablo.rubio@email.com"},
+                {"name": "Adrian Salinas", "position": "Right Field", "phone": "(555) 901-2345", "email": "adrian.salinas@email.com"},
+                {"name": "Carlos Cabrera", "position": "Utility", "phone": "(555) 012-3456", "email": "carlos.cabrera@email.com"}
+            ],
+            "Coyotes": [
+                {"name": "Miguel Duran", "position": "Pitcher", "phone": "(555) 123-4567", "email": "miguel.duran@email.com"},
+                {"name": "Jose Estrada", "position": "Catcher", "phone": "(555) 234-5678", "email": "jose.estrada@email.com"},
+                {"name": "Luis Ponce", "position": "1st Base", "phone": "(555) 345-6789", "email": "luis.ponce@email.com"},
+                {"name": "Antonio Vargas", "position": "2nd Base", "phone": "(555) 456-7890", "email": "antonio.vargas@email.com"},
+                {"name": "Roberto Cortes", "position": "3rd Base", "phone": "(555) 567-8901", "email": "roberto.cortes@email.com"},
+                {"name": "Fernando Rojas", "position": "Shortstop", "phone": "(555) 678-9012", "email": "fernando.rojas@email.com"},
+                {"name": "Diego Mendoza", "position": "Left Field", "phone": "(555) 789-0123", "email": "diego.mendoza@email.com"},
+                {"name": "Manuel Silva", "position": "Center Field", "phone": "(555) 890-1234", "email": "manuel.silva@email.com"},
+                {"name": "Victor Torres", "position": "Right Field", "phone": "(555) 901-2345", "email": "victor.torres@email.com"},
+                {"name": "Eduardo Alvarez", "position": "Utility", "phone": "(555) 012-3456", "email": "eduardo.alvarez@email.com"}
+            ],
+            "Diablos": [
+                {"name": "Ramon Fernandez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "ramon.fernandez@email.com"},
+                {"name": "Sergio Gutierrez", "position": "Catcher", "phone": "(555) 234-5678", "email": "sergio.gutierrez@email.com"},
+                {"name": "Mario Navarro", "position": "1st Base", "phone": "(555) 345-6789", "email": "mario.navarro@email.com"},
+                {"name": "Rafael Delgado", "position": "2nd Base", "phone": "(555) 456-7890", "email": "rafael.delgado@email.com"},
+                {"name": "Angel Moreno", "position": "3rd Base", "phone": "(555) 567-8901", "email": "angel.moreno@email.com"},
+                {"name": "Alberto Reyes", "position": "Shortstop", "phone": "(555) 678-9012", "email": "alberto.reyes@email.com"},
+                {"name": "Daniel Vega", "position": "Left Field", "phone": "(555) 789-0123", "email": "daniel.vega@email.com"},
+                {"name": "Gabriel Soto", "position": "Center Field", "phone": "(555) 890-1234", "email": "gabriel.soto@email.com"},
+                {"name": "Adrian Cruz", "position": "Right Field", "phone": "(555) 901-2345", "email": "adrian.cruz@email.com"},
+                {"name": "Emilio Flores", "position": "Utility", "phone": "(555) 012-3456", "email": "emilio.flores@email.com"}
+            ],
+            "Goodfellas": [
+                {"name": "Tomas Aguilar", "position": "Pitcher", "phone": "(555) 123-4567", "email": "tomas.aguilar@email.com"},
+                {"name": "Ruben Guerrero", "position": "Catcher", "phone": "(555) 234-5678", "email": "ruben.guerrero@email.com"},
+                {"name": "Esteban Rios", "position": "1st Base", "phone": "(555) 345-6789", "email": "esteban.rios@email.com"},
+                {"name": "Ignacio Pena", "position": "2nd Base", "phone": "(555) 456-7890", "email": "ignacio.pena@email.com"},
+                {"name": "Salvador Campos", "position": "3rd Base", "phone": "(555) 567-8901", "email": "salvador.campos@email.com"},
+                {"name": "Gilberto Leon", "position": "Shortstop", "phone": "(555) 678-9012", "email": "gilberto.leon@email.com"},
+                {"name": "Armando Rubio", "position": "Left Field", "phone": "(555) 789-0123", "email": "armando.rubio@email.com"},
+                {"name": "Hector Salinas", "position": "Center Field", "phone": "(555) 890-1234", "email": "hector.salinas@email.com"},
+                {"name": "Julio Cabrera", "position": "Right Field", "phone": "(555) 901-2345", "email": "julio.cabrera@email.com"},
+                {"name": "Felipe Duran", "position": "Utility", "phone": "(555) 012-3456", "email": "felipe.duran@email.com"}
+            ],
+            "Orioles": [
+                {"name": "Nicolas Estrada", "position": "Pitcher", "phone": "(555) 123-4567", "email": "nicolas.estrada@email.com"},
+                {"name": "Leonardo Ponce", "position": "Catcher", "phone": "(555) 234-5678", "email": "leonardo.ponce@email.com"},
+                {"name": "Cristian Vargas", "position": "1st Base", "phone": "(555) 345-6789", "email": "cristian.vargas@email.com"},
+                {"name": "Sebastian Luna", "position": "2nd Base", "phone": "(555) 456-7890", "email": "sebastian.luna@email.com"},
+                {"name": "Matias Cortes", "position": "3rd Base", "phone": "(555) 567-8901", "email": "matias.cortes@email.com"},
+                {"name": "Diego Rojas", "position": "Shortstop", "phone": "(555) 678-9012", "email": "diego.rojas@email.com"},
+                {"name": "Lucas Mendoza", "position": "Left Field", "phone": "(555) 789-0123", "email": "lucas.mendoza@email.com"},
+                {"name": "Mateo Silva", "position": "Center Field", "phone": "(555) 890-1234", "email": "mateo.silva@email.com"},
+                {"name": "Thiago Torres", "position": "Right Field", "phone": "(555) 901-2345", "email": "thiago.torres@email.com"},
+                {"name": "Bruno Alvarez", "position": "Utility", "phone": "(555) 012-3456", "email": "bruno.alvarez@email.com"}
+            ],
+            "Salvajes": [
+                {"name": "Ivan Ramirez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "ivan.ramirez@email.com"},
+                {"name": "Oscar Gonzalez", "position": "Catcher", "phone": "(555) 234-5678", "email": "oscar.gonzalez@email.com"},
+                {"name": "Pablo Martinez", "position": "1st Base", "phone": "(555) 345-6789", "email": "pablo.martinez@email.com"},
+                {"name": "Adrian Lopez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "adrian.lopez@email.com"},
+                {"name": "Carlos Sanchez", "position": "3rd Base", "phone": "(555) 567-8901", "email": "carlos.sanchez@email.com"},
+                {"name": "Miguel Rodriguez", "position": "Shortstop", "phone": "(555) 678-9012", "email": "miguel.rodriguez@email.com"},
+                {"name": "Jose Torres", "position": "Left Field", "phone": "(555) 789-0123", "email": "jose.torres@email.com"},
+                {"name": "Luis Diaz", "position": "Center Field", "phone": "(555) 890-1234", "email": "luis.diaz@email.com"},
+                {"name": "Antonio Morales", "position": "Right Field", "phone": "(555) 901-2345", "email": "antonio.morales@email.com"},
+                {"name": "Roberto Jimenez", "position": "Utility", "phone": "(555) 012-3456", "email": "roberto.jimenez@email.com"}
+            ]
+        },
+        "Division D": {
+            "Dawgz": [
+                {"name": "Fernando Alvarez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "fernando.alvarez@email.com"},
+                {"name": "Diego Vargas", "position": "Catcher", "phone": "(555) 234-5678", "email": "diego.vargas@email.com"},
+                {"name": "Manuel Mendoza", "position": "1st Base", "phone": "(555) 345-6789", "email": "manuel.mendoza@email.com"},
+                {"name": "Victor Castillo", "position": "2nd Base", "phone": "(555) 456-7890", "email": "victor.castillo@email.com"},
+                {"name": "Francisco Ruiz", "position": "3rd Base", "phone": "(555) 567-8901", "email": "francisco.ruiz@email.com"},
+                {"name": "Javier Ortega", "position": "Shortstop", "phone": "(555) 678-9012", "email": "javier.ortega@email.com"},
+                {"name": "Ricardo Silva", "position": "Left Field", "phone": "(555) 789-0123", "email": "ricardo.silva@email.com"},
+                {"name": "Enrique Herrera", "position": "Center Field", "phone": "(555) 890-1234", "email": "enrique.herrera@email.com"},
+                {"name": "Oscar Medina", "position": "Right Field", "phone": "(555) 901-2345", "email": "oscar.medina@email.com"},
+                {"name": "Hugo Chavez", "position": "Utility", "phone": "(555) 012-3456", "email": "hugo.chavez@email.com"}
+            ],
+            "Desvelados": [
+                {"name": "Sergio Fernandez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "sergio.fernandez@email.com"},
+                {"name": "Mario Gutierrez", "position": "Catcher", "phone": "(555) 234-5678", "email": "mario.gutierrez@email.com"},
+                {"name": "Rafael Navarro", "position": "1st Base", "phone": "(555) 345-6789", "email": "rafael.navarro@email.com"},
+                {"name": "Pedro Delgado", "position": "2nd Base", "phone": "(555) 456-7890", "email": "pedro.delgado@email.com"},
+                {"name": "Angel Moreno", "position": "3rd Base", "phone": "(555) 567-8901", "email": "angel.moreno@email.com"},
+                {"name": "Alberto Reyes", "position": "Shortstop", "phone": "(555) 678-9012", "email": "alberto.reyes@email.com"},
+                {"name": "Daniel Vega", "position": "Left Field", "phone": "(555) 789-0123", "email": "daniel.vega@email.com"},
+                {"name": "Gabriel Soto", "position": "Center Field", "phone": "(555) 890-1234", "email": "gabriel.soto@email.com"},
+                {"name": "Adrian Cruz", "position": "Right Field", "phone": "(555) 901-2345", "email": "adrian.cruz@email.com"},
+                {"name": "Emilio Flores", "position": "Utility", "phone": "(555) 012-3456", "email": "emilio.flores@email.com"}
+            ],
+            "Los Pericos": [
+                {"name": "Tomas Aguilar", "position": "Pitcher", "phone": "(555) 123-4567", "email": "tomas.aguilar@email.com"},
+                {"name": "Ruben Guerrero", "position": "Catcher", "phone": "(555) 234-5678", "email": "ruben.guerrero@email.com"},
+                {"name": "Esteban Rios", "position": "1st Base", "phone": "(555) 345-6789", "email": "esteban.rios@email.com"},
+                {"name": "Ignacio Pena", "position": "2nd Base", "phone": "(555) 456-7890", "email": "ignacio.pena@email.com"},
+                {"name": "Salvador Campos", "position": "3rd Base", "phone": "(555) 567-8901", "email": "salvador.campos@email.com"},
+                {"name": "Gilberto Leon", "position": "Shortstop", "phone": "(555) 678-9012", "email": "gilberto.leon@email.com"},
+                {"name": "Armando Rubio", "position": "Left Field", "phone": "(555) 789-0123", "email": "armando.rubio@email.com"},
+                {"name": "Hector Salinas", "position": "Center Field", "phone": "(555) 890-1234", "email": "hector.salinas@email.com"},
+                {"name": "Julio Cabrera", "position": "Right Field", "phone": "(555) 901-2345", "email": "julio.cabrera@email.com"},
+                {"name": "Felipe Duran", "position": "Utility", "phone": "(555) 012-3456", "email": "felipe.duran@email.com"}
+            ],
+            "No Chance": [
+                {"name": "Nicolas Estrada", "position": "Pitcher", "phone": "(555) 123-4567", "email": "nicolas.estrada@email.com"},
+                {"name": "Leonardo Ponce", "position": "Catcher", "phone": "(555) 234-5678", "email": "leonardo.ponce@email.com"},
+                {"name": "Cristian Vargas", "position": "1st Base", "phone": "(555) 345-6789", "email": "cristian.vargas@email.com"},
+                {"name": "Sebastian Luna", "position": "2nd Base", "phone": "(555) 456-7890", "email": "sebastian.luna@email.com"},
+                {"name": "Matias Cortes", "position": "3rd Base", "phone": "(555) 567-8901", "email": "matias.cortes@email.com"},
+                {"name": "Diego Rojas", "position": "Shortstop", "phone": "(555) 678-9012", "email": "diego.rojas@email.com"},
+                {"name": "Lucas Mendoza", "position": "Left Field", "phone": "(555) 789-0123", "email": "lucas.mendoza@email.com"},
+                {"name": "Mateo Silva", "position": "Center Field", "phone": "(555) 890-1234", "email": "mateo.silva@email.com"},
+                {"name": "Thiago Torres", "position": "Right Field", "phone": "(555) 901-2345", "email": "thiago.torres@email.com"},
+                {"name": "Bruno Alvarez", "position": "Utility", "phone": "(555) 012-3456", "email": "bruno.alvarez@email.com"}
+            ],
+            "Strokes": [
+                {"name": "Ivan Ramirez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "ivan.ramirez@email.com"},
+                {"name": "Oscar Gonzalez", "position": "Catcher", "phone": "(555) 234-5678", "email": "oscar.gonzalez@email.com"},
+                {"name": "Pablo Martinez", "position": "1st Base", "phone": "(555) 345-6789", "email": "pablo.martinez@email.com"},
+                {"name": "Adrian Lopez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "adrian.lopez@email.com"},
+                {"name": "Carlos Sanchez", "position": "3rd Base", "phone": "(555) 567-8901", "email": "carlos.sanchez@email.com"},
+                {"name": "Miguel Rodriguez", "position": "Shortstop", "phone": "(555) 678-9012", "email": "miguel.rodriguez@email.com"},
+                {"name": "Jose Torres", "position": "Left Field", "phone": "(555) 789-0123", "email": "jose.torres@email.com"},
+                {"name": "Luis Diaz", "position": "Center Field", "phone": "(555) 890-1234", "email": "luis.diaz@email.com"},
+                {"name": "Antonio Morales", "position": "Right Field", "phone": "(555) 901-2345", "email": "antonio.morales@email.com"},
+                {"name": "Roberto Jimenez", "position": "Utility", "phone": "(555) 012-3456", "email": "roberto.jimenez@email.com"}
+            ],
+            "Viejones": [
+                {"name": "Fernando Alvarez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "fernando.alvarez@email.com"},
+                {"name": "Diego Vargas", "position": "Catcher", "phone": "(555) 234-5678", "email": "diego.vargas@email.com"},
+                {"name": "Manuel Mendoza", "position": "1st Base", "phone": "(555) 345-6789", "email": "manuel.mendoza@email.com"},
+                {"name": "Victor Castillo", "position": "2nd Base", "phone": "(555) 456-7890", "email": "victor.castillo@email.com"},
+                {"name": "Francisco Ruiz", "position": "3rd Base", "phone": "(555) 567-8901", "email": "francisco.ruiz@email.com"},
+                {"name": "Javier Ortega", "position": "Shortstop", "phone": "(555) 678-9012", "email": "javier.ortega@email.com"},
+                {"name": "Ricardo Silva", "position": "Left Field", "phone": "(555) 789-0123", "email": "ricardo.silva@email.com"},
+                {"name": "Enrique Herrera", "position": "Center Field", "phone": "(555) 890-1234", "email": "enrique.herrera@email.com"},
+                {"name": "Oscar Medina", "position": "Right Field", "phone": "(555) 901-2345", "email": "oscar.medina@email.com"},
+                {"name": "Hugo Chavez", "position": "Utility", "phone": "(555) 012-3456", "email": "hugo.chavez@email.com"}
+            ],
+            "Wild Hogz": [
+                {"name": "Sergio Fernandez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "sergio.fernandez@email.com"},
+                {"name": "Mario Gutierrez", "position": "Catcher", "phone": "(555) 234-5678", "email": "mario.gutierrez@email.com"},
+                {"name": "Rafael Navarro", "position": "1st Base", "phone": "(555) 345-6789", "email": "rafael.navarro@email.com"},
+                {"name": "Pedro Delgado", "position": "2nd Base", "phone": "(555) 456-7890", "email": "pedro.delgado@email.com"},
+                {"name": "Angel Moreno", "position": "3rd Base", "phone": "(555) 567-8901", "email": "angel.moreno@email.com"},
+                {"name": "Alberto Reyes", "position": "Shortstop", "phone": "(555) 678-9012", "email": "alberto.reyes@email.com"},
+                {"name": "Daniel Vega", "position": "Left Field", "phone": "(555) 789-0123", "email": "daniel.vega@email.com"},
+                {"name": "Gabriel Soto", "position": "Center Field", "phone": "(555) 890-1234", "email": "gabriel.soto@email.com"},
+                {"name": "Adrian Cruz", "position": "Right Field", "phone": "(555) 901-2345", "email": "adrian.cruz@email.com"},
+                {"name": "Emilio Flores", "position": "Utility", "phone": "(555) 012-3456", "email": "emilio.flores@email.com"}
+            ],
+            "Xolos": [
+                {"name": "Tomas Aguilar", "position": "Pitcher", "phone": "(555) 123-4567", "email": "tomas.aguilar@email.com"},
+                {"name": "Ruben Guerrero", "position": "Catcher", "phone": "(555) 234-5678", "email": "ruben.guerrero@email.com"},
+                {"name": "Esteban Rios", "position": "1st Base", "phone": "(555) 345-6789", "email": "esteban.rios@email.com"},
+                {"name": "Ignacio Pena", "position": "2nd Base", "phone": "(555) 456-7890", "email": "ignacio.pena@email.com"},
+                {"name": "Salvador Campos", "position": "3rd Base", "phone": "(555) 567-8901", "email": "salvador.campos@email.com"},
+                {"name": "Gilberto Leon", "position": "Shortstop", "phone": "(555) 678-9012", "email": "gilberto.leon@email.com"},
+                {"name": "Armando Rubio", "position": "Left Field", "phone": "(555) 789-0123", "email": "armando.rubio@email.com"},
+                {"name": "Hector Salinas", "position": "Center Field", "phone": "(555) 890-1234", "email": "hector.salinas@email.com"},
+                {"name": "Julio Cabrera", "position": "Right Field", "phone": "(555) 901-2345", "email": "julio.cabrera@email.com"},
+                {"name": "Felipe Duran", "position": "Utility", "phone": "(555) 012-3456", "email": "felipe.duran@email.com"}
+            ]
+        },
+        "Winter Division 1": {
+            "Charros": [
+                {"name": "Nicolas Estrada", "position": "Pitcher", "phone": "(555) 123-4567", "email": "nicolas.estrada@email.com"},
+                {"name": "Leonardo Ponce", "position": "Catcher", "phone": "(555) 234-5678", "email": "leonardo.ponce@email.com"},
+                {"name": "Cristian Vargas", "position": "1st Base", "phone": "(555) 345-6789", "email": "cristian.vargas@email.com"},
+                {"name": "Sebastian Luna", "position": "2nd Base", "phone": "(555) 456-7890", "email": "sebastian.luna@email.com"},
+                {"name": "Matias Cortes", "position": "3rd Base", "phone": "(555) 567-8901", "email": "matias.cortes@email.com"},
+                {"name": "Diego Rojas", "position": "Shortstop", "phone": "(555) 678-9012", "email": "diego.rojas@email.com"},
+                {"name": "Lucas Mendoza", "position": "Left Field", "phone": "(555) 789-0123", "email": "lucas.mendoza@email.com"},
+                {"name": "Mateo Silva", "position": "Center Field", "phone": "(555) 890-1234", "email": "mateo.silva@email.com"},
+                {"name": "Thiago Torres", "position": "Right Field", "phone": "(555) 901-2345", "email": "thiago.torres@email.com"},
+                {"name": "Bruno Alvarez", "position": "Utility", "phone": "(555) 012-3456", "email": "bruno.alvarez@email.com"}
+            ],
+            "Goodfellas": [
+                {"name": "Ivan Ramirez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "ivan.ramirez@email.com"},
+                {"name": "Oscar Gonzalez", "position": "Catcher", "phone": "(555) 234-5678", "email": "oscar.gonzalez@email.com"},
+                {"name": "Pablo Martinez", "position": "1st Base", "phone": "(555) 345-6789", "email": "pablo.martinez@email.com"},
+                {"name": "Adrian Lopez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "adrian.lopez@email.com"},
+                {"name": "Carlos Sanchez", "position": "3rd Base", "phone": "(555) 567-8901", "email": "carlos.sanchez@email.com"},
+                {"name": "Miguel Rodriguez", "position": "Shortstop", "phone": "(555) 678-9012", "email": "miguel.rodriguez@email.com"},
+                {"name": "Jose Torres", "position": "Left Field", "phone": "(555) 789-0123", "email": "jose.torres@email.com"},
+                {"name": "Luis Diaz", "position": "Center Field", "phone": "(555) 890-1234", "email": "luis.diaz@email.com"},
+                {"name": "Antonio Morales", "position": "Right Field", "phone": "(555) 901-2345", "email": "antonio.morales@email.com"},
+                {"name": "Roberto Jimenez", "position": "Utility", "phone": "(555) 012-3456", "email": "roberto.jimenez@email.com"}
+            ],
+            "La Tribu": [
+                {"name": "Fernando Alvarez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "fernando.alvarez@email.com"},
+                {"name": "Diego Vargas", "position": "Catcher", "phone": "(555) 234-5678", "email": "diego.vargas@email.com"},
+                {"name": "Manuel Mendoza", "position": "1st Base", "phone": "(555) 345-6789", "email": "manuel.mendoza@email.com"},
+                {"name": "Victor Castillo", "position": "2nd Base", "phone": "(555) 456-7890", "email": "victor.castillo@email.com"},
+                {"name": "Francisco Ruiz", "position": "3rd Base", "phone": "(555) 567-8901", "email": "francisco.ruiz@email.com"},
+                {"name": "Javier Ortega", "position": "Shortstop", "phone": "(555) 678-9012", "email": "javier.ortega@email.com"},
+                {"name": "Ricardo Silva", "position": "Left Field", "phone": "(555) 789-0123", "email": "ricardo.silva@email.com"},
+                {"name": "Enrique Herrera", "position": "Center Field", "phone": "(555) 890-1234", "email": "enrique.herrera@email.com"},
+                {"name": "Oscar Medina", "position": "Right Field", "phone": "(555) 901-2345", "email": "oscar.medina@email.com"},
+                {"name": "Hugo Chavez", "position": "Utility", "phone": "(555) 012-3456", "email": "hugo.chavez@email.com"}
+            ],
+            "LAMSL OG's": [
+                {"name": "Sergio Fernandez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "sergio.fernandez@email.com"},
+                {"name": "Mario Gutierrez", "position": "Catcher", "phone": "(555) 234-5678", "email": "mario.gutierrez@email.com"},
+                {"name": "Rafael Navarro", "position": "1st Base", "phone": "(555) 345-6789", "email": "rafael.navarro@email.com"},
+                {"name": "Pedro Delgado", "position": "2nd Base", "phone": "(555) 456-7890", "email": "pedro.delgado@email.com"},
+                {"name": "Angel Moreno", "position": "3rd Base", "phone": "(555) 567-8901", "email": "angel.moreno@email.com"},
+                {"name": "Alberto Reyes", "position": "Shortstop", "phone": "(555) 678-9012", "email": "alberto.reyes@email.com"},
+                {"name": "Daniel Vega", "position": "Left Field", "phone": "(555) 789-0123", "email": "daniel.vega@email.com"},
+                {"name": "Gabriel Soto", "position": "Center Field", "phone": "(555) 890-1234", "email": "gabriel.soto@email.com"},
+                {"name": "Adrian Cruz", "position": "Right Field", "phone": "(555) 901-2345", "email": "adrian.cruz@email.com"},
+                {"name": "Emilio Flores", "position": "Utility", "phone": "(555) 012-3456", "email": "emilio.flores@email.com"}
+            ],
+            "Legends": [
+                {"name": "Tomas Aguilar", "position": "Pitcher", "phone": "(555) 123-4567", "email": "tomas.aguilar@email.com"},
+                {"name": "Ruben Guerrero", "position": "Catcher", "phone": "(555) 234-5678", "email": "ruben.guerrero@email.com"},
+                {"name": "Esteban Rios", "position": "1st Base", "phone": "(555) 345-6789", "email": "esteban.rios@email.com"},
+                {"name": "Ignacio Pena", "position": "2nd Base", "phone": "(555) 456-7890", "email": "ignacio.pena@email.com"},
+                {"name": "Salvador Campos", "position": "3rd Base", "phone": "(555) 567-8901", "email": "salvador.campos@email.com"},
+                {"name": "Gilberto Leon", "position": "Shortstop", "phone": "(555) 678-9012", "email": "gilberto.leon@email.com"},
+                {"name": "Armando Rubio", "position": "Left Field", "phone": "(555) 789-0123", "email": "armando.rubio@email.com"},
+                {"name": "Hector Salinas", "position": "Center Field", "phone": "(555) 890-1234", "email": "hector.salinas@email.com"},
+                {"name": "Julio Cabrera", "position": "Right Field", "phone": "(555) 901-2345", "email": "julio.cabrera@email.com"},
+                {"name": "Felipe Duran", "position": "Utility", "phone": "(555) 012-3456", "email": "felipe.duran@email.com"}
+            ],
+            "Titans": [
+                {"name": "Nicolas Estrada", "position": "Pitcher", "phone": "(555) 123-4567", "email": "nicolas.estrada@email.com"},
+                {"name": "Leonardo Ponce", "position": "Catcher", "phone": "(555) 234-5678", "email": "leonardo.ponce@email.com"},
+                {"name": "Cristian Vargas", "position": "1st Base", "phone": "(555) 345-6789", "email": "cristian.vargas@email.com"},
+                {"name": "Sebastian Luna", "position": "2nd Base", "phone": "(555) 456-7890", "email": "sebastian.luna@email.com"},
+                {"name": "Matias Cortes", "position": "3rd Base", "phone": "(555) 567-8901", "email": "matias.cortes@email.com"},
+                {"name": "Diego Rojas", "position": "Shortstop", "phone": "(555) 678-9012", "email": "diego.rojas@email.com"},
+                {"name": "Lucas Mendoza", "position": "Left Field", "phone": "(555) 789-0123", "email": "lucas.mendoza@email.com"},
+                {"name": "Mateo Silva", "position": "Center Field", "phone": "(555) 890-1234", "email": "mateo.silva@email.com"},
+                {"name": "Thiago Torres", "position": "Right Field", "phone": "(555) 901-2345", "email": "thiago.torres@email.com"},
+                {"name": "Bruno Alvarez", "position": "Utility", "phone": "(555) 012-3456", "email": "bruno.alvarez@email.com"}
+            ]
+        },
+        "Winter Division 2": {
+            "Balls Out": [
+                {"name": "Ivan Ramirez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "ivan.ramirez@email.com"},
+                {"name": "Oscar Gonzalez", "position": "Catcher", "phone": "(555) 234-5678", "email": "oscar.gonzalez@email.com"},
+                {"name": "Pablo Martinez", "position": "1st Base", "phone": "(555) 345-6789", "email": "pablo.martinez@email.com"},
+                {"name": "Adrian Lopez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "adrian.lopez@email.com"},
+                {"name": "Carlos Sanchez", "position": "3rd Base", "phone": "(555) 567-8901", "email": "carlos.sanchez@email.com"},
+                {"name": "Miguel Rodriguez", "position": "Shortstop", "phone": "(555) 678-9012", "email": "miguel.rodriguez@email.com"},
+                {"name": "Jose Torres", "position": "Left Field", "phone": "(555) 789-0123", "email": "jose.torres@email.com"},
+                {"name": "Luis Diaz", "position": "Center Field", "phone": "(555) 890-1234", "email": "luis.diaz@email.com"},
+                {"name": "Antonio Morales", "position": "Right Field", "phone": "(555) 901-2345", "email": "antonio.morales@email.com"},
+                {"name": "Roberto Jimenez", "position": "Utility", "phone": "(555) 012-3456", "email": "roberto.jimenez@email.com"}
+            ],
+            "Bastards": [
+                {"name": "Fernando Alvarez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "fernando.alvarez@email.com"},
+                {"name": "Diego Vargas", "position": "Catcher", "phone": "(555) 234-5678", "email": "diego.vargas@email.com"},
+                {"name": "Manuel Mendoza", "position": "1st Base", "phone": "(555) 345-6789", "email": "manuel.mendoza@email.com"},
+                {"name": "Victor Castillo", "position": "2nd Base", "phone": "(555) 456-7890", "email": "victor.castillo@email.com"},
+                {"name": "Francisco Ruiz", "position": "3rd Base", "phone": "(555) 567-8901", "email": "francisco.ruiz@email.com"},
+                {"name": "Javier Ortega", "position": "Shortstop", "phone": "(555) 678-9012", "email": "javier.ortega@email.com"},
+                {"name": "Ricardo Silva", "position": "Left Field", "phone": "(555) 789-0123", "email": "ricardo.silva@email.com"},
+                {"name": "Enrique Herrera", "position": "Center Field", "phone": "(555) 890-1234", "email": "enrique.herrera@email.com"},
+                {"name": "Oscar Medina", "position": "Right Field", "phone": "(555) 901-2345", "email": "oscar.medina@email.com"},
+                {"name": "Hugo Chavez", "position": "Utility", "phone": "(555) 012-3456", "email": "hugo.chavez@email.com"}
+            ],
+            "Coyotes": [
+                {"name": "Sergio Fernandez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "sergio.fernandez@email.com"},
+                {"name": "Mario Gutierrez", "position": "Catcher", "phone": "(555) 234-5678", "email": "mario.gutierrez@email.com"},
+                {"name": "Rafael Navarro", "position": "1st Base", "phone": "(555) 345-6789", "email": "rafael.navarro@email.com"},
+                {"name": "Pedro Delgado", "position": "2nd Base", "phone": "(555) 456-7890", "email": "pedro.delgado@email.com"},
+                {"name": "Angel Moreno", "position": "3rd Base", "phone": "(555) 567-8901", "email": "angel.moreno@email.com"},
+                {"name": "Alberto Reyes", "position": "Shortstop", "phone": "(555) 678-9012", "email": "alberto.reyes@email.com"},
+                {"name": "Daniel Vega", "position": "Left Field", "phone": "(555) 789-0123", "email": "daniel.vega@email.com"},
+                {"name": "Gabriel Soto", "position": "Center Field", "phone": "(555) 890-1234", "email": "gabriel.soto@email.com"},
+                {"name": "Adrian Cruz", "position": "Right Field", "phone": "(555) 901-2345", "email": "adrian.cruz@email.com"},
+                {"name": "Emilio Flores", "position": "Utility", "phone": "(555) 012-3456", "email": "emilio.flores@email.com"}
+            ],
+            "Diablos": [
+                {"name": "Tomas Aguilar", "position": "Pitcher", "phone": "(555) 123-4567", "email": "tomas.aguilar@email.com"},
+                {"name": "Ruben Guerrero", "position": "Catcher", "phone": "(555) 234-5678", "email": "ruben.guerrero@email.com"},
+                {"name": "Esteban Rios", "position": "1st Base", "phone": "(555) 345-6789", "email": "esteban.rios@email.com"},
+                {"name": "Ignacio Pena", "position": "2nd Base", "phone": "(555) 456-7890", "email": "ignacio.pena@email.com"},
+                {"name": "Salvador Campos", "position": "3rd Base", "phone": "(555) 567-8901", "email": "salvador.campos@email.com"},
+                {"name": "Gilberto Leon", "position": "Shortstop", "phone": "(555) 678-9012", "email": "gilberto.leon@email.com"},
+                {"name": "Armando Rubio", "position": "Left Field", "phone": "(555) 789-0123", "email": "armando.rubio@email.com"},
+                {"name": "Hector Salinas", "position": "Center Field", "phone": "(555) 890-1234", "email": "hector.salinas@email.com"},
+                {"name": "Julio Cabrera", "position": "Right Field", "phone": "(555) 901-2345", "email": "julio.cabrera@email.com"},
+                {"name": "Felipe Duran", "position": "Utility", "phone": "(555) 012-3456", "email": "felipe.duran@email.com"}
+            ],
+            "Hitmen": [
+                {"name": "Nicolas Estrada", "position": "Pitcher", "phone": "(555) 123-4567", "email": "nicolas.estrada@email.com"},
+                {"name": "Leonardo Ponce", "position": "Catcher", "phone": "(555) 234-5678", "email": "leonardo.ponce@email.com"},
+                {"name": "Cristian Vargas", "position": "1st Base", "phone": "(555) 345-6789", "email": "cristian.vargas@email.com"},
+                {"name": "Sebastian Luna", "position": "2nd Base", "phone": "(555) 456-7890", "email": "sebastian.luna@email.com"},
+                {"name": "Matias Cortes", "position": "3rd Base", "phone": "(555) 567-8901", "email": "matias.cortes@email.com"},
+                {"name": "Diego Rojas", "position": "Shortstop", "phone": "(555) 678-9012", "email": "diego.rojas@email.com"},
+                {"name": "Lucas Mendoza", "position": "Left Field", "phone": "(555) 789-0123", "email": "lucas.mendoza@email.com"},
+                {"name": "Mateo Silva", "position": "Center Field", "phone": "(555) 890-1234", "email": "mateo.silva@email.com"},
+                {"name": "Thiago Torres", "position": "Right Field", "phone": "(555) 901-2345", "email": "thiago.torres@email.com"},
+                {"name": "Bruno Alvarez", "position": "Utility", "phone": "(555) 012-3456", "email": "bruno.alvarez@email.com"}
+            ],
+            "Peloteros": [
+                {"name": "Ivan Ramirez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "ivan.ramirez@email.com"},
+                {"name": "Oscar Gonzalez", "position": "Catcher", "phone": "(555) 234-5678", "email": "oscar.gonzalez@email.com"},
+                {"name": "Pablo Martinez", "position": "1st Base", "phone": "(555) 345-6789", "email": "pablo.martinez@email.com"},
+                {"name": "Adrian Lopez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "adrian.lopez@email.com"},
+                {"name": "Carlos Sanchez", "position": "3rd Base", "phone": "(555) 567-8901", "email": "carlos.sanchez@email.com"},
+                {"name": "Miguel Rodriguez", "position": "Shortstop", "phone": "(555) 678-9012", "email": "miguel.rodriguez@email.com"},
+                {"name": "Jose Torres", "position": "Left Field", "phone": "(555) 789-0123", "email": "jose.torres@email.com"},
+                {"name": "Luis Diaz", "position": "Center Field", "phone": "(555) 890-1234", "email": "luis.diaz@email.com"},
+                {"name": "Antonio Morales", "position": "Right Field", "phone": "(555) 901-2345", "email": "antonio.morales@email.com"},
+                {"name": "Roberto Jimenez", "position": "Utility", "phone": "(555) 012-3456", "email": "roberto.jimenez@email.com"}
+            ],
+            "Showtime": [
+                {"name": "Fernando Alvarez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "fernando.alvarez@email.com"},
+                {"name": "Diego Vargas", "position": "Catcher", "phone": "(555) 234-5678", "email": "diego.vargas@email.com"},
+                {"name": "Manuel Mendoza", "position": "1st Base", "phone": "(555) 345-6789", "email": "manuel.mendoza@email.com"},
+                {"name": "Victor Castillo", "position": "2nd Base", "phone": "(555) 456-7890", "email": "victor.castillo@email.com"},
+                {"name": "Francisco Ruiz", "position": "3rd Base", "phone": "(555) 567-8901", "email": "francisco.ruiz@email.com"},
+                {"name": "Javier Ortega", "position": "Shortstop", "phone": "(555) 678-9012", "email": "javier.ortega@email.com"},
+                {"name": "Ricardo Silva", "position": "Left Field", "phone": "(555) 789-0123", "email": "ricardo.silva@email.com"},
+                {"name": "Enrique Herrera", "position": "Center Field", "phone": "(555) 890-1234", "email": "enrique.herrera@email.com"},
+                {"name": "Oscar Medina", "position": "Right Field", "phone": "(555) 901-2345", "email": "oscar.medina@email.com"},
+                {"name": "Hugo Chavez", "position": "Utility", "phone": "(555) 012-3456", "email": "hugo.chavez@email.com"}
+            ],
+            "Wild Hogz": [
+                {"name": "Sergio Fernandez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "sergio.fernandez@email.com"},
+                {"name": "Mario Gutierrez", "position": "Catcher", "phone": "(555) 234-5678", "email": "mario.gutierrez@email.com"},
+                {"name": "Rafael Navarro", "position": "1st Base", "phone": "(555) 345-6789", "email": "rafael.navarro@email.com"},
+                {"name": "Pedro Delgado", "position": "2nd Base", "phone": "(555) 456-7890", "email": "pedro.delgado@email.com"},
+                {"name": "Angel Moreno", "position": "3rd Base", "phone": "(555) 567-8901", "email": "angel.moreno@email.com"},
+                {"name": "Alberto Reyes", "position": "Shortstop", "phone": "(555) 678-9012", "email": "alberto.reyes@email.com"},
+                {"name": "Daniel Vega", "position": "Left Field", "phone": "(555) 789-0123", "email": "daniel.vega@email.com"},
+                {"name": "Gabriel Soto", "position": "Center Field", "phone": "(555) 890-1234", "email": "gabriel.soto@email.com"},
+                {"name": "Adrian Cruz", "position": "Right Field", "phone": "(555) 901-2345", "email": "adrian.cruz@email.com"},
+                {"name": "Emilio Flores", "position": "Utility", "phone": "(555) 012-3456", "email": "emilio.flores@email.com"}
+            ]
+        }
+    };
+
+    const existingRosters = readJson(ROSTER_KEY, {});
+    const mergedRosters = { ...existingRosters };
+
+    for (const division in rosterData) {
+        if (!mergedRosters[division]) mergedRosters[division] = {};
+        for (const team in rosterData[division]) {
+            if (!mergedRosters[division][team]) {
+                mergedRosters[division][team] = rosterData[division][team];
+            }
+        }
+    }
+
+    localStorage.setItem(ROSTER_KEY, JSON.stringify(mergedRosters));
+})();
 
 const standingsByDivision = {
     A: [
@@ -957,7 +1706,7 @@ function canManageTeamContent() {
 }
 
 function canCheckInPlayers() {
-    return hasRole('admin', 'team-manager', 'umpire', 'player');
+    return hasRole('admin', 'team-manager', 'umpire');
 }
 
 function toStatusLabel(status) {
@@ -995,7 +1744,11 @@ const scheduleAnchorDate = document.getElementById('schedule-anchor-date');
 const rosterAdminStatus = document.getElementById('roster-admin-status');
 const rosterFileInput = document.getElementById('roster-file');
 const uploadRosterBtn = document.getElementById('upload-roster-btn');
-const rosterTableWrap = document.getElementById('roster-table-wrap');
+const uploadAllRostersBtn = document.getElementById('upload-all-rosters-btn');
+const rosterGridWrap = document.getElementById('roster-grid-wrap');
+const addPlayerBtn = document.getElementById('add-player-btn');
+const removePlayerBtn = document.getElementById('remove-player-btn');
+const formInstruction = document.getElementById('form-instruction');
 const playerIdInput = document.getElementById('player-id');
 const playerNameInput = document.getElementById('player-name');
 const playerPositionInput = document.getElementById('player-position');
@@ -1011,6 +1764,13 @@ const checkinPlayerList = document.getElementById('checkin-player-list');
 const saveCheckinBtn = document.getElementById('save-checkin-btn');
 const clearCheckinBtn = document.getElementById('clear-checkin-btn');
 const checkinStatus = document.getElementById('checkin-status');
+
+const playerModal = document.getElementById('player-modal');
+const modalTitle = document.getElementById('modal-title');
+const closeModalBtn = document.getElementById('close-modal-btn');
+const playerFormSection = document.getElementById('player-form-section');
+const playerProfilesSection = document.getElementById('player-profiles-section');
+const playerList = document.getElementById('player-list');
 
 let selectedGame = null;
 let selectedGameCheckins = [];
@@ -1278,31 +2038,26 @@ function renderRoster() {
     const roster = team ? store[team] : null;
 
     if (!team) {
-        rosterTableWrap.innerHTML = '<p class="muted">Select a team to view roster details.</p>';
+        rosterGridWrap.innerHTML = '<p class="muted">Select a team to view roster details.</p>';
         return;
     }
 
-    if (!roster || !Array.isArray(roster.rows) || !roster.rows.length) {
-        rosterTableWrap.innerHTML = '<p class="muted">No roster uploaded yet for this team.</p>';
+    if (!roster || !Array.isArray(roster) || !roster.length) {
+        rosterGridWrap.innerHTML = '<p class="muted">No roster available for this team.</p>';
         renderPlayerProfiles();
         return;
     }
 
-    const headers = roster.headers || Object.keys(roster.rows[0] || {});
-    const headHtml = headers.map(header => `<th>${header}</th>`).join('');
+    const cardsHtml = roster.map(player => `
+        <div class="roster-card">
+            <h4>${player.name || 'Unknown'}</h4>
+            <p><strong>Position:</strong> ${player.position || 'N/A'}</p>
+            <p><strong>Phone:</strong> ${player.phone || 'N/A'}</p>
+            <p><strong>Email:</strong> ${player.email || 'N/A'}</p>
+        </div>
+    `).join('');
 
-    const bodyHtml = roster.rows.map(row => {
-        const cols = headers.map(header => `<td>${row[header] ?? ''}</td>`).join('');
-        return `<tr>${cols}</tr>`;
-    }).join('');
-
-    rosterTableWrap.innerHTML = `
-        <p class="muted">Last uploaded: ${roster.uploadedAt || 'Unknown'}</p>
-        <table>
-            <thead><tr>${headHtml}</tr></thead>
-            <tbody>${bodyHtml}</tbody>
-        </table>
-    `;
+    rosterGridWrap.innerHTML = `<div class="roster-grid">${cardsHtml}</div>`;
     renderPlayerProfiles();
 }
 
@@ -1317,6 +2072,17 @@ function setTeamPlayers(payload) {
     writeJson(TEAM_PLAYERS_KEY, store);
 }
 
+function getTeamPlayersForTeam(teamName) {
+    const store = readJson(TEAM_PLAYERS_KEY, {});
+    return store[teamName] || { players: [] };
+}
+
+function setTeamPlayersForTeam(teamName, payload) {
+    const store = readJson(TEAM_PLAYERS_KEY, {});
+    store[teamName] = payload;
+    writeJson(TEAM_PLAYERS_KEY, store);
+}
+
 function getTeamGameCheckins() {
     const store = readJson(TEAM_CHECKIN_KEY, {});
     return store[team] || {};
@@ -1326,6 +2092,24 @@ function setTeamGameCheckins(payload) {
     const store = readJson(TEAM_CHECKIN_KEY, {});
     store[team] = payload;
     writeJson(TEAM_CHECKIN_KEY, store);
+}
+
+function getRosterPlayers() {
+    const store = readJson(ROSTER_KEY, {});
+    const roster = team ? store[team] : null;
+    if (!roster || !Array.isArray(roster.rows)) {
+        return [];
+    }
+    return normalizePlayersFromRows(roster.rows);
+}
+
+function getCheckinPlayers() {
+    const stored = getTeamPlayers();
+    const players = Array.isArray(stored.players) ? [...stored.players] : [];
+    if (players.length) {
+        return players;
+    }
+    return getRosterPlayers();
 }
 
 function getGameId(game) {
@@ -1348,7 +2132,7 @@ function showCheckinPanel(game) {
     checkinGameLabel.textContent = `Check in players for: ${gameLabel}`;
     playerCheckinPanel.style.display = 'block';
 
-    const players = Array.isArray(getTeamPlayers().players) ? getTeamPlayers().players : [];
+    const players = getCheckinPlayers();
     const gameId = getGameId(game);
     const checkins = getTeamGameCheckins()[gameId] || { checkedIds: [] };
     selectedGameCheckins = Array.isArray(checkins.checkedIds) ? [...checkins.checkedIds] : [];
@@ -1363,8 +2147,13 @@ function showCheckinPanel(game) {
                 </label>
             `;
         }).join('')
-        : '<p class="muted">Add player profiles first to use check-in.</p>';
-    updateCheckinStatus('Select the players who attended this game, then save check-in.');
+        : '<p class="muted">Upload a roster or add player profiles first to use check-in.</p>';
+
+    if (!players.length) {
+        updateCheckinStatus('Upload a roster or add player profiles before checking in players.', true);
+    } else {
+        updateCheckinStatus('Select the players who attended this game, then save check-in.');
+    }
 }
 
 function hideCheckinPanel() {
@@ -1389,7 +2178,7 @@ function saveCheckinSelections() {
     const boxes = Array.from(checkinPlayerList.querySelectorAll('input[type="checkbox"]'));
     const checkedIds = boxes.filter(box => box.checked).map(box => box.dataset.playerId);
     const gameId = getGameId(selectedGame);
-    const allPlayers = Array.isArray(getTeamPlayers().players) ? getTeamPlayers().players : [];
+    const allPlayers = getCheckinPlayers();
     const playerMap = Object.fromEntries(allPlayers.map(player => [player.id, player]));
     const previousCheckins = Array.isArray(getTeamGameCheckins()[gameId]?.checkedIds) ? getTeamGameCheckins()[gameId].checkedIds : [];
 
@@ -1444,24 +2233,34 @@ function normalizePlayersFromRows(rows) {
     })).filter(player => player.name);
 }
 
-function renderPlayerProfiles() {
+function renderPlayerProfiles(filterPlayers = null) {
     const data = getTeamPlayers();
-    const players = Array.isArray(data.players) ? data.players : [];
-    playerListWrap.innerHTML = '';
+    const allPlayers = Array.isArray(data.players) ? data.players : [];
+    const players = filterPlayers || allPlayers;
+    playerList.innerHTML = '';
 
     if (!team) {
-        playerListWrap.innerHTML = '<p class="player-profiles-empty">Select a team to manage player profiles.</p>';
+        playerList.innerHTML = '<p class="player-profiles-empty">Select a team to manage player profiles.</p>';
         return;
     }
 
     if (!players.length) {
-        playerListWrap.innerHTML = '<p class="player-profiles-empty">No player profiles added yet.</p>';
+        playerList.innerHTML = '<p class="player-profiles-empty">No player profiles added yet.</p>';
         return;
     }
+
+    const canManage = canManageTeamContent();
+    const isRemoveMode = playerFormSection.style.display === 'block' && savePlayerBtn.textContent === 'Remove Player';
 
     players.forEach(player => {
         const card = document.createElement('div');
         card.className = 'player-card';
+        const actionsHtml = isRemoveMode ? '' : `
+            <div class="player-card-actions">
+                <button type="button" data-action="edit" data-player-id="${player.id}" ${canManage ? '' : 'disabled'}>Edit</button>
+                ${canManage ? `<button type="button" class="danger" data-action="remove" data-player-id="${player.id}">Remove</button>` : ''}
+            </div>
+        `;
         card.innerHTML = `
             <img src="${player.photo || 'Images/LAMSLLogo.jpg'}" alt="${player.name}">
             <div class="player-card-content">
@@ -1471,12 +2270,17 @@ function renderPlayerProfiles() {
                 <p><strong>Email:</strong> ${player.email || 'N/A'}</p>
                 <p><strong>Games Played:</strong> ${player.gamesPlayed}</p>
             </div>
-            <div class="player-card-actions">
-                <button type="button" data-action="edit" data-player-id="${player.id}">Edit</button>
-                <button type="button" class="danger" data-action="remove" data-player-id="${player.id}">Remove</button>
-            </div>
+            ${actionsHtml}
         `;
-        playerListWrap.appendChild(card);
+
+        if (isRemoveMode) {
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', () => {
+                populatePlayerForm(player);
+            });
+        }
+
+        playerList.appendChild(card);
     });
 }
 
@@ -1487,6 +2291,8 @@ function clearPlayerForm() {
     playerPhoneInput.value = '';
     playerEmailInput.value = '';
     playerPhotoInput.value = '';
+    playerFormSection.style.display = 'none';
+    playerModal.style.display = 'none';
 }
 
 function populatePlayerForm(player) {
@@ -1519,6 +2325,32 @@ async function savePlayer() {
 
     if (!canManageTeamContent()) {
         rosterAdminStatus.textContent = 'Sign in as team manager or admin to save player profiles.';
+        return;
+    }
+
+    const isRemove = savePlayerBtn.textContent === 'Remove Player';
+
+    if (isRemove) {
+        const id = playerIdInput.value;
+        if (!id) {
+            rosterAdminStatus.textContent = 'Select a player to remove.';
+            return;
+        }
+
+        const store = getTeamPlayers();
+        const players = Array.isArray(store.players) ? [...store.players] : [];
+        const existingIndex = players.findIndex(item => item.id === id);
+
+        if (existingIndex >= 0) {
+            const name = players[existingIndex].name;
+            players.splice(existingIndex, 1);
+            setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
+            rosterAdminStatus.textContent = `${name} removed from the roster.`;
+            renderPlayerProfiles();
+            clearPlayerForm();
+        } else {
+            rosterAdminStatus.textContent = 'Player not found.';
+        }
         return;
     }
 
@@ -1566,7 +2398,52 @@ function editPlayer(id) {
     populatePlayerForm(player);
 }
 
+function showPlayerProfile(playerName) {
+    const store = getTeamPlayers();
+    const player = (store.players || []).find(item => item.name === playerName);
+    if (!player) {
+        return;
+    }
+    modalTitle.textContent = 'Player Profile';
+    playerFormSection.style.display = 'none';
+    playerProfilesSection.style.display = 'block';
+    renderPlayerProfiles([player]); // Render only this player
+    playerModal.style.display = 'flex';
+}
+
+function getPlayerKey(player) {
+    const name = String(player.name || player.Name || '').trim().toLowerCase();
+    const email = String(player.email || player.Email || '').trim().toLowerCase();
+    const phone = String(player.phone || player.Phone || '').trim().toLowerCase();
+    return `${name}|${email || phone}`;
+}
+
+function normalizeRosterRow(row) {
+    const getValue = key => {
+        const keys = Object.keys(row);
+        const match = keys.find(k => k.toLowerCase() === key.toLowerCase());
+        return match ? String(row[match] || '').trim() : '';
+    };
+    return {
+        Team: getValue('Team').replace(/\s+Regular$/i, ''),
+        Name: getValue('Name'),
+        Position: getValue('Position'),
+        Phone: getValue('Phone'),
+        Email: getValue('Email')
+    };
+}
+
+function setRosterStatus(message, isError = false, isSuccess = false) {
+    rosterAdminStatus.textContent = message;
+    rosterAdminStatus.style.color = isError ? '#d32f2f' : isSuccess ? '#2e7d32' : '';
+}
+
 function removePlayer(id) {
+    if (!canManageTeamContent()) {
+        rosterAdminStatus.textContent = 'Sign in as team manager or admin to remove players.';
+        return;
+    }
+
     const store = getTeamPlayers();
     const players = (store.players || []).filter(item => item.id !== id);
     setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
@@ -1584,11 +2461,14 @@ function normalizePlayerDataFromRoster(rows) {
 
 function applyRosterUploadAccess() {
     const allowed = canManageTeamContent();
-    rosterAdminStatus.textContent = allowed
+    const isAdmin = hasRole('admin');
+    setRosterStatus(allowed
         ? 'Manager access confirmed. Upload roster Excel/CSV file for this team.'
-        : 'Sign in as team manager or admin to upload roster spreadsheets.';
+        : 'Sign in as team manager or admin to upload roster spreadsheets.');
     rosterFileInput.disabled = !allowed || !team;
     uploadRosterBtn.disabled = !allowed || !team;
+    uploadAllRostersBtn.style.display = isAdmin ? 'inline-block' : 'none';
+    uploadAllRostersBtn.disabled = !isAdmin;
 
     teamPhotoStatus.textContent = allowed
         ? 'Manager access confirmed. Upload a team profile image.'
@@ -1618,7 +2498,13 @@ uploadRosterBtn.addEventListener('click', async () => {
 
     const file = rosterFileInput.files && rosterFileInput.files[0];
     if (!file) {
-        rosterAdminStatus.textContent = 'Choose an Excel/CSV roster file first.';
+        setRosterStatus('Choose an Excel/CSV roster file first.', true);
+        return;
+    }
+
+    const confirmUpload = confirm('Uploading this roster will merge new players into the existing roster and may overwrite duplicate rows. Continue?');
+    if (!confirmUpload) {
+        setRosterStatus('Roster upload canceled.');
         return;
     }
 
@@ -1630,44 +2516,216 @@ uploadRosterBtn.addEventListener('click', async () => {
         const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
 
         if (!rows.length) {
-            rosterAdminStatus.textContent = 'Roster file appears empty.';
+            setRosterStatus('Roster file appears empty.', true);
             return;
         }
 
-        const headers = Object.keys(rows[0]);
+        const headers = ['Team', 'Name', 'Position', 'Phone', 'Email'];
         const store = readJson(ROSTER_KEY, {});
+        const existing = store[team] || { headers, rows: [] };
+        const existingRows = Array.isArray(existing.rows) ? existing.rows : [];
+        const seen = new Set(existingRows.map(row => {
+            const normalized = normalizeRosterRow(row);
+            return `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
+        }));
+
+        const combinedRows = [...existingRows];
+        rows.forEach(rawRow => {
+            const normalized = normalizeRosterRow(rawRow);
+            if (!normalized.Name) return;
+            const rowKey = `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
+            if (!seen.has(rowKey)) {
+                seen.add(rowKey);
+                combinedRows.push(normalized);
+            }
+        });
+
         store[team] = {
             headers,
-            rows,
+            rows: combinedRows,
             uploadedAt: new Date().toLocaleString()
         };
         writeJson(ROSTER_KEY, store);
 
-        const playerData = normalizePlayerDataFromRoster(rows);
-        if (playerData) {
-            setTeamPlayers(playerData);
+        const currentPlayers = Array.isArray(getTeamPlayers().players) ? [...getTeamPlayers().players] : [];
+        const existingPlayerKeys = new Set(currentPlayers.map(getPlayerKey));
+        const incomingPlayers = normalizePlayersFromRows(combinedRows);
+        let addedCount = 0;
+
+        incomingPlayers.forEach(player => {
+            const playerKey = getPlayerKey(player);
+            if (!existingPlayerKeys.has(playerKey)) {
+                existingPlayerKeys.add(playerKey);
+                currentPlayers.push(player);
+                addedCount += 1;
+            }
+        });
+
+        if (currentPlayers.length) {
+            setTeamPlayers({ players: currentPlayers, updatedAt: new Date().toLocaleString() });
         }
 
-        rosterAdminStatus.textContent = `Roster uploaded for ${team}.`;
+        if (addedCount > 0) {
+            setRosterStatus(`Roster uploaded for ${team}. ${addedCount} new player(s) added; duplicates ignored.`, false, true);
+        } else {
+            setRosterStatus(`Roster uploaded for ${team}. No new players were added; duplicates were ignored.`, false, true);
+        }
+
         renderRoster();
         renderPlayerProfiles();
     } catch (error) {
-        rosterAdminStatus.textContent = `Roster upload failed: ${error.message}`;
+        setRosterStatus(`Roster upload failed: ${error.message}`, true);
     }
+});
+
+uploadAllRostersBtn.addEventListener('click', async () => {
+    if (!hasRole('admin')) {
+        rosterAdminStatus.textContent = 'Admin access required to upload all rosters.';
+        return;
+    }
+
+    const file = rosterFileInput.files && rosterFileInput.files[0];
+    if (!file) {
+        setRosterStatus('Choose an Excel/CSV roster file first.', true);
+        return;
+    }
+
+    const confirmUpload = confirm('Uploading this roster will populate rosters for ALL teams in the spreadsheet. Existing rosters will be merged. Continue?');
+    if (!confirmUpload) {
+        setRosterStatus('All rosters upload canceled.');
+        return;
+    }
+
+    try {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+        if (!rows.length) {
+            setRosterStatus('Roster file appears empty.', true);
+            return;
+        }
+
+        const headers = ['Team', 'Name', 'Position', 'Phone', 'Email'];
+        const store = readJson(ROSTER_KEY, {});
+        const teamGroups = {};
+
+        rows.forEach(rawRow => {
+            const normalized = normalizeRosterRow(rawRow);
+            if (!normalized.Name || !normalized.Team) return;
+            const teamName = normalized.Team;
+            if (!teamGroups[teamName]) {
+                teamGroups[teamName] = [];
+            }
+            teamGroups[teamName].push(normalized);
+        });
+
+        let totalAdded = 0;
+        let teamsUpdated = 0;
+
+        for (const [teamName, teamRows] of Object.entries(teamGroups)) {
+            const existing = store[teamName] || { headers, rows: [] };
+            const existingRows = Array.isArray(existing.rows) ? existing.rows : [];
+            const seen = new Set(existingRows.map(row => {
+                const normalized = normalizeRosterRow(row);
+                return `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
+            }));
+
+            const combinedRows = [...existingRows];
+            teamRows.forEach(row => {
+                const rowKey = `${row.Team}|${row.Name}|${row.Position}|${row.Email}|${row.Phone}`.toLowerCase();
+                if (!seen.has(rowKey)) {
+                    seen.add(rowKey);
+                    combinedRows.push(row);
+                    totalAdded += 1;
+                }
+            });
+
+            if (combinedRows.length > existingRows.length) {
+                store[teamName] = {
+                    headers,
+                    rows: combinedRows,
+                    uploadedAt: new Date().toLocaleString()
+                };
+                teamsUpdated += 1;
+
+                // Also update player profiles
+                const currentPlayers = Array.isArray(getTeamPlayersForTeam(teamName).players) ? [...getTeamPlayersForTeam(teamName).players] : [];
+                const existingPlayerKeys = new Set(currentPlayers.map(getPlayerKey));
+                const incomingPlayers = normalizePlayersFromRows(combinedRows);
+
+                incomingPlayers.forEach(player => {
+                    const playerKey = getPlayerKey(player);
+                    if (!existingPlayerKeys.has(playerKey)) {
+                        existingPlayerKeys.add(playerKey);
+                        currentPlayers.push(player);
+                    }
+                });
+
+                if (currentPlayers.length) {
+                    setTeamPlayersForTeam(teamName, { players: currentPlayers, updatedAt: new Date().toLocaleString() });
+                }
+            }
+        }
+
+        writeJson(ROSTER_KEY, store);
+
+        setRosterStatus(`All rosters uploaded. ${teamsUpdated} team(s) updated, ${totalAdded} new player(s) added across all teams.`, false, true);
+        renderRoster();
+        renderPlayerProfiles();
+    } catch (error) {
+        setRosterStatus(`All rosters upload failed: ${error.message}`, true);
+    }
+});
+
+addPlayerBtn.addEventListener('click', () => {
+    modalTitle.textContent = 'Add Player';
+    playerFormSection.style.display = 'block';
+    playerProfilesSection.style.display = 'none';
+    clearPlayerForm();
+    renderPlayerProfiles();
+    playerModal.style.display = 'flex';
+});
+
+removePlayerBtn.addEventListener('click', () => {
+    modalTitle.textContent = 'Remove Player';
+    playerFormSection.style.display = 'block';
+    playerProfilesSection.style.display = 'block';
+    formInstruction.textContent = 'Select a player from the roster to remove.';
+    savePlayerBtn.textContent = 'Remove Player';
+    clearPlayerForm();
+    renderPlayerProfiles();
+    playerModal.style.display = 'flex';
 });
 
 savePlayerBtn.addEventListener('click', savePlayer);
 cancelPlayerBtn.addEventListener('click', clearPlayerForm);
-playerListWrap.addEventListener('click', event => {
+closeModalBtn.addEventListener('click', () => {
+    playerModal.style.display = 'none';
+});
+playerModal.addEventListener('click', (event) => {
+    if (event.target === playerModal) {
+        playerModal.style.display = 'none';
+    }
+});
+playerList.addEventListener('click', event => {
     const button = event.target.closest('button');
     if (!button) return;
     const action = button.dataset.action;
     const playerId = button.dataset.playerId;
     if (!action || !playerId) return;
+
     if (action === 'edit') {
+        modalTitle.textContent = 'Edit Player';
+        playerFormSection.style.display = 'block';
+        playerProfilesSection.style.display = 'none';
         editPlayer(playerId);
+        playerModal.style.display = 'flex';
     } else if (action === 'remove') {
         removePlayer(playerId);
+        playerModal.style.display = 'none';
     }
 });
 
@@ -1682,6 +2740,13 @@ teamScheduleWrap.addEventListener('click', event => {
     if (selected) {
         showCheckinPanel(selected);
     }
+});
+
+rosterGridWrap.addEventListener('click', event => {
+    const card = event.target.closest('.roster-card');
+    if (!card) return;
+    const playerName = card.querySelector('h4').textContent;
+    showPlayerProfile(playerName);
 });
 
 saveCheckinBtn.addEventListener('click', saveCheckinSelections);
@@ -1769,5 +2834,46 @@ loadTeamPhoto();
     } catch (e) {}
 })();
 </script>
+
+<!-- Player Management Modal -->
+<div id="player-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">Player Management</h3>
+            <button id="close-modal-btn" type="button" class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="player-form-section" style="display:none;">
+                <p class="muted" id="form-instruction">Fill in player details below.</p>
+                <div class="player-form-grid">
+                    <input id="player-id" type="hidden">
+                    <label for="player-name">Player Name</label>
+                    <input id="player-name" type="text" placeholder="Full name">
+
+                    <label for="player-position">Position(s)</label>
+                    <input id="player-position" type="text" placeholder="Primary positions">
+
+                    <label for="player-phone">Phone Number</label>
+                    <input id="player-phone" type="tel" placeholder="(555) 123-4567">
+
+                    <label for="player-email">Email Address</label>
+                    <input id="player-email" type="email" placeholder="name@example.com">
+
+                    <label for="player-photo-file">Player Photo</label>
+                    <input id="player-photo-file" type="file" accept="*/*">
+                </div>
+                <div class="player-form-actions">
+                    <button id="save-player-btn" type="button">Save Player</button>
+                    <button id="cancel-player-btn" type="button" class="secondary">Clear Form</button>
+                </div>
+            </div>
+            <section id="player-profiles-section">
+                <h4>Player Profiles</h4>
+                <div id="player-list" class="player-list"></div>
+            </section>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

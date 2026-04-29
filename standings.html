@@ -113,6 +113,7 @@ header {
 
 /* ===== BANNER ===== */
 .banner {
+    position: relative;
     background: #12324A;
     color: white;
     padding: 24px 20px;
@@ -120,247 +121,50 @@ header {
     display: grid;
     grid-template-columns: 240px minmax(0, 1fr);
     align-items: center;
-    justify-content: start;
-    column-gap: 8px;
+    justify-items: center;
+    gap: 12px;
     text-align: center;
 }
-
 .banner h1 {
+    margin: 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
     font-size: 42px;
-    font-style: italic;
-    margin: 10px 0;
-    font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
 }
-
 .banner .subtitle {
     font-size: 18px;
     font-style: italic;
-    margin: 8px 0;
-    font-weight: 400;
-    letter-spacing: 1px;
+    margin: 8px 0 0;
 }
-
-.banner h1,
-.banner .subtitle,
 .banner .tagline {
-    grid-column: 2;
+    margin-top: 10px;
+    font-size: 16px;
+    max-width: 620px;
 }
-
-
 .banner-logo {
-    width: 240px;
+    width: 220px;
     height: 160px;
     object-fit: contain;
-    margin: 0;
-    grid-column: 1;
-    grid-row: 1 / span 3;
-    justify-self: center;
 }
-
-/* ===== CARDS ===== */
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-
-/* ===== DIVISION TABS ===== */
-.division-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    background: #12324A;
-    padding: 14px 16px;
-    border-radius: 10px 10px 0 0;
-    scrollbar-width: thin;
-    scroll-snap-type: x proximity;
-}
-
-.tab-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    color: #a8c4d8;
-    border: 2px solid transparent;
-    padding: 8px 18px;
-    cursor: pointer;
-    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    border-radius: 5px;
-    transition: background 0.2s, color 0.2s, border-color 0.2s;
-    white-space: nowrap;
-    min-height: 40px;
-    scroll-snap-align: start;
-    text-decoration: none;
-}
-
-.tab-btn:hover {
-    color: #F1D27A;
-    border-color: #C86A2F;
-}
-
-.tab-btn.active {
-    background: #C86A2F;
-    color: white;
-    border-color: #C86A2F;
-}
-
-.tab-content-panel {
-    background: white;
-    border-radius: 0 0 10px 10px;
-    padding: 24px 20px;
-    min-height: 200px;
-    overflow-x: auto;
-}
-
-.tab-content-panel table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 16px;
-    min-width: 520px;
-}
-
-.tab-content-panel th,
-.tab-content-panel td {
-    border: 1px solid #dde4eb;
-    padding: 8px 12px;
-    text-align: left;
-    font-size: 14px;
-}
-
-.tab-content-panel a {
-    color: #12324A;
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.tab-content-panel a:hover,
-.tab-content-panel a:focus-visible {
-    color: #C86A2F;
-    text-decoration: underline;
-}
-
-.tab-content-panel th {
-    background: #12324A;
-    color: white;
-    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-}
-
-.tab-content-panel tr:nth-child(even) td {
-    background: #f4f8fb;
-}
-
-.tab-loading {
-    padding: 40px;
-    text-align: center;
-    color: #888;
-    font-size: 15px;
-}
-
-/* ===== FOOTER ===== */
-footer {
-    text-align: center;
-    padding: 20px;
-    background: #12324A;
-    color: white;
-    margin-top: 20px;
-}
-
-/* ===== MOBILE ===== */
-@media (max-width: 768px) {
-    body {
-        background-attachment: scroll;
-    }
-
-    .container {
-        padding: 16px;
-    }
-
-    .navbar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-        padding: 14px 16px;
-    }
-
-    .navbar ul {
-        flex-direction: column;
-        width: 100%;
-        gap: 4px;
-    }
-
-    .navbar li {
-        margin: 0;
-    }
-
-    .navbar a {
-        width: 100%;
-        padding: 8px 10px;
-        border-radius: 6px;
-        box-sizing: border-box;
-    }
-
+@media (max-width: 700px) {
     .banner {
         grid-template-columns: 1fr;
         text-align: center;
-        row-gap: 6px;
     }
-
-    .banner-logo {
-        width: 150px;
-        height: 120px;
-        grid-column: 1;
-        grid-row: auto;
-        justify-self: center;
-    }
-
     .banner h1 {
-        grid-column: 1;
-        font-size: 28px;
+        font-size: 32px;
     }
-
-    .banner .subtitle {
-        grid-column: 1;
+    .banner .subtitle,
+    .banner .tagline {
         font-size: 14px;
     }
-
-    .banner .tagline {
-        grid-column: 1;
-        font-size: 12px;
-    }
-
-    .division-tabs {
-        flex-wrap: nowrap;
-        gap: 8px;
-        margin: 0 -4px;
-        padding: 10px 12px 12px;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .tab-btn {
-        flex: 0 0 auto;
-        padding: 7px 12px;
-        font-size: 12px;
-    }
-
-    .tab-content-panel {
-        padding: 14px;
-        border-radius: 0 0 12px 12px;
-    }
-
-    .tab-loading {
-        padding: 24px 12px;
+    .banner-logo {
+        width: 180px;
+        height: auto;
     }
 }
+
 
 </style>
 </head>

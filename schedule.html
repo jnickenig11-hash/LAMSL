@@ -19,6 +19,18 @@ body {
     color: #333;
 }
 
+.team-link {
+    color: #0d4f85;
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.team-link:hover {
+    color: #08375a;
+    text-decoration: underline;
+}
+
 h1, h2, h3 {
     margin-bottom: 10px;
 }
@@ -1173,19 +1185,16 @@ function parseDateKey(dateKey) {
 }
 
 function apiUrl(path) {
+    if (window.location.protocol === 'file:' && path.startsWith('/')) {
+        return path.slice(1);
+    }
     return new URL(path, window.location.href).toString();
 }
 
 async function notifyScheduleUpdate(game, action) {
-    const users = readJson(USERS_KEY, []);
-    const recipientEmails = users
-        .filter(user => typeof user.email === 'string' && user.email.trim())
-        .map(user => user.email.trim());
-
     const payload = {
         action: action || 'updated',
-        game: game || {},
-        recipients: recipientEmails
+        game: game || {}
     };
 
     try {
@@ -1251,6 +1260,10 @@ function toggleGameCheckin(gameId) {
     }
     saveGameCheckins(checkins);
     return !!checkins[gameId];
+}
+
+function getTeamPageUrl(team, division, gameId) {
+    return `team.html?team=${encodeURIComponent(team)}&division=${encodeURIComponent(division)}&gameId=${encodeURIComponent(gameId)}`;
 }
 
 function ensureDefaults() {
@@ -1757,7 +1770,7 @@ function renderSelectedDayGames() {
             ? ` | Score: ${game.score1}-${game.score2}`
             : '';
         const gameInfo = document.createElement('div');
-        gameInfo.innerHTML = `${game.time} | ${game.park} | Div ${game.division} | Home: ${game.team1} vs Visitors: ${game.team2}${scoreText} <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+        gameInfo.innerHTML = `${game.time} | ${game.park} | Div ${game.division} | Home: <a class="team-link" href="${getTeamPageUrl(game.team1, game.division, game.id)}">${game.team1}</a> vs Visitors: <a class="team-link" href="${getTeamPageUrl(game.team2, game.division, game.id)}">${game.team2}</a>${scoreText} <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
         li.appendChild(gameInfo);
 
         const canManage = canManageScores();
@@ -2236,7 +2249,7 @@ function renderParkView() {
                 row.innerHTML = `
                     <span class="park-col-meta">${game.date}</span>
                     <span class="park-col-meta">${game.time}</span>
-                    <span class="park-col-matchup"><span class="park-col-division">Div ${game.division}</span> Home: ${game.team1} vs Visitors: ${game.team2}${scoreText}</span>
+                    <span class="park-col-matchup"><span class="park-col-division">Div ${game.division}</span> Home: <a class="team-link" href="${getTeamPageUrl(game.team1, game.division, game.id)}">${game.team1}</a> vs Visitors: <a class="team-link" href="${getTeamPageUrl(game.team2, game.division, game.id)}">${game.team2}</a>${scoreText}</span>
                     <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>${checkinBadge}
                 `;
                 list.appendChild(row);

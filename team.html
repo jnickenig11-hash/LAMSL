@@ -282,6 +282,12 @@ header {
         color: #334153;
     }
 
+    .roster-card .checkin-count {
+        margin-top: 6px;
+        font-size: 13px;
+        color: #0f3a6f;
+    }
+
     .manager-toolbar {
         display: flex;
         gap: 10px;
@@ -1839,6 +1845,7 @@ function toStatusLabel(status) {
 const params = new URLSearchParams(window.location.search);
 const team = params.get('team') || '';
 let division = (params.get('division') || '').toUpperCase();
+const gameIdParam = params.get('gameId') || '';
 
 if (!division && team) {
     for (const key of Object.keys(standingsByDivision)) {
@@ -2202,14 +2209,20 @@ function renderRoster() {
         return;
     }
 
-    const cardsHtml = roster.map(player => `
+    const cardsHtml = roster.map(player => {
+        const playerId = player.id || player.Id || player.Email || player.email || player.Name || player.name || '';
+        const counts = getPlayerCheckinCounts(playerId);
+        const checkinSummary = `Regular: ${counts.regular}, Winter: ${counts.winter}, Practice: ${counts.practice}`;
+        return `
         <div class="roster-card">
             <h4>${player.Name || player.name || 'Unknown'}</h4>
             <p><strong>Position:</strong> ${player.Position || player.position || 'N/A'}</p>
             <p><strong>Phone:</strong> ${player.Phone || player.phone || 'N/A'}</p>
             <p><strong>Email:</strong> ${player.Email || player.email || 'N/A'}</p>
+            <p class="checkin-count"><strong>Check-ins:</strong> ${checkinSummary}</p>
         </div>
-    `).join('');
+    `;
+    }).join('');
 
     rosterGridWrap.innerHTML = `<div class="roster-grid">${cardsHtml}</div>`;
     renderPlayerProfiles();
@@ -2240,6 +2253,26 @@ function setTeamPlayersForTeam(teamName, payload) {
 function getTeamGameCheckins() {
     const store = readJson(TEAM_CHECKIN_KEY, {});
     return store[team] || {};
+}
+
+function getPlayerCheckinCounts(playerId) {
+    const checkins = getTeamGameCheckins();
+    const games = getTeamGames();
+    const gameMap = Object.fromEntries(games.map(game => [getGameId(game), game]));
+    const counts = { regular: 0, winter: 0, practice: 0 };
+
+    Object.values(checkins).forEach(entry => {
+        if (!entry || !Array.isArray(entry.checkedIds) || !entry.checkedIds.includes(playerId)) {
+            return;
+        }
+        const game = gameMap[entry.gameId];
+        const season = game ? getSeasonType(game) : 'regular';
+        if (counts[season] !== undefined) {
+            counts[season] += 1;
+        }
+    });
+
+    return counts;
 }
 
 function setTeamGameCheckins(payload) {
@@ -2378,6 +2411,7 @@ function saveCheckinSelections() {
     setTeamGameCheckins(checkins);
 
     renderPlayerProfiles();
+    renderRoster();
     updateCheckinStatus(`Check-in saved for ${selectedGameCheckins.length} player(s).`);
 }
 
@@ -3025,6 +3059,19 @@ renderScheduleTable(games);
 if (upcomingGameSelect && games.length) {
     upcomingGameSelect.innerHTML = '<option value="">Select a game to check in players</option>' +
         getUpcomingGames().map(game => `<option value="${getGameId(game)}">${game.date} ${game.time || ''} — ${game.team1} vs ${game.team2}</option>`).join('');
+}
+
+if (gameIdParam && games.length) {
+    const selected = games.find(game => getGameId(game) === gameIdParam);
+    if (selected) {
+        if (upcomingGameSelect) {
+            upcomingGameSelect.value = gameIdParam;
+        }
+        showCheckinPanel(selected);
+        if (playerCheckinPanel) {
+            playerCheckinPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
 }
 
 if (scheduleAnchorDate) {

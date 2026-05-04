@@ -21,6 +21,18 @@ body {
     color: #333;
 }
 
+.team-link {
+    color: #0d4f85;
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.team-link:hover {
+    color: #08375a;
+    text-decoration: underline;
+}
+
 h1, h2, h3 {
     margin-bottom: 8px;
     font-family: 'Oswald', 'Barlow Condensed', sans-serif;
@@ -645,13 +657,22 @@ header {
                 <label>Zelle</label>
                 <input id="pay-zelle" type="url" placeholder="Zelle link or phone/email...">
                 <label>PayPal</label>
-                <input id="pay-paypal" type="url" placeholder="https://paypal.me/...">
+                <input id="pay-paypal" type="url" placeholder="https://paypal.me...">
                 <label>Google Pay</label>
-                <input id="pay-googlepay" type="url" placeholder="https://pay.google.com/...">
+                <input id="pay-googlepay" type="url" placeholder="https://pay.google.com/..."></input>
                 <label>Venmo</label>
-                <input id="pay-venmo" type="url" placeholder="https://venmo.com/...">
+                <input id="pay-venmo" type="url" placeholder="https://venmo.com/..."></input>
                 <button class="payment-save-btn" onclick="savePaymentLinks()">Save Payment Links</button>
             </div>
+        </section>
+
+        <section class="card home-region region-notifications">
+            <h3>Stay Informed by Email</h3>
+            <p>Enter your email to receive fundraiser and schedule update announcements.</p>
+            <label for="notify-email-input">Email address</label>
+            <input id="notify-email-input" type="email" placeholder="Enter email (e.g. address@example.com)">
+            <button id="notify-signup-btn">Sign Up</button>
+            <p id="notify-signup-message" style="margin-top:0.75rem;color:#1f4e79;font-size:0.95rem;"></p>
         </section>
 
         <section class="card home-region founder-region region-founder">
@@ -729,6 +750,9 @@ const uploadStatus = document.getElementById('upload-status');
 const homeSlideshowPrev = document.querySelector('.prev');
 const homeSlideshowNext = document.querySelector('.next');
 const announcementsList = document.getElementById('announcements-list');
+const notifyEmailInput = document.getElementById('notify-email-input');
+const notifySignupBtn = document.getElementById('notify-signup-btn');
+const notifySignupMessage = document.getElementById('notify-signup-message');
 const paymentLinksDisplay = document.getElementById('payment-links-display');
 const paymentEditForm = document.getElementById('payment-edit-form');
 
@@ -743,6 +767,52 @@ function readJson(key, fallback) {
 
 function writeJson(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
+}
+
+function apiUrl(path) {
+    if (window.location.protocol === 'file:' && path.startsWith('/')) {
+        return path.slice(1);
+    }
+    return new URL(path, window.location.href).toString();
+}
+
+function setNotifySignupMessage(message, isError = false) {
+    if (!notifySignupMessage) return;
+    notifySignupMessage.textContent = message;
+    notifySignupMessage.style.color = isError ? '#a32d2d' : '#1f4e79';
+}
+
+async function subscribeNotificationEmail() {
+    if (!notifyEmailInput || !notifySignupBtn) return;
+
+    const email = notifyEmailInput.value.trim();
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        setNotifySignupMessage('Please enter a valid email address.', true);
+        return;
+    }
+
+    notifySignupBtn.disabled = true;
+    setNotifySignupMessage('Signing up...');
+
+    try {
+        const response = await fetch(apiUrl('/subscribe-email'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Unable to subscribe at this time.');
+        }
+
+        setNotifySignupMessage(result.message || 'Thanks! You are signed up for notifications.');
+        notifyEmailInput.value = '';
+    } catch (error) {
+        setNotifySignupMessage(error.message || 'Subscription failed. Please try again later.', true);
+    } finally {
+        notifySignupBtn.disabled = false;
+    }
 }
 
 function ensureDefaults() {
@@ -1104,6 +1174,10 @@ applyUploadPermissions();
 loadSlidesFromFolder();
 renderMiniSchedule();
 
+if (notifySignupBtn) {
+    notifySignupBtn.addEventListener('click', subscribeNotificationEmail);
+}
+
 // Autoplay every 20 seconds
 setInterval(nextSlide, 20000);
 
@@ -1117,6 +1191,10 @@ function renderMiniSchedule() {
 
     const schedule = readJson(SCHEDULE_KEY, []);
     const checkins = readJson(CHECKINS_KEY, {});
+
+    const getGameId = game => String(game.id || `${game.date}|${game.time}|${game.team1}|${game.team2}`).trim();
+    const getTeamPageUrl = (team, division, gameId) =>
+        `team.html?team=${encodeURIComponent(team)}&division=${encodeURIComponent(division)}&gameId=${encodeURIComponent(gameId)}`;
 
     const pad = n => String(n).padStart(2, '0');
     const today = new Date();
@@ -1178,7 +1256,7 @@ function renderMiniSchedule() {
                 ? ' <span style="font-size:9px;color:#C86A2F;font-weight:700;">PPD</span>' : '';
             const checkinBit = checkins[game.id]
                 ? ' <span style="font-size:9px;background:#1a8f1a;color:white;padding:1px 4px;border-radius:3px;font-weight:700;">✓ IN</span>' : '';
-            row.innerHTML = `<span class="mini-time">${timeStr}</span><span class="mini-div">Div ${game.division}</span><span class="mini-teams">H: ${game.team1} | V: ${game.team2}${statusBit}${checkinBit}</span>`;
+            row.innerHTML = `<span class="mini-time">${timeStr}</span><span class="mini-div">Div ${game.division}</span><span class="mini-teams">H: <a class="team-link" href="${getTeamPageUrl(game.team1, game.division, getGameId(game))}">${game.team1}</a> | V: <a class="team-link" href="${getTeamPageUrl(game.team2, game.division, getGameId(game))}">${game.team2}</a>${statusBit}${checkinBit}</span>`;
             section.appendChild(row);
         });
 

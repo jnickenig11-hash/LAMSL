@@ -16,6 +16,7 @@ TEAM_PROFILE_DIR = BASE_DIR / "teamProfile images"
 SLIDESHOW_META_FILE = BASE_DIR / "slideshow_metadata.json"
 EF_META_FILE = BASE_DIR / "ef_images_metadata.json"
 TEAM_PROFILE_META_FILE = BASE_DIR / "team_profile_metadata.json"
+SUBSCRIBERS_FILE = BASE_DIR / "email_subscribers.json"
 ALLOWED_EXTENSIONS = {
     ".jpg",
     ".jpeg",
@@ -139,6 +140,39 @@ def _sanitize_team_field(value: str | None) -> str:
     return re.sub(r"\s+", " ", (value or "").strip())[:80]
 
 
+def _sanitize_email(value: str | None) -> str:
+    email = (value or "").strip()
+    if not email or "@" not in email or email.startswith("@") or email.endswith("@"): 
+        return ""
+    return email
+
+
+def _read_subscribers() -> list[str]:
+    if not SUBSCRIBERS_FILE.exists():
+        return []
+    try:
+        raw = json.loads(SUBSCRIBERS_FILE.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return []
+    if isinstance(raw, dict):
+        raw = raw.get("subscribers", raw)
+    if not isinstance(raw, list):
+        return []
+    result = []
+    for entry in raw:
+        if not isinstance(entry, str):
+            continue
+        email = _sanitize_email(entry)
+        if email:
+            result.append(email)
+    return list(dict.fromkeys(result))
+
+
+def _write_subscribers(subscribers: list[str]) -> None:
+    unique = sorted(set(_sanitize_email(item) for item in subscribers if _sanitize_email(item)))
+    SUBSCRIBERS_FILE.write_text(json.dumps(unique, indent=2), encoding="utf-8")
+
+
 def _team_profile_division_folder(division: str) -> str:
     mapping = {
         "A": "Division A",
@@ -214,6 +248,10 @@ class UploadHandler(SimpleHTTPRequestHandler):
             self._handle_team_photo_upload()
         elif route == "/notify-schedule-update":
             self._handle_schedule_notification()
+        elif route == "/notify-announcement":
+            self._handle_event_announcement()
+        elif route == "/subscribe-email":
+            self._handle_subscribe_email()
         elif route == "/remove-photo":
             self._handle_remove_photo(SLIDESHOW_DIR, SLIDESHOW_META_FILE)
         elif route == "/remove-ef-photo":
@@ -423,6 +461,9 @@ class UploadHandler(SimpleHTTPRequestHandler):
         env_recipients = [addr.strip() for addr in os.environ.get("NOTIFY_RECIPIENTS", "").split(",") if addr.strip()]
         recipients = list(dict.fromkeys(recipients + env_recipients))
 
+        subscriber_recipients = self._read_subscribers()
+        recipients = list(dict.fromkeys(recipients + subscriber_recipients + env_recipients))
+
         if not recipients:
             self._json_response(200, {"success": True, "warning": "No recipient email addresses configured."})
             return
@@ -462,6 +503,99 @@ class UploadHandler(SimpleHTTPRequestHandler):
             f"Status: {game.get('status', 'scheduled')}\n\n"
             f"Visit the schedule page to review the latest game details.\n"
         )
+
+        message = EmailMessage()
+        message["Subject"] = subject
+        message["From"] = smtp_from
+        message["To"] = ", ".join(recipients)
+        message.set_content(body)
+
+        if smtp_use_ssl:
+            smtp_client = smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=10)
+        else:
+            smtp_client = smtplib.SMTP(smtp_host, smtp_port, timeout=10)
+
+        with smtp_client as smtp:
+            if not smtp_use_ssl and smtp_starttls:
+                smtp.starttls()
+            if smtp_user and smtp_password:
+                smtp.login(smtp_user, smtp_password)
+            smtp.send_message(message)
+
+    def _handle_subscribe_email(self) -> None:
+        content_length = int(self.headers.get("Content-Length", "0"))
+        if content_length <= 0:
+            self._json_response(400, {"success": False, "error": "Invalid request body"})
+            return
+
+        try:
+            payload = json.loads(self.rfile.read(content_length).decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            self._json_response(400, {"success": False, "error": "Invalid JSON body"})
+            return
+
+        email = _sanitize_email(payload.get("email", ""))
+        if not email:
+            self._json_response(400, {"success": False, "error": "A valid email address is required."})
+            return
+
+        subscribers = self._read_subscribers()
+        if email in subscribers:
+            self._json_response(200, {"success": True, "message": "Email already subscribed."})
+            return
+
+        subscribers.append(email)
+        self._write_subscribers(subscribers)
+        self._json_response(200, {"success": True, "message": "Subscribed successfully."})
+
+    def _handle_event_announcement(self) -> None:
+        content_length = int(self.headers.get("Content-Length", "0"))
+        if content_length <= 0:
+            self._json_response(400, {"success": False, "error": "Invalid request body"})
+            return
+
+        try:
+            payload = json.loads(self.rfile.read(content_length).decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            self._json_response(400, {"success": False, "error": "Invalid JSON body"})
+            return
+
+        title = str(payload.get("title", "")).strip() or "Fundraiser/Event Announcement"
+        date = str(payload.get("date", "")).strip()
+        message_text = str(payload.get("message", "")).strip()
+        recipients = payload.get("recipients", [])
+        if isinstance(recipients, str):
+            recipients = [recipients]
+        recipients = [str(email).strip() for email in recipients if str(email).strip()]
+
+        env_recipients = [addr.strip() for addr in os.environ.get("NOTIFY_RECIPIENTS", "").split(",") if addr.strip()]
+        recipient_list = list(dict.fromkeys(recipients + self._read_subscribers() + env_recipients))
+
+        if not recipient_list:
+            self._json_response(200, {"success": True, "warning": "No recipient email addresses configured."})
+            return
+
+        if not os.environ.get("SMTP_HOST"):
+            self._json_response(200, {"success": True, "warning": "SMTP_HOST is not configured. Notification not sent."})
+            return
+
+        try:
+            self._send_email_notification(title, date, message_text, recipient_list)
+            self._json_response(200, {"success": True})
+        except Exception as error:
+            self._json_response(500, {"success": False, "error": str(error)})
+
+    def _send_email_notification(self, title: str, date: str, message_text: str, recipients: list[str]) -> None:
+        smtp_host = os.environ.get("SMTP_HOST", "")
+        smtp_port = int(os.environ.get("SMTP_PORT", "587") or "587")
+        smtp_user = os.environ.get("SMTP_USER", "")
+        smtp_password = os.environ.get("SMTP_PASSWORD", "")
+        smtp_from = os.environ.get("SMTP_FROM", "noreply@lamsl.local")
+        smtp_use_ssl = os.environ.get("SMTP_USE_SSL", "false").lower() in ("1", "true", "yes")
+        smtp_starttls = os.environ.get("SMTP_USE_TLS", "true").lower() in ("1", "true", "yes")
+
+        subject = f"LAMSL Announcement: {title}"
+        body = f"{title}\n\nDate: {date}\n\n{message_text}\n\nVisit the LAMSL website for more details."
 
         message = EmailMessage()
         message["Subject"] = subject

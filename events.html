@@ -502,6 +502,7 @@ footer {
                     <input id="ef-ann-date" type="date" required>
                     <textarea id="ef-ann-message" placeholder="Announcement details" required></textarea>
                     <button type="submit">Publish Announcement</button>
+                    <p id="ef-ann-status" style="margin-top:0.75rem;color:#1f4e79;font-size:0.95rem;"></p>
                 </form>
             </div>
 
@@ -568,6 +569,7 @@ const efAnnForm          = document.getElementById('ef-ann-form');
 const efAnnTitle         = document.getElementById('ef-ann-title');
 const efAnnDate          = document.getElementById('ef-ann-date');
 const efAnnMessage       = document.getElementById('ef-ann-message');
+const efAnnStatus        = document.getElementById('ef-ann-status');
 const efUploadForm       = document.getElementById('ef-upload-form');
 const efUploadPanel      = efUploadForm.closest('.upload-form');
 const efPhotoInput       = document.getElementById('ef-photo-input');
@@ -595,6 +597,36 @@ function writeJson(key, value) {
 function isAdminLoggedIn() {
     const session = readJson(SESSION_KEY, null);
     return !!(session && session.role === 'admin');
+}
+
+function apiUrl(path) {
+    if (window.location.protocol === 'file:' && path.startsWith('/')) {
+        return path.slice(1);
+    }
+    return new URL(path, window.location.href).toString();
+}
+
+function setAnnouncementStatus(message, isError = false) {
+    if (!efAnnStatus) return;
+    efAnnStatus.textContent = message;
+    efAnnStatus.style.color = isError ? '#a32d2d' : '#1f4e79';
+}
+
+async function notifyEventAnnouncement(title, date, message) {
+    try {
+        const response = await fetch(apiUrl('/notify-announcement'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, date, message })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Unable to send announcement notifications.');
+        }
+        setAnnouncementStatus('Announcement published and notifications sent.');
+    } catch (error) {
+        setAnnouncementStatus(error.message || 'Announcement published, but notification failed.', true);
+    }
 }
 
 // ===== ANNOUNCEMENTS =====
@@ -673,6 +705,8 @@ efAnnForm.addEventListener('submit', (event) => {
     writeJson(EF_ANN_KEY, announcements);
     efAnnForm.reset();
     renderEFAnnouncements();
+    setAnnouncementStatus('Announcement published successfully.');
+    notifyEventAnnouncement(title, date, message);
 });
 
 // ===== SLIDESHOW =====

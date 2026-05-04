@@ -1110,11 +1110,13 @@ setInterval(nextSlide, 20000);
 // ===== MINI SCHEDULE =====
 function renderMiniSchedule() {
     const SCHEDULE_KEY = 'lamslWeeklyScheduleV3';
+    const CHECKINS_KEY = 'lamslGameCheckinsV1';
     const ALL_PARKS = ['Stevenson Park', 'Dolphin Park', 'Calas Park', 'Veterans Park'];
     const container = document.getElementById('mini-schedule-content');
     if (!container) return;
 
     const schedule = readJson(SCHEDULE_KEY, []);
+    const checkins = readJson(CHECKINS_KEY, {});
 
     const pad = n => String(n).padStart(2, '0');
     const today = new Date();
@@ -1174,7 +1176,9 @@ function renderMiniSchedule() {
             const timeStr = `${hr12}:${m} ${ampm}`;
             const statusBit = game.status === 'postponed'
                 ? ' <span style="font-size:9px;color:#C86A2F;font-weight:700;">PPD</span>' : '';
-            row.innerHTML = `<span class="mini-time">${timeStr}</span><span class="mini-div">Div ${game.division}</span><span class="mini-teams">H: ${game.team1} | V: ${game.team2}${statusBit}</span>`;
+            const checkinBit = checkins[game.id]
+                ? ' <span style="font-size:9px;background:#1a8f1a;color:white;padding:1px 4px;border-radius:3px;font-weight:700;">✓ IN</span>' : '';
+            row.innerHTML = `<span class="mini-time">${timeStr}</span><span class="mini-div">Div ${game.division}</span><span class="mini-teams">H: ${game.team1} | V: ${game.team2}${statusBit}${checkinBit}</span>`;
             section.appendChild(row);
         });
 

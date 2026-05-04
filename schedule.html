@@ -1106,6 +1106,7 @@ let teamsByDivision = {};
 const ALL_PARKS = ['Stevenson Park', 'Dolphin Park', 'Calas Park', 'Veterans Park'];
 const GAME_TIME_SLOTS = ['08:00', '09:30', '11:00', '12:30'];
 const ALLOWED_GAME_DAYS = [0]; // Sunday only
+const CHECKINS_KEY = 'lamslGameCheckinsV1';
 
 const weekLabel = document.getElementById('week-label');
 const weekGrid = document.getElementById('week-grid');
@@ -1231,6 +1232,25 @@ function formatDateLong(dateKey) {
         day: 'numeric',
         year: 'numeric'
     });
+}
+
+function getGameCheckins() {
+    return readJson(CHECKINS_KEY, {});
+}
+
+function saveGameCheckins(checkins) {
+    writeJson(CHECKINS_KEY, checkins);
+}
+
+function toggleGameCheckin(gameId) {
+    const checkins = getGameCheckins();
+    if (checkins[gameId]) {
+        delete checkins[gameId];
+    } else {
+        checkins[gameId] = new Date().toISOString();
+    }
+    saveGameCheckins(checkins);
+    return !!checkins[gameId];
 }
 
 function ensureDefaults() {
@@ -1745,6 +1765,31 @@ function renderSelectedDayGames() {
             const actions = document.createElement('div');
             actions.className = 'action-buttons';
 
+            // Check-in button for all users who can manage scores
+            const checkinBtn = document.createElement('button');
+            checkinBtn.type = 'button';
+            checkinBtn.textContent = 'Check In';
+            const checkins = getGameCheckins();
+            const isCheckedIn = !!checkins[game.id];
+            if (isCheckedIn) {
+                checkinBtn.textContent = '✓ Checked In';
+                checkinBtn.style.background = '#1a8f1a';
+            } else {
+                checkinBtn.style.background = '#C86A2F';
+            }
+            checkinBtn.addEventListener('click', () => {
+                const isNowCheckedIn = toggleGameCheckin(game.id);
+                if (isNowCheckedIn) {
+                    checkinBtn.textContent = '✓ Checked In';
+                    checkinBtn.style.background = '#1a8f1a';
+                } else {
+                    checkinBtn.textContent = 'Check In';
+                    checkinBtn.style.background = '#C86A2F';
+                }
+                renderParkView();
+            });
+            actions.appendChild(checkinBtn);
+
             if (canEditSchedule()) {
                 const editBtn = document.createElement('button');
                 editBtn.type = 'button';
@@ -2183,13 +2228,16 @@ function renderParkView() {
                 const status = game.status || 'scheduled';
                 const scoreText = game.score1 !== '' && game.score2 !== ''
                     ? `<span class="park-col-score">${game.score1}-${game.score2}</span>` : '';
+                const checkins = getGameCheckins();
+                const isCheckedIn = !!checkins[game.id];
+                const checkinBadge = isCheckedIn ? '<span style="background:#1a8f1a;color:white;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;margin-left:4px;">✓ CHECKED IN</span>' : '';
                 const row = document.createElement('div');
                 row.className = 'park-game-row';
                 row.innerHTML = `
                     <span class="park-col-meta">${game.date}</span>
                     <span class="park-col-meta">${game.time}</span>
                     <span class="park-col-matchup"><span class="park-col-division">Div ${game.division}</span> Home: ${game.team1} vs Visitors: ${game.team2}${scoreText}</span>
-                    <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>
+                    <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>${checkinBadge}
                 `;
                 list.appendChild(row);
             });

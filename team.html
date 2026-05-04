@@ -502,6 +502,29 @@ tr:nth-child(even) td {
     background: #f6f9fc;
 }
 
+.check-in-game-btn {
+    padding: 6px 14px;
+    background: #C86A2F;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+.check-in-game-btn:hover:not(:disabled) {
+    background: #b35a24;
+}
+
+.check-in-game-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
 .roster-controls {
     border: 1px solid #dbe2ea;
     border-radius: 10px;
@@ -705,6 +728,92 @@ footer {
         margin: 0;
         color: #334153;
         font-size: 14px;
+    }
+
+    .upcoming-games-panel {
+        margin-bottom: 16px;
+        padding: 12px;
+        background: #f8fbfe;
+        border-radius: 6px;
+        border: 1px solid #dbe2ea;
+    }
+
+    .upcoming-games-panel label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #12324A;
+        font-size: 14px;
+    }
+
+    .upcoming-games-panel select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #dbe2ea;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .checkin-player-controls {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: end;
+        margin-bottom: 12px;
+        padding: 12px;
+        background: #f8fbfe;
+        border-radius: 6px;
+        border: 1px solid #dbe2ea;
+    }
+
+    .checkin-player-controls label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #12324A;
+        font-size: 14px;
+    }
+
+    .checkin-player-controls select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #dbe2ea;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .checkin-player-controls button {
+        padding: 8px 16px;
+        background: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .checkin-player-item.selected {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        background: #e3f2fd;
+        border: 1px solid #90caf9;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .checkin-player-item.selected button {
+        padding: 4px 8px;
+        background: #d32f2f;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
     }
 }
 
@@ -1020,11 +1129,24 @@ footer {
                     </select>
                     <input id="schedule-anchor-date" type="date" aria-label="Schedule anchor date">
                 </div>
+                <div class="upcoming-games-panel">
+                    <label for="upcoming-game-select">Upcoming scheduled games</label>
+                    <select id="upcoming-game-select" aria-label="Upcoming scheduled games">
+                        <option value="">Select a game to check in players</option>
+                    </select>
+                </div>
                 <div id="team-schedule-wrap"></div>
                 <div id="player-checkin-panel" style="display:none;">
                     <h4>Player Check-In</h4>
-                    <p id="checkin-game-label" class="muted">Select a scheduled game to check in players and update games played.</p>
-                    <div id="checkin-player-list" class="checkin-player-list"></div>
+                    <p id="checkin-game-label" class="muted">Select a player from the roster and add them to the selected game.</p>
+                    <div class="checkin-player-controls">
+                        <label for="checkin-player-select">Player name</label>
+                        <select id="checkin-player-select" aria-label="Player name for check in">
+                            <option value="">Choose a player</option>
+                        </select>
+                        <button id="add-player-checkin-btn" type="button">Add Player</button>
+                    </div>
+                    <div id="checkin-selected-players" class="checkin-player-list"></div>
                     <div class="checkin-player-actions">
                         <button id="save-checkin-btn" type="button">Save Check-In</button>
                         <button id="clear-checkin-btn" type="button" class="secondary">Clear Selection</button>
@@ -1727,53 +1849,68 @@ if (!division && team) {
     }
 }
 
-const teamTitle = document.getElementById('team-title');
-const teamSubtitle = document.getElementById('team-subtitle');
-const teamDivisionChip = document.getElementById('team-division-chip');
-const teamPhoto = document.getElementById('team-photo');
-const teamPhotoPlaceholder = document.getElementById('team-photo-placeholder');
-const teamPhotoStatus = document.getElementById('team-photo-status');
-const teamPhotoFileInput = document.getElementById('team-photo-file');
-const uploadTeamPhotoBtn = document.getElementById('upload-team-photo-btn');
-const standingsSummary = document.getElementById('standings-summary');
-const latestResults = document.getElementById('latest-results');
-const teamScheduleWrap = document.getElementById('team-schedule-wrap');
-const schedulePeriodFilter = document.getElementById('schedule-period-filter');
-const scheduleSeasonFilter = document.getElementById('schedule-season-filter');
-const scheduleAnchorDate = document.getElementById('schedule-anchor-date');
-const rosterAdminStatus = document.getElementById('roster-admin-status');
-const rosterFileInput = document.getElementById('roster-file');
-const uploadRosterBtn = document.getElementById('upload-roster-btn');
-const uploadAllRostersBtn = document.getElementById('upload-all-rosters-btn');
-const rosterGridWrap = document.getElementById('roster-grid-wrap');
-const addPlayerBtn = document.getElementById('add-player-btn');
-const removePlayerBtn = document.getElementById('remove-player-btn');
-const formInstruction = document.getElementById('form-instruction');
-const playerIdInput = document.getElementById('player-id');
-const playerNameInput = document.getElementById('player-name');
-const playerPositionInput = document.getElementById('player-position');
-const playerPhoneInput = document.getElementById('player-phone');
-const playerEmailInput = document.getElementById('player-email');
-const playerPhotoInput = document.getElementById('player-photo-file');
-const savePlayerBtn = document.getElementById('save-player-btn');
-const cancelPlayerBtn = document.getElementById('cancel-player-btn');
-const playerListWrap = document.getElementById('player-list');
-const playerCheckinPanel = document.getElementById('player-checkin-panel');
-const checkinGameLabel = document.getElementById('checkin-game-label');
-const checkinPlayerList = document.getElementById('checkin-player-list');
-const saveCheckinBtn = document.getElementById('save-checkin-btn');
-const clearCheckinBtn = document.getElementById('clear-checkin-btn');
-const checkinStatus = document.getElementById('checkin-status');
-
-const playerModal = document.getElementById('player-modal');
-const modalTitle = document.getElementById('modal-title');
-const closeModalBtn = document.getElementById('close-modal-btn');
-const playerFormSection = document.getElementById('player-form-section');
-const playerProfilesSection = document.getElementById('player-profiles-section');
-const playerList = document.getElementById('player-list');
+let teamTitle, teamSubtitle, teamDivisionChip, teamPhoto, teamPhotoPlaceholder, teamPhotoStatus, teamPhotoFileInput, uploadTeamPhotoBtn,
+    standingsSummary, latestResults, teamScheduleWrap, schedulePeriodFilter, scheduleSeasonFilter, scheduleAnchorDate,
+    rosterAdminStatus, rosterFileInput, uploadRosterBtn, uploadAllRostersBtn, rosterGridWrap, addPlayerBtn, removePlayerBtn,
+    formInstruction, playerIdInput, playerNameInput, playerPositionInput, playerPhoneInput, playerEmailInput, playerPhotoInput,
+    savePlayerBtn, cancelPlayerBtn, upcomingGameSelect, checkinPlayerSelect, addPlayerCheckinBtn, checkinSelectedPlayers,
+    playerCheckinPanel, checkinGameLabel, checkinPlayerList, saveCheckinBtn, clearCheckinBtn, checkinStatus,
+    playerModal, modalTitle, closeModalBtn, playerFormSection, playerProfilesSection, playerList;
 
 let selectedGame = null;
 let selectedGameCheckins = [];
+
+// Initialize DOM references after DOM is ready
+function initDOMReferences() {
+    teamTitle = document.getElementById('team-title');
+    teamSubtitle = document.getElementById('team-subtitle');
+    teamDivisionChip = document.getElementById('team-division-chip');
+    teamPhoto = document.getElementById('team-photo');
+    teamPhotoPlaceholder = document.getElementById('team-photo-placeholder');
+    teamPhotoStatus = document.getElementById('team-photo-status');
+    teamPhotoFileInput = document.getElementById('team-photo-file');
+    uploadTeamPhotoBtn = document.getElementById('upload-team-photo-btn');
+    standingsSummary = document.getElementById('standings-summary');
+    latestResults = document.getElementById('latest-results');
+    teamScheduleWrap = document.getElementById('team-schedule-wrap');
+    schedulePeriodFilter = document.getElementById('schedule-period-filter');
+    scheduleSeasonFilter = document.getElementById('schedule-season-filter');
+    scheduleAnchorDate = document.getElementById('schedule-anchor-date');
+    rosterAdminStatus = document.getElementById('roster-admin-status');
+    rosterFileInput = document.getElementById('roster-file');
+    uploadRosterBtn = document.getElementById('upload-roster-btn');
+    uploadAllRostersBtn = document.getElementById('upload-all-rosters-btn');
+    rosterGridWrap = document.getElementById('roster-grid-wrap');
+    addPlayerBtn = document.getElementById('add-player-btn');
+    removePlayerBtn = document.getElementById('remove-player-btn');
+    formInstruction = document.getElementById('form-instruction');
+    playerIdInput = document.getElementById('player-id');
+    playerNameInput = document.getElementById('player-name');
+    playerPositionInput = document.getElementById('player-position');
+    playerPhoneInput = document.getElementById('player-phone');
+    playerEmailInput = document.getElementById('player-email');
+    playerPhotoInput = document.getElementById('player-photo-file');
+    savePlayerBtn = document.getElementById('save-player-btn');
+    cancelPlayerBtn = document.getElementById('cancel-player-btn');
+    upcomingGameSelect = document.getElementById('upcoming-game-select');
+    checkinPlayerSelect = document.getElementById('checkin-player-select');
+    addPlayerCheckinBtn = document.getElementById('add-player-checkin-btn');
+    checkinSelectedPlayers = document.getElementById('checkin-selected-players');
+    playerCheckinPanel = document.getElementById('player-checkin-panel');
+    checkinGameLabel = document.getElementById('checkin-game-label');
+    checkinPlayerList = document.getElementById('checkin-selected-players');
+    saveCheckinBtn = document.getElementById('save-checkin-btn');
+    clearCheckinBtn = document.getElementById('clear-checkin-btn');
+    checkinStatus = document.getElementById('checkin-status');
+    playerModal = document.getElementById('player-modal');
+    modalTitle = document.getElementById('modal-title');
+    closeModalBtn = document.getElementById('close-modal-btn');
+    playerFormSection = document.getElementById('player-form-section');
+    playerProfilesSection = document.getElementById('player-profiles-section');
+    playerList = document.getElementById('player-list');
+}
+
+// Wrap all event listener setup
 
 function apiUrl(path) {
     return new URL(path, window.location.href).toString();
@@ -1941,6 +2078,7 @@ function renderLatestResults(games) {
 function renderScheduleTable(games) {
     if (!games.length) {
         teamScheduleWrap.innerHTML = '<p class="muted">No games found for this team yet.</p>';
+        populateUpcomingGamesSelect([]);
         return;
     }
 
@@ -1950,6 +2088,7 @@ function renderScheduleTable(games) {
             ? `Home: ${item.team1} ${item.score1} - ${item.score2} Visitors: ${item.team2}`
             : '-';
         const gameId = getGameId(item);
+        const canCheckIn = canCheckInPlayers();
         return `
             <tr data-game-id="${gameId}" class="schedule-row">
                 <td>${item.date}</td>
@@ -1960,6 +2099,7 @@ function renderScheduleTable(games) {
                 <td>${item.division || '-'}</td>
                 <td><span class="status-badge status-${status}">${toStatusLabel(status)}</span></td>
                 <td>${scoreText}</td>
+                <td><button class="check-in-game-btn" data-game-id="${gameId}" ${!canCheckIn ? 'disabled' : ''}>Check In</button></td>
             </tr>
         `;
     }).join('');
@@ -1976,11 +2116,14 @@ function renderScheduleTable(games) {
                     <th>Division</th>
                     <th>Status</th>
                     <th>Score</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>${rows}</tbody>
         </table>
     `;
+
+    populateUpcomingGamesSelect(getUpcomingGames());
 
     if (selectedGame) {
         const stillVisible = games.some(g => getGameId(g) === getGameId(selectedGame));
@@ -1988,6 +2131,16 @@ function renderScheduleTable(games) {
             hideCheckinPanel();
         }
     }
+}
+
+function populateUpcomingGamesSelect(games) {
+    if (!upcomingGameSelect) return;
+    upcomingGameSelect.innerHTML = '<option value="">Select a game to check in players</option>' +
+        games.map(game => {
+            const gameId = getGameId(game);
+            const label = `${game.date} ${game.time || '—'} ${game.team1} vs ${game.team2}`;
+            return `<option value="${gameId}">${label}</option>`;
+        }).join('');
 }
 
 function applyScheduleFilters(allGames) {
@@ -2035,7 +2188,8 @@ function applyScheduleFilters(allGames) {
 
 function renderRoster() {
     const store = readJson(ROSTER_KEY, {});
-    const roster = team ? store[team] : null;
+    const rawRoster = team ? store[team] : null;
+    const roster = Array.isArray(rawRoster) ? rawRoster : (rawRoster?.rows || []);
 
     if (!team) {
         rosterGridWrap.innerHTML = '<p class="muted">Select a team to view roster details.</p>';
@@ -2050,10 +2204,10 @@ function renderRoster() {
 
     const cardsHtml = roster.map(player => `
         <div class="roster-card">
-            <h4>${player.name || 'Unknown'}</h4>
-            <p><strong>Position:</strong> ${player.position || 'N/A'}</p>
-            <p><strong>Phone:</strong> ${player.phone || 'N/A'}</p>
-            <p><strong>Email:</strong> ${player.email || 'N/A'}</p>
+            <h4>${player.Name || player.name || 'Unknown'}</h4>
+            <p><strong>Position:</strong> ${player.Position || player.position || 'N/A'}</p>
+            <p><strong>Phone:</strong> ${player.Phone || player.phone || 'N/A'}</p>
+            <p><strong>Email:</strong> ${player.Email || player.email || 'N/A'}</p>
         </div>
     `).join('');
 
@@ -2096,11 +2250,9 @@ function setTeamGameCheckins(payload) {
 
 function getRosterPlayers() {
     const store = readJson(ROSTER_KEY, {});
-    const roster = team ? store[team] : null;
-    if (!roster || !Array.isArray(roster.rows)) {
-        return [];
-    }
-    return normalizePlayersFromRows(roster.rows);
+    const rawRoster = team ? store[team] : null;
+    const rows = Array.isArray(rawRoster) ? rawRoster : (rawRoster?.rows || []);
+    return normalizePlayersFromRows(rows);
 }
 
 function getCheckinPlayers() {
@@ -2110,6 +2262,10 @@ function getCheckinPlayers() {
         return players;
     }
     return getRosterPlayers();
+}
+
+function getUpcomingGames() {
+    return getTeamGames().filter(game => (game.status || 'scheduled') === 'scheduled');
 }
 
 function getGameId(game) {
@@ -2133,27 +2289,41 @@ function showCheckinPanel(game) {
     playerCheckinPanel.style.display = 'block';
 
     const players = getCheckinPlayers();
+    populateCheckinPlayerSelect(players);
+
     const gameId = getGameId(game);
     const checkins = getTeamGameCheckins()[gameId] || { checkedIds: [] };
     selectedGameCheckins = Array.isArray(checkins.checkedIds) ? [...checkins.checkedIds] : [];
 
-    checkinPlayerList.innerHTML = players.length
-        ? players.map(player => {
-            const checked = selectedGameCheckins.includes(player.id) ? 'checked' : '';
-            return `
-                <label class="checkin-player-item">
-                    <input type="checkbox" data-player-id="${player.id}" ${checked}>
-                    <span>${player.name} (${player.position || 'TBA'})</span>
-                </label>
-            `;
-        }).join('')
-        : '<p class="muted">Upload a roster or add player profiles first to use check-in.</p>';
+    renderSelectedCheckinPlayers(players);
 
     if (!players.length) {
         updateCheckinStatus('Upload a roster or add player profiles before checking in players.', true);
     } else {
-        updateCheckinStatus('Select the players who attended this game, then save check-in.');
+        updateCheckinStatus('Choose players from the roster, then save check-in.');
     }
+}
+
+function populateCheckinPlayerSelect(players) {
+    if (!checkinPlayerSelect) return;
+    checkinPlayerSelect.innerHTML = '<option value="">Choose a player</option>' +
+        players.map(player => `<option value="${player.id}">${player.name}</option>`).join('');
+}
+
+function renderSelectedCheckinPlayers(players) {
+    const selectedIds = selectedGameCheckins || [];
+    if (!selectedIds.length) {
+        checkinSelectedPlayers.innerHTML = '<p class="muted">No players selected yet.</p>';
+        return;
+    }
+
+    const selected = players.filter(player => selectedIds.includes(player.id));
+    checkinSelectedPlayers.innerHTML = selected.map(player => `
+        <div class="checkin-player-item selected">
+            <span>${player.name} (${player.position || 'TBA'})</span>
+            <button type="button" data-player-id="${player.id}" class="remove-player-checkin">Remove</button>
+        </div>
+    `).join('');
 }
 
 function hideCheckinPanel() {
@@ -2175,15 +2345,13 @@ function saveCheckinSelections() {
         return;
     }
 
-    const boxes = Array.from(checkinPlayerList.querySelectorAll('input[type="checkbox"]'));
-    const checkedIds = boxes.filter(box => box.checked).map(box => box.dataset.playerId);
     const gameId = getGameId(selectedGame);
     const allPlayers = getCheckinPlayers();
     const playerMap = Object.fromEntries(allPlayers.map(player => [player.id, player]));
     const previousCheckins = Array.isArray(getTeamGameCheckins()[gameId]?.checkedIds) ? getTeamGameCheckins()[gameId].checkedIds : [];
 
-    const toAdd = checkedIds.filter(id => !previousCheckins.includes(id));
-    const toRemove = previousCheckins.filter(id => !checkedIds.includes(id));
+    const toAdd = selectedGameCheckins.filter(id => !previousCheckins.includes(id));
+    const toRemove = previousCheckins.filter(id => !selectedGameCheckins.includes(id));
 
     const players = allPlayers.map(player => {
         const current = Number(player.gamesPlayed) || 0;
@@ -2205,31 +2373,32 @@ function saveCheckinSelections() {
         time: selectedGame.time,
         team1: selectedGame.team1,
         team2: selectedGame.team2,
-        checkedIds
+        checkedIds: selectedGameCheckins
     };
     setTeamGameCheckins(checkins);
 
-    selectedGameCheckins = [...checkedIds];
     renderPlayerProfiles();
-    updateCheckinStatus(`Check-in saved for ${checkedIds.length} player(s).`);
+    updateCheckinStatus(`Check-in saved for ${selectedGameCheckins.length} player(s).`);
 }
 
 function clearCheckinSelection() {
-    const boxes = Array.from(checkinPlayerList.querySelectorAll('input[type="checkbox"]'));
-    boxes.forEach(box => { box.checked = false; });
     selectedGameCheckins = [];
+    renderSelectedCheckinPlayers(getCheckinPlayers());
+    if (checkinPlayerSelect) {
+        checkinPlayerSelect.value = '';
+    }
     updateCheckinStatus('Selection cleared. Save to confirm no players attended this game.');
 }
 
 function normalizePlayersFromRows(rows) {
     return rows.map((row, index) => ({
         id: row.id || `${Date.now()}-${index}`,
-        name: String(row.Name || row['Player Name'] || row.Player || '').trim(),
-        position: String(row.Position || row.Positions || row.Pos || '').trim(),
-        phone: String(row.Phone || row['Phone Number'] || row['Contact Phone'] || '').trim(),
-        email: String(row.Email || row['Email Address'] || row.Email || '').trim(),
+        name: String(row.Name || row.name || row['Player Name'] || row.Player || '').trim(),
+        position: String(row.Position || row.position || row.Positions || row.Pos || '').trim(),
+        phone: String(row.Phone || row.phone || row['Phone Number'] || row['Contact Phone'] || '').trim(),
+        email: String(row.Email || row.email || row['Email Address'] || '').trim(),
         gamesPlayed: Number(row['Games Played'] || row.GamesPlayed || row['Games'] || 0) || 0,
-        photo: String(row.Photo || '').trim()
+        photo: String(row.Photo || row.photo || '').trim()
     })).filter(player => player.name);
 }
 
@@ -2485,7 +2654,8 @@ function applyRosterUploadAccess() {
     cancelPlayerBtn.disabled = !team;
 }
 
-uploadRosterBtn.addEventListener('click', async () => {
+function setupEventListeners() {
+    uploadRosterBtn.addEventListener('click', async () => {
     if (!canManageTeamContent()) {
         rosterAdminStatus.textContent = 'Sign in as team manager or admin first.';
         return;
@@ -2523,7 +2693,7 @@ uploadRosterBtn.addEventListener('click', async () => {
         const headers = ['Team', 'Name', 'Position', 'Phone', 'Email'];
         const store = readJson(ROSTER_KEY, {});
         const existing = store[team] || { headers, rows: [] };
-        const existingRows = Array.isArray(existing.rows) ? existing.rows : [];
+        const existingRows = Array.isArray(existing) ? existing : (Array.isArray(existing.rows) ? existing.rows : []);
         const seen = new Set(existingRows.map(row => {
             const normalized = normalizeRosterRow(row);
             return `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
@@ -2742,15 +2912,60 @@ teamScheduleWrap.addEventListener('click', event => {
     }
 });
 
-rosterGridWrap.addEventListener('click', event => {
-    const card = event.target.closest('.roster-card');
-    if (!card) return;
-    const playerName = card.querySelector('h4').textContent;
-    showPlayerProfile(playerName);
+upcomingGameSelect.addEventListener('change', event => {
+    const gameId = event.target.value;
+    if (!gameId) {
+        hideCheckinPanel();
+        return;
+    }
+    const games = getTeamGames();
+    const selected = games.find(game => getGameId(game) === gameId);
+    if (selected) {
+        showCheckinPanel(selected);
+    }
 });
 
-saveCheckinBtn.addEventListener('click', saveCheckinSelections);
-clearCheckinBtn.addEventListener('click', clearCheckinSelection);
+teamScheduleWrap.addEventListener('click', event => {
+    const btn = event.target.closest('.check-in-game-btn');
+    if (!btn || btn.disabled) return;
+    
+    const gameId = btn.dataset.gameId;
+    const games = getTeamGames();
+    const selected = games.find(game => getGameId(game) === gameId);
+    if (selected) {
+        upcomingGameSelect.value = gameId;
+        showCheckinPanel(selected);
+        playerCheckinPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+});
+
+addPlayerCheckinBtn.addEventListener('click', () => {
+    if (!checkinPlayerSelect || !checkinPlayerSelect.value) {
+        updateCheckinStatus('Select a player first.', true);
+        return;
+    }
+
+    const playerId = checkinPlayerSelect.value;
+    if (!selectedGameCheckins.includes(playerId)) {
+        selectedGameCheckins.push(playerId);
+    }
+    
+    const players = getCheckinPlayers();
+    renderSelectedCheckinPlayers(players);
+    checkinPlayerSelect.value = '';
+    updateCheckinStatus('Player added to check-in list.');
+});
+
+checkinSelectedPlayers.addEventListener('click', event => {
+    const btn = event.target.closest('.remove-player-checkin');
+    if (!btn) return;
+    const playerId = btn.dataset.playerId;
+    selectedGameCheckins = selectedGameCheckins.filter(id => id !== playerId);
+    const players = getCheckinPlayers();
+    renderSelectedCheckinPlayers(players);
+    updateCheckinStatus('Player removed from check-in list.');
+});
+
 
 uploadTeamPhotoBtn.addEventListener('click', async () => {
     if (!canManageTeamContent()) {
@@ -2800,11 +3015,18 @@ window.addEventListener('storage', event => {
     }
 });
 
-renderHeader();
-renderStandingsSummary();
-const games = getTeamGames();
+    renderHeader();
+    renderStandingsSummary();
+    const games = getTeamGames();
 renderLatestResults(games);
 renderScheduleTable(games);
+
+// Populate upcoming games select for check-in
+if (upcomingGameSelect && games.length) {
+    upcomingGameSelect.innerHTML = '<option value="">Select a game to check in players</option>' +
+        getUpcomingGames().map(game => `<option value="${getGameId(game)}">${game.date} ${game.time || ''} — ${game.team1} vs ${game.team2}</option>`).join('');
+}
+
 if (scheduleAnchorDate) {
     scheduleAnchorDate.value = formatDateKey(new Date());
 }
@@ -2820,19 +3042,26 @@ if (scheduleAnchorDate) {
 applyScheduleFilters(games);
 applyRosterUploadAccess();
 renderRoster();
-loadTeamPhoto();
+} // End setupEventListeners
 
-// ===== SEASON BANNER =====
-(function () {
-    try {
-        const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
-        const el = document.getElementById('banner-tagline');
-        if (s && el) {
-            const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-            el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
-        }
-    } catch (e) {}
-})();
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    initDOMReferences();
+    setupEventListeners();
+    loadTeamPhoto();
+
+    // ===== SEASON BANNER =====
+    (function () {
+        try {
+            const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
+            const el = document.getElementById('banner-tagline');
+            if (s && el) {
+                const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
+            }
+        } catch (e) {}
+    })();
+});
 </script>
 
 <!-- Player Management Modal -->

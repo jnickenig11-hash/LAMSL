@@ -31,7 +31,7 @@ h1, h2, h3 {
 .container {
     max-width: 1200px;
     margin: auto;
-    padding: 16px;
+    padding: 20px;
 }
 
 /* ===== BANNER ===== */
@@ -46,8 +46,8 @@ header {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    gap: 14px;
-    padding: 12px 18px;
+    gap: 20px;
+    padding: 15px 20px;
 }
 
 .navbar-brand {
@@ -167,6 +167,287 @@ header {
     }
 }
 
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(18, 50, 74, 0.08);
+}
+
+.ef-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 24px;
+    align-items: start;
+    margin-top: 24px;
+}
+
+.announcements-panel,
+.slideshow-panel {
+    display: grid;
+    gap: 20px;
+}
+
+.announcements-list,
+.ef-admin-panel {
+    background: #fff;
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    padding: 18px;
+}
+
+.ef-admin-panel h3 {
+    margin-top: 0;
+    color: #12324A;
+}
+
+.ef-ann-form {
+    display: grid;
+    gap: 12px;
+}
+
+.ef-ann-form input,
+.ef-ann-form textarea,
+.ef-ann-form select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #b8c5d2;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.ef-ann-form textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.ef-ann-form button {
+    align-self: start;
+    width: fit-content;
+    background: #12324A;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.instagram-card {
+    background: #f8fbff;
+    border: 1px solid #dbe2ea;
+}
+
+.instagram-copy {
+    margin: 0;
+    color: #1f3f5a;
+    line-height: 1.6;
+}
+
+.instagram-preview-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.instagram-preview-grid img {
+    width: 100%;
+    border-radius: 10px;
+    display: block;
+}
+
+.instagram-link {
+    display: inline-block;
+    color: #12324A;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.instagram-link:hover {
+    color: #004080;
+    text-decoration: underline;
+}
+
+.slideshow-box {
+    background: white;
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    padding: 18px;
+    display: grid;
+    gap: 18px;
+}
+
+.slides {
+    position: relative;
+    min-height: 340px;
+    overflow: hidden;
+    background: #12324A;
+    border-radius: 10px;
+}
+
+.slide,
+.slide-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.slide {
+    display: none;
+}
+
+.slide.active {
+    display: block;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.slide-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 10px 14px;
+    background: linear-gradient(180deg, rgba(18, 50, 74, 0), rgba(18, 50, 74, 0.88));
+    color: white;
+    font-size: 13px;
+    line-height: 1.35;
+    border-radius: 0 0 10px 10px;
+    box-sizing: border-box;
+}
+
+.slide-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #f4f9ff;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    font-size: 16px;
+    line-height: 1.5;
+    padding: 24px;
+}
+
+.indicators {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.indicator {
+    cursor: pointer;
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background: #ccc;
+    border-radius: 50%;
+    transition: background 0.3s;
+}
+
+.indicator.active {
+    background: #C86A2F;
+}
+
+.slideshow-nav {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.slideshow-nav button {
+    background: #12324A;
+    color: white;
+    border: 2px solid #C86A2F;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 6px;
+    transition: background 0.3s, color 0.3s;
+    min-width: 44px;
+}
+
+.slideshow-nav button:hover {
+    background: #C86A2F;
+    color: #12324A;
+}
+
+.upload-form {
+    margin-top: 12px;
+    background: white;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #dbe2ea;
+}
+
+.upload-form h3 {
+    margin-top: 0;
+    color: #12324A;
+}
+
+.upload-form form {
+    display: grid;
+    gap: 12px;
+}
+
+.upload-form input[type="file"],
+.upload-form input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #c9d2dc;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.upload-form button {
+    background: #12324A;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.upload-form button:hover {
+    background: #004080;
+}
+
+.admin-status {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: #eef6ed;
+    color: #225522;
+    border: 1px solid #c9e2cd;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #12324A;
+    color: white;
+    margin-top: 20px;
+}
+
+@media (max-width: 980px) {
+    .ef-layout {
+        grid-template-columns: 1fr;
+    }
+}
 
 </style>
 </head>

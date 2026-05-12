@@ -411,8 +411,8 @@ footer {
             <p class="admin-status" id="auth-status">Not signed in.</p>
 
             <div class="admin-inline" id="login-row">
-                <input id="login-username" type="text" placeholder="Username" value="admin">
-                <input id="login-password" type="password" placeholder="Password" value="admin">
+                <input id="login-username" type="text" placeholder="Username" value="">
+                <input id="login-password" type="password" placeholder="Password" value="">
                 <button id="login-btn" type="button">Sign In</button>
             </div>
 
@@ -464,6 +464,20 @@ footer {
                         <button id="add-team-btn" type="button">Add Team to Selected Division</button>
 
                         <ul id="division-team-list" class="division-team-list full-row"></ul>
+
+                        <div class="assignment-panel full-row">
+                            <h4>Team Manager Assignments</h4>
+                            <div class="admin-inline">
+                                <select id="assign-team-select" aria-label="Select team"></select>
+                                <select id="assign-manager-select" aria-label="Select manager"></select>
+                                <button id="assign-manager-btn" type="button">Assign Manager</button>
+                            </div>
+                            <ul id="team-manager-assignments-list" class="admin-list"></ul>
+                            <div class="manager-upload-controls">
+                                <input id="admin-roster-file" type="file" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                                <button id="upload-all-rosters-admin-btn" type="button">Upload All Rosters</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -501,6 +515,8 @@ footer {
             <p>Cell/Text: 323-228-1112</p>
             <p>E-mail: gilbertcuevas2010@gmail.com</p>
             <h4>League Administrative Assistant</h4>
+            <p>Belen Rocha</p>
+            <p>Cell/Text: (323) 942-4032</p>
             <p>Alejandra Pierce Padilla</p>
             <p>Cell/Text: (562) 299-3978</p>
             <p>E-mail: lamsl1976@gmail.com</p>
@@ -521,6 +537,7 @@ footer {
     <p>Â© Latino Men's Softball League (LAMSL)</p>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 const USERS_KEY = 'lamslUsersV1';
 const SESSION_KEY = 'lamslSessionV1';
@@ -530,6 +547,9 @@ const SEASON_KEY = 'lamslSeasonV1';
 const DIVISIONS_KEY = 'lamslDivisionsV1';
 const SCHEDULE_KEY = 'lamslWeeklyScheduleV3';
 const PRACTICE_KEY = 'lamslPracticeScheduleV1';
+const ROSTER_KEY = 'lamslTeamRostersV1';
+const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
+const TEAM_MANAGER_ASSIGNMENTS_KEY = 'lamslTeamManagerAssignmentsV1';
 
 const DEFAULT_TEAMS_BY_DIVISION = {
     A: ['Titans', 'Doom Squad', 'Legends', 'Nasty Boyz', 'Black Sox', 'White Sox', 'Dodgers'],
@@ -567,6 +587,12 @@ const deleteDivisionButton = document.getElementById('delete-division-btn');
 const newTeamInput = document.getElementById('new-team-name');
 const addTeamButton = document.getElementById('add-team-btn');
 const divisionTeamList = document.getElementById('division-team-list');
+const assignTeamSelect = document.getElementById('assign-team-select');
+const assignManagerSelect = document.getElementById('assign-manager-select');
+const assignManagerButton = document.getElementById('assign-manager-btn');
+const teamManagerAssignmentsList = document.getElementById('team-manager-assignments-list');
+const adminRosterFile = document.getElementById('admin-roster-file');
+const uploadAllRostersAdminBtn = document.getElementById('upload-all-rosters-admin-btn');
 
 function readJson(key, fallback) {
     try {
@@ -641,6 +667,279 @@ function savePracticeSchedule(games) {
     writeJson(PRACTICE_KEY, games);
 }
 
+function getTeamManagerAssignments() {
+    return readJson(TEAM_MANAGER_ASSIGNMENTS_KEY, {});
+}
+
+function saveTeamManagerAssignments(assignments) {
+    writeJson(TEAM_MANAGER_ASSIGNMENTS_KEY, assignments);
+}
+
+function getTeamPlayersForTeam(teamName) {
+    const store = readJson(TEAM_PLAYERS_KEY, {});
+    return store[teamName] || { players: [] };
+}
+
+function setTeamPlayersForTeam(teamName, payload) {
+    const store = readJson(TEAM_PLAYERS_KEY, {});
+    store[teamName] = payload;
+    writeJson(TEAM_PLAYERS_KEY, store);
+}
+
+function getTeamManagerUsers() {
+    return readJson(USERS_KEY, []).filter(user => user.role === 'team-manager');
+}
+
+function normalizePlayersFromRows(rows) {
+    return rows.map((row, index) => ({
+        id: row.id || `${Date.now()}-${index}`,
+        name: String(row.Name || row.name || row['Player Name'] || row.Player || '').trim(),
+        position: String(row.Position || row.position || row.Positions || row.Pos || '').trim(),
+        phone: String(row.Phone || row.phone || row['Phone Number'] || row['Contact Phone'] || '').trim(),
+        email: String(row.Email || row.email || row['Email Address'] || '').trim(),
+        gamesPlayed: Number(row['Games Played'] || row.GamesPlayed || row['Games'] || 0) || 0,
+        photo: String(row.Photo || row.photo || '').trim()
+    })).filter(player => player.name);
+}
+
+function getPlayerKey(player) {
+    const name = String(player.name || player.Name || '').trim().toLowerCase();
+    const email = String(player.email || player.Email || '').trim().toLowerCase();
+    const phone = String(player.phone || player.Phone || '').trim().toLowerCase();
+    return `${name}|${email || phone}`;
+}
+
+function populateAssignTeamSelect(selectedDivision = '') {
+    if (!assignTeamSelect) return;
+    const divisionMap = getDivisionMap();
+    const division = selectedDivision || manageDivisionSelect?.value || '';
+    const teams = divisionMap[division] || [];
+    assignTeamSelect.innerHTML = '<option value="">Select team</option>' +
+        teams.map(team => `<option value="${team}">${team}</option>`).join('');
+}
+
+function populateAssignManagerSelect() {
+    if (!assignManagerSelect) return;
+    const managers = getTeamManagerUsers();
+    assignManagerSelect.innerHTML = '<option value="">Select manager</option>' +
+        managers.map(manager => `<option value="${manager.username}">${manager.username}</option>`).join('');
+}
+
+function renderTeamManagerAssignments() {
+    if (!teamManagerAssignmentsList) return;
+    const assignments = getTeamManagerAssignments();
+    const managerUsers = getTeamManagerUsers().map(user => user.username);
+    const entries = Object.entries(assignments);
+
+    teamManagerAssignmentsList.innerHTML = '';
+    if (!entries.length) {
+        const li = document.createElement('li');
+        li.textContent = 'No team manager assignments configured yet.';
+        teamManagerAssignmentsList.appendChild(li);
+        return;
+    }
+
+    entries.forEach(([username, teams]) => {
+        teams.forEach(teamName => {
+            const li = document.createElement('li');
+            li.textContent = `${username} — ${teamName}` + (managerUsers.includes(username) ? '' : ' (manager account not active)');
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'remove-btn';
+            removeBtn.textContent = 'Unassign';
+            removeBtn.addEventListener('click', () => {
+                unassignTeamManager(username, teamName);
+            });
+            li.appendChild(removeBtn);
+            teamManagerAssignmentsList.appendChild(li);
+        });
+    });
+}
+
+function assignTeamManagerToTeam() {
+    if (!isAdminLoggedIn()) {
+        divisionManagerStatus.textContent = 'Sign in as admin first.';
+        return;
+    }
+    const manager = assignManagerSelect?.value || '';
+    const teamName = assignTeamSelect?.value || '';
+    if (!manager) {
+        divisionManagerStatus.textContent = 'Select a team manager to assign.';
+        return;
+    }
+    if (!teamName) {
+        divisionManagerStatus.textContent = 'Select a team to assign.';
+        return;
+    }
+
+    const assignments = getTeamManagerAssignments();
+    Object.keys(assignments).forEach(existingManager => {
+        assignments[existingManager] = (assignments[existingManager] || []).filter(team => team !== teamName);
+        if (!assignments[existingManager].length) {
+            delete assignments[existingManager];
+        }
+    });
+
+    assignments[manager] = assignments[manager] || [];
+    if (!assignments[manager].includes(teamName)) {
+        assignments[manager].push(teamName);
+    }
+
+    saveTeamManagerAssignments(assignments);
+    renderTeamManagerAssignments();
+    divisionManagerStatus.textContent = `${manager} is now assigned to ${teamName}.`;
+}
+
+function unassignTeamManager(username, teamName) {
+    if (!isAdminLoggedIn()) {
+        divisionManagerStatus.textContent = 'Sign in as admin first.';
+        return;
+    }
+    const assignments = getTeamManagerAssignments();
+    if (!assignments[username]) return;
+
+    assignments[username] = assignments[username].filter(team => team !== teamName);
+    if (!assignments[username].length) {
+        delete assignments[username];
+    }
+    saveTeamManagerAssignments(assignments);
+    renderTeamManagerAssignments();
+    divisionManagerStatus.textContent = `${username} is no longer assigned to ${teamName}.`;
+}
+
+function setAssignmentControlsEnabled(enabled) {
+    [assignTeamSelect, assignManagerSelect, assignManagerButton, adminRosterFile, uploadAllRostersAdminBtn].forEach(control => {
+        if (control) control.disabled = !enabled;
+    });
+}
+
+function normalizeRosterRow(row) {
+    const getValue = key => {
+        const keys = Object.keys(row);
+        const match = keys.find(k => k.toLowerCase() === key.toLowerCase());
+        return match ? String(row[match] || '').trim() : '';
+    };
+    return {
+        Team: getValue('Team').replace(/\s+Regular$/i, ''),
+        Name: getValue('Name'),
+        Position: getValue('Position'),
+        Phone: getValue('Phone'),
+        Email: getValue('Email')
+    };
+}
+
+function uploadAllRostersByAdmin() {
+    if (!isAdminLoggedIn()) {
+        divisionManagerStatus.textContent = 'Admin access required to upload all rosters.';
+        return;
+    }
+
+    const file = adminRosterFile?.files?.[0];
+    if (!file) {
+        divisionManagerStatus.textContent = 'Choose an Excel/CSV roster file first.';
+        return;
+    }
+
+    const confirmUpload = confirm('Uploading this roster will populate rosters for ALL teams in the spreadsheet. Existing rosters will be merged. Continue?');
+    if (!confirmUpload) {
+        divisionManagerStatus.textContent = 'All rosters upload canceled.';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        try {
+            const workbook = XLSX.read(reader.result, { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+            if (!rows.length) {
+                divisionManagerStatus.textContent = 'Roster file appears empty.';
+                return;
+            }
+
+            const headers = ['Team', 'Name', 'Position', 'Phone', 'Email'];
+            const store = readJson(ROSTER_KEY, {});
+            const teamGroups = {};
+
+            rows.forEach(rawRow => {
+                const normalized = normalizeRosterRow(rawRow);
+                if (!normalized.Name || !normalized.Team) return;
+                const teamName = normalized.Team;
+                if (!teamGroups[teamName]) {
+                    teamGroups[teamName] = [];
+                }
+                teamGroups[teamName].push(normalized);
+            });
+
+            let totalAdded = 0;
+            let teamsUpdated = 0;
+
+            Object.entries(teamGroups).forEach(([teamName, teamRows]) => {
+                const existing = store[teamName] || { headers, rows: [] };
+                const existingRows = Array.isArray(existing.rows) ? existing.rows : [];
+                const seen = new Set(existingRows.map(row => {
+                    const normalized = normalizeRosterRow(row);
+                    return `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
+                }));
+
+                const combinedRows = [...existingRows];
+                teamRows.forEach(row => {
+                    const rowKey = `${row.Team}|${row.Name}|${row.Position}|${row.Email}|${row.Phone}`.toLowerCase();
+                    if (!seen.has(rowKey)) {
+                        seen.add(rowKey);
+                        combinedRows.push(row);
+                        totalAdded += 1;
+                    }
+                });
+
+                if (combinedRows.length > existingRows.length) {
+                    store[teamName] = {
+                        headers,
+                        rows: combinedRows,
+                        uploadedAt: new Date().toLocaleString()
+                    };
+                    teamsUpdated += 1;
+
+                    const currentPlayers = Array.isArray(getTeamPlayersForTeam(teamName).players) ? [...getTeamPlayersForTeam(teamName).players] : [];
+                    const existingPlayerKeys = new Set(currentPlayers.map(getPlayerKey));
+                    const incomingPlayers = normalizePlayersFromRows(combinedRows);
+                    incomingPlayers.forEach(player => {
+                        const playerKey = getPlayerKey(player);
+                        if (!existingPlayerKeys.has(playerKey)) {
+                            existingPlayerKeys.add(playerKey);
+                            currentPlayers.push(player);
+                        }
+                    });
+                    if (currentPlayers.length) {
+                        setTeamPlayersForTeam(teamName, { players: currentPlayers, updatedAt: new Date().toLocaleString() });
+                    }
+                }
+            });
+
+            writeJson(ROSTER_KEY, store);
+            divisionManagerStatus.textContent = `All rosters uploaded. ${teamsUpdated} team(s) updated, ${totalAdded} new player(s) added across all teams.`;
+        } catch (error) {
+            divisionManagerStatus.textContent = `All rosters upload failed: ${error.message}`;
+        }
+    };
+    reader.onerror = () => {
+        divisionManagerStatus.textContent = 'Unable to read roster file.';
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function renderDivisionManager(selectedDivision = '') {
+    fillDivisionSelect(manageDivisionSelect, selectedDivision || (manageDivisionSelect ? manageDivisionSelect.value : ''));
+    renderDivisionTeamList();
+    populateAssignTeamSelect(selectedDivision || (manageDivisionSelect ? manageDivisionSelect.value : ''));
+    populateAssignManagerSelect();
+    renderTeamManagerAssignments();
+    if (!isAdminLoggedIn()) {
+        divisionManagerStatus.textContent = 'Sign in as admin to manage divisions and teams.';
+    }
+}
+
 function normalizeDivisionName(raw) {
     return String(raw || '').trim().replace(/\s+/g, ' ');
 }
@@ -669,6 +968,7 @@ function setDivisionManagerEnabled(enabled) {
             button.disabled = !enabled;
         });
     }
+    setAssignmentControlsEnabled(enabled);
 }
 
 function renderDivisionTeamList() {
@@ -745,14 +1045,6 @@ function renderDivisionTeamList() {
     setDivisionManagerEnabled(isAdminLoggedIn());
 }
 
-function renderDivisionManager(selectedDivision = '') {
-    fillDivisionSelect(manageDivisionSelect, selectedDivision || (manageDivisionSelect ? manageDivisionSelect.value : ''));
-    renderDivisionTeamList();
-    if (!isAdminLoggedIn()) {
-        divisionManagerStatus.textContent = 'Sign in as admin to manage divisions and teams.';
-    }
-}
-
 function getSession() {
     return readJson(SESSION_KEY, null);
 }
@@ -804,6 +1096,7 @@ function renderUserAccounts() {
         li.appendChild(removeButton);
         userAccountsList.appendChild(li);
     });
+    populateAssignManagerSelect();
 }
 
 function renderAnnouncements() {
@@ -960,7 +1253,16 @@ createAdminButton.addEventListener('click', () => {
 if (manageDivisionSelect) {
     manageDivisionSelect.addEventListener('change', () => {
         renderDivisionTeamList();
+        populateAssignTeamSelect();
     });
+}
+
+if (assignManagerButton) {
+    assignManagerButton.addEventListener('click', assignTeamManagerToTeam);
+}
+
+if (uploadAllRostersAdminBtn) {
+    uploadAllRostersAdminBtn.addEventListener('click', uploadAllRostersByAdmin);
 }
 
 if (addDivisionButton) {

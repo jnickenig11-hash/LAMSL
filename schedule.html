@@ -961,9 +961,8 @@ footer {
                     <select id="game-time" required>
                         <option value="">Select Time Slot</option>
                         <option value="08:00">08:00</option>
-                        <option value="09:30">09:30</option>
-                        <option value="11:00">11:00</option>
-                        <option value="12:30">12:30</option>
+                        <option value="09:50">09:50</option>
+                        <option value="11:45">11:45</option>
                     </select>
                     <select id="game-park" required>
                         <option value="">Select Park</option>
@@ -994,7 +993,7 @@ footer {
                     <button id="save-schedule-btn" type="submit">Save Scheduled Game</button>
                 </form>
                 <p class="admin-status" style="margin-top:10px;">
-                    Manual scheduling rules: Sunday only, 8:00AM�12:30PM time slots, one game per field/time slot, max 4 games per field/day.
+                    Manual scheduling rules: Sundays only, 8:00AM, 9:50AM, 11:45AM time slots, one game per field/time slot, max 3 games per field/day.
                 </p>
 
                 <div class="generator-panel">
@@ -1116,8 +1115,8 @@ const DEFAULT_TEAMS_BY_DIVISION = {
 };
 let teamsByDivision = {};
 const ALL_PARKS = ['Stevenson Park', 'Dolphin Park', 'Calas Park', 'Veterans Park'];
-const GAME_TIME_SLOTS = ['08:00', '09:30', '11:00', '12:30'];
-const ALLOWED_GAME_DAYS = [0]; // Sunday only
+const GAME_TIME_SLOTS = ['08:00', '09:50', '11:45'];
+const ALLOWED_GAME_DAYS = [0]; // Sundays only
 const CHECKINS_KEY = 'lamslGameCheckinsV1';
 
 const weekLabel = document.getElementById('week-label');
@@ -1285,8 +1284,8 @@ function ensureDefaults() {
     if (!existing) {
         const seed = [
             { id: 'game-1', date: '2026-03-30', time: '08:00', park: 'Stevenson Park', division: 'C', team1: 'Diablos', team2: 'Brewers', score1: '', score2: '', status: 'scheduled' },
-            { id: 'game-2', date: '2026-03-31', time: '10:00', park: 'Dolphin Park', division: 'B', team1: 'Charros', team2: 'Primos', score1: '', score2: '', status: 'scheduled' },
-            { id: 'game-3', date: '2026-04-02', time: '11:50', park: 'Veterans Park', division: 'A', team1: 'Titans', team2: 'Legends', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-2', date: '2026-03-31', time: '09:50', park: 'Dolphin Park', division: 'B', team1: 'Charros', team2: 'Primos', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-3', date: '2026-04-02', time: '11:45', park: 'Veterans Park', division: 'A', team1: 'Titans', team2: 'Legends', score1: '', score2: '', status: 'scheduled' }
         ];
         writeJson(SCHEDULE_KEY, seed);
     }
@@ -2142,7 +2141,7 @@ generatorRunButton.addEventListener('click', () => {
     renderParkView();
     notifyScheduleUpdate({ action: 'generated', count: generatedCount, sourceDivisions: divisionsToGenerate }, 'generated');
 
-    adminStatus.textContent = `Generated ${generatedCount} games on Sundays only (8:00AM�12:30PM). Scheduler fills next available park/time slots across all ${ALL_PARKS.length} parks before moving to the next date, with no duplicate field/time slot assignments.`;
+    adminStatus.textContent = `Generated ${generatedCount} games on Sundays only (8:00AM, 9:50AM,11:45AM). Scheduler fills next available park/time slots across all ${ALL_PARKS.length} parks before moving to the next date, with no duplicate field/time slot assignments.`;
 });
 
 refreshAdminButton.addEventListener('click', () => {

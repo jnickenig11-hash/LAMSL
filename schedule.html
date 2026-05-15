@@ -963,6 +963,8 @@ footer {
                         <option value="08:00">08:00</option>
                         <option value="09:50">09:50</option>
                         <option value="11:45">11:45</option>
+                        <option value="09:50">09:50</option>
+                        <option value="11:45">11:45</option>
                     </select>
                     <select id="game-park" required>
                         <option value="">Select Park</option>
@@ -985,6 +987,7 @@ footer {
                     <button id="save-schedule-btn" type="submit">Save Scheduled Game</button>
                 </form>
                 <p class="admin-status" style="margin-top:10px;">
+                    Manual scheduling rules: Sundays only, 8:00AM, 9:50AM, 11:45AM time slots, one game per field/time slot, max 3 games per field/day.
                     Manual scheduling rules: Sundays only, 8:00AM, 9:50AM, 11:45AM time slots, one game per field/time slot, max 3 games per field/day.
                 </p>
 
@@ -1108,6 +1111,8 @@ const DEFAULT_TEAMS_BY_DIVISION = {
 };
 let teamsByDivision = {};
 const ALL_PARKS = ['Stevenson Park', 'Dolphin Park', 'Calas Park', 'Veterans Park'];
+const GAME_TIME_SLOTS = ['08:00', '09:50', '11:45'];
+const ALLOWED_GAME_DAYS = [0]; // Sundays only
 const GAME_TIME_SLOTS = ['08:00', '09:50', '11:45'];
 const ALLOWED_GAME_DAYS = [0]; // Sundays only
 const CHECKINS_KEY = 'lamslGameCheckinsV1';
@@ -1276,6 +1281,8 @@ function ensureDefaults() {
     if (!existing) {
         const seed = [
             { id: 'game-1', date: '2026-03-30', time: '08:00', park: 'Stevenson Park', division: 'C', team1: 'Diablos', team2: 'Brewers', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-2', date: '2026-03-31', time: '09:50', park: 'Dolphin Park', division: 'B', team1: 'Charros', team2: 'Primos', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-3', date: '2026-04-02', time: '11:45', park: 'Veterans Park', division: 'A', team1: 'Titans', team2: 'Legends', score1: '', score2: '', status: 'scheduled' }
             { id: 'game-2', date: '2026-03-31', time: '09:50', park: 'Dolphin Park', division: 'B', team1: 'Charros', team2: 'Primos', score1: '', score2: '', status: 'scheduled' },
             { id: 'game-3', date: '2026-04-02', time: '11:45', park: 'Veterans Park', division: 'A', team1: 'Titans', team2: 'Legends', score1: '', score2: '', status: 'scheduled' }
         ];
@@ -1717,6 +1724,7 @@ function populateTeamsForDivision() {
     gameTeam2Select.innerHTML = '<option value="">Select Visitors Team</option>';
 
     allTeams.forEach(team => {
+    allTeams.forEach(team => {
         const option1 = document.createElement('option');
         option1.value = team;
         option1.textContent = team;
@@ -1728,6 +1736,8 @@ function populateTeamsForDivision() {
         gameTeam2Select.appendChild(option2);
     });
 
+    gameTeam1Select.disabled = false;
+    gameTeam2Select.disabled = false;
     gameTeam1Select.disabled = false;
     gameTeam2Select.disabled = false;
 }
@@ -1988,6 +1998,7 @@ scheduleForm.addEventListener('submit', event => {
     const team2 = gameTeam2Select.value;
 
     if (!date || !time || !park || !team1 || !team2) {
+    if (!date || !time || !park || !team1 || !team2) {
         adminStatus.textContent = 'Please complete all scheduling fields.';
         return;
     }
@@ -2021,6 +2032,16 @@ const div2 = Object.keys(teamsByDivision).find(d => teamsByDivision[d].includes(
 if (div1 !== div2) {
     finalDivision = 'INTER';
 }
+    }
+let finalDivision = division;
+
+// If teams are from different divisions, mark as INTER
+const div1 = Object.keys(teamsByDivision).find(d => teamsByDivision[d].includes(team1));
+const div2 = Object.keys(teamsByDivision).find(d => teamsByDivision[d].includes(team2));
+
+if (div1 !== div2) {
+    finalDivision = 'INTER';
+}
 
     let savedGame = null;
     let scheduleAction = 'added';
@@ -2030,6 +2051,7 @@ if (div1 !== div2) {
             existing.date = date;
             existing.time = time;
             existing.park = park;
+            existing.division = finalDivision;
             existing.division = finalDivision;
             existing.team1 = team1;
             existing.team2 = team2;
@@ -2043,6 +2065,7 @@ if (div1 !== div2) {
             date,
             time,
             park,
+            finalDivision,
             finalDivision,
             team1,
             team2,
@@ -2182,6 +2205,7 @@ generatorRunButton.addEventListener('click', () => {
     renderParkView();
     notifyScheduleUpdate({ action: 'generated', count: generatedCount, sourceDivisions: divisionsToGenerate }, 'generated');
 
+    adminStatus.textContent = `Generated ${generatedCount} games on Sundays only (8:00AM, 9:50AM,11:45AM). Scheduler fills next available park/time slots across all ${ALL_PARKS.length} parks before moving to the next date, with no duplicate field/time slot assignments.`;
     adminStatus.textContent = `Generated ${generatedCount} games on Sundays only (8:00AM, 9:50AM,11:45AM). Scheduler fills next available park/time slots across all ${ALL_PARKS.length} parks before moving to the next date, with no duplicate field/time slot assignments.`;
 });
 

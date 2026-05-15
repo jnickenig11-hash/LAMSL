@@ -1167,7 +1167,6 @@ footer {
                     <p id="roster-admin-status" class="muted">Admin sign-in required to upload roster spreadsheets.</p>
                     <input id="roster-file" type="file" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
                     <button id="upload-roster-btn" type="button">Upload Roster Spreadsheet</button>
-                    <button id="upload-all-rosters-btn" type="button" style="display:none;">Upload All Rosters</button>
                     <p class="muted">Spreadsheet tip: use column headers like Name, Position, Phone, Email.</p>
                 </div>
                 <div id="roster-grid-wrap" class="roster-grid"></div>
@@ -1189,6 +1188,7 @@ const PRACTICE_KEY = 'lamslPracticeScheduleV1';
 const ROSTER_KEY = 'lamslTeamRostersV1';
 const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
 const TEAM_CHECKIN_KEY = 'lamslTeamGameCheckinsV1';
+const TEAM_MANAGER_ASSIGNMENTS_KEY = 'lamslTeamManagerAssignmentsV1';
 
 // Populate rosters from spreadsheet data
 (function() {
@@ -1819,6 +1819,20 @@ function writeJson(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
 }
 
+function getTeamManagerAssignments() {
+    return readJson(TEAM_MANAGER_ASSIGNMENTS_KEY, {});
+}
+
+function isTeamManagerAssignedToTeam(teamName) {
+    const session = readJson(SESSION_KEY, null);
+    if (!session || session.role !== 'team-manager' || !teamName) {
+        return false;
+    }
+    const assignments = getTeamManagerAssignments();
+    const assignedTeams = Array.isArray(assignments[session.username]) ? assignments[session.username] : [];
+    return assignedTeams.includes(teamName);
+}
+
 function isAdminLoggedIn() {
     const session = readJson(SESSION_KEY, null);
     return !!(session && session.role === 'admin');
@@ -1830,7 +1844,13 @@ function hasRole(...roles) {
 }
 
 function canManageTeamContent() {
-    return hasRole('admin', 'team-manager');
+    if (isAdminLoggedIn()) {
+        return true;
+    }
+    if (!hasRole('team-manager')) {
+        return false;
+    }
+    return isTeamManagerAssignedToTeam(team);
 }
 
 function canCheckInPlayers() {
@@ -1858,7 +1878,7 @@ if (!division && team) {
 
 let teamTitle, teamSubtitle, teamDivisionChip, teamPhoto, teamPhotoPlaceholder, teamPhotoStatus, teamPhotoFileInput, uploadTeamPhotoBtn,
     standingsSummary, latestResults, teamScheduleWrap, schedulePeriodFilter, scheduleSeasonFilter, scheduleAnchorDate,
-    rosterAdminStatus, rosterFileInput, uploadRosterBtn, uploadAllRostersBtn, rosterGridWrap, addPlayerBtn, removePlayerBtn,
+    rosterAdminStatus, rosterFileInput, uploadRosterBtn, rosterGridWrap, addPlayerBtn, removePlayerBtn,
     formInstruction, playerIdInput, playerNameInput, playerPositionInput, playerPhoneInput, playerEmailInput, playerPhotoInput,
     savePlayerBtn, cancelPlayerBtn, upcomingGameSelect, checkinPlayerSelect, addPlayerCheckinBtn, checkinSelectedPlayers,
     playerCheckinPanel, checkinGameLabel, checkinPlayerList, saveCheckinBtn, clearCheckinBtn, checkinStatus,
@@ -1886,7 +1906,6 @@ function initDOMReferences() {
     rosterAdminStatus = document.getElementById('roster-admin-status');
     rosterFileInput = document.getElementById('roster-file');
     uploadRosterBtn = document.getElementById('upload-roster-btn');
-    uploadAllRostersBtn = document.getElementById('upload-all-rosters-btn');
     rosterGridWrap = document.getElementById('roster-grid-wrap');
     addPlayerBtn = document.getElementById('add-player-btn');
     removePlayerBtn = document.getElementById('remove-player-btn');
@@ -2665,13 +2684,25 @@ function normalizePlayerDataFromRoster(rows) {
 function applyRosterUploadAccess() {
     const allowed = canManageTeamContent();
     const isAdmin = hasRole('admin');
-    setRosterStatus(allowed
-        ? 'Manager access confirmed. Upload roster Excel/CSV file for this team.'
-        : 'Sign in as team manager or admin to upload roster spreadsheets.');
+    const session = readJson(SESSION_KEY, null);
+    const managerAssigned = session && session.role === 'team-manager' && isTeamManagerAssignedToTeam(team);
+
+    if (!team) {
+        setRosterStatus('Select a team to manage roster and player profiles.');
+    } else if (isAdmin) {
+        setRosterStatus('Admin access confirmed. Upload roster Excel/CSV file for this team.');
+    } else if (managerAssigned) {
+        setRosterStatus('Team Manager access confirmed for this team. Upload roster Excel/CSV file.');
+    } else if (session && session.role === 'team-manager') {
+        const assignments = getTeamManagerAssignments();
+        const assignedTeams = Array.isArray(assignments[session.username]) ? assignments[session.username] : [];
+        setRosterStatus(`Team Manager access granted, but not assigned to ${team}. Assigned teams: ${assignedTeams.length ? assignedTeams.join(', ') : 'none'}.`, true);
+    } else {
+        setRosterStatus('Sign in as team manager or admin to upload roster spreadsheets.', true);
+    }
+
     rosterFileInput.disabled = !allowed || !team;
     uploadRosterBtn.disabled = !allowed || !team;
-    uploadAllRostersBtn.style.display = isAdmin ? 'inline-block' : 'none';
-    uploadAllRostersBtn.disabled = !isAdmin;
 
     teamPhotoStatus.textContent = allowed
         ? 'Manager access confirmed. Upload a team profile image.'
@@ -2779,108 +2810,6 @@ function setupEventListeners() {
         renderPlayerProfiles();
     } catch (error) {
         setRosterStatus(`Roster upload failed: ${error.message}`, true);
-    }
-});
-
-uploadAllRostersBtn.addEventListener('click', async () => {
-    if (!hasRole('admin')) {
-        rosterAdminStatus.textContent = 'Admin access required to upload all rosters.';
-        return;
-    }
-
-    const file = rosterFileInput.files && rosterFileInput.files[0];
-    if (!file) {
-        setRosterStatus('Choose an Excel/CSV roster file first.', true);
-        return;
-    }
-
-    const confirmUpload = confirm('Uploading this roster will populate rosters for ALL teams in the spreadsheet. Existing rosters will be merged. Continue?');
-    if (!confirmUpload) {
-        setRosterStatus('All rosters upload canceled.');
-        return;
-    }
-
-    try {
-        const data = await file.arrayBuffer();
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-
-        if (!rows.length) {
-            setRosterStatus('Roster file appears empty.', true);
-            return;
-        }
-
-        const headers = ['Team', 'Name', 'Position', 'Phone', 'Email'];
-        const store = readJson(ROSTER_KEY, {});
-        const teamGroups = {};
-
-        rows.forEach(rawRow => {
-            const normalized = normalizeRosterRow(rawRow);
-            if (!normalized.Name || !normalized.Team) return;
-            const teamName = normalized.Team;
-            if (!teamGroups[teamName]) {
-                teamGroups[teamName] = [];
-            }
-            teamGroups[teamName].push(normalized);
-        });
-
-        let totalAdded = 0;
-        let teamsUpdated = 0;
-
-        for (const [teamName, teamRows] of Object.entries(teamGroups)) {
-            const existing = store[teamName] || { headers, rows: [] };
-            const existingRows = Array.isArray(existing.rows) ? existing.rows : [];
-            const seen = new Set(existingRows.map(row => {
-                const normalized = normalizeRosterRow(row);
-                return `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
-            }));
-
-            const combinedRows = [...existingRows];
-            teamRows.forEach(row => {
-                const rowKey = `${row.Team}|${row.Name}|${row.Position}|${row.Email}|${row.Phone}`.toLowerCase();
-                if (!seen.has(rowKey)) {
-                    seen.add(rowKey);
-                    combinedRows.push(row);
-                    totalAdded += 1;
-                }
-            });
-
-            if (combinedRows.length > existingRows.length) {
-                store[teamName] = {
-                    headers,
-                    rows: combinedRows,
-                    uploadedAt: new Date().toLocaleString()
-                };
-                teamsUpdated += 1;
-
-                // Also update player profiles
-                const currentPlayers = Array.isArray(getTeamPlayersForTeam(teamName).players) ? [...getTeamPlayersForTeam(teamName).players] : [];
-                const existingPlayerKeys = new Set(currentPlayers.map(getPlayerKey));
-                const incomingPlayers = normalizePlayersFromRows(combinedRows);
-
-                incomingPlayers.forEach(player => {
-                    const playerKey = getPlayerKey(player);
-                    if (!existingPlayerKeys.has(playerKey)) {
-                        existingPlayerKeys.add(playerKey);
-                        currentPlayers.push(player);
-                    }
-                });
-
-                if (currentPlayers.length) {
-                    setTeamPlayersForTeam(teamName, { players: currentPlayers, updatedAt: new Date().toLocaleString() });
-                }
-            }
-        }
-
-        writeJson(ROSTER_KEY, store);
-
-        setRosterStatus(`All rosters uploaded. ${teamsUpdated} team(s) updated, ${totalAdded} new player(s) added across all teams.`, false, true);
-        renderRoster();
-        renderPlayerProfiles();
-    } catch (error) {
-        setRosterStatus(`All rosters upload failed: ${error.message}`, true);
     }
 });
 

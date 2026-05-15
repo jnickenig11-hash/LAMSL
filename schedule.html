@@ -150,7 +150,7 @@ header {
     color: #12324A;
 }
 
-.finalDivision-filter {
+.division-filter {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -306,14 +306,14 @@ header {
     border-radius: 6px;
 }
 
-.generator-finalDivision-selector {
+.generator-division-selector {
     grid-column: span 2;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
-.generator-finalDivision-selector label {
+.generator-division-selector label {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -532,7 +532,7 @@ header {
 .park-game-row:last-child { border-bottom: none; }
 .park-empty { padding: 10px 12px; color: #888; font-size: 12pt; }
 .park-col-meta { color: #55616d; }
-.park-col-finalDivision { font-weight: 700; color: #12324A; }
+.park-col-division { font-weight: 700; color: #12324A; }
 .park-col-matchup { min-width: 0; }
 .park-col-score {
     color: #0f5f1f;
@@ -746,7 +746,7 @@ footer {
         text-align: center;
     }
 
-    .finalDivision-filter {
+    .division-filter {
         gap: 6px;
     }
 
@@ -915,13 +915,13 @@ footer {
                     <h3 id="week-label">Week Range</h3>
                     <button id="next-week" type="button">Next Week</button>
                 </div>
-                <div id="finalDivision-filter" class="finalDivision-filter">
-                    <button type="button" class="filter-btn active" data-finalDivision="ALL">All finalDivisions</button>
-                    <button type="button" class="filter-btn" data-finalDivision="A">finalDivision A</button>
-                    <button type="button" class="filter-btn" data-finalDivision="B">finalDivision B</button>
-                    <button type="button" class="filter-btn" data-finalDivision="C">finalDivision C</button>
-                    <button type="button" class="filter-btn" data-finalDivision="D">finalDivision D</button>
-                    <button type="button" class="filter-btn" data-finalDivision="E">finalDivision E</button>
+                <div id="division-filter" class="division-filter">
+                    <button type="button" class="filter-btn active" data-division="ALL">All Divisions</button>
+                    <button type="button" class="filter-btn" data-division="A">Division A</button>
+                    <button type="button" class="filter-btn" data-division="B">Division B</button>
+                    <button type="button" class="filter-btn" data-division="C">Division C</button>
+                    <button type="button" class="filter-btn" data-division="D">Division D</button>
+                    <button type="button" class="filter-btn" data-division="E">Division E</button>
                 </div>
                 <div id="week-grid" class="week-grid"></div>
                 <div class="day-panel">
@@ -971,14 +971,14 @@ footer {
                         <option value="Calas Park">Calas Park</option>
                         <option value="Veterans Park">Veterans Park</option>
                     </select>
-                    <select id="game-finalDivision" required>
-                        <option value="">Select finalDivision</option>
-                        <option value="all">All finalDivisions</option>
-                        <option value="A">finalDivision A</option>
-                        <option value="B">finalDivision B</option>
-                        <option value="C">finalDivision C</option>
-                        <option value="D">finalDivision D</option>
-                        <option value="E">finalDivision E</option>
+                    <select id="game-division" required>
+                        <option value="">Select Division</option>
+                        <option value="all">All Divisions</option>
+                        <option value="A">Division A</option>
+                        <option value="B">Division B</option>
+                        <option value="C">Division C</option>
+                        <option value="D">Division D</option>
+                        <option value="E">Division E</option>
                     </select>
                     <select id="game-team1" required disabled>
                         <option value="">Select Home Team</option>
@@ -999,20 +999,20 @@ footer {
 
                 <div class="generator-panel">
                     <h4>Random Schedule Generator</h4>
-                    <p class="admin-status" style="margin:0 0 8px;">Select one or more finalDivisions, or keep All finalDivisions selected.</p>
+                    <p class="admin-status" style="margin:0 0 8px;">Select one or more divisions, or keep All Divisions selected.</p>
                     <div class="generator-grid">
-                        <div id="generator-finalDivision-selector" class="generator-finalDivision-selector">
-                            <label><input id="generator-div-all" type="checkbox" value="ALL" checked> All finalDivisions</label>
-                            <label><input class="generator-div-choice" type="checkbox" value="A" checked> finalDivision A</label>
-                            <label><input class="generator-div-choice" type="checkbox" value="B" checked> finalDivision B</label>
-                            <label><input class="generator-div-choice" type="checkbox" value="C" checked> finalDivision C</label>
-                            <label><input class="generator-div-choice" type="checkbox" value="D" checked> finalDivision D</label>
-                            <label><input class="generator-div-choice" type="checkbox" value="E" checked> finalDivision E</label>
+                        <div id="generator-division-selector" class="generator-division-selector">
+                            <label><input id="generator-div-all" type="checkbox" value="ALL" checked> All Divisions</label>
+                            <label><input class="generator-div-choice" type="checkbox" value="A" checked> Division A</label>
+                            <label><input class="generator-div-choice" type="checkbox" value="B" checked> Division B</label>
+                            <label><input class="generator-div-choice" type="checkbox" value="C" checked> Division C</label>
+                            <label><input class="generator-div-choice" type="checkbox" value="D" checked> Division D</label>
+                            <label><input class="generator-div-choice" type="checkbox" value="E" checked> Division E</label>
                         </div>
                         <input id="generator-start-date" type="date">
                         <label class="generator-checkbox">
                             <input id="generator-replace-existing" type="checkbox" checked>
-                            Replace existing games for selected finalDivision(s)
+                            Replace existing games for selected division(s)
                         </label>
                         <button id="generator-run-btn" type="button">Generate Random Schedule</button>
                     </div>
@@ -1057,23 +1057,23 @@ footer {
                                 <option value="Veterans Park">Veterans Park</option>
                             </select>
                             <select id="practice-div1">
-                                <option value="">Team 1 finalDivision</option>
-                                <option value="A">finalDivision A</option>
-                                <option value="B">finalDivision B</option>
-                                <option value="C">finalDivision C</option>
-                                <option value="D">finalDivision D</option>
-                                <option value="E">finalDivision E</option>
+                                <option value="">Team 1 Division</option>
+                                <option value="A">Division A</option>
+                                <option value="B">Division B</option>
+                                <option value="C">Division C</option>
+                                <option value="D">Division D</option>
+                                <option value="E">Division E</option>
                             </select>
                             <select id="practice-team1" required disabled>
                                 <option value="">Select Team 1</option>
                             </select>
                             <select id="practice-div2">
-                                <option value="">Team 2 finalDivision</option>
-                                <option value="A">finalDivision A</option>
-                                <option value="B">finalDivision B</option>
-                                <option value="C">finalDivision C</option>
-                                <option value="D">finalDivision D</option>
-                                <option value="E">finalDivision E</option>
+                                <option value="">Team 2 Division</option>
+                                <option value="A">Division A</option>
+                                <option value="B">Division B</option>
+                                <option value="C">Division C</option>
+                                <option value="D">Division D</option>
+                                <option value="E">Division E</option>
                             </select>
                             <select id="practice-team2" required disabled>
                                 <option value="">Select Team 2</option>
@@ -1105,16 +1105,16 @@ const USERS_KEY      = 'lamslUsersV1';
 const SESSION_KEY    = 'lamslSessionV1';
 const SCHEDULE_KEY   = 'lamslWeeklyScheduleV3';
 const PRACTICE_KEY   = 'lamslPracticeScheduleV1';
-const finalDivisionS_KEY  = 'lamslfinalDivisionsV1';
+const DIVISIONS_KEY  = 'lamslDivisionsV1';
 
-const DEFAULT_TEAMS_BY_finalDivision = {
+const DEFAULT_TEAMS_BY_DIVISION = {
     A: ['Titans', 'Doom Squad', 'Legends', 'Nasty Boyz', 'Black Sox', 'White Sox', 'Dodgers'],
     B: ['Charros', 'Toxic', 'Primos', 'Demons', 'Cubs', 'Borrachos'],
     C: ['Diablos', 'Brewers', 'Coyotes', 'Goodfellas', 'Bandits', 'Salvajes', 'Balls Out', 'Orioles'],
     D: ['Viejones', 'No Chance', 'Los Pericos', 'Wild Hogz', 'Strokes', 'Dawgz', 'Xolos', 'Desvelados'],
     E: []
 };
-let teamsByfinalDivision = {};
+let teamsByDivision = {};
 const ALL_PARKS = ['Stevenson Park', 'Dolphin Park', 'Calas Park', 'Veterans Park'];
 const GAME_TIME_SLOTS = ['08:00', '09:50', '11:45'];
 const ALLOWED_GAME_DAYS = [0]; // Sundays only
@@ -1126,7 +1126,7 @@ const selectedDayLabel = document.getElementById('selected-day-label');
 const selectedDayGames = document.getElementById('selected-day-games');
 const prevWeekButton = document.getElementById('prev-week');
 const nextWeekButton = document.getElementById('next-week');
-const finalDivisionFilter = document.getElementById('finalDivision-filter');
+const divisionFilter = document.getElementById('division-filter');
 
 const refreshAdminButton = document.getElementById('refresh-admin-access');
 const adminStatus = document.getElementById('admin-status');
@@ -1136,14 +1136,14 @@ const scheduleForm = document.getElementById('schedule-form');
 const gameDateInput = document.getElementById('game-date');
 const gameTimeInput = document.getElementById('game-time');
 const gameParkSelect = document.getElementById('game-park');
-const gamefinalDivisionSelect = document.getElementById('game-finalDivision');
+const gameDivisionSelect = document.getElementById('game-division');
 const gameTeam1Select = document.getElementById('game-team1');
 const gameTeam2Select = document.getElementById('game-team2');
 const gameStatusSelect = document.getElementById('game-status');
 const saveScheduleButton = document.getElementById('save-schedule-btn');
-const generatorfinalDivisionSelector = document.getElementById('generator-finalDivision-selector');
-let generatorAllfinalDivisionsInput = null;
-let generatorfinalDivisionInputs = [];
+const generatorDivisionSelector = document.getElementById('generator-division-selector');
+let generatorAllDivisionsInput = null;
+let generatorDivisionInputs = [];
 const generatorStartDateInput = document.getElementById('generator-start-date');
 const generatorReplaceExistingInput = document.getElementById('generator-replace-existing');
 const generatorRunButton = document.getElementById('generator-run-btn');
@@ -1159,7 +1159,7 @@ let selectedDate = new Date();
 let currentWeekStart = getWeekStart(new Date());
 let editingGameId = null;
 let isAdminUnlocked = false;
-let activefinalDivisionFilter = 'ALL';
+let activeDivisionFilter = 'ALL';
 let parkViewPeriod = 'week';
 let parkViewDate = getNextAllowedGameDate(new Date());
 
@@ -1262,8 +1262,8 @@ function toggleGameCheckin(gameId) {
     return !!checkins[gameId];
 }
 
-function getTeamPageUrl(team, finalDivision, gameId) {
-    return `team.html?team=${encodeURIComponent(team)}&finalDivision=${encodeURIComponent(finalDivision)}&gameId=${encodeURIComponent(gameId)}`;
+function getTeamPageUrl(team, division, gameId) {
+    return `team.html?team=${encodeURIComponent(team)}&division=${encodeURIComponent(division)}&gameId=${encodeURIComponent(gameId)}`;
 }
 
 function ensureDefaults() {
@@ -1273,112 +1273,112 @@ function ensureDefaults() {
         writeJson(USERS_KEY, users);
     }
 
-    const finalDivisions = readJson(finalDivisionS_KEY, null);
-    if (!finalDivisions) {
-        writeJson(finalDivisionS_KEY, DEFAULT_TEAMS_BY_finalDivision);
-        teamsByfinalDivision = JSON.parse(JSON.stringify(DEFAULT_TEAMS_BY_finalDivision));
+    const divisions = readJson(DIVISIONS_KEY, null);
+    if (!divisions) {
+        writeJson(DIVISIONS_KEY, DEFAULT_TEAMS_BY_DIVISION);
+        teamsByDivision = JSON.parse(JSON.stringify(DEFAULT_TEAMS_BY_DIVISION));
     } else {
-        teamsByfinalDivision = finalDivisions;
+        teamsByDivision = divisions;
     }
 
     const existing = readJson(SCHEDULE_KEY, null);
     if (!existing) {
         const seed = [
-            { id: 'game-1', date: '2026-03-30', time: '08:00', park: 'Stevenson Park', finalDivision: 'C', team1: 'Diablos', team2: 'Brewers', score1: '', score2: '', status: 'scheduled' },
-            { id: 'game-2', date: '2026-03-31', time: '09:50', park: 'Dolphin Park', finalDivision: 'B', team1: 'Charros', team2: 'Primos', score1: '', score2: '', status: 'scheduled' },
-            { id: 'game-3', date: '2026-04-02', time: '11:45', park: 'Veterans Park', finalDivision: 'A', team1: 'Titans', team2: 'Legends', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-1', date: '2026-03-30', time: '08:00', park: 'Stevenson Park', division: 'C', team1: 'Diablos', team2: 'Brewers', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-2', date: '2026-03-31', time: '09:50', park: 'Dolphin Park', division: 'B', team1: 'Charros', team2: 'Primos', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-3', date: '2026-04-02', time: '11:45', park: 'Veterans Park', division: 'A', team1: 'Titans', team2: 'Legends', score1: '', score2: '', status: 'scheduled' }
         ];
         writeJson(SCHEDULE_KEY, seed);
     }
 }
 
-function getfinalDivisionCodes() {
-    return Object.keys(teamsByfinalDivision);
+function getDivisionCodes() {
+    return Object.keys(teamsByDivision);
 }
 
-function refreshfinalDivisionSelectOptions(selectElement, placeholder) {
+function refreshDivisionSelectOptions(selectElement, placeholder) {
     if (!selectElement) return;
     const previous = selectElement.value;
-    const finalDivisions = getfinalDivisionCodes();
+    const divisions = getDivisionCodes();
     selectElement.innerHTML = `<option value="">${placeholder}</option>`;
-    finalDivisions.forEach(finalDivision => {
+    divisions.forEach(division => {
         const option = document.createElement('option');
-        option.value = finalDivision;
-        option.textContent = `finalDivision ${finalDivision}`;
+        option.value = division;
+        option.textContent = `Division ${division}`;
         selectElement.appendChild(option);
     });
-    if (previous && finalDivisions.includes(previous)) {
+    if (previous && divisions.includes(previous)) {
         selectElement.value = previous;
     }
 }
 
-function refreshfinalDivisionFilterButtons() {
-    if (!finalDivisionFilter) return;
-    const finalDivisions = getfinalDivisionCodes();
-    if (activefinalDivisionFilter !== 'ALL' && !finalDivisions.includes(activefinalDivisionFilter)) {
-        activefinalDivisionFilter = 'ALL';
+function refreshDivisionFilterButtons() {
+    if (!divisionFilter) return;
+    const divisions = getDivisionCodes();
+    if (activeDivisionFilter !== 'ALL' && !divisions.includes(activeDivisionFilter)) {
+        activeDivisionFilter = 'ALL';
     }
 
-    finalDivisionFilter.innerHTML = '<button type="button" class="filter-btn" data-finalDivision="ALL">All finalDivisions</button>';
-    finalDivisions.forEach(finalDivision => {
+    divisionFilter.innerHTML = '<button type="button" class="filter-btn" data-division="ALL">All Divisions</button>';
+    divisions.forEach(division => {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'filter-btn';
-        button.dataset.finalDivision = finalDivision;
-        button.textContent = `finalDivision ${finalDivision}`;
-        finalDivisionFilter.appendChild(button);
+        button.dataset.division = division;
+        button.textContent = `Division ${division}`;
+        divisionFilter.appendChild(button);
     });
 
-    finalDivisionFilter.querySelectorAll('.filter-btn').forEach(button => {
-        button.classList.toggle('active', button.dataset.finalDivision === activefinalDivisionFilter);
+    divisionFilter.querySelectorAll('.filter-btn').forEach(button => {
+        button.classList.toggle('active', button.dataset.division === activeDivisionFilter);
     });
 }
 
-function renderGeneratorfinalDivisionSelector() {
-    if (!generatorfinalDivisionSelector) return;
+function renderGeneratorDivisionSelector() {
+    if (!generatorDivisionSelector) return;
 
     const selectedBefore = new Set(
-        Array.from(generatorfinalDivisionInputs || [])
+        Array.from(generatorDivisionInputs || [])
             .filter(input => input.checked)
             .map(input => input.value)
     );
-    const allWasChecked = generatorAllfinalDivisionsInput ? generatorAllfinalDivisionsInput.checked : true;
+    const allWasChecked = generatorAllDivisionsInput ? generatorAllDivisionsInput.checked : true;
 
-    generatorfinalDivisionSelector.innerHTML = '';
+    generatorDivisionSelector.innerHTML = '';
 
     const allLabel = document.createElement('label');
-    allLabel.innerHTML = '<input id="generator-div-all" type="checkbox" value="ALL"> All finalDivisions';
-    generatorfinalDivisionSelector.appendChild(allLabel);
+    allLabel.innerHTML = '<input id="generator-div-all" type="checkbox" value="ALL"> All Divisions';
+    generatorDivisionSelector.appendChild(allLabel);
 
-    getfinalDivisionCodes().forEach(finalDivision => {
+    getDivisionCodes().forEach(division => {
         const label = document.createElement('label');
-        label.innerHTML = `<input class="generator-div-choice" type="checkbox" value="${finalDivision}"> finalDivision ${finalDivision}`;
-        generatorfinalDivisionSelector.appendChild(label);
+        label.innerHTML = `<input class="generator-div-choice" type="checkbox" value="${division}"> Division ${division}`;
+        generatorDivisionSelector.appendChild(label);
     });
 
-    generatorAllfinalDivisionsInput = document.getElementById('generator-div-all');
-    generatorfinalDivisionInputs = Array.from(document.querySelectorAll('.generator-div-choice'));
+    generatorAllDivisionsInput = document.getElementById('generator-div-all');
+    generatorDivisionInputs = Array.from(document.querySelectorAll('.generator-div-choice'));
 
     if (allWasChecked || selectedBefore.size === 0) {
-        if (generatorAllfinalDivisionsInput) generatorAllfinalDivisionsInput.checked = true;
-        generatorfinalDivisionInputs.forEach(input => { input.checked = true; });
+        if (generatorAllDivisionsInput) generatorAllDivisionsInput.checked = true;
+        generatorDivisionInputs.forEach(input => { input.checked = true; });
     } else {
-        generatorfinalDivisionInputs.forEach(input => {
+        generatorDivisionInputs.forEach(input => {
             input.checked = selectedBefore.has(input.value);
         });
     }
 
-    initializeGeneratorfinalDivisionSelector();
+    initializeGeneratorDivisionSelector();
 }
 
-function refreshfinalDivisionDependentUI() {
-    refreshfinalDivisionSelectOptions(gamefinalDivisionSelect, 'Select finalDivision');
-    refreshfinalDivisionSelectOptions(practiceDiv1Select, 'Team 1 finalDivision');
-    refreshfinalDivisionSelectOptions(practiceDiv2Select, 'Team 2 finalDivision');
-    refreshfinalDivisionFilterButtons();
-    renderGeneratorfinalDivisionSelector();
+function refreshDivisionDependentUI() {
+    refreshDivisionSelectOptions(gameDivisionSelect, 'Select Division');
+    refreshDivisionSelectOptions(practiceDiv1Select, 'Team 1 Division');
+    refreshDivisionSelectOptions(practiceDiv2Select, 'Team 2 Division');
+    refreshDivisionFilterButtons();
+    renderGeneratorDivisionSelector();
 
-    populateTeamsForfinalDivision();
+    populateTeamsForDivision();
     if (practiceDiv1Select) populatePracticeTeamsForDiv(practiceDiv1Select, practiceTeam1Select);
     if (practiceDiv2Select) populatePracticeTeamsForDiv(practiceDiv2Select, practiceTeam2Select);
 }
@@ -1407,10 +1407,10 @@ function getSchedule() {
 }
 
 function getFilteredGames(games) {
-    if (activefinalDivisionFilter === 'ALL') {
+    if (activeDivisionFilter === 'ALL') {
         return games;
     }
-    return games.filter(game => game.finalDivision === activefinalDivisionFilter);
+    return games.filter(game => game.division === activeDivisionFilter);
 }
 
 function saveSchedule(games) {
@@ -1468,8 +1468,8 @@ function getNextAllowedGameDate(date) {
     return next;
 }
 
-function generatefinalDivisionMatchups(finalDivision) {
-    const teams = teamsByfinalDivision[finalDivision] || [];
+function generateDivisionMatchups(division) {
+    const teams = teamsByDivision[division] || [];
     if (teams.length < 2) {
         return [];
     }
@@ -1488,7 +1488,7 @@ function generatefinalDivisionMatchups(finalDivision) {
     allRounds.forEach(roundPairs => {
         roundPairs.forEach(pair => {
             generated.push({
-                finalDivision,
+                division,
                 team1: pair[0],
                 team2: pair[1],
                 sequence
@@ -1617,11 +1617,11 @@ function allocateGamesToSlots(matchups, startDateKey, existingSchedule) {
                 teamDayParkMap.set(team2ParkKey, park);
 
                 generated.push({
-                    id: `game-${match.finalDivision}-${runSeed}-${sequence}`,
+                    id: `game-${match.division}-${runSeed}-${sequence}`,
                     date: dateKey,
                     time,
                     park,
-                    finalDivision: match.finalDivision,
+                    division: match.division,
                     team1: match.team1,
                     team2: match.team2,
                     status: 'scheduled',
@@ -1638,44 +1638,44 @@ function allocateGamesToSlots(matchups, startDateKey, existingSchedule) {
     return generated;
 }
 
-function getSelectedGeneratorfinalDivisions() {
-    const selected = generatorfinalDivisionInputs
+function getSelectedGeneratorDivisions() {
+    const selected = generatorDivisionInputs
         .filter(input => input.checked)
         .map(input => input.value);
     return selected;
 }
 
-function syncGeneratorAllStateFromfinalDivisionSelection() {
-    if (!generatorAllfinalDivisionsInput) return;
-    const allChecked = generatorfinalDivisionInputs.length > 0 && generatorfinalDivisionInputs.every(input => input.checked);
-    generatorAllfinalDivisionsInput.checked = allChecked;
+function syncGeneratorAllStateFromDivisionSelection() {
+    if (!generatorAllDivisionsInput) return;
+    const allChecked = generatorDivisionInputs.length > 0 && generatorDivisionInputs.every(input => input.checked);
+    generatorAllDivisionsInput.checked = allChecked;
 }
 
-function initializeGeneratorfinalDivisionSelector() {
-    if (!generatorAllfinalDivisionsInput || !generatorfinalDivisionInputs.length) return;
+function initializeGeneratorDivisionSelector() {
+    if (!generatorAllDivisionsInput || !generatorDivisionInputs.length) return;
 
-    generatorAllfinalDivisionsInput.addEventListener('change', () => {
-        generatorfinalDivisionInputs.forEach(input => {
-            input.checked = generatorAllfinalDivisionsInput.checked;
+    generatorAllDivisionsInput.addEventListener('change', () => {
+        generatorDivisionInputs.forEach(input => {
+            input.checked = generatorAllDivisionsInput.checked;
         });
     });
 
-    generatorfinalDivisionInputs.forEach(input => {
+    generatorDivisionInputs.forEach(input => {
         input.addEventListener('change', () => {
-            const anyChecked = generatorfinalDivisionInputs.some(item => item.checked);
+            const anyChecked = generatorDivisionInputs.some(item => item.checked);
             if (!anyChecked) {
                 input.checked = true;
             }
-            syncGeneratorAllStateFromfinalDivisionSelection();
+            syncGeneratorAllStateFromDivisionSelection();
         });
     });
 
-    syncGeneratorAllStateFromfinalDivisionSelection();
+    syncGeneratorAllStateFromDivisionSelection();
 }
 
-function populateTeamsForfinalDivision() {
-// Ignore finalDivision - allow interfinalDivision scheduling flexibility, but still filter team options based on selected finalDivision for convenience
-    const allTeams = Object.values(teamsByfinalDivision).flat();
+function populateTeamsForDivision() {
+// Ignore division - allow interdivision scheduling flexibility, but still filter team options based on selected division for convenience
+    const allTeams = Object.values(teamsByDivision).flat();
 
     gameTeam1Select.innerHTML = '<option value="">Select Home Team</option>';
     gameTeam2Select.innerHTML = '<option value="">Select Visitors Team</option>';
@@ -1732,7 +1732,7 @@ function renderWeekCalendar() {
                     ? `<div class="score">Score: ${game.team1} ${game.score1} - ${game.score2} ${game.team2}</div>`
                     : '';
                 const badge = status !== 'scheduled' ? ` <span class="status-badge status-${status}">${status}</span>` : '';
-                pill.innerHTML = `<div>${game.time} | ${game.park}${badge}</div><div>Div ${game.finalDivision}: Home: ${game.team1} vs Visitors: ${game.team2}</div>${scoreText}`;
+                pill.innerHTML = `<div>${game.time} | ${game.park}${badge}</div><div>Div ${game.division}: Home: ${game.team1} vs Visitors: ${game.team2}</div>${scoreText}`;
                 dayCard.appendChild(pill);
             });
         }
@@ -1751,7 +1751,7 @@ function renderWeekCalendar() {
 function renderSelectedDayGames() {
     const selectedKey = formatDateKey(selectedDate);
     const games = getFilteredGames(getSchedule()).filter(game => game.date === selectedKey);
-    const filterSuffix = activefinalDivisionFilter === 'ALL' ? '' : ` - finalDivision ${activefinalDivisionFilter}`;
+    const filterSuffix = activeDivisionFilter === 'ALL' ? '' : ` - Division ${activeDivisionFilter}`;
     selectedDayLabel.textContent = `Games on ${formatDateLong(selectedKey)}${filterSuffix}`;
     selectedDayGames.innerHTML = '';
 
@@ -1769,7 +1769,7 @@ function renderSelectedDayGames() {
             ? ` | Score: ${game.score1}-${game.score2}`
             : '';
         const gameInfo = document.createElement('div');
-        gameInfo.innerHTML = `${game.time} | ${game.park} | Div ${game.finalDivision} | Home: <a class="team-link" href="${getTeamPageUrl(game.team1, game.finalDivision, game.id)}">${game.team1}</a> vs Visitors: <a class="team-link" href="${getTeamPageUrl(game.team2, game.finalDivision, game.id)}">${game.team2}</a>${scoreText} <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+        gameInfo.innerHTML = `${game.time} | ${game.park} | Div ${game.division} | Home: <a class="team-link" href="${getTeamPageUrl(game.team1, game.division, game.id)}">${game.team1}</a> vs Visitors: <a class="team-link" href="${getTeamPageUrl(game.team2, game.division, game.id)}">${game.team2}</a>${scoreText} <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
         li.appendChild(gameInfo);
 
         const canManage = canManageScores();
@@ -1812,8 +1812,8 @@ function renderSelectedDayGames() {
                     gameDateInput.value = game.date;
                     gameTimeInput.value = game.time;
                     gameParkSelect.value = game.park;
-                    gamefinalDivisionSelect.value = game.finalDivision;
-                    populateTeamsForfinalDivision();
+                    gameDivisionSelect.value = game.division;
+                    populateTeamsForDivision();
                     gameTeam1Select.value = game.team1;
                     gameTeam2Select.value = game.team2;
                     if (gameStatusSelect) gameStatusSelect.value = status;
@@ -1874,7 +1874,7 @@ function renderScheduledGameOptions() {
     games.forEach(game => {
         const option = document.createElement('option');
         option.value = game.id;
-        option.textContent = `${game.date} ${game.time} | Div ${game.finalDivision} | Home: ${game.team1} vs Visitors: ${game.team2}`;
+        option.textContent = `${game.date} ${game.time} | Div ${game.division} | Home: ${game.team1} vs Visitors: ${game.team2}`;
         scheduledGameSelect.appendChild(option);
     });
 
@@ -1926,17 +1926,17 @@ function applyAdminPermissions() {
 
     setFormAccess(scheduleForm, isAdminUnlocked);
     setFormAccess(scoreForm, scoreAccess);
-    if (generatorAllfinalDivisionsInput) {
-        generatorAllfinalDivisionsInput.disabled = !isAdminUnlocked;
+    if (generatorAllDivisionsInput) {
+        generatorAllDivisionsInput.disabled = !isAdminUnlocked;
     }
-    generatorfinalDivisionInputs.forEach(input => {
+    generatorDivisionInputs.forEach(input => {
         input.disabled = !isAdminUnlocked;
     });
     generatorStartDateInput.disabled = !isAdminUnlocked;
     generatorReplaceExistingInput.disabled = !isAdminUnlocked;
     generatorRunButton.disabled = !isAdminUnlocked;
-    gameTeam1Select.disabled = !isAdminUnlocked || !gamefinalDivisionSelect.value;
-    gameTeam2Select.disabled = !isAdminUnlocked || !gamefinalDivisionSelect.value;
+    gameTeam1Select.disabled = !isAdminUnlocked || !gameDivisionSelect.value;
+    gameTeam2Select.disabled = !isAdminUnlocked || !gameDivisionSelect.value;
 }
 
 scheduleForm.addEventListener('submit', event => {
@@ -1949,7 +1949,7 @@ scheduleForm.addEventListener('submit', event => {
     const date = gameDateInput.value;
     const time = gameTimeInput.value;
     const park = gameParkSelect.value;
-    const finalDivision = gamefinalDivisionSelect.value;
+    const division = gameDivisionSelect.value;
     const team1 = gameTeam1Select.value;
     const team2 = gameTeam2Select.value;
 
@@ -1978,18 +1978,15 @@ scheduleForm.addEventListener('submit', event => {
         adminStatus.textContent = constraintError;
         return;
     }
+let finalDivision = division;
 
-    
-    let finalDivision = finalDivision;
+// If teams are from different divisions, mark as INTER
+const div1 = Object.keys(teamsByDivision).find(d => teamsByDivision[d].includes(team1));
+const div2 = Object.keys(teamsByDivision).find(d => teamsByDivision[d].includes(team2));
 
-    // If teams are from different finalDivisions, mark as INTER
-    const div1 = Object.keys(teamsByfinalDivision).find(d => teamsByfinalDivision[d].includes(team1));
-    const div2 = Object.keys(teamsByfinalDivision).find(d => teamsByfinalDivision[d].includes(team2));
-
-    if (div1 !== div2) {
-        finalDivision = 'INTER';
-    }
-
+if (div1 !== div2) {
+    finalDivision = 'INTER';
+}
 
     let savedGame = null;
     let scheduleAction = 'added';
@@ -1999,7 +1996,7 @@ scheduleForm.addEventListener('submit', event => {
             existing.date = date;
             existing.time = time;
             existing.park = park;
-            existing.finalDivision = finalDivision;
+            existing.division = finalDivision;
             existing.team1 = team1;
             existing.team2 = team2;
             existing.status = gameStatus;
@@ -2079,8 +2076,8 @@ scoreForm.addEventListener('submit', event => {
     scoreAdminStatus.textContent = `Score saved for Home: ${game.team1} vs Visitors: ${game.team2}.`;
 });
 
-gamefinalDivisionSelect.addEventListener('change', () => {
-    populateTeamsForfinalDivision();
+gameDivisionSelect.addEventListener('change', () => {
+    populateTeamsForDivision();
 });
 
 prevWeekButton.addEventListener('click', () => {
@@ -2093,14 +2090,14 @@ nextWeekButton.addEventListener('click', () => {
     renderWeekCalendar();
 });
 
-finalDivisionFilter.addEventListener('click', event => {
+divisionFilter.addEventListener('click', event => {
     const button = event.target.closest('.filter-btn');
     if (!button) {
         return;
     }
 
-    activefinalDivisionFilter = button.dataset.finalDivision || 'ALL';
-    finalDivisionFilter.querySelectorAll('.filter-btn').forEach(item => {
+    activeDivisionFilter = button.dataset.division || 'ALL';
+    divisionFilter.querySelectorAll('.filter-btn').forEach(item => {
         item.classList.toggle('active', item === button);
     });
 
@@ -2118,23 +2115,23 @@ generatorRunButton.addEventListener('click', () => {
 
     const startDateKey = generatorStartDateInput.value || formatDateKey(new Date());
     const replaceExisting = generatorReplaceExistingInput.checked;
-    const finalDivisionsToGenerate = generatorAllfinalDivisionsInput && generatorAllfinalDivisionsInput.checked
-        ? generatorfinalDivisionInputs.map(input => input.value)
-        : getSelectedGeneratorfinalDivisions();
+    const divisionsToGenerate = generatorAllDivisionsInput && generatorAllDivisionsInput.checked
+        ? generatorDivisionInputs.map(input => input.value)
+        : getSelectedGeneratorDivisions();
 
-    if (!finalDivisionsToGenerate.length) {
-        adminStatus.textContent = 'Select at least one finalDivision to generate a schedule.';
+    if (!divisionsToGenerate.length) {
+        adminStatus.textContent = 'Select at least one division to generate a schedule.';
         return;
     }
 
     let schedule = getSchedule();
     if (replaceExisting) {
-        schedule = schedule.filter(game => !finalDivisionsToGenerate.includes(game.finalDivision));
+        schedule = schedule.filter(game => !divisionsToGenerate.includes(game.division));
     }
 
     const allMatchups = [];
-    finalDivisionsToGenerate.forEach(finalDivision => {
-        allMatchups.push(...generatefinalDivisionMatchups(finalDivision));
+    divisionsToGenerate.forEach(division => {
+        allMatchups.push(...generateDivisionMatchups(division));
     });
 
     const generatedGames = allocateGamesToSlots(allMatchups, startDateKey, schedule);
@@ -2151,7 +2148,7 @@ generatorRunButton.addEventListener('click', () => {
     renderScheduledGameOptions();
     renderScoresList();
     renderParkView();
-    notifyScheduleUpdate({ action: 'generated', count: generatedCount, sourcefinalDivisions: finalDivisionsToGenerate }, 'generated');
+    notifyScheduleUpdate({ action: 'generated', count: generatedCount, sourceDivisions: divisionsToGenerate }, 'generated');
 
     adminStatus.textContent = `Generated ${generatedCount} games on Sundays only (8:00AM, 9:50AM,11:45AM). Scheduler fills next available park/time slots across all ${ALL_PARKS.length} parks before moving to the next date, with no duplicate field/time slot assignments.`;
 });
@@ -2260,7 +2257,7 @@ function renderParkView() {
                 row.innerHTML = `
                     <span class="park-col-meta">${game.date}</span>
                     <span class="park-col-meta">${game.time}</span>
-                    <span class="park-col-matchup"><span class="park-col-finalDivision">Div ${game.finalDivision}</span> Home: <a class="team-link" href="${getTeamPageUrl(game.team1, game.finalDivision, game.id)}">${game.team1}</a> vs Visitors: <a class="team-link" href="${getTeamPageUrl(game.team2, game.finalDivision, game.id)}">${game.team2}</a>${scoreText}</span>
+                    <span class="park-col-matchup"><span class="park-col-division">Div ${game.division}</span> Home: <a class="team-link" href="${getTeamPageUrl(game.team1, game.division, game.id)}">${game.team1}</a> vs Visitors: <a class="team-link" href="${getTeamPageUrl(game.team2, game.division, game.id)}">${game.team2}</a>${scoreText}</span>
                     <span class="status-badge status-${status}">${status === 'scheduled' ? 'On Schedule' : status.charAt(0).toUpperCase() + status.slice(1)}</span>${checkinBadge}
                 `;
                 list.appendChild(row);
@@ -2341,7 +2338,7 @@ function savePracticeSchedule(games) { writeJson(PRACTICE_KEY, games); }
 
 function populatePracticeTeamsForDiv(divSelect, teamSelect) {
     const div = divSelect.value;
-    const teams = div ? (teamsByfinalDivision[div] || []) : [];
+    const teams = div ? (teamsByDivision[div] || []) : [];
     teamSelect.innerHTML = '<option value="">Select Team</option>';
     teams.forEach(t => {
         const opt = document.createElement('option');
@@ -2476,7 +2473,7 @@ if (practiceRefreshAdmin) {
 }
 
 ensureDefaults();
-refreshfinalDivisionDependentUI();
+refreshDivisionDependentUI();
 applyAdminPermissions();
 applyPracticeAdminAccess();
 gameDateInput.value = formatDateKey(selectedDate);

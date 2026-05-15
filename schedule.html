@@ -1113,8 +1113,6 @@ let teamsByDivision = {};
 const ALL_PARKS = ['Stevenson Park', 'Dolphin Park', 'Calas Park', 'Veterans Park'];
 const GAME_TIME_SLOTS = ['08:00', '09:50', '11:45'];
 const ALLOWED_GAME_DAYS = [0]; // Sundays only
-const GAME_TIME_SLOTS = ['08:00', '09:50', '11:45'];
-const ALLOWED_GAME_DAYS = [0]; // Sundays only
 const CHECKINS_KEY = 'lamslGameCheckinsV1';
 
 const weekLabel = document.getElementById('week-label');
@@ -1283,7 +1281,7 @@ function ensureDefaults() {
             { id: 'game-1', date: '2026-03-30', time: '08:00', park: 'Stevenson Park', division: 'C', team1: 'Diablos', team2: 'Brewers', score1: '', score2: '', status: 'scheduled' },
             { id: 'game-2', date: '2026-03-31', time: '09:50', park: 'Dolphin Park', division: 'B', team1: 'Charros', team2: 'Primos', score1: '', score2: '', status: 'scheduled' },
             { id: 'game-3', date: '2026-04-02', time: '11:45', park: 'Veterans Park', division: 'A', team1: 'Titans', team2: 'Legends', score1: '', score2: '', status: 'scheduled' }
-            { id: 'game-2', date: '2026-03-31', time: '09:50', park: 'Dolphin Park', division: 'B', team1: 'Charros', team2: 'Primos', score1: '', score2: '', status: 'scheduled' },
+            ,{ id: 'game-2', date: '2026-03-31', time: '09:50', park: 'Dolphin Park', division: 'B', team1: 'Charros', team2: 'Primos', score1: '', score2: '', status: 'scheduled' },
             { id: 'game-3', date: '2026-04-02', time: '11:45', park: 'Veterans Park', division: 'A', team1: 'Titans', team2: 'Legends', score1: '', score2: '', status: 'scheduled' }
         ];
         writeJson(SCHEDULE_KEY, seed);
@@ -1742,7 +1740,7 @@ function populateTeamsForDivision() {
     gameTeam2Select.disabled = false;
 }
 
-function renderWeekCalendar() {
+,function renderWeekCalendar() {
     const weekEnd = addDays(currentWeekStart, 6);
     weekLabel.textContent = `${currentWeekStart.toLocaleDateString()} - ${weekEnd.toLocaleDateString()}`;
 
@@ -1794,7 +1792,7 @@ function renderWeekCalendar() {
     }
 }
 
-function renderSelectedDayGames() {
+,function renderSelectedDayGames() {
     const selectedKey = formatDateKey(selectedDate);
     const games = getFilteredGames(getSchedule()).filter(game => game.date === selectedKey);
     const filterSuffix = activeDivisionFilter === 'ALL' ? '' : ` - Division ${activeDivisionFilter}`;
@@ -1911,7 +1909,7 @@ function renderSelectedDayGames() {
     });
 }
 
-function renderScheduledGameOptions() {
+,function renderScheduledGameOptions() {
     const games = getFilteredGames(getSchedule());
     const currentValue = scheduledGameSelect.value;
     scheduledGameSelect.innerHTML = '<option value="">Select Scheduled Game</option>';
@@ -1928,7 +1926,7 @@ function renderScheduledGameOptions() {
     }
 }
 
-function renderScoresList() {
+,function renderScoresList() {
     const scored = getFilteredGames(getSchedule()).filter(game => game.score1 !== '' && game.score2 !== '');
     scoresList.innerHTML = '';
 
@@ -1946,13 +1944,13 @@ function renderScoresList() {
     });
 }
 
-function setFormAccess(formElement, enabled) {
+,function setFormAccess(formElement, enabled) {
     Array.from(formElement.elements).forEach(element => {
         element.disabled = !enabled;
     });
 }
 
-function applyAdminPermissions() {
+,function applyAdminPermissions() {
     isAdminUnlocked = isAdminLoggedIn();
     const scoreAccess = canManageScores();
     if (isAdminUnlocked) {
@@ -1984,7 +1982,7 @@ function applyAdminPermissions() {
     gameTeam2Select.disabled = !isAdminUnlocked || !gameDivisionSelect.value;
 }
 
-scheduleForm.addEventListener('submit', event => {
+,scheduleForm.addEventListener('submit', event => {
     event.preventDefault();
     if (!isAdminUnlocked) {
         adminStatus.textContent = 'Sign in as admin first.';
@@ -2096,7 +2094,7 @@ if (div1 !== div2) {
     if (savedGame) {
         notifyScheduleUpdate(savedGame, scheduleAction);
     }
-});
+}));
 
 scoreForm.addEventListener('submit', event => {
     event.preventDefault();
@@ -2557,3 +2555,4 @@ renderPracticeGames();
 </body>
 </html>
 
+}

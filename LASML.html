@@ -769,8 +769,11 @@ function writeJson(key, value) {
 }
 
 function apiUrl(path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+    }
     if (window.location.protocol === 'file:' && path.startsWith('/')) {
-        return path.slice(1);
+        return `http://localhost:8000${path}`;
     }
     return new URL(path, window.location.href).toString();
 }
@@ -799,7 +802,14 @@ async function subscribeNotificationEmail() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
         });
-        const result = await response.json();
+        const text = await response.text();
+        let result;
+
+        try {
+            result = JSON.parse(text);
+        } catch (jsonError) {
+            throw new Error(`Unexpected response from server: ${text.slice(0, 200)}`);
+        }
 
         if (!response.ok || !result.success) {
             throw new Error(result.error || 'Unable to subscribe at this time.');

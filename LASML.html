@@ -1143,7 +1143,7 @@ uploadForm.addEventListener('submit', async (event) => {
     uploadStatus.textContent = 'Uploading image...';
 
     try {
-        const response = await fetch('/upload', {
+        const response = await fetch(apiUrl('/upload'), {
             method: 'POST',
             body: formData
         });

@@ -46,6 +46,24 @@ ALLOWED_EXTENSIONS = {
     ".aac",
 }
 
+IMAGE_EXTENSIONS = {
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".webp",
+    ".bmp",
+    ".svg",
+    ".apng",
+    ".avif",
+    ".ico",
+    ".jfif",
+    ".tif",
+    ".tiff",
+    ".heic",
+    ".heif",
+}
+
 CONTENT_TYPE_EXTENSION_MAP = {
     "image/jpeg": ".jpg",
     "image/png": ".png",
@@ -301,6 +319,11 @@ class UploadHandler(SimpleHTTPRequestHandler):
 
         raw_filename = photo_part.get_filename() or "upload.jpg"
         safe_name = _safe_filename(raw_filename, photo_part.get_content_type())
+        content_type = (photo_part.get_content_type() or "").lower()
+        extension = Path(safe_name).suffix.lower()
+        if not content_type.startswith("image/") or extension not in IMAGE_EXTENSIONS:
+            self._json_response(400, {"success": False, "error": "Invalid image file type."})
+            return
 
         target_dir.mkdir(parents=True, exist_ok=True)
         destination = _unique_path(target_dir, safe_name)
@@ -400,6 +423,11 @@ class UploadHandler(SimpleHTTPRequestHandler):
         raw_filename = photo_part.get_filename() or "team-photo.jpg"
         safe_name = _safe_filename(raw_filename, photo_part.get_content_type())
         extension = Path(safe_name).suffix.lower() or ".jpg"
+        content_type = (photo_part.get_content_type() or "").lower()
+        extension = Path(safe_name).suffix.lower() or ".jpg"
+        if not content_type.startswith("image/") or extension not in IMAGE_EXTENSIONS:
+            self._json_response(400, {"success": False, "error": "Invalid image file type."})
+            return
         profile_key = _team_profile_key(team, division)
         stored_name = f"profile{extension}"
 

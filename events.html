@@ -909,7 +909,7 @@ efUploadForm.addEventListener('submit', async (event) => {
     efUploadStatus.textContent = 'Uploading image...';
 
     try {
-        const response = await fetch('/upload-ef', {
+        const response = await fetch(apiUrl('/upload-ef'), {
             method: 'POST',
             body: formData
         });

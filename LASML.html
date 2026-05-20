@@ -734,6 +734,7 @@ const USERS_KEY = 'lamslUsersV1';
 const SESSION_KEY = 'lamslSessionV1';
 const ANNOUNCEMENTS_KEY = 'lamslAnnouncementsV1';
 const PAYMENT_KEY = 'lamslPaymentLinksV1';
+const BACKEND_URL = 'https://lamsl-backend.onrender.com';
 
 let currentSlide = 0;
 let slideshowImages = [];
@@ -781,7 +782,7 @@ emailSignupForm.addEventListener('submit', async (e) => {
     messageBox.textContent = "Submitting...";
 
     try {
-      const res = await fetch("http://localhost:3000/api/subscribe", {
+      const res = await fetch(BACKEND_URL + "/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email })
@@ -1067,7 +1068,7 @@ uploadForm.addEventListener("submit", async (e) => {
     formData.append("image", file);
 
     try {
-      const res = await fetch("http://localhost:3000/api/upload-image", {
+      const res = await fetch(BACKEND_URL + "/api/upload-image", {
         method: "POST",
         body: formData
       });
@@ -1086,7 +1087,7 @@ uploadForm.addEventListener("submit", async (e) => {
       // Optional: show uploaded image
       if (data.url) {
         const img = document.createElement("img");
-        img.src = "http://localhost:3000" + data.url;
+        img.src = BACKEND_URL + data.url;
         img.style.maxWidth = "200px";
         uploadMessage.appendChild(document.createElement("br"));
         uploadMessage.appendChild(img);

@@ -726,7 +726,7 @@ header {
 
 <!-- FOOTER -->
 <footer>
-    <p>Â© Latino Men's Softball League (LAMSL)</p>
+    <p>© Latino Men's Softball League (LAMSL)</p>
 </footer>
 
 <script>
@@ -781,7 +781,7 @@ emailSignupForm.addEventListener('submit', async (e) => {
     messageBox.textContent = "Submitting...";
 
     try {
-      const res = await fetch("https://lamsl-backend.onrender.com/api/subscribe", {
+      const res = await fetch("http://localhost:3000/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email })
@@ -927,14 +927,9 @@ function createSlideElement(image) {
 
 function applyUploadPermissions() {
     const isAdmin = isAdminLoggedIn();
-    uploadInput.disabled = !isAdmin;
-    uploadCaptionInput.disabled = !isAdmin;
-    removePhotoButton.disabled = !isAdmin;
+    imageInput.disabled = !isAdmin;
     uploadForm.querySelector('button[type="submit"]').disabled = !isAdmin;
-    uploadPanel.style.display = isAdmin ? 'block' : 'none';
-    uploadStatus.textContent = isAdmin
-        ? 'Uploads are saved to the SlideshowImages folder. Add an optional caption before uploading or remove the current photo.'
-        : 'Slideshow is visible to all users. Sign in as admin at administrators.html to upload/remove photos and edit captions.';
+    uploadMessage.style.display = isAdmin ? 'block' : 'none';
 }
 
 function getSlides() {
@@ -1072,7 +1067,7 @@ uploadForm.addEventListener("submit", async (e) => {
     formData.append("image", file);
 
     try {
-      const res = await fetch("https://lamsl-backend.onrender.com/api/upload-image", {
+      const res = await fetch("http://localhost:3000/api/upload-image", {
         method: "POST",
         body: formData
       });
@@ -1091,7 +1086,7 @@ uploadForm.addEventListener("submit", async (e) => {
       // Optional: show uploaded image
       if (data.url) {
         const img = document.createElement("img");
-        img.src = "https://lamsl-backend.onrender.com" + data.url;
+        img.src = "http://localhost:3000" + data.url;
         img.style.maxWidth = "200px";
         uploadMessage.appendChild(document.createElement("br"));
         uploadMessage.appendChild(img);

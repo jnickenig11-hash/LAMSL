@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -669,10 +669,11 @@ header {
         <section class="card home-region region-notifications">
             <h3>Stay Informed by Email</h3>
             <p>Enter your email to receive fundraiser and schedule update announcements.</p>
-            <label for="notify-email-input">Email address</label>
-            <input id="notify-email-input" type="email" placeholder="Enter email (e.g. address@example.com)">
-            <button id="notify-signup-btn">Sign Up</button>
-            <p id="notify-signup-message" style="margin-top:0.75rem;color:#1f4e79;font-size:0.95rem;"></p>
+            <form id="email-signup-form">
+              <input type="email" id="email-input" placeholder="Enter your email" required />
+              <button type="submit">Sign Up</button>
+              <div id="email-signup-message"></div>
+            </form>
         </section>
 
         <section class="card home-region founder-region region-founder">
@@ -713,13 +714,11 @@ header {
         <button class="next">&gt;</button>
         <div class="upload-form">
             <h3>Upload New Photo</h3>
-            <form id="slideshow-upload-form" enctype="multipart/form-data">
-                <input id="slideshow-photo-input" type="file" name="photo" accept="image/*" required>
-                <input id="slideshow-caption-input" type="text" name="caption" maxlength="180" placeholder="Add photo caption">
-                <button type="submit">Upload</button>
-                <button id="remove-photo-btn" type="button">Remove Current Photo</button>
+            <form id="image-upload-form" enctype="multipart/form-data">
+              <input type="file" id="image-input" accept="image/*" required />
+              <button type="submit">Upload Image</button>
+              <div id="image-upload-message"></div>
             </form>
-            <p id="upload-status"><em>Uploads are saved to the SlideshowImages folder.</em></p>
         </div>
     </section>
 
@@ -740,18 +739,15 @@ let currentSlide = 0;
 let slideshowImages = [];
 const indicatorsContainer = document.querySelector('.indicators');
 const slidesContainer = document.querySelector('.slides');
-const uploadForm = document.getElementById('slideshow-upload-form');
-const uploadPanel = uploadForm.closest('.upload-form');
-const uploadInput = document.getElementById('slideshow-photo-input');
-const uploadCaptionInput = document.getElementById('slideshow-caption-input');
-const removePhotoButton = document.getElementById('remove-photo-btn');
-const uploadStatus = document.getElementById('upload-status');
+const uploadForm = document.getElementById('image-upload-form');
+const imageInput = document.getElementById('image-input');
+const uploadMessage = document.getElementById('image-upload-message');
 const homeSlideshowPrev = document.querySelector('.prev');
 const homeSlideshowNext = document.querySelector('.next');
 const announcementsList = document.getElementById('announcements-list');
-const notifyEmailInput = document.getElementById('notify-email-input');
-const notifySignupBtn = document.getElementById('notify-signup-btn');
-const notifySignupMessage = document.getElementById('notify-signup-message');
+const emailSignupForm = document.getElementById('email-signup-form');
+const emailInput = document.getElementById('email-input');
+const messageBox = document.getElementById('email-signup-message');
 const paymentLinksDisplay = document.getElementById('payment-links-display');
 const paymentEditForm = document.getElementById('payment-edit-form');
 
@@ -778,51 +774,36 @@ function apiUrl(path) {
     return new URL(path, window.location.href).toString();
 }
 
-function setNotifySignupMessage(message, isError = false) {
-    if (!notifySignupMessage) return;
-    notifySignupMessage.textContent = message;
-    notifySignupMessage.style.color = isError ? '#a32d2d' : '#1f4e79';
-}
+emailSignupForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-async function subscribeNotificationEmail() {
-    if (!notifyEmailInput || !notifySignupBtn) return;
-
-    const email = notifyEmailInput.value.trim();
-    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-        setNotifySignupMessage('Please enter a valid email address.', true);
-        return;
-    }
-
-    notifySignupBtn.disabled = true;
-    setNotifySignupMessage('Signing up...');
+    const email = emailInput.value.trim();
+    messageBox.textContent = "Submitting...";
 
     try {
-        const response = await fetch(apiUrl('/subscribe-email'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
-        });
-        const text = await response.text();
-        let result;
+      const res = await fetch("https://lamsl-backend.onrender.com/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
 
-        try {
-            result = JSON.parse(text);
-        } catch (jsonError) {
-            throw new Error(`Unexpected response from server: ${text.slice(0, 200)}`);
-        }
+      const data = await res.json();
 
-        if (!response.ok || !result.success) {
-            throw new Error(result.error || 'Unable to subscribe at this time.');
-        }
+      if (!data.success) {
+        messageBox.style.color = "red";
+        messageBox.textContent = data.message || "Signup failed";
+        return;
+      }
 
-        setNotifySignupMessage(result.message || 'Thanks! You are signed up for notifications.');
-        notifyEmailInput.value = '';
-    } catch (error) {
-        setNotifySignupMessage(error.message || 'Subscription failed. Please try again later.', true);
-    } finally {
-        notifySignupBtn.disabled = false;
+      messageBox.style.color = "green";
+      messageBox.textContent = "You're signed up!";
+      emailSignupForm.reset();
+
+    } catch (err) {
+      messageBox.style.color = "red";
+      messageBox.textContent = "Server error — is your backend running?";
     }
-}
+});
 
 function ensureDefaults() {
     const users = readJson(USERS_KEY, []);
@@ -1066,54 +1047,6 @@ function addSlide(image) {
 homeSlideshowNext.addEventListener('click', nextSlide);
 homeSlideshowPrev.addEventListener('click', prevSlide);
 
-removePhotoButton.addEventListener('click', async () => {
-    if (!isAdminLoggedIn()) {
-        uploadStatus.textContent = 'Admin sign-in required to remove photos.';
-        return;
-    }
-
-    // Resolve filename from the tracked array first, then fall back to the active DOM slide.
-    let current = slideshowImages[currentSlide];
-    if (!current || !current.name) {
-        const activeSlide = slidesContainer.querySelector('.slide.active');
-        const domFilename = activeSlide?.dataset.filename || (() => {
-            const src = activeSlide?.querySelector('img')?.src || '';
-            const raw = src.split('/').pop().split('?')[0];
-            return raw ? decodeURIComponent(raw) : '';
-        })();
-        if (domFilename) current = { name: domFilename };
-    }
-
-    if (!current || !current.name) {
-        uploadStatus.textContent = 'No photo available to remove.';
-        return;
-    }
-
-    const savedIndex = currentSlide;
-    uploadStatus.textContent = `Removing ${current.name}...`;
-
-    try {
-        const response = await fetch('/remove-photo', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filename: current.name })
-        });
-        const result = await response.json();
-        if (!response.ok || !result.success) {
-            throw new Error(result.error || 'Remove failed.');
-        }
-
-        await loadSlidesFromFolder();
-        // Navigate to the next available slide rather than always jumping to index 0.
-        if (slideshowImages.length > 0) {
-            showSlide(Math.min(savedIndex, slideshowImages.length - 1));
-        }
-        uploadStatus.textContent = `Removed: ${current.name}`;
-    } catch (error) {
-        uploadStatus.textContent = `Remove failed: ${error.message}`;
-    }
-});
-
 indicatorsContainer.addEventListener('click', (event) => {
     if (!event.target.classList.contains('indicator')) {
         return;
@@ -1124,46 +1057,51 @@ indicatorsContainer.addEventListener('click', (event) => {
     }
 });
 
-uploadForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    if (!isAdminLoggedIn()) {
-        uploadStatus.textContent = 'Admin sign-in required for uploads.';
-        return;
+uploadForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const file = imageInput.files[0];
+    if (!file) {
+      uploadMessage.textContent = "Please select an image first.";
+      return;
     }
 
-    if (!uploadInput.files || !uploadInput.files[0]) {
-        uploadStatus.textContent = 'Please choose an image file.';
-        return;
-    }
+    uploadMessage.textContent = "Uploading...";
 
     const formData = new FormData();
-    formData.append('photo', uploadInput.files[0]);
-    formData.append('caption', uploadCaptionInput.value.trim());
-
-    uploadStatus.textContent = 'Uploading image...';
+    formData.append("image", file);
 
     try {
-        const response = await fetch(apiUrl('/upload'), {
-            method: 'POST',
-            body: formData
-        });
+      const res = await fetch("https://lamsl-backend.onrender.com/api/upload-image", {
+        method: "POST",
+        body: formData
+      });
 
-        const result = await response.json();
-        if (!response.ok || !result.success) {
-            throw new Error(result.error || 'Upload failed.');
-        }
+      const data = await res.json();
 
-        addSlide({
-            name: result.filename,
-            path: `${result.path}?t=${Date.now()}`,
-            caption: result.caption || ''
-        });
-        uploadForm.reset();
-        uploadStatus.textContent = `Uploaded: ${result.filename}`;
-    } catch (error) {
-        uploadStatus.textContent = `Upload failed: ${error.message}`;
+      if (!data.success) {
+        uploadMessage.style.color = "red";
+        uploadMessage.textContent = data.message || "Upload failed";
+        return;
+      }
+
+      uploadMessage.style.color = "green";
+      uploadMessage.textContent = "Upload successful!";
+
+      // Optional: show uploaded image
+      if (data.url) {
+        const img = document.createElement("img");
+        img.src = "https://lamsl-backend.onrender.com" + data.url;
+        img.style.maxWidth = "200px";
+        uploadMessage.appendChild(document.createElement("br"));
+        uploadMessage.appendChild(img);
+      }
+
+    } catch (err) {
+      uploadMessage.style.color = "red";
+      uploadMessage.textContent = "Server error — is your backend running?";
     }
-});
+  });
 
 window.addEventListener('storage', (event) => {
     if (event.key === SESSION_KEY) {
@@ -1182,10 +1120,6 @@ applyPaymentSection();
 applyUploadPermissions();
 loadSlidesFromFolder();
 renderMiniSchedule();
-
-if (notifySignupBtn) {
-    notifySignupBtn.addEventListener('click', subscribeNotificationEmail);
-}
 
 // Autoplay every 20 seconds
 setInterval(nextSlide, 20000);

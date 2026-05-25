@@ -388,7 +388,7 @@ footer {
     <div class="navbar container">
         <h2 class="navbar-brand"><span class="navbar-brand-gem" aria-hidden="true"></span>LAMSL</h2>
         <ul>
-            <li><a href="LASML.html">Home</a></li>
+            <li><a href="LAMSL.html">Home</a></li>
             <li><a href="standings.html">Standings</a></li>
             <li><a href="schedule.html">Schedule</a></li>
             <li><a href="teams.html">Teams</a></li>
@@ -534,7 +534,7 @@ footer {
 
 <!-- FOOTER -->
 <footer>
-    <p>Â© Latino Men's Softball League (LAMSL)</p>
+    <p>Ã‚Â© Latino Men's Softball League (LAMSL)</p>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -743,7 +743,7 @@ function renderTeamManagerAssignments() {
     entries.forEach(([username, teams]) => {
         teams.forEach(teamName => {
             const li = document.createElement('li');
-            li.textContent = `${username} — ${teamName}` + (managerUsers.includes(username) ? '' : ' (manager account not active)');
+            li.textContent = `${username} Â— ${teamName}` + (managerUsers.includes(username) ? '' : ' (manager account not active)');
             const removeBtn = document.createElement('button');
             removeBtn.type = 'button';
             removeBtn.className = 'remove-btn';
@@ -1073,7 +1073,7 @@ function renderUserAccounts() {
         li.style.justifyContent = 'space-between';
         li.style.alignItems = 'center';
         li.style.gap = '12px';
-        li.innerHTML = `<span>${user.username} — <strong>${user.role}</strong></span>`;
+        li.innerHTML = `<span>${user.username} Â— <strong>${user.role}</strong></span>`;
 
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
@@ -1452,7 +1452,7 @@ function getActiveSeason() {
 }
 
 function formatSeasonDate(dateKey) {
-    if (!dateKey) return '—';
+    if (!dateKey) return 'Â—';
     const d = new Date(`${dateKey}T00:00:00`);
     return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
@@ -1508,7 +1508,7 @@ seasonForm.addEventListener('submit', event => {
     writeJson(SEASON_KEY, { name, year, start, end });
     writeJson(STANDINGS_KEY, {});
     renderSeasonPanel();
-    authStatus.textContent = `${name} ${year} season saved (${formatSeasonDate(start)} – ${formatSeasonDate(end)}).`;
+    authStatus.textContent = `${name} ${year} season saved (${formatSeasonDate(start)} Â– ${formatSeasonDate(end)}).`;
 });
 
 ensureDefaults();

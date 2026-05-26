@@ -638,10 +638,15 @@ header {
     <!-- TOP ROW: Next Games | Announcements | Payment -->
     <section class="card mini-schedule-panel home-region region-schedule">
         <h3>&#9918; Next Games</h3>
-        <div id="mini-schedule-content"><p class="mini-schedule-empty">Loading&hellip;</p></div>
+        <div id="mini-schedule-content"></div>
         <a class="mini-schedule-link" href="schedule.html">&#8594; Full Schedule</a>
     </section>
 
+    <section class="card home-region region-scores">
+        <h3>Recent Scores</h3>
+        <div id="gameScores"></div>
+    </section>
+    
     <section class="card home-region region-announcements">
         <h2>LAMSL Announcements</h2>
         <p>League updates are managed in the Administrators section.</p>
@@ -696,13 +701,7 @@ header {
 
     <!-- MIDDLE/BOTTOM: Slideshow spans left space, Founder and Instagram on right -->
     <section class="slideshow home-region region-slideshow">
-        <div class="slides">
-            <div class="slide active" data-filename="DonArturoPadillaLAMSLPresident2.jpg"><img src="SlideshowImages/DonArturoPadillaLAMSLPresident2.jpg" alt="Game Photo 1"></div>
-            <div class="slide" data-filename="DonArturoPadillaLAMSLPresident2 (1).jpg"><img src="SlideshowImages/DonArturoPadillaLAMSLPresident2 (1).jpg" alt="Game Photo 2"></div>
-            <div class="slide" data-filename="LAMSLClubhouseCartoonPic.jpg"><img src="SlideshowImages/LAMSLClubhouseCartoonPic.jpg" alt="Game Photo 3"></div>
-            <div class="slide" data-filename="400dpiMariachiConservatory.jpg"><img src="SlideshowImages/400dpiMariachiConservatory.jpg" alt="Game Photo 4"></div>
-            <div class="slide" data-filename="Estylo Hair Salon2.jpg"><img src="SlideshowImages/Estylo Hair Salon2.jpg" alt="Game Photo 5"></div>
-        </div>
+        <div class="slides" id="slideshow"></div>
         <div class="indicators">
             <span class="indicator active" data-slide="0"></span>
             <span class="indicator" data-slide="1"></span>
@@ -1214,6 +1213,61 @@ function renderMiniSchedule() {
         }
     } catch (e) {}
 })();
+</script>
+<script>
+fetch('https://lamsl-backend.onrender.com/api/content')
+  .then(res => res.json())
+  .then(data => {
+
+    // Announcements
+    document.getElementById('announcements-list').innerHTML =
+      data.announcements.map(a => `
+        <div class="announcement">
+          <h4>${a.title}</h4>
+          <p>${a.message}</p>
+          <small>${a.date}</small>
+        </div>
+      `).join('');
+
+    // Zelle info
+    document.getElementById('zelleInfo').innerHTML = `
+      <p><strong>${data.zelle.name}</strong></p>
+      <p>${data.zelle.email}</p>
+      <img src="${data.zelle.qrImage}" style="width:150px;">
+    `;
+
+    // Slideshow
+    document.getElementById('slideshow').innerHTML =
+      data.slideshow.map((s, i) => `
+        <div class="slide ${i === 0 ? 'active' : ''}">
+          <img src="${s.imageUrl}" alt="${s.caption}">
+          <p>${s.caption}</p>
+        </div>
+      `).join('');
+
+    // Game Schedules (Next Games)
+    document.getElementById('mini-schedule-content').innerHTML =
+      data.gameSchedules.slice(0, 3).map(s => `
+        <div class="mini-schedule-item">
+          <p><strong>${s.team}</strong> vs <strong>${s.opponent}</strong></p>
+          <p>${s.date} at ${s.time}</p>
+          <p>${s.location}</p>
+        </div>
+      `).join('');
+
+    // Game Scores (if you add the section)
+    if (document.getElementById('gameScores')) {
+      document.getElementById('gameScores').innerHTML =
+        data.gameScores.map(g => `
+          <div class="score-item">
+            <p>${g.teamA} ${g.scoreA} - ${g.scoreB} ${g.teamB}</p>
+            <small>${g.date}</small>
+          </div>
+        `).join('');
+    }
+
+  })
+  .catch(err => console.error('Error loading content:', err));
 </script>
 
 </body>

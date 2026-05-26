@@ -896,6 +896,7 @@ footer {
                     </select>
                     <select id="game-park" required>
                         <option value="">Select Park</option>
+                        <option value="Ford Park">Ford Park</option>
                         <option value="Stevenson Park">Stevenson Park</option>
                         <option value="Dolphin Park">Dolphin Park</option>
                         <option value="Calas Park">Calas Park</option>
@@ -911,10 +912,10 @@ footer {
                         <option value="E">Division E</option>
                     </select>
                     <select id="game-team1" required disabled>
-                        <option value="">Select Home Team</option>
+                        <option value="">Select Team 1</option>
                     </select>
                     <select id="game-team2" required disabled>
-                        <option value="">Select Visitors Team</option>
+                        <option value="">Select Team 2</option>
                     </select>
                     <select id="game-status">
                         <option value="scheduled">On Schedule</option>
@@ -963,6 +964,7 @@ footer {
                             <input id="practice-time" type="time" required>
                             <select id="practice-park" required>
                                 <option value="">Select Park</option>
+                                <option value="Ford Park">Ford Park</option>
                                 <option value="Stevenson Park">Stevenson Park</option>
                                 <option value="Dolphin Park">Dolphin Park</option>
                                 <option value="Calas Park">Calas Park</option>
@@ -1027,8 +1029,8 @@ const DEFAULT_TEAMS_BY_DIVISION = {
     E: []
 };
 let teamsByDivision = {};
-const ALL_PARKS = ['Stevenson Park', 'Dolphin Park', 'Calas Park', 'Veterans Park'];
-const GAME_TIME_SLOTS = ['08:00', '09:50', '11:45'];
+const ALL_PARKS = ['Stevenson Park','Ford Park', 'Dolphin Park', 'Calas Park', 'Veterans Park'];
+const GAME_TIME_SLOTS = ['08:00 Am', '09:50Am', '11:45Am'];
 const ALLOWED_GAME_DAYS = [0]; // Sundays only
 const CHECKINS_KEY = 'lamslGameCheckinsV1';
 
@@ -1363,8 +1365,8 @@ function populateTeamsForDivision() {
         teams = teamsByDivision[division] || [];
     }
 
-    gameTeam1Select.innerHTML = '<option value="">Select Home Team</option>';
-    gameTeam2Select.innerHTML = '<option value="">Select Visitors Team</option>';
+    gameTeam1Select.innerHTML = '<option value="">Select Team 1</option>';
+    gameTeam2Select.innerHTML = '<option value="">Select Team 2</option>';
 
     teams.forEach(team => {
         const option1 = document.createElement('option');
@@ -1561,7 +1563,7 @@ function renderScheduledGameOptions() {
     games.forEach(game => {
         const option = document.createElement('option');
         option.value = game.id;
-        option.textContent = `${game.date} ${game.time} | Div ${game.division} | Home: ${game.team1} vs Visitors: ${game.team2}`;
+        option.textContent = `${game.date} ${game.time} | Div ${game.division} | Team 1: ${game.team1} vs Team 2: ${game.team2}`;
         scheduledGameSelect.appendChild(option);
     });
 
@@ -1753,7 +1755,7 @@ scoreForm.addEventListener('submit', event => {
     renderSelectedDayGames();
     renderScheduledGameOptions();
     renderScoresList();
-    scoreAdminStatus.textContent = `Score saved for Home: ${game.team1} vs Visitors: ${game.team2}.`;
+    scoreAdminStatus.textContent = `Score saved for Team 1: ${game.team1} vs Team 2: ${game.team2}.`;
 });
 
 scheduledGameSelect.addEventListener('change', () => {

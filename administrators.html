@@ -1199,9 +1199,11 @@ function renderAuthState() {
     loginRow.style.display = loggedIn ? 'none' : 'flex';
     logoutRow.style.display = loggedIn ? 'flex' : 'none';
     adminTools.style.display = isAdmin ? 'block' : 'none';
+    document.getElementById('content-tools').style.display = isAdmin ? 'block' : 'none';
+
 
     if (loggedIn) {
-        authStatus.textContent = `Signed in as ${session.username} (${session.role || 'user'}). ${isAdmin ? 'Admin tools unlocked.' : 'Admin tools locked.'}`;
+        authStatus.textContent = `Signed in as ${session.username} (${session.role || 'user'}). ${isAdmin ? 'Admin tools unlocked, including Site Content Management.' : 'Admin tools locked.'}`;
     } else {
         authStatus.textContent = 'Not signed in.';
     }

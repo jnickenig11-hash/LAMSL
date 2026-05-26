@@ -1194,531 +1194,139 @@ const TEAM_MANAGER_ASSIGNMENTS_KEY = 'lamslTeamManagerAssignmentsV1';
 (function() {
     const rosterData = {
         "Division A": {
-            "Titans": [
-                {"name": "Alex Rodriguez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "alex.rodriguez@email.com"},
-                {"name": "Carlos Martinez", "position": "Catcher", "phone": "(555) 234-5678", "email": "carlos.martinez@email.com"},
-                {"name": "Miguel Sanchez", "position": "1st Base", "phone": "(555) 345-6789", "email": "miguel.sanchez@email.com"},
-                {"name": "Jose Gonzalez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "jose.gonzalez@email.com"},
-                {"name": "Luis Ramirez", "position": "3rd Base", "phone": "(555) 567-8901", "email": "luis.ramirez@email.com"},
-                {"name": "Antonio Lopez", "position": "Shortstop", "phone": "(555) 678-9012", "email": "antonio.lopez@email.com"},
-                {"name": "Roberto Torres", "position": "Left Field", "phone": "(555) 789-0123", "email": "roberto.torres@email.com"},
-                {"name": "Fernando Diaz", "position": "Center Field", "phone": "(555) 890-1234", "email": "fernando.diaz@email.com"},
-                {"name": "Diego Morales", "position": "Right Field", "phone": "(555) 901-2345", "email": "diego.morales@email.com"},
-                {"name": "Pablo Jimenez", "position": "Utility", "phone": "(555) 012-3456", "email": "pablo.jimenez@email.com"}
-            ],
-            "Doom Squad": [
-                {"name": "Ramon Alvarez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "ramon.alvarez@email.com"},
-                {"name": "Eduardo Vargas", "position": "Catcher", "phone": "(555) 234-5678", "email": "eduardo.vargas@email.com"},
-                {"name": "Victor Mendoza", "position": "1st Base", "phone": "(555) 345-6789", "email": "victor.mendoza@email.com"},
-                {"name": "Manuel Castillo", "position": "2nd Base", "phone": "(555) 456-7890", "email": "manuel.castillo@email.com"},
-                {"name": "Francisco Ruiz", "position": "3rd Base", "phone": "(555) 567-8901", "email": "francisco.ruiz@email.com"},
-                {"name": "Javier Ortega", "position": "Shortstop", "phone": "(555) 678-9012", "email": "javier.ortega@email.com"},
-                {"name": "Ricardo Silva", "position": "Left Field", "phone": "(555) 789-0123", "email": "ricardo.silva@email.com"},
-                {"name": "Enrique Herrera", "position": "Center Field", "phone": "(555) 890-1234", "email": "enrique.herrera@email.com"},
-                {"name": "Oscar Medina", "position": "Right Field", "phone": "(555) 901-2345", "email": "oscar.medina@email.com"},
-                {"name": "Hugo Chavez", "position": "Utility", "phone": "(555) 012-3456", "email": "hugo.chavez@email.com"}
-            ],
-            "Legends": [
-                {"name": "Sergio Fernandez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "sergio.fernandez@email.com"},
-                {"name": "Mario Gutierrez", "position": "Catcher", "phone": "(555) 234-5678", "email": "mario.gutierrez@email.com"},
-                {"name": "Rafael Navarro", "position": "1st Base", "phone": "(555) 345-6789", "email": "rafael.navarro@email.com"},
-                {"name": "Pedro Delgado", "position": "2nd Base", "phone": "(555) 456-7890", "email": "pedro.delgado@email.com"},
-                {"name": "Angel Moreno", "position": "3rd Base", "phone": "(555) 567-8901", "email": "angel.moreno@email.com"},
-                {"name": "Alberto Reyes", "position": "Shortstop", "phone": "(555) 678-9012", "email": "alberto.reyes@email.com"},
-                {"name": "Daniel Vega", "position": "Left Field", "phone": "(555) 789-0123", "email": "daniel.vega@email.com"},
-                {"name": "Gabriel Soto", "position": "Center Field", "phone": "(555) 890-1234", "email": "gabriel.soto@email.com"},
-                {"name": "Adrian Cruz", "position": "Right Field", "phone": "(555) 901-2345", "email": "adrian.cruz@email.com"},
-                {"name": "Emilio Flores", "position": "Utility", "phone": "(555) 012-3456", "email": "emilio.flores@email.com"}
+            "La Tribu": [
+               
             ],
             "Nasty Boyz": [
-                {"name": "Tomas Aguilar", "position": "Pitcher", "phone": "(555) 123-4567", "email": "tomas.aguilar@email.com"},
-                {"name": "Ruben Guerrero", "position": "Catcher", "phone": "(555) 234-5678", "email": "ruben.guerrero@email.com"},
-                {"name": "Esteban Rios", "position": "1st Base", "phone": "(555) 345-6789", "email": "esteban.rios@email.com"},
-                {"name": "Ignacio Pena", "position": "2nd Base", "phone": "(555) 456-7890", "email": "ignacio.pena@email.com"},
-                {"name": "Salvador Campos", "position": "3rd Base", "phone": "(555) 567-8901", "email": "salvador.campos@email.com"},
-                {"name": "Gilberto Leon", "position": "Shortstop", "phone": "(555) 678-9012", "email": "gilberto.leon@email.com"},
-                {"name": "Armando Rubio", "position": "Left Field", "phone": "(555) 789-0123", "email": "armando.rubio@email.com"},
-                {"name": "Hector Salinas", "position": "Center Field", "phone": "(555) 890-1234", "email": "hector.salinas@email.com"},
-                {"name": "Julio Cabrera", "position": "Right Field", "phone": "(555) 901-2345", "email": "julio.cabrera@email.com"},
-                {"name": "Felipe Duran", "position": "Utility", "phone": "(555) 012-3456", "email": "felipe.duran@email.com"}
-            ],
-            "Black Sox": [
-                {"name": "Nicolas Estrada", "position": "Pitcher", "phone": "(555) 123-4567", "email": "nicolas.estrada@email.com"},
-                {"name": "Leonardo Ponce", "position": "Catcher", "phone": "(555) 234-5678", "email": "leonardo.ponce@email.com"},
-                {"name": "Cristian Vargas", "position": "1st Base", "phone": "(555) 345-6789", "email": "cristian.vargas@email.com"},
-                {"name": "Sebastian Luna", "position": "2nd Base", "phone": "(555) 456-7890", "email": "sebastian.luna@email.com"},
-                {"name": "Matias Cortes", "position": "3rd Base", "phone": "(555) 567-8901", "email": "matias.cortes@email.com"},
-                {"name": "Diego Rojas", "position": "Shortstop", "phone": "(555) 678-9012", "email": "diego.rojas@email.com"},
-                {"name": "Lucas Mendoza", "position": "Left Field", "phone": "(555) 789-0123", "email": "lucas.mendoza@email.com"},
-                {"name": "Mateo Silva", "position": "Center Field", "phone": "(555) 890-1234", "email": "mateo.silva@email.com"},
-                {"name": "Thiago Torres", "position": "Right Field", "phone": "(555) 901-2345", "email": "thiago.torres@email.com"},
-                {"name": "Bruno Alvarez", "position": "Utility", "phone": "(555) 012-3456", "email": "bruno.alvarez@email.com"}
-            ],
-            "White Sox": [
-                {"name": "Ivan Ramirez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "ivan.ramirez@email.com"},
-                {"name": "Oscar Gonzalez", "position": "Catcher", "phone": "(555) 234-5678", "email": "oscar.gonzalez@email.com"},
-                {"name": "Pablo Martinez", "position": "1st Base", "phone": "(555) 345-6789", "email": "pablo.martinez@email.com"},
-                {"name": "Adrian Lopez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "adrian.lopez@email.com"},
-                {"name": "Carlos Sanchez", "position": "3rd Base", "phone": "(555) 567-8901", "email": "carlos.sanchez@email.com"},
-                {"name": "Miguel Rodriguez", "position": "Shortstop", "phone": "(555) 678-9012", "email": "miguel.rodriguez@email.com"},
-                {"name": "Jose Torres", "position": "Left Field", "phone": "(555) 789-0123", "email": "jose.torres@email.com"},
-                {"name": "Luis Diaz", "position": "Center Field", "phone": "(555) 890-1234", "email": "luis.diaz@email.com"},
-                {"name": "Antonio Morales", "position": "Right Field", "phone": "(555) 901-2345", "email": "antonio.morales@email.com"},
-                {"name": "Roberto Jimenez", "position": "Utility", "phone": "(555) 012-3456", "email": "roberto.jimenez@email.com"}
-            ],
-            "Dodgers": [
-                {"name": "Fernando Alvarez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "fernando.alvarez@email.com"},
-                {"name": "Diego Vargas", "position": "Catcher", "phone": "(555) 234-5678", "email": "diego.vargas@email.com"},
-                {"name": "Manuel Mendoza", "position": "1st Base", "phone": "(555) 345-6789", "email": "manuel.mendoza@email.com"},
-                {"name": "Victor Castillo", "position": "2nd Base", "phone": "(555) 456-7890", "email": "victor.castillo@email.com"},
-                {"name": "Francisco Ruiz", "position": "3rd Base", "phone": "(555) 567-8901", "email": "francisco.ruiz@email.com"},
-                {"name": "Javier Ortega", "position": "Shortstop", "phone": "(555) 678-9012", "email": "javier.ortega@email.com"},
-                {"name": "Ricardo Silva", "position": "Left Field", "phone": "(555) 789-0123", "email": "ricardo.silva@email.com"},
-                {"name": "Enrique Herrera", "position": "Center Field", "phone": "(555) 890-1234", "email": "enrique.herrera@email.com"},
-                {"name": "Oscar Medina", "position": "Right Field", "phone": "(555) 901-2345", "email": "oscar.medina@email.com"},
-                {"name": "Hugo Chavez", "position": "Utility", "phone": "(555) 012-3456", "email": "hugo.chavez@email.com"}
-            ]
-        },
-        "Division B": {
-            "Borrachos": [
-                {"name": "Juan Perez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "juan.perez@email.com"},
-                {"name": "Pedro Garcia", "position": "Catcher", "phone": "(555) 234-5678", "email": "pedro.garcia@email.com"},
-                {"name": "Luis Martinez", "position": "1st Base", "phone": "(555) 345-6789", "email": "luis.martinez@email.com"},
-                {"name": "Carlos Lopez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "carlos.lopez@email.com"},
-                {"name": "Miguel Gonzalez", "position": "3rd Base", "phone": "(555) 567-8901", "email": "miguel.gonzalez@email.com"},
-                {"name": "Jose Rodriguez", "position": "Shortstop", "phone": "(555) 678-9012", "email": "jose.rodriguez@email.com"},
-                {"name": "Antonio Sanchez", "position": "Left Field", "phone": "(555) 789-0123", "email": "antonio.sanchez@email.com"},
-                {"name": "Francisco Torres", "position": "Center Field", "phone": "(555) 890-1234", "email": "francisco.torres@email.com"},
-                {"name": "Javier Ramirez", "position": "Right Field", "phone": "(555) 901-2345", "email": "javier.ramirez@email.com"},
-                {"name": "Manuel Diaz", "position": "Utility", "phone": "(555) 012-3456", "email": "manuel.diaz@email.com"}
-            ],
-            "Charros": [
-                {"name": "Roberto Morales", "position": "Pitcher", "phone": "(555) 123-4567", "email": "roberto.morales@email.com"},
-                {"name": "Fernando Jimenez", "position": "Catcher", "phone": "(555) 234-5678", "email": "fernando.jimenez@email.com"},
-                {"name": "Diego Alvarez", "position": "1st Base", "phone": "(555) 345-6789", "email": "diego.alvarez@email.com"},
-                {"name": "Victor Vargas", "position": "2nd Base", "phone": "(555) 456-7890", "email": "victor.vargas@email.com"},
-                {"name": "Eduardo Mendoza", "position": "3rd Base", "phone": "(555) 567-8901", "email": "eduardo.mendoza@email.com"},
-                {"name": "Ramon Castillo", "position": "Shortstop", "phone": "(555) 678-9012", "email": "ramon.castillo@email.com"},
-                {"name": "Sergio Ruiz", "position": "Left Field", "phone": "(555) 789-0123", "email": "sergio.ruiz@email.com"},
-                {"name": "Mario Ortega", "position": "Center Field", "phone": "(555) 890-1234", "email": "mario.ortega@email.com"},
-                {"name": "Rafael Silva", "position": "Right Field", "phone": "(555) 901-2345", "email": "rafael.silva@email.com"},
-                {"name": "Angel Herrera", "position": "Utility", "phone": "(555) 012-3456", "email": "angel.herrera@email.com"}
-            ],
-            "Cubs": [
-                {"name": "Alberto Medina", "position": "Pitcher", "phone": "(555) 123-4567", "email": "alberto.medina@email.com"},
-                {"name": "Daniel Chavez", "position": "Catcher", "phone": "(555) 234-5678", "email": "daniel.chavez@email.com"},
-                {"name": "Gabriel Flores", "position": "1st Base", "phone": "(555) 345-6789", "email": "gabriel.flores@email.com"},
-                {"name": "Adrian Aguilar", "position": "2nd Base", "phone": "(555) 456-7890", "email": "adrian.aguilar@email.com"},
-                {"name": "Emilio Guerrero", "position": "3rd Base", "phone": "(555) 567-8901", "email": "emilio.guerrero@email.com"},
-                {"name": "Hugo Rios", "position": "Shortstop", "phone": "(555) 678-9012", "email": "hugo.rios@email.com"},
-                {"name": "Tomas Pena", "position": "Left Field", "phone": "(555) 789-0123", "email": "tomas.pena@email.com"},
-                {"name": "Ruben Campos", "position": "Center Field", "phone": "(555) 890-1234", "email": "ruben.campos@email.com"},
-                {"name": "Esteban Leon", "position": "Right Field", "phone": "(555) 901-2345", "email": "esteban.leon@email.com"},
-                {"name": "Ignacio Rubio", "position": "Utility", "phone": "(555) 012-3456", "email": "ignacio.rubio@email.com"}
-            ],
-            "Demons": [
-                {"name": "Salvador Salinas", "position": "Pitcher", "phone": "(555) 123-4567", "email": "salvador.salinas@email.com"},
-                {"name": "Gilberto Cabrera", "position": "Catcher", "phone": "(555) 234-5678", "email": "gilberto.cabrera@email.com"},
-                {"name": "Armando Duran", "position": "1st Base", "phone": "(555) 345-6789", "email": "armando.duran@email.com"},
-                {"name": "Hector Estrada", "position": "2nd Base", "phone": "(555) 456-7890", "email": "hector.estrada@email.com"},
-                {"name": "Julio Ponce", "position": "3rd Base", "phone": "(555) 567-8901", "email": "julio.ponce@email.com"},
-                {"name": "Felipe Vargas", "position": "Shortstop", "phone": "(555) 678-9012", "email": "felipe.vargas@email.com"},
-                {"name": "Nicolas Cortes", "position": "Left Field", "phone": "(555) 789-0123", "email": "nicolas.cortes@email.com"},
-                {"name": "Leonardo Rojas", "position": "Center Field", "phone": "(555) 890-1234", "email": "leonardo.rojas@email.com"},
-                {"name": "Cristian Mendoza", "position": "Right Field", "phone": "(555) 901-2345", "email": "cristian.mendoza@email.com"},
-                {"name": "Sebastian Silva", "position": "Utility", "phone": "(555) 012-3456", "email": "sebastian.silva@email.com"}
-            ],
-            "Primos": [
-                {"name": "Matias Torres", "position": "Pitcher", "phone": "(555) 123-4567", "email": "matias.torres@email.com"},
-                {"name": "Thiago Alvarez", "position": "Catcher", "phone": "(555) 234-5678", "email": "thiago.alvarez@email.com"},
-                {"name": "Bruno Fernandez", "position": "1st Base", "phone": "(555) 345-6789", "email": "bruno.fernandez@email.com"},
-                {"name": "Lucas Gutierrez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "lucas.gutierrez@email.com"},
-                {"name": "Mateo Navarro", "position": "3rd Base", "phone": "(555) 567-8901", "email": "mateo.navarro@email.com"},
-                {"name": "Diego Delgado", "position": "Shortstop", "phone": "(555) 678-9012", "email": "diego.delgado@email.com"},
-                {"name": "Ivan Moreno", "position": "Left Field", "phone": "(555) 789-0123", "email": "ivan.moreno@email.com"},
-                {"name": "Oscar Reyes", "position": "Center Field", "phone": "(555) 890-1234", "email": "oscar.reyes@email.com"},
-                {"name": "Pablo Vega", "position": "Right Field", "phone": "(555) 901-2345", "email": "pablo.vega@email.com"},
-                {"name": "Adrian Soto", "position": "Utility", "phone": "(555) 012-3456", "email": "adrian.soto@email.com"}
+               
             ],
             "Toxic": [
-                {"name": "Carlos Cruz", "position": "Pitcher", "phone": "(555) 123-4567", "email": "carlos.cruz@email.com"},
-                {"name": "Miguel Flores", "position": "Catcher", "phone": "(555) 234-5678", "email": "miguel.flores@email.com"},
-                {"name": "Jose Aguilar", "position": "1st Base", "phone": "(555) 345-6789", "email": "jose.aguilar@email.com"},
-                {"name": "Luis Guerrero", "position": "2nd Base", "phone": "(555) 456-7890", "email": "luis.guerrero@email.com"},
-                {"name": "Antonio Rios", "position": "3rd Base", "phone": "(555) 567-8901", "email": "antonio.rios@email.com"},
-                {"name": "Roberto Pena", "position": "Shortstop", "phone": "(555) 678-9012", "email": "roberto.pena@email.com"},
-                {"name": "Fernando Campos", "position": "Left Field", "phone": "(555) 789-0123", "email": "fernando.campos@email.com"},
-                {"name": "Diego Leon", "position": "Center Field", "phone": "(555) 890-1234", "email": "diego.leon@email.com"},
-                {"name": "Manuel Rubio", "position": "Right Field", "phone": "(555) 901-2345", "email": "manuel.rubio@email.com"},
-                {"name": "Victor Salinas", "position": "Utility", "phone": "(555) 012-3456", "email": "victor.salinas@email.com"}
+             
+            ],
+            "Titans": [
+              
+            ],
+            "White Sox": [
+               
+            ],
+            "Legends": [
+               
+            ],
+        },
+        "Division B": {
+            "Cubs": [
+               
+            ],
+            "Primos": [
+               
+            ],
+            "Dodgers": [
+               
+            ],
+            "Diablos": [
+               
+            ],
+            "Charros": [
+               
+            ],
+            "Doom Squad": [
+               
             ]
         },
         "Division C": {
-            "Balls Out": [
-                {"name": "Francisco Cabrera", "position": "Pitcher", "phone": "(555) 123-4567", "email": "francisco.cabrera@email.com"},
-                {"name": "Javier Duran", "position": "Catcher", "phone": "(555) 234-5678", "email": "javier.duran@email.com"},
-                {"name": "Ricardo Estrada", "position": "1st Base", "phone": "(555) 345-6789", "email": "ricardo.estrada@email.com"},
-                {"name": "Enrique Ponce", "position": "2nd Base", "phone": "(555) 456-7890", "email": "enrique.ponce@email.com"},
-                {"name": "Oscar Vargas", "position": "3rd Base", "phone": "(555) 567-8901", "email": "oscar.vargas@email.com"},
-                {"name": "Hugo Cortes", "position": "Shortstop", "phone": "(555) 678-9012", "email": "hugo.cortes@email.com"},
-                {"name": "Tomas Rojas", "position": "Left Field", "phone": "(555) 789-0123", "email": "tomas.rojas@email.com"},
-                {"name": "Ruben Mendoza", "position": "Center Field", "phone": "(555) 890-1234", "email": "ruben.mendoza@email.com"},
-                {"name": "Esteban Silva", "position": "Right Field", "phone": "(555) 901-2345", "email": "esteban.silva@email.com"},
-                {"name": "Ignacio Torres", "position": "Utility", "phone": "(555) 012-3456", "email": "ignacio.torres@email.com"}
+            "Demons": [
+                
             ],
-            "Bandits": [
-                {"name": "Salvador Alvarez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "salvador.alvarez@email.com"},
-                {"name": "Gilberto Fernandez", "position": "Catcher", "phone": "(555) 234-5678", "email": "gilberto.fernandez@email.com"},
-                {"name": "Armando Gutierrez", "position": "1st Base", "phone": "(555) 345-6789", "email": "armando.gutierrez@email.com"},
-                {"name": "Hector Navarro", "position": "2nd Base", "phone": "(555) 456-7890", "email": "hector.navarro@email.com"},
-                {"name": "Julio Delgado", "position": "3rd Base", "phone": "(555) 567-8901", "email": "julio.delgado@email.com"},
-                {"name": "Felipe Moreno", "position": "Shortstop", "phone": "(555) 678-9012", "email": "felipe.moreno@email.com"},
-                {"name": "Nicolas Reyes", "position": "Left Field", "phone": "(555) 789-0123", "email": "nicolas.reyes@email.com"},
-                {"name": "Leonardo Vega", "position": "Center Field", "phone": "(555) 890-1234", "email": "leonardo.vega@email.com"},
-                {"name": "Cristian Soto", "position": "Right Field", "phone": "(555) 901-2345", "email": "cristian.soto@email.com"},
-                {"name": "Sebastian Cruz", "position": "Utility", "phone": "(555) 012-3456", "email": "sebastian.cruz@email.com"}
+            "Naranjeros": [
+                
             ],
-            "Brewers": [
-                {"name": "Matias Flores", "position": "Pitcher", "phone": "(555) 123-4567", "email": "matias.flores@email.com"},
-                {"name": "Thiago Aguilar", "position": "Catcher", "phone": "(555) 234-5678", "email": "thiago.aguilar@email.com"},
-                {"name": "Bruno Guerrero", "position": "1st Base", "phone": "(555) 345-6789", "email": "bruno.guerrero@email.com"},
-                {"name": "Lucas Rios", "position": "2nd Base", "phone": "(555) 456-7890", "email": "lucas.rios@email.com"},
-                {"name": "Mateo Pena", "position": "3rd Base", "phone": "(555) 567-8901", "email": "mateo.pena@email.com"},
-                {"name": "Ivan Campos", "position": "Shortstop", "phone": "(555) 678-9012", "email": "ivan.campos@email.com"},
-                {"name": "Oscar Leon", "position": "Left Field", "phone": "(555) 789-0123", "email": "oscar.leon@email.com"},
-                {"name": "Pablo Rubio", "position": "Center Field", "phone": "(555) 890-1234", "email": "pablo.rubio@email.com"},
-                {"name": "Adrian Salinas", "position": "Right Field", "phone": "(555) 901-2345", "email": "adrian.salinas@email.com"},
-                {"name": "Carlos Cabrera", "position": "Utility", "phone": "(555) 012-3456", "email": "carlos.cabrera@email.com"}
-            ],
-            "Coyotes": [
-                {"name": "Miguel Duran", "position": "Pitcher", "phone": "(555) 123-4567", "email": "miguel.duran@email.com"},
-                {"name": "Jose Estrada", "position": "Catcher", "phone": "(555) 234-5678", "email": "jose.estrada@email.com"},
-                {"name": "Luis Ponce", "position": "1st Base", "phone": "(555) 345-6789", "email": "luis.ponce@email.com"},
-                {"name": "Antonio Vargas", "position": "2nd Base", "phone": "(555) 456-7890", "email": "antonio.vargas@email.com"},
-                {"name": "Roberto Cortes", "position": "3rd Base", "phone": "(555) 567-8901", "email": "roberto.cortes@email.com"},
-                {"name": "Fernando Rojas", "position": "Shortstop", "phone": "(555) 678-9012", "email": "fernando.rojas@email.com"},
-                {"name": "Diego Mendoza", "position": "Left Field", "phone": "(555) 789-0123", "email": "diego.mendoza@email.com"},
-                {"name": "Manuel Silva", "position": "Center Field", "phone": "(555) 890-1234", "email": "manuel.silva@email.com"},
-                {"name": "Victor Torres", "position": "Right Field", "phone": "(555) 901-2345", "email": "victor.torres@email.com"},
-                {"name": "Eduardo Alvarez", "position": "Utility", "phone": "(555) 012-3456", "email": "eduardo.alvarez@email.com"}
-            ],
-            "Diablos": [
-                {"name": "Ramon Fernandez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "ramon.fernandez@email.com"},
-                {"name": "Sergio Gutierrez", "position": "Catcher", "phone": "(555) 234-5678", "email": "sergio.gutierrez@email.com"},
-                {"name": "Mario Navarro", "position": "1st Base", "phone": "(555) 345-6789", "email": "mario.navarro@email.com"},
-                {"name": "Rafael Delgado", "position": "2nd Base", "phone": "(555) 456-7890", "email": "rafael.delgado@email.com"},
-                {"name": "Angel Moreno", "position": "3rd Base", "phone": "(555) 567-8901", "email": "angel.moreno@email.com"},
-                {"name": "Alberto Reyes", "position": "Shortstop", "phone": "(555) 678-9012", "email": "alberto.reyes@email.com"},
-                {"name": "Daniel Vega", "position": "Left Field", "phone": "(555) 789-0123", "email": "daniel.vega@email.com"},
-                {"name": "Gabriel Soto", "position": "Center Field", "phone": "(555) 890-1234", "email": "gabriel.soto@email.com"},
-                {"name": "Adrian Cruz", "position": "Right Field", "phone": "(555) 901-2345", "email": "adrian.cruz@email.com"},
-                {"name": "Emilio Flores", "position": "Utility", "phone": "(555) 012-3456", "email": "emilio.flores@email.com"}
-            ],
-            "Goodfellas": [
-                {"name": "Tomas Aguilar", "position": "Pitcher", "phone": "(555) 123-4567", "email": "tomas.aguilar@email.com"},
-                {"name": "Ruben Guerrero", "position": "Catcher", "phone": "(555) 234-5678", "email": "ruben.guerrero@email.com"},
-                {"name": "Esteban Rios", "position": "1st Base", "phone": "(555) 345-6789", "email": "esteban.rios@email.com"},
-                {"name": "Ignacio Pena", "position": "2nd Base", "phone": "(555) 456-7890", "email": "ignacio.pena@email.com"},
-                {"name": "Salvador Campos", "position": "3rd Base", "phone": "(555) 567-8901", "email": "salvador.campos@email.com"},
-                {"name": "Gilberto Leon", "position": "Shortstop", "phone": "(555) 678-9012", "email": "gilberto.leon@email.com"},
-                {"name": "Armando Rubio", "position": "Left Field", "phone": "(555) 789-0123", "email": "armando.rubio@email.com"},
-                {"name": "Hector Salinas", "position": "Center Field", "phone": "(555) 890-1234", "email": "hector.salinas@email.com"},
-                {"name": "Julio Cabrera", "position": "Right Field", "phone": "(555) 901-2345", "email": "julio.cabrera@email.com"},
-                {"name": "Felipe Duran", "position": "Utility", "phone": "(555) 012-3456", "email": "felipe.duran@email.com"}
-            ],
-            "Orioles": [
-                {"name": "Nicolas Estrada", "position": "Pitcher", "phone": "(555) 123-4567", "email": "nicolas.estrada@email.com"},
-                {"name": "Leonardo Ponce", "position": "Catcher", "phone": "(555) 234-5678", "email": "leonardo.ponce@email.com"},
-                {"name": "Cristian Vargas", "position": "1st Base", "phone": "(555) 345-6789", "email": "cristian.vargas@email.com"},
-                {"name": "Sebastian Luna", "position": "2nd Base", "phone": "(555) 456-7890", "email": "sebastian.luna@email.com"},
-                {"name": "Matias Cortes", "position": "3rd Base", "phone": "(555) 567-8901", "email": "matias.cortes@email.com"},
-                {"name": "Diego Rojas", "position": "Shortstop", "phone": "(555) 678-9012", "email": "diego.rojas@email.com"},
-                {"name": "Lucas Mendoza", "position": "Left Field", "phone": "(555) 789-0123", "email": "lucas.mendoza@email.com"},
-                {"name": "Mateo Silva", "position": "Center Field", "phone": "(555) 890-1234", "email": "mateo.silva@email.com"},
-                {"name": "Thiago Torres", "position": "Right Field", "phone": "(555) 901-2345", "email": "thiago.torres@email.com"},
-                {"name": "Bruno Alvarez", "position": "Utility", "phone": "(555) 012-3456", "email": "bruno.alvarez@email.com"}
+            "Caballeros": [
+               
             ],
             "Salvajes": [
-                {"name": "Ivan Ramirez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "ivan.ramirez@email.com"},
-                {"name": "Oscar Gonzalez", "position": "Catcher", "phone": "(555) 234-5678", "email": "oscar.gonzalez@email.com"},
-                {"name": "Pablo Martinez", "position": "1st Base", "phone": "(555) 345-6789", "email": "pablo.martinez@email.com"},
-                {"name": "Adrian Lopez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "adrian.lopez@email.com"},
-                {"name": "Carlos Sanchez", "position": "3rd Base", "phone": "(555) 567-8901", "email": "carlos.sanchez@email.com"},
-                {"name": "Miguel Rodriguez", "position": "Shortstop", "phone": "(555) 678-9012", "email": "miguel.rodriguez@email.com"},
-                {"name": "Jose Torres", "position": "Left Field", "phone": "(555) 789-0123", "email": "jose.torres@email.com"},
-                {"name": "Luis Diaz", "position": "Center Field", "phone": "(555) 890-1234", "email": "luis.diaz@email.com"},
-                {"name": "Antonio Morales", "position": "Right Field", "phone": "(555) 901-2345", "email": "antonio.morales@email.com"},
-                {"name": "Roberto Jimenez", "position": "Utility", "phone": "(555) 012-3456", "email": "roberto.jimenez@email.com"}
+              
+            ],
+            "Coyotes": [
+                
+            ],
+            "Bandits": [
+               
+            ],
+            "Orioles": [
+                
+            ],
+            "Goodfellas": [
+            
             ]
         },
         "Division D": {
-            "Dawgz": [
-                {"name": "Fernando Alvarez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "fernando.alvarez@email.com"},
-                {"name": "Diego Vargas", "position": "Catcher", "phone": "(555) 234-5678", "email": "diego.vargas@email.com"},
-                {"name": "Manuel Mendoza", "position": "1st Base", "phone": "(555) 345-6789", "email": "manuel.mendoza@email.com"},
-                {"name": "Victor Castillo", "position": "2nd Base", "phone": "(555) 456-7890", "email": "victor.castillo@email.com"},
-                {"name": "Francisco Ruiz", "position": "3rd Base", "phone": "(555) 567-8901", "email": "francisco.ruiz@email.com"},
-                {"name": "Javier Ortega", "position": "Shortstop", "phone": "(555) 678-9012", "email": "javier.ortega@email.com"},
-                {"name": "Ricardo Silva", "position": "Left Field", "phone": "(555) 789-0123", "email": "ricardo.silva@email.com"},
-                {"name": "Enrique Herrera", "position": "Center Field", "phone": "(555) 890-1234", "email": "enrique.herrera@email.com"},
-                {"name": "Oscar Medina", "position": "Right Field", "phone": "(555) 901-2345", "email": "oscar.medina@email.com"},
-                {"name": "Hugo Chavez", "position": "Utility", "phone": "(555) 012-3456", "email": "hugo.chavez@email.com"}
-            ],
-            "Desvelados": [
-                {"name": "Sergio Fernandez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "sergio.fernandez@email.com"},
-                {"name": "Mario Gutierrez", "position": "Catcher", "phone": "(555) 234-5678", "email": "mario.gutierrez@email.com"},
-                {"name": "Rafael Navarro", "position": "1st Base", "phone": "(555) 345-6789", "email": "rafael.navarro@email.com"},
-                {"name": "Pedro Delgado", "position": "2nd Base", "phone": "(555) 456-7890", "email": "pedro.delgado@email.com"},
-                {"name": "Angel Moreno", "position": "3rd Base", "phone": "(555) 567-8901", "email": "angel.moreno@email.com"},
-                {"name": "Alberto Reyes", "position": "Shortstop", "phone": "(555) 678-9012", "email": "alberto.reyes@email.com"},
-                {"name": "Daniel Vega", "position": "Left Field", "phone": "(555) 789-0123", "email": "daniel.vega@email.com"},
-                {"name": "Gabriel Soto", "position": "Center Field", "phone": "(555) 890-1234", "email": "gabriel.soto@email.com"},
-                {"name": "Adrian Cruz", "position": "Right Field", "phone": "(555) 901-2345", "email": "adrian.cruz@email.com"},
-                {"name": "Emilio Flores", "position": "Utility", "phone": "(555) 012-3456", "email": "emilio.flores@email.com"}
-            ],
-            "Los Pericos": [
-                {"name": "Tomas Aguilar", "position": "Pitcher", "phone": "(555) 123-4567", "email": "tomas.aguilar@email.com"},
-                {"name": "Ruben Guerrero", "position": "Catcher", "phone": "(555) 234-5678", "email": "ruben.guerrero@email.com"},
-                {"name": "Esteban Rios", "position": "1st Base", "phone": "(555) 345-6789", "email": "esteban.rios@email.com"},
-                {"name": "Ignacio Pena", "position": "2nd Base", "phone": "(555) 456-7890", "email": "ignacio.pena@email.com"},
-                {"name": "Salvador Campos", "position": "3rd Base", "phone": "(555) 567-8901", "email": "salvador.campos@email.com"},
-                {"name": "Gilberto Leon", "position": "Shortstop", "phone": "(555) 678-9012", "email": "gilberto.leon@email.com"},
-                {"name": "Armando Rubio", "position": "Left Field", "phone": "(555) 789-0123", "email": "armando.rubio@email.com"},
-                {"name": "Hector Salinas", "position": "Center Field", "phone": "(555) 890-1234", "email": "hector.salinas@email.com"},
-                {"name": "Julio Cabrera", "position": "Right Field", "phone": "(555) 901-2345", "email": "julio.cabrera@email.com"},
-                {"name": "Felipe Duran", "position": "Utility", "phone": "(555) 012-3456", "email": "felipe.duran@email.com"}
-            ],
-            "No Chance": [
-                {"name": "Nicolas Estrada", "position": "Pitcher", "phone": "(555) 123-4567", "email": "nicolas.estrada@email.com"},
-                {"name": "Leonardo Ponce", "position": "Catcher", "phone": "(555) 234-5678", "email": "leonardo.ponce@email.com"},
-                {"name": "Cristian Vargas", "position": "1st Base", "phone": "(555) 345-6789", "email": "cristian.vargas@email.com"},
-                {"name": "Sebastian Luna", "position": "2nd Base", "phone": "(555) 456-7890", "email": "sebastian.luna@email.com"},
-                {"name": "Matias Cortes", "position": "3rd Base", "phone": "(555) 567-8901", "email": "matias.cortes@email.com"},
-                {"name": "Diego Rojas", "position": "Shortstop", "phone": "(555) 678-9012", "email": "diego.rojas@email.com"},
-                {"name": "Lucas Mendoza", "position": "Left Field", "phone": "(555) 789-0123", "email": "lucas.mendoza@email.com"},
-                {"name": "Mateo Silva", "position": "Center Field", "phone": "(555) 890-1234", "email": "mateo.silva@email.com"},
-                {"name": "Thiago Torres", "position": "Right Field", "phone": "(555) 901-2345", "email": "thiago.torres@email.com"},
-                {"name": "Bruno Alvarez", "position": "Utility", "phone": "(555) 012-3456", "email": "bruno.alvarez@email.com"}
-            ],
             "Strokes": [
-                {"name": "Ivan Ramirez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "ivan.ramirez@email.com"},
-                {"name": "Oscar Gonzalez", "position": "Catcher", "phone": "(555) 234-5678", "email": "oscar.gonzalez@email.com"},
-                {"name": "Pablo Martinez", "position": "1st Base", "phone": "(555) 345-6789", "email": "pablo.martinez@email.com"},
-                {"name": "Adrian Lopez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "adrian.lopez@email.com"},
-                {"name": "Carlos Sanchez", "position": "3rd Base", "phone": "(555) 567-8901", "email": "carlos.sanchez@email.com"},
-                {"name": "Miguel Rodriguez", "position": "Shortstop", "phone": "(555) 678-9012", "email": "miguel.rodriguez@email.com"},
-                {"name": "Jose Torres", "position": "Left Field", "phone": "(555) 789-0123", "email": "jose.torres@email.com"},
-                {"name": "Luis Diaz", "position": "Center Field", "phone": "(555) 890-1234", "email": "luis.diaz@email.com"},
-                {"name": "Antonio Morales", "position": "Right Field", "phone": "(555) 901-2345", "email": "antonio.morales@email.com"},
-                {"name": "Roberto Jimenez", "position": "Utility", "phone": "(555) 012-3456", "email": "roberto.jimenez@email.com"}
+                
             ],
-            "Viejones": [
-                {"name": "Fernando Alvarez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "fernando.alvarez@email.com"},
-                {"name": "Diego Vargas", "position": "Catcher", "phone": "(555) 234-5678", "email": "diego.vargas@email.com"},
-                {"name": "Manuel Mendoza", "position": "1st Base", "phone": "(555) 345-6789", "email": "manuel.mendoza@email.com"},
-                {"name": "Victor Castillo", "position": "2nd Base", "phone": "(555) 456-7890", "email": "victor.castillo@email.com"},
-                {"name": "Francisco Ruiz", "position": "3rd Base", "phone": "(555) 567-8901", "email": "francisco.ruiz@email.com"},
-                {"name": "Javier Ortega", "position": "Shortstop", "phone": "(555) 678-9012", "email": "javier.ortega@email.com"},
-                {"name": "Ricardo Silva", "position": "Left Field", "phone": "(555) 789-0123", "email": "ricardo.silva@email.com"},
-                {"name": "Enrique Herrera", "position": "Center Field", "phone": "(555) 890-1234", "email": "enrique.herrera@email.com"},
-                {"name": "Oscar Medina", "position": "Right Field", "phone": "(555) 901-2345", "email": "oscar.medina@email.com"},
-                {"name": "Hugo Chavez", "position": "Utility", "phone": "(555) 012-3456", "email": "hugo.chavez@email.com"}
+            "Dirt Bags": [
+            
+            ],
+            "Camaradas": [
+               
             ],
             "Wild Hogz": [
-                {"name": "Sergio Fernandez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "sergio.fernandez@email.com"},
-                {"name": "Mario Gutierrez", "position": "Catcher", "phone": "(555) 234-5678", "email": "mario.gutierrez@email.com"},
-                {"name": "Rafael Navarro", "position": "1st Base", "phone": "(555) 345-6789", "email": "rafael.navarro@email.com"},
-                {"name": "Pedro Delgado", "position": "2nd Base", "phone": "(555) 456-7890", "email": "pedro.delgado@email.com"},
-                {"name": "Angel Moreno", "position": "3rd Base", "phone": "(555) 567-8901", "email": "angel.moreno@email.com"},
-                {"name": "Alberto Reyes", "position": "Shortstop", "phone": "(555) 678-9012", "email": "alberto.reyes@email.com"},
-                {"name": "Daniel Vega", "position": "Left Field", "phone": "(555) 789-0123", "email": "daniel.vega@email.com"},
-                {"name": "Gabriel Soto", "position": "Center Field", "phone": "(555) 890-1234", "email": "gabriel.soto@email.com"},
-                {"name": "Adrian Cruz", "position": "Right Field", "phone": "(555) 901-2345", "email": "adrian.cruz@email.com"},
-                {"name": "Emilio Flores", "position": "Utility", "phone": "(555) 012-3456", "email": "emilio.flores@email.com"}
+               
+            ],
+            "Los Pericos": [
+               
             ],
             "Xolos": [
-                {"name": "Tomas Aguilar", "position": "Pitcher", "phone": "(555) 123-4567", "email": "tomas.aguilar@email.com"},
-                {"name": "Ruben Guerrero", "position": "Catcher", "phone": "(555) 234-5678", "email": "ruben.guerrero@email.com"},
-                {"name": "Esteban Rios", "position": "1st Base", "phone": "(555) 345-6789", "email": "esteban.rios@email.com"},
-                {"name": "Ignacio Pena", "position": "2nd Base", "phone": "(555) 456-7890", "email": "ignacio.pena@email.com"},
-                {"name": "Salvador Campos", "position": "3rd Base", "phone": "(555) 567-8901", "email": "salvador.campos@email.com"},
-                {"name": "Gilberto Leon", "position": "Shortstop", "phone": "(555) 678-9012", "email": "gilberto.leon@email.com"},
-                {"name": "Armando Rubio", "position": "Left Field", "phone": "(555) 789-0123", "email": "armando.rubio@email.com"},
-                {"name": "Hector Salinas", "position": "Center Field", "phone": "(555) 890-1234", "email": "hector.salinas@email.com"},
-                {"name": "Julio Cabrera", "position": "Right Field", "phone": "(555) 901-2345", "email": "julio.cabrera@email.com"},
-                {"name": "Felipe Duran", "position": "Utility", "phone": "(555) 012-3456", "email": "felipe.duran@email.com"}
-            ]
+               
+            ],
+            "Desvelados": [
+                
+            ],
+           
         },
         "Winter Division 1": {
             "Charros": [
-                {"name": "Nicolas Estrada", "position": "Pitcher", "phone": "(555) 123-4567", "email": "nicolas.estrada@email.com"},
-                {"name": "Leonardo Ponce", "position": "Catcher", "phone": "(555) 234-5678", "email": "leonardo.ponce@email.com"},
-                {"name": "Cristian Vargas", "position": "1st Base", "phone": "(555) 345-6789", "email": "cristian.vargas@email.com"},
-                {"name": "Sebastian Luna", "position": "2nd Base", "phone": "(555) 456-7890", "email": "sebastian.luna@email.com"},
-                {"name": "Matias Cortes", "position": "3rd Base", "phone": "(555) 567-8901", "email": "matias.cortes@email.com"},
-                {"name": "Diego Rojas", "position": "Shortstop", "phone": "(555) 678-9012", "email": "diego.rojas@email.com"},
-                {"name": "Lucas Mendoza", "position": "Left Field", "phone": "(555) 789-0123", "email": "lucas.mendoza@email.com"},
-                {"name": "Mateo Silva", "position": "Center Field", "phone": "(555) 890-1234", "email": "mateo.silva@email.com"},
-                {"name": "Thiago Torres", "position": "Right Field", "phone": "(555) 901-2345", "email": "thiago.torres@email.com"},
-                {"name": "Bruno Alvarez", "position": "Utility", "phone": "(555) 012-3456", "email": "bruno.alvarez@email.com"}
+              
             ],
             "Goodfellas": [
-                {"name": "Ivan Ramirez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "ivan.ramirez@email.com"},
-                {"name": "Oscar Gonzalez", "position": "Catcher", "phone": "(555) 234-5678", "email": "oscar.gonzalez@email.com"},
-                {"name": "Pablo Martinez", "position": "1st Base", "phone": "(555) 345-6789", "email": "pablo.martinez@email.com"},
-                {"name": "Adrian Lopez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "adrian.lopez@email.com"},
-                {"name": "Carlos Sanchez", "position": "3rd Base", "phone": "(555) 567-8901", "email": "carlos.sanchez@email.com"},
-                {"name": "Miguel Rodriguez", "position": "Shortstop", "phone": "(555) 678-9012", "email": "miguel.rodriguez@email.com"},
-                {"name": "Jose Torres", "position": "Left Field", "phone": "(555) 789-0123", "email": "jose.torres@email.com"},
-                {"name": "Luis Diaz", "position": "Center Field", "phone": "(555) 890-1234", "email": "luis.diaz@email.com"},
-                {"name": "Antonio Morales", "position": "Right Field", "phone": "(555) 901-2345", "email": "antonio.morales@email.com"},
-                {"name": "Roberto Jimenez", "position": "Utility", "phone": "(555) 012-3456", "email": "roberto.jimenez@email.com"}
+                
             ],
             "La Tribu": [
-                {"name": "Fernando Alvarez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "fernando.alvarez@email.com"},
-                {"name": "Diego Vargas", "position": "Catcher", "phone": "(555) 234-5678", "email": "diego.vargas@email.com"},
-                {"name": "Manuel Mendoza", "position": "1st Base", "phone": "(555) 345-6789", "email": "manuel.mendoza@email.com"},
-                {"name": "Victor Castillo", "position": "2nd Base", "phone": "(555) 456-7890", "email": "victor.castillo@email.com"},
-                {"name": "Francisco Ruiz", "position": "3rd Base", "phone": "(555) 567-8901", "email": "francisco.ruiz@email.com"},
-                {"name": "Javier Ortega", "position": "Shortstop", "phone": "(555) 678-9012", "email": "javier.ortega@email.com"},
-                {"name": "Ricardo Silva", "position": "Left Field", "phone": "(555) 789-0123", "email": "ricardo.silva@email.com"},
-                {"name": "Enrique Herrera", "position": "Center Field", "phone": "(555) 890-1234", "email": "enrique.herrera@email.com"},
-                {"name": "Oscar Medina", "position": "Right Field", "phone": "(555) 901-2345", "email": "oscar.medina@email.com"},
-                {"name": "Hugo Chavez", "position": "Utility", "phone": "(555) 012-3456", "email": "hugo.chavez@email.com"}
+               
             ],
             "LAMSL OG's": [
-                {"name": "Sergio Fernandez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "sergio.fernandez@email.com"},
-                {"name": "Mario Gutierrez", "position": "Catcher", "phone": "(555) 234-5678", "email": "mario.gutierrez@email.com"},
-                {"name": "Rafael Navarro", "position": "1st Base", "phone": "(555) 345-6789", "email": "rafael.navarro@email.com"},
-                {"name": "Pedro Delgado", "position": "2nd Base", "phone": "(555) 456-7890", "email": "pedro.delgado@email.com"},
-                {"name": "Angel Moreno", "position": "3rd Base", "phone": "(555) 567-8901", "email": "angel.moreno@email.com"},
-                {"name": "Alberto Reyes", "position": "Shortstop", "phone": "(555) 678-9012", "email": "alberto.reyes@email.com"},
-                {"name": "Daniel Vega", "position": "Left Field", "phone": "(555) 789-0123", "email": "daniel.vega@email.com"},
-                {"name": "Gabriel Soto", "position": "Center Field", "phone": "(555) 890-1234", "email": "gabriel.soto@email.com"},
-                {"name": "Adrian Cruz", "position": "Right Field", "phone": "(555) 901-2345", "email": "adrian.cruz@email.com"},
-                {"name": "Emilio Flores", "position": "Utility", "phone": "(555) 012-3456", "email": "emilio.flores@email.com"}
+               
             ],
             "Legends": [
-                {"name": "Tomas Aguilar", "position": "Pitcher", "phone": "(555) 123-4567", "email": "tomas.aguilar@email.com"},
-                {"name": "Ruben Guerrero", "position": "Catcher", "phone": "(555) 234-5678", "email": "ruben.guerrero@email.com"},
-                {"name": "Esteban Rios", "position": "1st Base", "phone": "(555) 345-6789", "email": "esteban.rios@email.com"},
-                {"name": "Ignacio Pena", "position": "2nd Base", "phone": "(555) 456-7890", "email": "ignacio.pena@email.com"},
-                {"name": "Salvador Campos", "position": "3rd Base", "phone": "(555) 567-8901", "email": "salvador.campos@email.com"},
-                {"name": "Gilberto Leon", "position": "Shortstop", "phone": "(555) 678-9012", "email": "gilberto.leon@email.com"},
-                {"name": "Armando Rubio", "position": "Left Field", "phone": "(555) 789-0123", "email": "armando.rubio@email.com"},
-                {"name": "Hector Salinas", "position": "Center Field", "phone": "(555) 890-1234", "email": "hector.salinas@email.com"},
-                {"name": "Julio Cabrera", "position": "Right Field", "phone": "(555) 901-2345", "email": "julio.cabrera@email.com"},
-                {"name": "Felipe Duran", "position": "Utility", "phone": "(555) 012-3456", "email": "felipe.duran@email.com"}
+              
             ],
             "Titans": [
-                {"name": "Nicolas Estrada", "position": "Pitcher", "phone": "(555) 123-4567", "email": "nicolas.estrada@email.com"},
-                {"name": "Leonardo Ponce", "position": "Catcher", "phone": "(555) 234-5678", "email": "leonardo.ponce@email.com"},
-                {"name": "Cristian Vargas", "position": "1st Base", "phone": "(555) 345-6789", "email": "cristian.vargas@email.com"},
-                {"name": "Sebastian Luna", "position": "2nd Base", "phone": "(555) 456-7890", "email": "sebastian.luna@email.com"},
-                {"name": "Matias Cortes", "position": "3rd Base", "phone": "(555) 567-8901", "email": "matias.cortes@email.com"},
-                {"name": "Diego Rojas", "position": "Shortstop", "phone": "(555) 678-9012", "email": "diego.rojas@email.com"},
-                {"name": "Lucas Mendoza", "position": "Left Field", "phone": "(555) 789-0123", "email": "lucas.mendoza@email.com"},
-                {"name": "Mateo Silva", "position": "Center Field", "phone": "(555) 890-1234", "email": "mateo.silva@email.com"},
-                {"name": "Thiago Torres", "position": "Right Field", "phone": "(555) 901-2345", "email": "thiago.torres@email.com"},
-                {"name": "Bruno Alvarez", "position": "Utility", "phone": "(555) 012-3456", "email": "bruno.alvarez@email.com"}
+               
             ]
         },
         "Winter Division 2": {
             "Balls Out": [
-                {"name": "Ivan Ramirez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "ivan.ramirez@email.com"},
-                {"name": "Oscar Gonzalez", "position": "Catcher", "phone": "(555) 234-5678", "email": "oscar.gonzalez@email.com"},
-                {"name": "Pablo Martinez", "position": "1st Base", "phone": "(555) 345-6789", "email": "pablo.martinez@email.com"},
-                {"name": "Adrian Lopez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "adrian.lopez@email.com"},
-                {"name": "Carlos Sanchez", "position": "3rd Base", "phone": "(555) 567-8901", "email": "carlos.sanchez@email.com"},
-                {"name": "Miguel Rodriguez", "position": "Shortstop", "phone": "(555) 678-9012", "email": "miguel.rodriguez@email.com"},
-                {"name": "Jose Torres", "position": "Left Field", "phone": "(555) 789-0123", "email": "jose.torres@email.com"},
-                {"name": "Luis Diaz", "position": "Center Field", "phone": "(555) 890-1234", "email": "luis.diaz@email.com"},
-                {"name": "Antonio Morales", "position": "Right Field", "phone": "(555) 901-2345", "email": "antonio.morales@email.com"},
-                {"name": "Roberto Jimenez", "position": "Utility", "phone": "(555) 012-3456", "email": "roberto.jimenez@email.com"}
+               
             ],
             "Bastards": [
-                {"name": "Fernando Alvarez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "fernando.alvarez@email.com"},
-                {"name": "Diego Vargas", "position": "Catcher", "phone": "(555) 234-5678", "email": "diego.vargas@email.com"},
-                {"name": "Manuel Mendoza", "position": "1st Base", "phone": "(555) 345-6789", "email": "manuel.mendoza@email.com"},
-                {"name": "Victor Castillo", "position": "2nd Base", "phone": "(555) 456-7890", "email": "victor.castillo@email.com"},
-                {"name": "Francisco Ruiz", "position": "3rd Base", "phone": "(555) 567-8901", "email": "francisco.ruiz@email.com"},
-                {"name": "Javier Ortega", "position": "Shortstop", "phone": "(555) 678-9012", "email": "javier.ortega@email.com"},
-                {"name": "Ricardo Silva", "position": "Left Field", "phone": "(555) 789-0123", "email": "ricardo.silva@email.com"},
-                {"name": "Enrique Herrera", "position": "Center Field", "phone": "(555) 890-1234", "email": "enrique.herrera@email.com"},
-                {"name": "Oscar Medina", "position": "Right Field", "phone": "(555) 901-2345", "email": "oscar.medina@email.com"},
-                {"name": "Hugo Chavez", "position": "Utility", "phone": "(555) 012-3456", "email": "hugo.chavez@email.com"}
+               
             ],
             "Coyotes": [
-                {"name": "Sergio Fernandez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "sergio.fernandez@email.com"},
-                {"name": "Mario Gutierrez", "position": "Catcher", "phone": "(555) 234-5678", "email": "mario.gutierrez@email.com"},
-                {"name": "Rafael Navarro", "position": "1st Base", "phone": "(555) 345-6789", "email": "rafael.navarro@email.com"},
-                {"name": "Pedro Delgado", "position": "2nd Base", "phone": "(555) 456-7890", "email": "pedro.delgado@email.com"},
-                {"name": "Angel Moreno", "position": "3rd Base", "phone": "(555) 567-8901", "email": "angel.moreno@email.com"},
-                {"name": "Alberto Reyes", "position": "Shortstop", "phone": "(555) 678-9012", "email": "alberto.reyes@email.com"},
-                {"name": "Daniel Vega", "position": "Left Field", "phone": "(555) 789-0123", "email": "daniel.vega@email.com"},
-                {"name": "Gabriel Soto", "position": "Center Field", "phone": "(555) 890-1234", "email": "gabriel.soto@email.com"},
-                {"name": "Adrian Cruz", "position": "Right Field", "phone": "(555) 901-2345", "email": "adrian.cruz@email.com"},
-                {"name": "Emilio Flores", "position": "Utility", "phone": "(555) 012-3456", "email": "emilio.flores@email.com"}
+                
             ],
             "Diablos": [
-                {"name": "Tomas Aguilar", "position": "Pitcher", "phone": "(555) 123-4567", "email": "tomas.aguilar@email.com"},
-                {"name": "Ruben Guerrero", "position": "Catcher", "phone": "(555) 234-5678", "email": "ruben.guerrero@email.com"},
-                {"name": "Esteban Rios", "position": "1st Base", "phone": "(555) 345-6789", "email": "esteban.rios@email.com"},
-                {"name": "Ignacio Pena", "position": "2nd Base", "phone": "(555) 456-7890", "email": "ignacio.pena@email.com"},
-                {"name": "Salvador Campos", "position": "3rd Base", "phone": "(555) 567-8901", "email": "salvador.campos@email.com"},
-                {"name": "Gilberto Leon", "position": "Shortstop", "phone": "(555) 678-9012", "email": "gilberto.leon@email.com"},
-                {"name": "Armando Rubio", "position": "Left Field", "phone": "(555) 789-0123", "email": "armando.rubio@email.com"},
-                {"name": "Hector Salinas", "position": "Center Field", "phone": "(555) 890-1234", "email": "hector.salinas@email.com"},
-                {"name": "Julio Cabrera", "position": "Right Field", "phone": "(555) 901-2345", "email": "julio.cabrera@email.com"},
-                {"name": "Felipe Duran", "position": "Utility", "phone": "(555) 012-3456", "email": "felipe.duran@email.com"}
+              
             ],
             "Hitmen": [
-                {"name": "Nicolas Estrada", "position": "Pitcher", "phone": "(555) 123-4567", "email": "nicolas.estrada@email.com"},
-                {"name": "Leonardo Ponce", "position": "Catcher", "phone": "(555) 234-5678", "email": "leonardo.ponce@email.com"},
-                {"name": "Cristian Vargas", "position": "1st Base", "phone": "(555) 345-6789", "email": "cristian.vargas@email.com"},
-                {"name": "Sebastian Luna", "position": "2nd Base", "phone": "(555) 456-7890", "email": "sebastian.luna@email.com"},
-                {"name": "Matias Cortes", "position": "3rd Base", "phone": "(555) 567-8901", "email": "matias.cortes@email.com"},
-                {"name": "Diego Rojas", "position": "Shortstop", "phone": "(555) 678-9012", "email": "diego.rojas@email.com"},
-                {"name": "Lucas Mendoza", "position": "Left Field", "phone": "(555) 789-0123", "email": "lucas.mendoza@email.com"},
-                {"name": "Mateo Silva", "position": "Center Field", "phone": "(555) 890-1234", "email": "mateo.silva@email.com"},
-                {"name": "Thiago Torres", "position": "Right Field", "phone": "(555) 901-2345", "email": "thiago.torres@email.com"},
-                {"name": "Bruno Alvarez", "position": "Utility", "phone": "(555) 012-3456", "email": "bruno.alvarez@email.com"}
+               
             ],
             "Peloteros": [
-                {"name": "Ivan Ramirez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "ivan.ramirez@email.com"},
-                {"name": "Oscar Gonzalez", "position": "Catcher", "phone": "(555) 234-5678", "email": "oscar.gonzalez@email.com"},
-                {"name": "Pablo Martinez", "position": "1st Base", "phone": "(555) 345-6789", "email": "pablo.martinez@email.com"},
-                {"name": "Adrian Lopez", "position": "2nd Base", "phone": "(555) 456-7890", "email": "adrian.lopez@email.com"},
-                {"name": "Carlos Sanchez", "position": "3rd Base", "phone": "(555) 567-8901", "email": "carlos.sanchez@email.com"},
-                {"name": "Miguel Rodriguez", "position": "Shortstop", "phone": "(555) 678-9012", "email": "miguel.rodriguez@email.com"},
-                {"name": "Jose Torres", "position": "Left Field", "phone": "(555) 789-0123", "email": "jose.torres@email.com"},
-                {"name": "Luis Diaz", "position": "Center Field", "phone": "(555) 890-1234", "email": "luis.diaz@email.com"},
-                {"name": "Antonio Morales", "position": "Right Field", "phone": "(555) 901-2345", "email": "antonio.morales@email.com"},
-                {"name": "Roberto Jimenez", "position": "Utility", "phone": "(555) 012-3456", "email": "roberto.jimenez@email.com"}
+                
             ],
             "Showtime": [
-                {"name": "Fernando Alvarez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "fernando.alvarez@email.com"},
-                {"name": "Diego Vargas", "position": "Catcher", "phone": "(555) 234-5678", "email": "diego.vargas@email.com"},
-                {"name": "Manuel Mendoza", "position": "1st Base", "phone": "(555) 345-6789", "email": "manuel.mendoza@email.com"},
-                {"name": "Victor Castillo", "position": "2nd Base", "phone": "(555) 456-7890", "email": "victor.castillo@email.com"},
-                {"name": "Francisco Ruiz", "position": "3rd Base", "phone": "(555) 567-8901", "email": "francisco.ruiz@email.com"},
-                {"name": "Javier Ortega", "position": "Shortstop", "phone": "(555) 678-9012", "email": "javier.ortega@email.com"},
-                {"name": "Ricardo Silva", "position": "Left Field", "phone": "(555) 789-0123", "email": "ricardo.silva@email.com"},
-                {"name": "Enrique Herrera", "position": "Center Field", "phone": "(555) 890-1234", "email": "enrique.herrera@email.com"},
-                {"name": "Oscar Medina", "position": "Right Field", "phone": "(555) 901-2345", "email": "oscar.medina@email.com"},
-                {"name": "Hugo Chavez", "position": "Utility", "phone": "(555) 012-3456", "email": "hugo.chavez@email.com"}
+                
             ],
             "Wild Hogz": [
-                {"name": "Sergio Fernandez", "position": "Pitcher", "phone": "(555) 123-4567", "email": "sergio.fernandez@email.com"},
-                {"name": "Mario Gutierrez", "position": "Catcher", "phone": "(555) 234-5678", "email": "mario.gutierrez@email.com"},
-                {"name": "Rafael Navarro", "position": "1st Base", "phone": "(555) 345-6789", "email": "rafael.navarro@email.com"},
-                {"name": "Pedro Delgado", "position": "2nd Base", "phone": "(555) 456-7890", "email": "pedro.delgado@email.com"},
-                {"name": "Angel Moreno", "position": "3rd Base", "phone": "(555) 567-8901", "email": "angel.moreno@email.com"},
-                {"name": "Alberto Reyes", "position": "Shortstop", "phone": "(555) 678-9012", "email": "alberto.reyes@email.com"},
-                {"name": "Daniel Vega", "position": "Left Field", "phone": "(555) 789-0123", "email": "daniel.vega@email.com"},
-                {"name": "Gabriel Soto", "position": "Center Field", "phone": "(555) 890-1234", "email": "gabriel.soto@email.com"},
-                {"name": "Adrian Cruz", "position": "Right Field", "phone": "(555) 901-2345", "email": "adrian.cruz@email.com"},
-                {"name": "Emilio Flores", "position": "Utility", "phone": "(555) 012-3456", "email": "emilio.flores@email.com"}
+                
             ]
         }
     };
@@ -1740,42 +1348,43 @@ const TEAM_MANAGER_ASSIGNMENTS_KEY = 'lamslTeamManagerAssignmentsV1';
 
 const standingsByDivision = {
     A: [
-        { team: 'Titans', w: 10, l: 2, t: 0, gb: '' },
-        { team: 'Doom Squad', w: 9, l: 3, t: 0, gb: '' },
-        { team: 'Legends', w: 8, l: 3, t: 1, gb: '' },
-        { team: 'Nasty Boyz', w: 8, l: 4, t: 0, gb: '' },
-        { team: 'Black Sox', w: 7, l: 4, t: 1, gb: '' },
-        { team: 'White Sox', w: 7, l: 5, t: 0, gb: '' },
-        { team: 'Dodgers', w: 7, l: 5, t: 0, gb: '' }
+        { team: 'La Tribu', w: 2, l: 0, t: 0, gb: '' },
+        { team: 'Nasty Boyz', w: 1, l: 2, t: 0, gb: '' },
+        { team: 'Toxic', w: 1, l: 1, t: 0, gb: '' },
+        { team: 'Titans', w: 1, l: 1, t: 0, gb: '' },
+        { team: 'White Sox', w: 1, l: 1, t: 1, gb: '' },
+        { team: 'Legends', w: 0, l: 2, t: 1, gb: '' }
     ],
+
     B: [
-        { team: 'Charros', w: 5, l: 7, t: 0, gb: '' },
-        { team: 'Toxic', w: 5, l: 7, t: 0, gb: '' },
-        { team: 'Primos', w: 2, l: 6, t: 3, gb: '' },
-        { team: 'Demons', w: 4, l: 8, t: 0, gb: '' },
-        { team: 'Cubs', w: 3, l: 8, t: 1, gb: '' },
-        { team: 'Borrachos', w: 0, l: 12, t: 0, gb: '' }
+        { team: 'Cubs', w: 3, l: 0, t: 1, gb: '' },
+        { team: 'Primos', w: 2, l: 0, t: 1, gb: '' },
+        { team: 'Dodgers', w: 2, l: 1, t: 1, gb: '' },
+        { team: 'Diablos', w: 1, l: 1, t: 1, gb: '' },
+        { team: 'Charros', w: 1, l: 3, t: 0, gb: '' },
+        { team: 'Doom Squad', w: 0, l: 3, t: 0, gb: '' }
     ],
+
     C: [
-        { team: 'Diablos', w: 12, l: 2, t: 0, gb: '' },
-        { team: 'Brewers', w: 8, l: 6, t: 0, gb: '' },
-        { team: 'Coyotes', w: 8, l: 6, t: 0, gb: '' },
-        { team: 'Goodfellas', w: 8, l: 6, t: 0, gb: '' },
-        { team: 'Bandits', w: 6, l: 8, t: 0, gb: '' },
-        { team: 'Salvajes', w: 5, l: 9, t: 0, gb: '' },
-        { team: 'Balls Out', w: 5, l: 9, t: 0, gb: '' },
-        { team: 'Orioles', w: 3, l: 11, t: 0, gb: '' }
+        { team: 'Demons', w: 4, l: 0, t: 0, gb: '' },
+        { team: 'Naranjeros', w: 3, l: 0, t: 0, gb: '' },
+        { team: 'Caballeros', w: 3, l: 1, t: 0, gb: '' },
+        { team: 'Salvajes', w: 1, l: 2, t: 0, gb: '' },
+        { team: 'Coyotes', w: 1, l: 2, t: 1, gb: '' },
+        { team: 'Bandits', w: 1, l: 3, t: 0, gb: '' },
+        { team: 'Orioles', w: 1, l: 3, t: 0, gb: '' },
+        { team: 'Goodfellas', w: 0, l: 3, t: 1, gb: '' }
     ],
+
     D: [
-        { team: 'Viejones', w: 13, l: 1, t: 0, gb: '' },
-        { team: 'No Chance', w: 9, l: 4, t: 1, gb: '' },
-        { team: 'Los Pericos', w: 9, l: 5, t: 0, gb: '' },
-        { team: 'Wild Hogz', w: 8, l: 5, t: 1, gb: '' },
-        { team: 'Strokes', w: 8, l: 5, t: 1, gb: '' },
-        { team: 'Dawgz', w: 4, l: 9, t: 1, gb: '' },
-        { team: 'Xolos', w: 2, l: 12, t: 0, gb: '' },
-        { team: 'Desvelados', w: 1, l: 13, t: 0, gb: 'Eliminated' }
-    ],
+        { team: 'Strokes', w: 4, l: 0, t: 0, gb: '' },
+        { team: 'Dirt Bags', w: 3, l: 0, t: 0, gb: '' },
+        { team: 'Camaradas', w: 2, l: 1, t: 0, gb: '' },
+        { team: 'Wild Hogz', w: 2, l: 1, t: 0, gb: '' },
+        { team: 'Los Pericos', w: 1, l: 1, t: 0, gb: '' },
+        { team: 'Xolos', w: 0, l: 4, t: 0, gb: '' },
+        { team: 'Desvelados', w: 0, l: 4, t: 0, gb: '' }
+    ]
     W1: [
         { team: 'Titans', w: 9, l: 1, t: 0, gb: '' },
         { team: 'La Tribu', w: 9, l: 1, t: 1, gb: '' },

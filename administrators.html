@@ -443,7 +443,66 @@ footer {
               </form>
             
               <button type="button" id="saveContentBtn" class="admin-form-btn">Save All Changes</button>
+            <script>
+let content = {};
 
+// Load existing content
+fetch('https://lamsl-backend.onrender.com/api/content')
+  .then(res => res.json())
+  .then(data => {
+    content = data;
+    document.getElementById('homepageMessage').value = data.homepageMessage || '';
+    document.getElementById('zelle').value = JSON.stringify(data.zelle, null, 2);
+    document.getElementById('gameSchedules').value = JSON.stringify(data.gameSchedules, null, 2);
+    document.getElementById('gameScores').value = JSON.stringify(data.gameScores, null, 2);
+    document.getElementById('slideshow').value = JSON.stringify(data.slideshow, null, 2);
+  });
+
+// Save all content
+document.getElementById('saveContentBtn').addEventListener('click', () => {
+  content.homepageMessage = document.getElementById('homepageMessage').value;
+  content.zelle = JSON.parse(document.getElementById('zelle').value);
+  content.gameSchedules = JSON.parse(document.getElementById('gameSchedules').value);
+  content.gameScores = JSON.parse(document.getElementById('gameScores').value);
+  content.slideshow = JSON.parse(document.getElementById('slideshow').value);
+
+  fetch('https://lamsl-backend.onrender.com/api/update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(content),
+    credentials: 'include'
+  })
+  .then(res => res.json())
+  .then(() => alert('Content updated successfully!'))
+  .catch(err => alert('Error saving content.'));
+});
+
+// Upload slideshow image
+document.getElementById('uploadBtn').addEventListener('click', () => {
+  const file = document.getElementById('slideUpload').files[0];
+  if (!file) return alert('Please select an image first.');
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  fetch('https://lamsl-backend.onrender.com/api/upload-image', {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      content.slideshow.push({
+        id: Date.now(),
+        imageUrl: data.url,
+        caption: "New Slide"
+      });
+      document.getElementById('slideshow').value = JSON.stringify(content.slideshow, null, 2);
+      document.getElementById('uploadMessage').innerText = "Uploaded!";
+    }
+  });
+});
+</script>
             </div>
             </div>
             

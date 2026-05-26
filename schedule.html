@@ -1025,7 +1025,7 @@ const DEFAULT_TEAMS_BY_DIVISION = {
     A: ['Titans','La Tribu','Nasty Boyz','Toxic','White Sox','Legends'],
     B: ['Cubs','Primos','Dodgers','Diablos','Charros','Doom Squad'],
     C: ['Demons', 'Naranjeros', 'Caballeros', 'Salvajes', 'Coyotes', 'Bandits', 'Orioles', 'Goodfellas'],
-    D: ['Strokes', 'Dirt Bags', 'Camaradas', 'Wild Hogz', 'Pericos', 'Xolos', 'Desvelados'],
+    D: ['Strokes', 'Dirt Bags', 'Camaradas', 'Wild Hogz', 'Los Pericos', 'Xolos', 'Desvelados'],
     E: []
 };
 let teamsByDivision = {};
@@ -1193,9 +1193,62 @@ function ensureDefaults() {
     const existing = readJson(SCHEDULE_KEY, null);
     if (!existing) {
         const seed = [
-            { id: 'game-1', date: '2026-03-30', time: '08:00', park: 'Stevenson Park', division: 'C', team1: 'Diablos', team2: 'Brewers', score1: '', score2: '', status: 'scheduled' },
-            { id: 'game-2', date: '2026-03-31', time: '09:50', park: 'Dolphin Park', division: 'B', team1: 'Charros', team2: 'Primos', score1: '', score2: '', status: 'scheduled' },
-            { id: 'game-3', date: '2026-04-02', time: '11:45', park: 'Veterans Park', division: 'A', team1: 'Titans', team2: 'Legends', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-1', date: '2026-04-26', time: '08:00', park: 'Calas Park', division: 'All', team1: 'Titans', team2: 'Primos', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-2', date: '2026-04-26', time: '09:50', park: 'Calas Park', division: 'All', team1: 'Dodgers', team2: 'Nasty Boyz', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-3', date: '2026-04-26', time: '11:45', park: 'Calas Park', division: 'All', team1: 'Goodfellas', team2: 'Demons', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-4', date: '2026-04-26', time: '08:00', park: 'Stevenson Park', division: 'All', team1: 'Camaradas', team2: 'Desvelados', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-5', date: '2026-04-26', time: '09:50', park: 'Stevenson Park', division: 'All', team1: 'Diablos', team2: 'Toxic', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-6', date: '2026-04-26', time: '11:45', park: 'Stevenson Park', division: 'All', team1: 'Wild Hogz', team2: 'Strokes', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-7', date: '2026-04-26', time: '08:00', park: 'Dolphin Park', division: 'All', team1: 'Legends', team2: 'Charros', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-8', date: '2026-04-26', time: '09:50', park: 'Dolphin Park', division: 'All', team1: 'Salvajes', team2: 'Coyotes', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-9', date: '2026-04-26', time: '11:45', park: 'Dolphin Park', division: 'All', team1: 'Caballeros', team2: 'Orioles', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-10', date: '2026-04-26', time: '13:45', park: 'Dolphin Park', division: 'All', team1: 'Doom Squad', team2: 'La Tribu', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-11', date: '2026-04-26', time: '08:00', park: 'Veterans Park', division: 'All', team1: 'Bandits', team2: 'Naranjeros', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-12', date: '2026-04-26', time: '09:50', park: 'Veterans Park', division: 'All', team1: 'White Sox', team2: 'Cubs', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-13', date: '2026-04-26', time: '11:45', park: 'Veterans Park', division: 'All', team1: 'Dirt Bags', team2: 'Xolos', score1: '', score2: '', status: 'scheduled' }
+        
+            { id: 'game-14', date: '2026-05-03', time: '08:00', park: 'Calas Park', division: 'All', team1: 'Demons', team2: 'Caballeros', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-15', date: '2026-05-03', time: '09:50', park: 'Calas Park', division: 'All', team1: 'Dodgers', team2: 'Legends', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-16', date: '2026-05-03', time: '11:45', park: 'Calas Park', division: 'All', team1: 'Nasty Boyz', team2: 'Doom Squad', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-17', date: '2026-05-03', time: '08:00', park: 'Stevenson Park', division: 'All', team1: 'Coyotes', team2: 'Naranjeros', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-18', date: '2026-05-03', time: '09:50', park: 'Stevenson Park', division: 'All', team1: 'Camaradas', team2: 'Xolos', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-19', date: '2026-05-03', time: '11:45', park: 'Stevenson Park', division: 'All', team1: 'Orioles', team2: 'Bandits', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-20', date: '2026-05-03', time: '08:00', park: 'Dolphin Park', division: 'All', team1: 'Strokes', team2: 'Los Pericos', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-21', date: '2026-05-03', time: '09:50', park: 'Dolphin Park', division: 'All', team1: 'White Sox', team2: 'Primos', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-22', date: '2026-05-03', time: '11:45', park: 'Dolphin Park', division: 'All', team1: 'Cubs', team2: 'Toxic', score1: '', score2: '', status: 'scheduled' },
+            { id: 'game-23', date: '2026-05-03', time: '08:00', park: 'Veterans Park', division: 'All', team1: 'Charros', team2: 'La Tribu', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-24', date: '2026-05-03', time: '09:50', park: 'Veterans Park', division: 'All', team1: 'Goodfellas', team2: 'Salvajes', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-25', date: '2026-05-03', time: '11:45', park: 'Veterans Park', division: 'All', team1: 'Desvelados', team2: 'Dirt Bags', score1: '', score2: '', status: 'scheduled' }
+           
+            { id: 'game-26', date: '2026-05-17', time: '08:00', park: 'Calas Park', division: 'All', team1: 'Orioles', team2: 'Salvajes', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-27', date: '2026-05-17', time: '09:50', park: 'Calas Park', division: 'All', team1: 'La Tribu', team2: 'Dodgers', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-28', date: '2026-05-17', time: '11:45', park: 'Calas Park', division: 'All', team1: 'Xolos', team2: 'Wild Hogz', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-29', date: '2026-05-17', time: '08:00', park: 'Stevenson Park', division: 'All', team1: 'Diablos', team2: 'Legends', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-30', date: '2026-05-17', time: '09:50', park: 'Stevenson Park', division: 'All', team1: 'Caballeros', team2: 'Bandits', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-31', date: '2026-05-17', time: '11:45', park: 'Stevenson Park', division: 'All', team1: 'Nasty Boyz', team2: 'Cubs', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-32', date: '2026-05-17', time: '08:00', park: 'Dolphin Park', division: 'All', team1: 'White Sox', team2: 'Doom Squad', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-33', date: '2026-05-17', time: '09:50', park: 'Dolphin Park', division: 'All', team1: 'Coyotes', team2: 'Demons', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-34', date: '2026-05-17', time: '11:45', park: 'Dolphin Park', division: 'All', team1: 'Goodfellas', team2: 'Naranjeros', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-35', date: '2026-05-17', time: '08:00', park: 'Ford Park', division: 'All', team1: 'Titans', team2: 'Charros', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-36', date: '2026-05-17', time: '09:50', park: 'Ford Park', division: 'All', team1: 'Camaradas', team2: 'Strokes', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-37', date: '2026-05-17', time: '11:45', park: 'Ford Park', division: 'All', team1: 'Desvelados', team2: 'Los Pericos', score1: '', score2: '', status: 'scheduled' }
+
+            { id: 'game-38', date: '2026-05-31', time: '08:00', park: 'Calas Park', division: 'All', team1: 'Coyotes', team2: 'Caballeros', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-39', date: '2026-05-31', time: '09:50', park: 'Calas Park', division: 'All', team1: 'Bandits', team2: 'Salvajes', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-40', date: '2026-05-31', time: '11:45', park: 'Calas Park', division: 'All', team1: 'La Tribu', team2: 'Cubs', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-41', date: '2026-05-31', time: '08:00', park: 'Stevenson Park', division: 'All', team1: 'Dirt Bags', team2: 'Wild Hogz', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-42', date: '2026-05-31', time: '09:50', park: 'Stevenson Park', division: 'All', team1: 'White Sox', team2: 'Diablos', score1: '', score2: '', status: 'scheduled' }
+           
+            { id: 'game-43', date: '2026-05-31', time: '08:00', park: 'Dolphin Park', division: 'All', team1: 'Camaradas', team2: 'Los Pericos', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-44', date: '2026-05-31', time: '09:50', park: 'Dolphin Park', division: 'All', team1: 'Dodgers', team2: 'Titans', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-45', date: '2026-05-31', time: '11:45', park: 'Dolphin Park', division: 'All', team1: 'Legends', team2: 'Doom Squad', score1: '', score2: '', status: 'scheduled' }
+        
+            { id: 'game-46', date: '2026-05-31', time: '08:00', park: 'Veterans Park', division: 'All', team1: 'Toxic', team2: 'Charros', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-47', date: '2026-05-31', time: '09:50', park: 'Veterans Park', division: 'All', team1: 'Orioles', team2: 'Goodfellas', score1: '', score2: '', status: 'scheduled' }
+           
+            { id: 'game-48', date: '2026-05-31', time: '08:00', park: 'Ford Park', division: 'All', team1: 'Naranjeros', team2: 'Demons', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-49', date: '2026-05-31', time: '09:50', park: 'Ford Park', division: 'All', team1: 'Strokes', team2: 'Desvelados', score1: '', score2: '', status: 'scheduled' }
+            { id: 'game-50', date: '2026-05-31', time: '11:45', park: 'Ford Park', division: 'All', team1: 'Nasty Boyz', team2: 'Primos', score1: '', score2: '', status: 'scheduled' }
         ];
         writeJson(SCHEDULE_KEY, seed);
     }

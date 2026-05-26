@@ -413,42 +413,41 @@ footer {
             <div id="content-admin">
               <!-- Homepage message, Zelle info, schedules, scores, slideshow -->
              <!-- Site Content Management -->
-<div class="admin-only" id="content-tools" style="display:none;">
-  <h3>Homepage Message</h3>
-  <form class="admin-form">
-    <textarea id="homepageMessage" rows="2" placeholder="Welcome message..."></textarea>
-  </form>
-
-  <h3>Zelle / Payment Info</h3>
-  <form class="admin-form">
-    <textarea id="zelle" rows="5" placeholder="Zelle name, email, QR image URL..."></textarea>
-  </form>
-
-  <h3>Game Schedules</h3>
-  <form class="admin-form">
-    <textarea id="gameSchedules" rows="8" placeholder="[{team, opponent, date, time, location}]"></textarea>
-  </form>
-
-  <h3>Game Scores</h3>
-  <form class="admin-form">
-    <textarea id="gameScores" rows="8" placeholder="[{teamA, teamB, scoreA, scoreB, date}]"></textarea>
-  </form>
-
-  <h3>Slideshow Images</h3>
-  <form class="admin-form">
-    <textarea id="slideshow" rows="8" placeholder="[{imageUrl, caption}]"></textarea>
-    <input type="file" id="slideUpload" accept="image/*">
-    <button type="button" id="uploadBtn">Upload Slide</button>
-    <div id="uploadMessage"></div>
-  </form>
-
-  <button type="button" id="saveContentBtn">Save All Changes</button>
-</div>
+            <div class="admin-only" id="content-tools" style="display:none;">
+              <h3>Homepage Message</h3>
+              <form class="admin-form">
+                <textarea id="homepageMessage" rows="2" placeholder="Welcome message..."></textarea>
+              </form>
+            
+              <h3>Zelle / Payment Info</h3>
+              <form class="admin-form">
+                <textarea id="zelle" rows="5" placeholder="Zelle name, email, QR image URL..."></textarea>
+              </form>
+            
+              <h3>Game Schedules</h3>
+              <form class="admin-form">
+                <textarea id="gameSchedules" rows="8" placeholder="[{team, opponent, date, time, location}]"></textarea>
+              </form>
+            
+              <h3>Game Scores</h3>
+              <form class="admin-form">
+                <textarea id="gameScores" rows="8" placeholder="[{teamA, teamB, scoreA, scoreB, date}]"></textarea>
+              </form>
+            
+              <h3>Slideshow Images</h3>
+              <form class="admin-form">
+                <textarea id="slideshow" rows="8" placeholder="[{imageUrl, caption}]"></textarea>
+                <input type="file" id="slideUpload" accept="image/*">
+                <button type="button" id="uploadBtn">Upload Slide</button>
+                <div id="uploadMessage"></div>
+              </form>
+            
+              <button type="button" id="saveContentBtn">Save All Changes</button>
+            </div>
             </div>
             
             <script>
-           <script>
-let content = {};
+          let content = {};
 
 // Load existing content
 fetch('https://lamsl-backend.onrender.com/api/content')
@@ -508,7 +507,7 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
 });
 </script>
 
-            </script>
+            
             
             <div class="admin-inline" id="login-row">
                 <input id="login-username" type="text" placeholder="Username" value="">
@@ -602,16 +601,7 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
             </form>
         </section>
 
-        <h2>Site Content Management</h2>
-        <div id="content-admin">
-          <!-- Homepage message, Zelle info, schedules, scores, slideshow -->
-          ...Step 8 admin panel code here...
-        </div>
-        <script>
-          // Step 8 fetch + saveContent + uploadSlide logic
-        </script>
-
-        
+            
         <section class="card">
             <h2>League Administrators</h2>
             <h4>Founder</h4>

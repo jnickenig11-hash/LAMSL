@@ -1187,7 +1187,7 @@ function renderMiniSchedule() {
             row.className = 'mini-game-row';
             const [h, m] = game.time.split(':');
             const hr = parseInt(h, 10);
-            const ampm = hr >= 12 ? 'PM' : 'AM';
+            const ampm = hr >= 12 ? '' : '';
             const hr12 = hr % 12 || 12;
             const timeStr = `${hr12}:${m} ${ampm}`;
             const statusBit = game.status === 'postponed'

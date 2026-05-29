@@ -422,8 +422,7 @@ tabButtons.forEach(btn => {
     });
 });
 
-// Load the first tab on page load
-loadTab(document.querySelector('.tab-btn.active').dataset.src);
+
 
 // ===== SEASON BANNER =====
 (function () {
@@ -436,6 +435,14 @@ loadTab(document.querySelector('.tab-btn.active').dataset.src);
         }
     } catch (e) {}
 })();
+
+// Load the first tab on page load
+document.addEventListener("DOMContentLoaded", () => {
+    const defaultTab = document.querySelector('.tab-btn.active');
+    if (defaultTab) {
+        loadTab(defaultTab.dataset.src);
+    }
+});    
 </script>
 
 </body>

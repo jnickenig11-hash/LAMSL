@@ -592,6 +592,15 @@ const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
 const TEAM_MANAGER_ASSIGNMENTS_KEY = 'lamslTeamManagerAssignmentsV1';
 const STANDINGS_KEY = 'lamslStandingsV1';
 
+// Backend base URL: prefer localhost during local development
+const backendBase = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:3000' : 'https://lamsl-backend.onrender.com';
+
+function apiUrl(path) {
+    if (!path) return backendBase;
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    return backendBase.replace(/\/$/, '') + (path.startsWith('/') ? path : '/' + path);
+}
+
 const DEFAULT_TEAMS_BY_DIVISION = {
     A: ['Titans', 'Doom Squad', 'Legends', 'Nasty Boyz', 'Black Sox', 'White Sox', 'Dodgers'],
     B: ['Charros', 'Toxic', 'Primos', 'Demons', 'Cubs', 'Borrachos'],
@@ -668,7 +677,7 @@ function logAdminAction(action, details) {
         details
     };
 
-    fetch('https://lamsl-backend.onrender.com/api/log-admin-action', {
+    fetch(apiUrl('/api/log-admin-action'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(logPayload)
@@ -1278,61 +1287,90 @@ announcementForm.addEventListener('submit', event => {
 // === Step 8: Site Content Management Logic ===
 let content = {};
 
-// Load existing content
-fetch('https://lamsl-backend.onrender.com/api/content')
-  .then(res => res.json())
-  .then(data => {
-    content = data;
-    document.getElementById('homepageMessage').value = data.homepageMessage || '';
-    document.getElementById('zelle').value = JSON.stringify(data.zelle, null, 2);
-    document.getElementById('gameSchedules').value = JSON.stringify(data.gameSchedules, null, 2);
-    document.getElementById('gameScores').value = JSON.stringify(data.gameScores, null, 2);
-    document.getElementById('slideshow').value = JSON.stringify(data.slideshow, null, 2);
-  });
+// Load existing content (use local backend when running locally)
+fetch(apiUrl('/api/content'))
+    .then(res => res.json())
+    .then(data => {
+        content = data || {};
+        document.getElementById('homepageMessage').value = data.homepageMessage || '';
+        document.getElementById('zelle').value = JSON.stringify(data.zelle || {}, null, 2);
+        document.getElementById('gameSchedules').value = JSON.stringify(data.gameSchedules || [], null, 2);
+        document.getElementById('gameScores').value = JSON.stringify(data.gameScores || [], null, 2);
+        document.getElementById('slideshow').value = JSON.stringify(data.slideshow || [], null, 2);
+    }).catch(err => {
+        console.warn('Failed to load site content from backend:', err);
+    });
 
 // Save all content
 document.getElementById('saveContentBtn').addEventListener('click', () => {
-  content.homepageMessage = document.getElementById('homepageMessage').value;
-  content.zelle = JSON.parse(document.getElementById('zelle').value);
-  content.gameSchedules = JSON.parse(document.getElementById('gameSchedules').value);
-  content.gameScores = JSON.parse(document.getElementById('gameScores').value);
-  content.slideshow = JSON.parse(document.getElementById('slideshow').value);
+    try {
+        content.homepageMessage = document.getElementById('homepageMessage').value;
+        try {
+            content.zelle = JSON.parse(document.getElementById('zelle').value || '{}');
+        } catch (e) { throw new Error('Zelle JSON invalid: ' + e.message); }
+        try {
+            content.gameSchedules = JSON.parse(document.getElementById('gameSchedules').value || '[]');
+        } catch (e) { throw new Error('Game schedules JSON invalid: ' + e.message); }
+        try {
+            content.gameScores = JSON.parse(document.getElementById('gameScores').value || '[]');
+        } catch (e) { throw new Error('Game scores JSON invalid: ' + e.message); }
+        try {
+            content.slideshow = JSON.parse(document.getElementById('slideshow').value || '[]');
+        } catch (e) { throw new Error('Slideshow JSON invalid: ' + e.message); }
+    } catch (err) {
+        alert('Unable to save content: ' + err.message);
+        return;
+    }
 
-  fetch('https://lamsl-backend.onrender.com/api/update', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(content),
-    credentials: 'include'
-  })
-  .then(res => res.json())
-  .then(() => alert('Content updated successfully!'))
-  .catch(err => alert('Error saving content.'));
+    fetch(apiUrl('/api/update'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(content)
+    })
+    .then(res => res.json())
+    .then(() => {
+        alert('Content updated successfully!');
+        logAdminAction('update_site_content', { by: getSession()?.username || 'unknown' });
+    })
+    .catch(err => {
+        console.error('Error saving content', err);
+        alert('Error saving content. See console for details.');
+    });
 });
 
 // Upload slideshow image
 document.getElementById('uploadBtn').addEventListener('click', () => {
-  const file = document.getElementById('slideUpload').files[0];
-  if (!file) return alert('Please select an image first.');
+    const file = document.getElementById('slideUpload').files[0];
+    if (!file) return alert('Please select an image first.');
 
-  const formData = new FormData();
-  formData.append('image', file);
+    const formData = new FormData();
+    formData.append('image', file);
 
-  fetch('https://lamsl-backend.onrender.com/api/upload-image', {
-    method: 'POST',
-    body: formData
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      content.slideshow.push({
-        id: Date.now(),
-        imageUrl: data.url,
-        caption: "New Slide"
-      });
-      document.getElementById('slideshow').value = JSON.stringify(content.slideshow, null, 2);
-      document.getElementById('uploadMessage').innerText = "Uploaded!";
-    }
-  });
+    fetch(apiUrl('/api/upload-image'), {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data && data.success) {
+            content.slideshow = content.slideshow || [];
+            content.slideshow.push({
+                id: Date.now(),
+                imageUrl: data.url || data.path || data.filepath || '',
+                caption: "New Slide"
+            });
+            document.getElementById('slideshow').value = JSON.stringify(content.slideshow, null, 2);
+            document.getElementById('uploadMessage').innerText = "Uploaded!";
+            logAdminAction('upload_slide', { filename: data.url || data.path });
+        } else {
+            throw new Error(data && data.error ? data.error : 'Upload failed');
+        }
+    })
+    .catch(err => {
+        console.error('Upload error', err);
+        document.getElementById('uploadMessage').innerText = 'Upload failed.';
+        alert('Upload failed: ' + err.message);
+    });
 });
 
 

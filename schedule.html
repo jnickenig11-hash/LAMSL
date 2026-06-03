@@ -1111,9 +1111,10 @@ async function notifyScheduleUpdate(game, action) {
     };
 
     try {
+        const headers = (window.apiHeaders || (() => ({})))({ 'Content-Type': 'application/json' });
         const response = await fetch(apiUrl('/notify-schedule-update'), {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify(payload)
         });
         const result = await response.json();
@@ -1349,11 +1350,6 @@ function canEditSchedule() {
     return hasRole('admin');
 }
 
-function getSchedule() {
-    const games = readJson(SCHEDULE_KEY, []);
-    return games.sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
-}
-
 function getFilteredGames(games) {
     if (activeDivisionFilter === 'ALL') {
         return games;
@@ -1361,8 +1357,72 @@ function getFilteredGames(games) {
     return games.filter(game => game.division === activeDivisionFilter);
 }
 
+let scheduleContent = null;
+
+function getDefaultBackendContent() {
+    return {
+        homepageMessage: '',
+        zelle: {},
+        gameSchedules: [],
+        gameScores: [],
+        practiceSchedules: [],
+        slideshow: []
+    };
+}
+
+function getSchedule() {
+    const games = scheduleContent ? scheduleContent.gameSchedules : readJson(SCHEDULE_KEY, []);
+    return games.sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+}
+
+function getPracticeSchedule() {
+    const games = scheduleContent ? scheduleContent.practiceSchedules : readJson(PRACTICE_KEY, []);
+    return games.sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+}
+
+function writeBackendCache() {
+    if (!scheduleContent) return;
+    writeJson(SCHEDULE_KEY, scheduleContent.gameSchedules);
+    writeJson(PRACTICE_KEY, scheduleContent.practiceSchedules);
+}
+
+async function persistBackendContent() {
+    if (!scheduleContent) return;
+
+    try {
+        const response = await fetch(apiUrl('/api/update'), {
+            method: 'POST',
+            headers: (window.apiHeaders || (() => ({})))({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify(scheduleContent)
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            console.warn('Backend schedule persist failed', result.error || result);
+        }
+    } catch (error) {
+        console.warn('Backend schedule persist error', error);
+    }
+}
+
 function saveSchedule(games) {
-    writeJson(SCHEDULE_KEY, games);
+    if (scheduleContent) {
+        scheduleContent.gameSchedules = games;
+        scheduleContent.gameScores = games.filter(game => game.score1 !== '' && game.score2 !== '');
+        writeBackendCache();
+        persistBackendContent();
+    } else {
+        writeJson(SCHEDULE_KEY, games);
+    }
+}
+
+function savePracticeSchedule(games) {
+    if (scheduleContent) {
+        scheduleContent.practiceSchedules = games;
+        writeBackendCache();
+        persistBackendContent();
+    } else {
+        writeJson(PRACTICE_KEY, games);
+    }
 }
 
 function isAllowedGameDay(date) {
@@ -2071,13 +2131,6 @@ const practiceGamesList    = document.getElementById('practice-games-list');
 const practiceAdminStatus  = document.getElementById('practice-admin-status');
 const practiceRefreshAdmin = document.getElementById('practice-refresh-admin');
 
-function getPracticeSchedule() {
-    return readJson(PRACTICE_KEY, []).sort((a, b) =>
-        `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`)
-    );
-}
-function savePracticeSchedule(games) { writeJson(PRACTICE_KEY, games); }
-
 function populatePracticeTeamsForDiv(divSelect, teamSelect) {
     const div = divSelect.value;
     const teams = div ? (teamsByDivision[div] || []) : [];
@@ -2169,6 +2222,23 @@ function applyPracticeAdminAccess() {
     }
 }
 
+async function loadBackendSchedule() {
+    try {
+        const response = await fetch(apiUrl('/api/content'));
+        if (!response.ok) throw new Error(`Backend content fetch failed ${response.status}`);
+        const data = await response.json();
+        scheduleContent = Object.assign(getDefaultBackendContent(), data, {
+            gameSchedules: Array.isArray(data.gameSchedules) ? data.gameSchedules : [],
+            gameScores: Array.isArray(data.gameScores) ? data.gameScores : [],
+            practiceSchedules: Array.isArray(data.practiceSchedules) ? data.practiceSchedules : []
+        });
+        writeBackendCache();
+    } catch (error) {
+        console.warn('Could not load schedule content from backend:', error);
+        scheduleContent = null;
+    }
+}
+
 if (practiceDiv1Select) practiceDiv1Select.addEventListener('change', () => populatePracticeTeamsForDiv(practiceDiv1Select, practiceTeam1Select));
 if (practiceDiv2Select) practiceDiv2Select.addEventListener('change', () => populatePracticeTeamsForDiv(practiceDiv2Select, practiceTeam2Select));
 
@@ -2214,18 +2284,23 @@ if (practiceRefreshAdmin) {
     });
 }
 
-ensureDefaults();
-refreshDivisionDependentUI();
-applyAdminPermissions();
-applyPracticeAdminAccess();
-gameDateInput.value = formatDateKey(selectedDate);
-if (document.getElementById('practice-date')) document.getElementById('practice-date').value = formatDateKey(selectedDate);
-renderWeekCalendar();
-renderSelectedDayGames();
-renderScheduledGameOptions();
-renderScoresList();
-renderParkView();
-renderPracticeGames();
+async function initializeSchedulePage() {
+    await loadBackendSchedule();
+    ensureDefaults();
+    refreshDivisionDependentUI();
+    applyAdminPermissions();
+    applyPracticeAdminAccess();
+    gameDateInput.value = formatDateKey(selectedDate);
+    if (document.getElementById('practice-date')) document.getElementById('practice-date').value = formatDateKey(selectedDate);
+    renderWeekCalendar();
+    renderSelectedDayGames();
+    renderScheduledGameOptions();
+    renderScoresList();
+    renderParkView();
+    renderPracticeGames();
+}
+
+initializeSchedulePage();
 
 // ===== SEASON BANNER =====
 (function () {

@@ -123,7 +123,7 @@ function readContent() {
     };
     return JSON.parse(fs.readFileSync(contentFile, 'utf8'));
   } catch (e) {
-    return { homepageMessage: '', zelle: {}, gameSchedules: [], gameScores: [], slideshow: [] };
+    return { homepageMessage: '', zelle: {}, gameSchedules: [], gameScores: [], practiceSchedules: [], slideshow: [] };
   }
 }
 

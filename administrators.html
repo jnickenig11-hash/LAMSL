@@ -619,6 +619,7 @@ const DEFAULT_TEAMS_BY_DIVISION = {
 
 const authStatus = document.getElementById('auth-status');
 const loginRow = document.getElementById('login-row');
+const adminKeyRow = document.getElementById('admin-key-row');
 const logoutRow = document.getElementById('logout-row');
 const adminTools = document.getElementById('admin-tools');
 const loginButton = document.getElementById('login-btn');
@@ -1285,10 +1286,18 @@ function renderAuthState() {
     const isAdmin = session && session.role === 'admin';
 
     loginRow.style.display = loggedIn ? 'none' : 'flex';
+    adminKeyRow.style.display = isAdmin ? 'none' : 'flex';
     logoutRow.style.display = loggedIn ? 'flex' : 'none';
     adminTools.style.display = isAdmin ? 'block' : 'none';
     document.getElementById('content-tools').style.display = isAdmin ? 'block' : 'none';
 
+    if (loggedIn && isAdmin) {
+        const storedKey = (typeof localStorage !== 'undefined') ? localStorage.getItem('LAMSL_ADMIN_KEY') : null;
+        if (storedKey) {
+            window.ADMIN_API_KEY = storedKey;
+        }
+        renderAdminKeyState();
+    }
 
     if (loggedIn) {
         authStatus.textContent = `Signed in as ${session.username} (${session.role || 'user'}). ${isAdmin ? 'Admin tools unlocked, including Site Content Management.' : 'Admin tools locked.'}`;

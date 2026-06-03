@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<title>LAMSL - Hall of Champions</title>
+<style>
+body {
+    margin: 0;
+    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
+    background-color: #eef4ea;
+    background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    background-size: min(60vw, 540px);
+    background-attachment: fixed;
+    color: #333;
+}
+
+h1, h2, h3 {
+    margin-bottom: 10px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+header {
+    background: #12324A;
+    color: white;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+}
+
+.navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+    margin: 0;
+    font-size: 20px;
+}
+
+.navbar-brand-gem {
+    width: 24px;
+    height: 18px;
+    background:
+        linear-gradient(90deg, transparent 0 22%, rgba(255, 255, 255, 0.7) 22% 28%, transparent 28% 72%, rgba(94, 108, 122, 0.24) 72% 78%, transparent 78% 100%),
+        linear-gradient(180deg, #fbfdff 0%, #dfe5ec 34%, #b5c0cb 62%, #7c8a97 100%);
+    clip-path: polygon(24% 6%, 76% 6%, 100% 35%, 67% 100%, 33% 100%, 0% 35%);
+    border: 1px solid rgba(248, 251, 255, 0.78);
+    box-shadow: 0 0 0 1px rgba(86, 96, 108, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.82), inset 0 -1px 0 rgba(85, 96, 108, 0.4);
+    position: relative;
+    display: inline-block;
+    flex: 0 0 auto;
+}
+
+.navbar-brand-gem::after {
+    content: "";
+    position: absolute;
+    inset: 2px 4px 2px 4px;
+    clip-path: polygon(50% 0%, 80% 26%, 64% 100%, 36% 100%, 20% 26%);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.15)),
+        linear-gradient(90deg, transparent 0 46%, rgba(126, 138, 151, 0.82) 46% 54%, transparent 54% 100%);
+    opacity: 0.95;
+    pointer-events: none;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar li {
+    margin: 0;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    display: block;
+}
+
+.navbar a:hover {
+    color: #F1D27A;
+}
+
+.navbar a.active-tab {
+    color: #F1D27A;
+    border-bottom: 2px solid #C86A2F;
+    padding-bottom: 2px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.year-index {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0 16px;
+    scrollbar-width: thin;
+}
+
+.year-index button {
+    background: #12324A;
+    color: white;
+    border: 1px solid #12324A;
+    border-radius: 999px;
+    padding: 7px 13px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.4px;
+    box-shadow: 0 2px 6px rgba(18, 50, 74, 0.14);
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    min-height: 40px;
+}
+
+.year-index button:hover {
+    background: #C86A2F;
+    color: #12324A;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(200, 106, 47, 0.22);
+}
+
+.year-index button.active {
+    background: #C86A2F;
+    color: #12324A;
+    border-color: #C86A2F;
+    box-shadow: 0 4px 12px rgba(200, 106, 47, 0.26);
+}
+
+.year-header {
+    background: #12324A;
+    color: white;
+    padding: 12px 14px;
+    border-radius: 6px;
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.year-header.active {
+    background: #12324A;
+}
+
+.year-content {
+    background: #f8fbff;
+    border: 1px solid #dbe2ea;
+    border-left: 4px solid #12324A;
+    border-radius: 0 0 8px 8px;
+    padding: 14px;
+    display: none;
+    margin-bottom: 8px;
+}
+
+.year-content.active {
+    display: block;
+}
+
+.season-block {
+    margin-bottom: 16px;
+}
+
+.season-title {
+    background: #e8ecf1;
+    border-left: 4px solid #12324A;
+    color: #12324A;
+    border-radius: 5px;
+    padding: 10px 12px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.champions-table {
+    width: 100%;
+    min-width: 420px;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.champions-table th,
+.champions-table td {
+    border-bottom: 1px solid #e6edf3;
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.champions-table th {
+    background: #12324A;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.champions-table tr:last-child td {
+    border-bottom: none;
+}
+
+.note {
+    background: #e8ecf1;
+    padding: 14px;
+    border-radius: 6px;
+    margin-top: 18px;
+    border-left: 4px solid #12324A;
+    color: #555;
+    line-height: 1.5;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #12324A;
+    color: white;
+    margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    body {
+        background-attachment: scroll;
+    }
+
+    .container {
+        padding: 16px;
+    }
+
+    .navbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 14px 16px;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        width: 100%;
+        gap: 4px;
+    }
+
+    .navbar li {
+        margin: 0;
+    }
+
+    .navbar a {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 6px;
+        box-sizing: border-box;
+    }
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    .card,
+    .year-content {
+        padding: 16px;
+    }
+
+    .year-index {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        margin-bottom: 14px;
+        scroll-snap-type: x proximity;
+    }
+
+    .year-index button {
+        flex: 0 0 auto;
+        scroll-snap-align: start;
+    }
+
+    .year-header {
+        padding: 11px 12px;
+        font-size: 15px;
+    }
+
+    .champions-table th,
+    .champions-table td {
+        font-size: 12px;
+        padding: 7px;
+    }
+}
+
+/* ===== BANNER ===== */
+.banner {
+    position: relative;
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    gap: 12px;
+    text-align: center;
+}
+.banner h1 {
+    margin: 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0 0;
+}
+.banner .tagline {
+    margin-top: 10px;
+    font-size: 16px;
+    max-width: 620px;
+}
+.banner-logo {
+    width: 220px;
+    height: 160px;
+    object-fit: contain;
+}
+@media (max-width: 700px) {
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .banner h1 {
+        font-size: 32px;
+    }
+    .banner .subtitle,
+    .banner .tagline {
+        font-size: 14px;
+    }
+    .banner-logo {
+        width: 180px;
+        height: auto;
+    }
+}
+
+
+</style>
+</head>
+<body>
+
+<div class="banner">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
+    <h1>Latin & american men's softball league</h1>
+    <div class="subtitle">Established 1976</div>
+    <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+</div>
+
+<header>
+    <div class="navbar container">
+        <h2 class="navbar-brand"><span class="navbar-brand-gem" aria-hidden="true"></span>LAMSL</h2>
+        <ul>
+            <li><a href="LAMSL.html">Home</a></li>
+            <li><a href="standings.html">Standings</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="teams.html">Teams</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="events.html">Events &amp; Fundraisers</a></li>
+            <li><a href="hallofchampions.html" class="active-tab">Hall of Champions</a></li>
+            <li><a href="administrators.html">Admin</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</header>
+
+<div class="container">
+    <main>
+        <section class="card">
+            <h2>Hall of Champions</h2>
+            <p>Organized by year, season, division, champions and runners-up.</p>
+            <div id="year-index" class="year-index"></div>
+            <div id="years-wrap"></div>
+
+            <div class="note">
+                The Hall of Champions recognizes LAMSL teams' achievements since the league's founding in 2004. Complete championship records for all years are under ongoing documentation. If you have historical championship information to contribute, please contact the league.
+            </div>
+        </section>
+    </main>
+</div>
+
+<footer>
+    <p>&copy; Latino Men's Softball League (LAMSL)</p>
+</footer>
+
+<script>
+const CHAMPIONS_DATA = [
+    {
+        year: 2018,
+        seasons: [
+            {
+                name: 'Regular Season',
+                divisions: [
+                    { division: 'Division A', champion: 'Cudahy', runnerUp: 'Brewers' },
+                    { division: 'Division C Majors', champion: 'Pitch Slappers', runnerUp: 'Leones' },
+                    { division: 'Division C Minors', champion: 'Dope Boyz', runnerUp: 'Nasty Boyz' },
+                    { division: 'Division D', champion: 'Legends', runnerUp: 'Cudahy' },
+                    { division: 'Division E', champion: 'Pitch Slappers', runnerUp: 'Avalos' }
+                ]
+            },
+            {
+                name: 'Winter 2017/2018',
+                divisions: [
+                    { division: 'Division 1 Majors', champion: 'Titans', runnerUp: 'ROSO' },
+                    { division: 'Division 1 Minors', champion: 'Coyotes', runnerUp: 'Diablos' }
+                ]
+            }
+        ]
+    },
+    {
+        year: 2017,
+        seasons: [
+            {
+                name: 'Regular Season',
+                divisions: [
+                    { division: 'Division A', champion: 'ROSO', runnerUp: 'White Sox' },
+                    { division: 'Division B', champion: 'Bandits', runnerUp: 'Misfits' },
+                    { division: 'Division C', champion: 'Doom Squad', runnerUp: 'Los Potros' },
+                    { division: 'Division D', champion: 'Nasty Boyz', runnerUp: 'Los Primos' },
+                    { division: 'Division E', champion: 'Orioles', runnerUp: 'Brewers' }
+                ]
+            },
+            {
+                name: 'Winter 2016/2017',
+                divisions: [
+                    { division: 'Division 1 Majors', champion: 'ROSO', runnerUp: 'Titans' },
+                    { division: 'Division 1 Minors', champion: 'Paramount', runnerUp: 'Cardinals' },
+                    { division: 'Division 2 Majors', champion: 'Astros', runnerUp: 'Coyotes' },
+                    { division: 'Division 2 Minors', champion: 'Hustlers', runnerUp: 'Alacranes' }
+                ]
+            }
+        ]
+    },
+    {
+        year: 2016,
+        seasons: [
+            {
+                name: 'Regular Season',
+                divisions: [
+                    { division: 'Division A', champion: 'White Sox', runnerUp: 'ROSO' },
+                    { division: 'Division B', champion: 'Paramount', runnerUp: 'Bandits' },
+                    { division: 'Division C', champion: 'Misfits', runnerUp: 'Cubs' },
+                    { division: 'Division D', champion: 'No Chance', runnerUp: 'LA Blues' },
+                    { division: 'Division E', champion: 'Zacatecas', runnerUp: 'Orioles' }
+                ]
+            },
+            {
+                name: 'Winter 2015/2016',
+                divisions: [
+                    { division: 'Division 1', champion: 'ROSO', runnerUp: 'Titans' },
+                    { division: 'Division 2 Majors', champion: 'Astros', runnerUp: 'Coyotes' },
+                    { division: 'Division 2 Minors', champion: 'Bandits', runnerUp: 'Los Toros' }
+                ]
+            }
+        ]
+    },
+    {
+        year: 2015,
+        seasons: [
+            {
+                name: 'Regular Season',
+                divisions: [
+                    { division: 'Division A', champion: 'White Sox', runnerUp: 'Chicanos' },
+                    { division: 'Division B', champion: 'Bandits', runnerUp: 'Bomb Squad' },
+                    { division: 'Division C', champion: 'Pitch Slappers', runnerUp: 'Orioles' },
+                    { division: 'Division D', champion: 'Misfits', runnerUp: 'Zacatecas' },
+                    { division: 'Division E', champion: 'Borrachos', runnerUp: 'Antrax' }
+                ]
+            },
+            {
+                name: 'Winter 2014/2015',
+                divisions: [
+                    { division: 'Division 1 Majors', champion: 'Titans', runnerUp: 'Chicanos' },
+                    { division: 'Division 1 Minors', champion: 'Black Sox', runnerUp: 'Mavericks' },
+                    { division: 'Division 2 Majors', champion: 'Mexico', runnerUp: 'Coyotes' },
+                    { division: 'Division 2 Minors', champion: 'Lunatix', runnerUp: 'Camarones' }
+                ]
+            }
+        ]
+    },
+    {
+        year: 2014,
+        seasons: [
+            {
+                name: 'Regular Season',
+                divisions: [
+                    { division: 'Division A', champion: 'Punishers', runnerUp: 'Diamond Cutters' },
+                    { division: 'Division B', champion: 'Demons', runnerUp: 'Wolves' },
+                    { division: 'Division C', champion: 'Orioles', runnerUp: 'Paramount Pirates' },
+                    { division: 'Division D', champion: 'Bomb Squad', runnerUp: 'Cerveceros' }
+                ]
+            },
+            {
+                name: 'Winter 2013/2014',
+                divisions: [
+                    { division: 'Division 1', champion: 'Mavericks', runnerUp: 'Titans' },
+                    { division: 'Division 2', champion: 'Orioles', runnerUp: 'Cardinals' },
+                    { division: 'Division 3', champion: 'Lunatix', runnerUp: "Param'nt Pirates" }
+                ]
+            }
+        ]
+    },
+    {
+        year: 2013,
+        seasons: [
+            {
+                name: 'Regular Season',
+                divisions: [
+                    { division: 'Division A', champion: 'White Sox', runnerUp: 'Pirates' },
+                    { division: 'Division B', champion: 'Mavericks', runnerUp: 'Diamond Cutters' },
+                    { division: 'Division C', champion: 'Wolves', runnerUp: 'Balls Out' },
+                    { division: 'Division D', champion: 'Salt Lake', runnerUp: 'The LA Blues' },
+                    { division: 'Division E', champion: 'Cerveceros', runnerUp: 'Zacatecas' }
+                ]
+            },
+            {
+                name: 'Winter 2012/2013',
+                divisions: [
+                    { division: 'Division 1', champion: 'Bandits', runnerUp: 'Mavericks' },
+                    { division: 'Division 2', champion: 'Indians', runnerUp: 'Balls Out' }
+                ]
+            }
+        ]
+    },
+    {
+        year: 2012,
+        seasons: [
+            {
+                name: 'Regular Season',
+                divisions: [
+                    { division: 'Division A', champion: 'Punishers', runnerUp: 'White Sox' },
+                    { division: 'Division B', champion: 'Doom Squad', runnerUp: 'Wolves' },
+                    { division: 'Division C', champion: 'Indians', runnerUp: 'Orioles' },
+                    { division: 'Division D', champion: 'Trucha', runnerUp: 'Tampa Bay' },
+                    { division: 'Division E', champion: 'Salt Lake', runnerUp: 'Zacatecas' }
+                ]
+            },
+            {
+                name: 'Winter 2011/2012',
+                divisions: [
+                    { division: 'Division 1', champion: 'Bandits', runnerUp: 'Mavericks' },
+                    { division: 'Division 2', champion: 'Coyotes', runnerUp: 'Tigers' }
+                ]
+            }
+        ]
+    },
+    {
+        year: 2011,
+        seasons: [
+            {
+                name: 'Regular Season',
+                divisions: [
+                    { division: 'Division A Majors', champion: 'White Sox', runnerUp: 'Nationals' },
+                    { division: 'Division A Minors', champion: 'Red Sox', runnerUp: 'Phillies' },
+                    { division: 'Division B', champion: 'Mavericks', runnerUp: 'Bandits' },
+                    { division: 'Division C', champion: 'Braves', runnerUp: 'Twins' },
+                    { division: 'Division D', champion: "Hit n' Run", runnerUp: 'The LA Blues' }
+                ]
+            },
+            {
+                name: 'Winter 2010/2011',
+                divisions: [
+                    { division: 'Division 1', champion: 'Titans', runnerUp: 'Nationals' },
+                    { division: 'Division 2', champion: 'Bandits', runnerUp: 'Coyotes' },
+                    { division: 'Division 3', champion: 'Twins', runnerUp: 'Cardinals' }
+                ]
+            }
+        ]
+    },
+    {
+        year: 2010,
+        seasons: [
+            {
+                name: 'Regular Season',
+                divisions: [
+                    { division: 'Division A', champion: 'White Sox', runnerUp: 'Nationals' },
+                    { division: 'Division B', champion: 'Phillies', runnerUp: 'Titans' },
+                    { division: 'Division C', champion: 'Expos', runnerUp: 'Bandits' },
+                    { division: 'Division D', champion: 'Mavericks', runnerUp: 'Showtime' },
+                    { division: 'Division E', champion: 'Tampa Bay', runnerUp: 'Peloteros' },
+                    { division: 'Division F', champion: 'NY Yankees', runnerUp: 'Braves' }
+                ]
+            },
+            {
+                name: 'Winter 2009/2010',
+                divisions: [
+                    { division: 'Division 1', champion: 'Mixed Blood', runnerUp: 'Dodgers' },
+                    { division: 'Division 2', champion: 'Bandits', runnerUp: 'Coyotes' }
+                ]
+            }
+        ]
+    },
+    {
+        year: 2009,
+        seasons: [
+            {
+                name: 'Regular Season',
+                divisions: [
+                    { division: 'Division A', champion: 'Cobras', runnerUp: 'White Sox' },
+                    { division: 'Division B', champion: 'Phillies', runnerUp: 'Orioles' },
+                    { division: 'Division C', champion: 'Chicanos', runnerUp: 'Wolves' },
+                    { division: 'Division D', champion: 'Bandits', runnerUp: 'Beavers' },
+                    { division: 'Division E', champion: 'Venados', runnerUp: 'Rangers' }
+                ]
+            },
+            {
+                name: 'Winter 2008/2009',
+                divisions: [
+                    { division: 'Division 1', champion: 'Cobras', runnerUp: 'Dodgers' },
+                    { division: 'Division 2', champion: 'Venados', runnerUp: 'Diamond Cutters' }
+                ]
+            }
+        ]
+    },
+    {
+        year: 2008,
+        seasons: [
+            {
+                name: 'Regular Season',
+                divisions: [
+                    { division: 'Division A', champion: 'Nationals', runnerUp: 'White Sox' },
+                    { division: 'Division B', champion: 'Phillies', runnerUp: 'Riots' },
+                    { division: 'Division C', champion: 'Titans', runnerUp: 'Orioles' },
+                    { division: 'Division D', champion: 'SG Scorpions', runnerUp: 'Royals' },
+                    { division: 'Division E', champion: 'Bell', runnerUp: 'Rangers' }
+                ]
+            },
+            {
+                name: 'Winter 2007/2008',
+                divisions: [
+                    { division: 'Division 1', champion: 'Washington', runnerUp: 'Cobras' },
+                    { division: 'Division 2', champion: 'SG Scorpions', runnerUp: 'Titans' }
+                ]
+            }
+        ]
+    },
+    {
+        year: 2007,
+        seasons: [
+            {
+                name: 'Regular Season',
+                divisions: [
+                    { division: 'Division A', champion: 'Washington', runnerUp: 'I.E. Nicas' },
+                    { division: 'Division B', champion: 'Aztecs', runnerUp: 'Vernon' },
+                    { division: 'Division C', champion: 'Phillies', runnerUp: 'Riots' },
+                    { division: 'Division D', champion: 'Outlaws', runnerUp: 'Orioles' },
+                    { division: 'Division E', champion: "A's", runnerUp: 'Tigers' }
+                ]
+            },
+            {
+                name: 'Winter 2006/2007',
+                divisions: [
+                    { division: 'Division 1', champion: 'Yankees', runnerUp: 'Boer' },
+                    { division: 'Division 2/3', champion: 'Blue Balls', runnerUp: 'Balls Out' }
+                ]
+            }
+        ]
+    },
+    {
+        year: 2006,
+        seasons: [
+            {
+                name: 'Regular Season',
+                divisions: [
+                    { division: 'Division A', champion: 'White Sox', runnerUp: 'Bonanza' },
+                    { division: 'Division B', champion: 'Untouchables', runnerUp: 'Reds' },
+                    { division: 'Division C', champion: 'Vernon', runnerUp: 'Riots' },
+                    { division: 'Division D', champion: 'Outlaws', runnerUp: 'Coyotes' },
+                    { division: 'Division E', champion: 'Angels', runnerUp: 'Demons' }
+                ]
+            },
+            {
+                name: 'Winter 2005/2006',
+                divisions: [
+                    { division: 'Division 1', champion: 'Yankees', runnerUp: 'Reds' },
+                    { division: 'Division 2', champion: 'SG Scorpions', runnerUp: 'Balls Out' }
+                ]
+            }
+        ]
+    },
+    {
+        year: 2005,
+        seasons: [
+            {
+                name: 'Regular Season',
+                divisions: [
+                    { division: 'Division A', champion: 'Bonanza', runnerUp: 'White Sox' },
+                    { division: 'Division B', champion: 'Cobras', runnerUp: 'Yankees' },
+                    { division: 'Division C', champion: 'Vernon', runnerUp: 'Chicanos' },
+                    { division: 'Division D', champion: 'Coyotes', runnerUp: 'Beavers' },
+                    { division: 'Division E', champion: 'Mariners', runnerUp: 'Angels' },
+                    { division: 'Division F', champion: 'Royals', runnerUp: 'No Limit' }
+                ]
+            },
+            {
+                name: 'Winter 2004/2005',
+                divisions: [
+                    { division: 'Division 1', champion: 'Coyotes', runnerUp: 'Poundum' },
+                    { division: 'Division 2', champion: 'Young Guns', runnerUp: 'Mariners' }
+                ]
+            }
+        ]
+    },
+    {
+        year: 2004,
+        seasons: [
+            {
+                name: 'Regular Season',
+                divisions: [
+                    { division: 'Division A', champion: 'White Sox', runnerUp: 'Red Sox' },
+                    { division: 'Division B', champion: 'Poundum', runnerUp: 'South Gate' },
+                    { division: 'Division C', champion: 'Yankees', runnerUp: 'Vernon' },
+                    { division: 'Division D', champion: 'Chicanos', runnerUp: 'Outlaws' },
+                    { division: 'Division E', champion: 'Raiders', runnerUp: 'Angels' },
+                    { division: 'Division F', champion: 'Tigers', runnerUp: 'Beaver Fever' }
+                ]
+            }
+        ]
+    }
+];
+
+const yearIndex = document.getElementById('year-index');
+const yearsWrap = document.getElementById('years-wrap');
+
+function setActiveYearButton(activeYear) {
+    const yearButtons = yearIndex.querySelectorAll('button');
+
+    yearButtons.forEach(button => {
+        button.classList.toggle('active', button.textContent === String(activeYear));
+    });
+}
+
+function renderPage() {
+    yearIndex.innerHTML = '';
+    yearsWrap.innerHTML = '';
+
+    CHAMPIONS_DATA.forEach((yearEntry, yearIndexPos) => {
+        const yearHeader = document.createElement('div');
+        yearHeader.className = yearIndexPos === 0 ? 'year-header active' : 'year-header';
+        yearHeader.id = `year-${yearEntry.year}`;
+        yearHeader.innerHTML = `<span>${yearEntry.year}</span><span>${yearIndexPos === 0 ? '-' : '+'}</span>`;
+
+        const yearContent = document.createElement('div');
+        yearContent.className = yearIndexPos === 0 ? 'year-content active' : 'year-content';
+
+        yearEntry.seasons.forEach(season => {
+            const seasonBlock = document.createElement('div');
+            seasonBlock.className = 'season-block';
+
+            const seasonTitle = document.createElement('div');
+            seasonTitle.className = 'season-title';
+            seasonTitle.textContent = season.name;
+            seasonBlock.appendChild(seasonTitle);
+
+            const table = document.createElement('table');
+            table.className = 'champions-table';
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Division</th>
+                        <th>Champion</th>
+                        <th>Runner-up</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${season.divisions.map(item => `
+                        <tr>
+                            <td>${item.division}</td>
+                            <td>${item.champion}</td>
+                            <td>${item.runnerUp}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+
+            const tableScroll = document.createElement('div');
+            tableScroll.className = 'table-scroll';
+            tableScroll.appendChild(table);
+
+            seasonBlock.appendChild(tableScroll);
+            yearContent.appendChild(seasonBlock);
+        });
+
+        yearHeader.addEventListener('click', () => {
+            const isActive = yearHeader.classList.contains('active');
+            yearHeader.classList.toggle('active', !isActive);
+            yearContent.classList.toggle('active', !isActive);
+            yearHeader.querySelector('span:last-child').textContent = isActive ? '+' : '-';
+
+            if (!isActive) {
+                setActiveYearButton(yearEntry.year);
+            }
+        });
+
+        yearsWrap.appendChild(yearHeader);
+        yearsWrap.appendChild(yearContent);
+
+        const jumpBtn = document.createElement('button');
+        jumpBtn.type = 'button';
+        jumpBtn.textContent = String(yearEntry.year);
+        jumpBtn.addEventListener('click', () => {
+            yearHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (!yearHeader.classList.contains('active')) {
+                yearHeader.click();
+                return;
+            }
+
+            setActiveYearButton(yearEntry.year);
+        });
+        yearIndex.appendChild(jumpBtn);
+    });
+
+    if (CHAMPIONS_DATA.length > 0) {
+        setActiveYearButton(CHAMPIONS_DATA[0].year);
+    }
+}
+
+renderPage();
+
+// ===== SEASON BANNER =====
+(function () {
+    try {
+        const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
+        const el = document.getElementById('banner-tagline');
+        if (s && el) {
+            const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
+        }
+    } catch (e) {}
+})();
+</script>
+</body>
+</html>

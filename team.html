@@ -1,0 +1,2693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<title>LAMSL - Team Profile</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
+    background-color: #eef4ea;
+    background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    background-size: min(60vw, 540px);
+    background-attachment: fixed;
+    color: #333;
+}
+
+h1, h2, h3 {
+    margin-bottom: 10px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+header {
+    background: #12324A;
+    color: white;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+}
+
+.navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+    margin: 0;
+    font-size: 20px;
+}
+
+.navbar-brand-gem {
+    width: 24px;
+    height: 18px;
+    background:
+        linear-gradient(90deg, transparent 0 22%, rgba(255, 255, 255, 0.7) 22% 28%, transparent 28% 72%, rgba(94, 108, 122, 0.24) 72% 78%, transparent 78% 100%),
+        linear-gradient(180deg, #fbfdff 0%, #dfe5ec 34%, #b5c0cb 62%, #7c8a97 100%);
+    clip-path: polygon(24% 6%, 76% 6%, 100% 35%, 67% 100%, 33% 100%, 0% 35%);
+    border: 1px solid rgba(248, 251, 255, 0.78);
+    box-shadow: 0 0 0 1px rgba(86, 96, 108, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.82), inset 0 -1px 0 rgba(85, 96, 108, 0.4);
+    position: relative;
+    display: inline-block;
+    flex: 0 0 auto;
+}
+
+.navbar-brand-gem::after {
+    content: "";
+    position: absolute;
+    inset: 2px 4px 2px 4px;
+    clip-path: polygon(50% 0%, 80% 26%, 64% 100%, 36% 100%, 20% 26%);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.15)),
+        linear-gradient(90deg, transparent 0 46%, rgba(126, 138, 151, 0.82) 46% 54%, transparent 54% 100%);
+    opacity: 0.95;
+    pointer-events: none;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar li {
+    margin: 0;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    display: block;
+}
+
+.navbar a:hover {
+    color: #F1D27A;
+}
+
+.navbar a.active-tab {
+    color: #F1D27A;
+    border-bottom: 2px solid #C86A2F;
+    padding-bottom: 2px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.team-overview-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.9fr 0.9fr;
+    gap: 16px;
+    align-items: stretch;
+}
+
+.team-content-grid {
+    display: grid;
+        grid-template-columns: 1.35fr 1fr;
+        gap: 16px;
+        align-items: stretch;
+        margin-bottom: 20px;
+    }
+
+    .team-manager-panel {
+        display: grid;
+        gap: 16px;
+    }
+
+    .content-panel {
+        border: 1px solid #dbe2ea;
+        border-radius: 14px;
+        background: linear-gradient(180deg, #ffffff, #f8fbfe);
+        padding: 16px;
+        min-width: 0;
+    }
+
+    .player-form-grid {
+        display: grid;
+        gap: 12px;
+    }
+
+    .player-form-grid label {
+        font-weight: 700;
+        font-size: 14px;
+        color: #12324A;
+    }
+
+    .player-form-grid input,
+    .player-form-grid textarea,
+    .player-form-grid select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #c5d0da;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 14px;
+    }
+
+    .player-form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .player-form-actions button {
+        background: #12324A;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 14px;
+        cursor: pointer;
+        font-family: inherit;
+        font-weight: 700;
+    }
+
+    .player-form-actions button.secondary {
+        background: #ced7df;
+        color: #12324A;
+    }
+
+    .player-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .player-card {
+        border: 1px solid #dbe2ea;
+        border-radius: 12px;
+        padding: 14px;
+        background: #ffffff;
+        display: grid;
+        grid-template-columns: 84px 1fr auto;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .player-card img {
+        width: 84px;
+        height: 84px;
+        border-radius: 14px;
+        object-fit: cover;
+        background: #f2f7fb;
+        border: 1px solid #d2dde8;
+    }
+
+    .player-card-content {
+        min-width: 0;
+    }
+
+    .player-card-content h4 {
+        margin: 0 0 6px;
+        font-size: 18px;
+    }
+
+    .player-card-content p {
+        margin: 4px 0;
+        font-size: 14px;
+        color: #334153;
+        line-height: 1.4;
+    }
+
+    .player-card-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-end;
+    }
+
+    .player-card-actions button {
+        background: #12324A;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 10px;
+        cursor: pointer;
+        font-size: 13px;
+    }
+
+    .player-card-actions button.danger {
+        background: #bd3a3a;
+    }
+
+    .player-profiles-empty {
+        color: #5d6c72;
+        margin: 0;
+    }
+
+    .roster-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 16px;
+    }
+
+    .roster-card {
+        border: 1px solid #dbe2ea;
+        border-radius: 12px;
+        padding: 14px;
+        background: #ffffff;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        cursor: pointer;
+    }
+
+    .roster-card h4 {
+        margin: 0;
+        font-size: 16px;
+    }
+
+    .roster-card p {
+        margin: 2px 0;
+        font-size: 14px;
+        color: #334153;
+    }
+
+    .roster-card .checkin-count {
+        margin-top: 6px;
+        font-size: 13px;
+        color: #0f3a6f;
+    }
+
+    .manager-toolbar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .manager-toolbar button {
+        background: #12324A;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 14px;
+        cursor: pointer;
+        font-family: inherit;
+        font-weight: 700;
+    }
+
+    .manager-toolbar button.danger {
+        background: #bd3a3a;
+    }
+
+    .small-manager-panel {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 16px;
+    }
+
+    .small-manager-panel .content-panel {
+        max-width: 400px;
+        width: 100%;
+    }
+
+.content-panel h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #12324A;
+    font-size: 20px;
+}
+
+.schedule-filters {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 10px 0 12px;
+}
+
+.schedule-filters select,
+.schedule-filters input[type="date"] {
+    padding: 8px;
+    border: 1px solid #c5d0da;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    background: white;
+}
+
+.overview-panel {
+    border: 1px solid #dbe2ea;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #ffffff, #f8fbfe);
+    padding: 16px;
+    min-width: 0;
+}
+
+.overview-panel h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #12324A;
+    font-size: 20px;
+}
+
+.team-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 16px;
+}
+
+.team-chip {
+    background: #12324A;
+    color: white;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    justify-self: start;
+    margin-top: 10px;
+}
+
+.team-photo-panel {
+    display: grid;
+    gap: 10px;
+    justify-items: center;
+}
+
+.team-photo-frame {
+    width: 220px;
+    aspect-ratio: 1 / 1;
+    border-radius: 18px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f2f7fb, #deebf5);
+    border: 1px solid #d2dde8;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    display: grid;
+    place-items: center;
+}
+
+.team-photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.team-photo-placeholder {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 18px;
+    text-align: center;
+    color: #5a6977;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.team-photo-controls {
+    width: min(100%, 220px);
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    background: #f7fbff;
+    padding: 12px;
+}
+
+.team-photo-controls input[type="file"] {
+    width: 100%;
+    margin: 8px 0;
+}
+
+.team-photo-controls button {
+    width: 100%;
+    background: #12324A;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.team-photo-controls button:hover {
+    background: #004080;
+}
+
+#team-schedule-wrap,
+#roster-table-wrap {
+    scrollbar-width: thin;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    vertical-align: middle;
+}
+
+.status-scheduled { background: #d4edda; color: #1a7a1a; }
+.status-postponed { background: #fde8d8; color: #C86A2F; }
+.status-cancelled { background: #f8d7da; color: #9a1616; }
+
+.info-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.info-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #e7edf3;
+    font-size: 15px;
+}
+
+.info-list li:last-child {
+    border-bottom: none;
+}
+
+.score-highlight {
+    color: #0f5f1f;
+    font-weight: 700;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    border: 1px solid #dbe2ea;
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 14px;
+}
+
+th {
+    background: #12324A;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+tr:nth-child(even) td {
+    background: #f6f9fc;
+}
+
+.check-in-game-btn {
+    padding: 6px 14px;
+    background: #C86A2F;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+.check-in-game-btn:hover:not(:disabled) {
+    background: #b35a24;
+}
+
+.check-in-game-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.roster-controls {
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    background: #f7fbff;
+    padding: 14px;
+    margin-bottom: 14px;
+}
+
+.roster-controls input[type="file"] {
+    margin: 8px 0;
+}
+
+.roster-controls button {
+    background: #12324A;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+}
+
+.roster-controls button:hover {
+    background: #004080;
+}
+
+.muted {
+    color: #6c7680;
+    font-size: 14px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #12324A;
+    color: white;
+    margin-top: 20px;
+}
+
+@media (max-width: 900px) {
+    .team-overview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .team-content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .schedule-filters {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        background-attachment: scroll;
+    }
+
+    .container {
+        padding: 16px;
+    }
+
+    .navbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 14px 16px;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        width: 100%;
+        gap: 4px;
+    }
+
+    .navbar li {
+        margin: 0;
+    }
+
+    .navbar a {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 6px;
+        box-sizing: border-box;
+    }
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    .team-hero {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .team-photo-panel,
+    .team-chip {
+        justify-self: start;
+    }
+
+    .card,
+    .roster-controls {
+        padding: 16px;
+    }
+
+    .overview-panel {
+        padding: 14px;
+    }
+
+    .info-list li {
+        font-size: 14px;
+    }
+
+    .roster-controls input[type="file"],
+    .roster-controls button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #team-schedule-wrap,
+    #roster-table-wrap,
+    #player-checkin-panel {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #team-schedule-wrap table,
+    #roster-table-wrap table {
+        min-width: 640px;
+    }
+
+    .schedule-row {
+        cursor: pointer;
+    }
+
+    .schedule-row:hover {
+        background: #f4f9ff;
+    }
+
+    #player-checkin-panel {
+        margin-top: 18px;
+        background: #f9fbfd;
+        border: 1px solid #dbe2ea;
+        border-radius: 14px;
+        padding: 16px;
+    }
+
+    #player-checkin-panel h4 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        color: #12324A;
+    }
+
+    .checkin-player-list {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .checkin-player-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 10px 12px;
+        border: 1px solid #d5dae1;
+        border-radius: 10px;
+        background: white;
+    }
+
+    .checkin-player-item label {
+        margin: 0;
+        flex: 1;
+        font-size: 14px;
+        color: #2f4250;
+    }
+
+    .checkin-player-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .checkin-player-actions button {
+        background: #12324A;
+        color: white;
+        border: none;
+        border-radius: 9px;
+        padding: 10px 14px;
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    .checkin-status {
+        margin: 0;
+        color: #334153;
+        font-size: 14px;
+    }
+
+    .upcoming-games-panel {
+        margin-bottom: 16px;
+        padding: 12px;
+        background: #f8fbfe;
+        border-radius: 6px;
+        border: 1px solid #dbe2ea;
+    }
+
+    .upcoming-games-panel label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #12324A;
+        font-size: 14px;
+    }
+
+    .upcoming-games-panel select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #dbe2ea;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .checkin-player-controls {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: end;
+        margin-bottom: 12px;
+        padding: 12px;
+        background: #f8fbfe;
+        border-radius: 6px;
+        border: 1px solid #dbe2ea;
+    }
+
+    .checkin-player-controls label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #12324A;
+        font-size: 14px;
+    }
+
+    .checkin-player-controls select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #dbe2ea;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .checkin-player-controls button {
+        padding: 8px 16px;
+        background: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .checkin-player-item.selected {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        background: #e3f2fd;
+        border: 1px solid #90caf9;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .checkin-player-item.selected button {
+        padding: 4px 8px;
+        background: #d32f2f;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+    }
+}
+
+/* ===== BANNER ===== */
+.banner {
+    position: relative;
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    gap: 12px;
+    text-align: center;
+}
+.banner h1 {
+    margin: 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0 0;
+}
+.banner .tagline {
+    margin-top: 10px;
+    font-size: 16px;
+    max-width: 620px;
+}
+.banner-logo {
+    width: 220px;
+    height: 160px;
+    object-fit: contain;
+}
+@media (max-width: 700px) {
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .banner h1 {
+        font-size: 32px;
+    }
+    .banner .subtitle,
+    .banner .tagline {
+        font-size: 14px;
+    }
+    .banner-logo {
+        width: 180px;
+        height: auto;
+    }
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 14px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #dbe2ea;
+    background: #f8fbfe;
+    border-radius: 14px 14px 0 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #12324A;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #6c7680;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    color: #12324A;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.player-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.player-form-grid label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #12324A;
+}
+
+.player-form-grid input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #dbe2ea;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.player-form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.player-form-actions button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.player-form-actions .secondary {
+    background: #f1f3f4;
+    color: #5f6368;
+}
+
+.player-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.player-card {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid #dbe2ea;
+    border-radius: 8px;
+    background: #f8fbfe;
+}
+
+.player-card img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.player-card-content {
+    flex: 1;
+}
+
+.player-card-content h4 {
+    margin: 0 0 8px 0;
+    color: #12324A;
+}
+
+.player-card-content p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #5f6368;
+}
+
+.player-card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.player-card-actions button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.player-card-actions .danger {
+    background: #d32f2f;
+    color: white;
+}
+
+.player-profiles-empty {
+    text-align: center;
+    color: #9aa0a6;
+    font-style: italic;
+    padding: 40px;
+}
+
+</style>
+</head>
+
+<body>
+<div class="banner">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
+    <h1>Latin & American men's softball league</h1>
+    <div class="subtitle">Established 1976</div>
+    <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+</div>
+
+<header>
+    <div class="navbar container">
+        <h2 class="navbar-brand"><span class="navbar-brand-gem" aria-hidden="true"></span>LAMSL</h2>
+        <ul>
+            <li><a href="LAMSL.html">Home</a></li>
+            <li><a href="standings.html" class="active-tab">Standings</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="teams.html">Teams</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="events.html">Events &amp; Fundraisers</a></li>
+            <li><a href="hallofchampions.html">Hall of Champions</a></li>
+            <li><a href="administrators.html">Admin</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</header>
+
+<div class="container">
+    <main>
+        <section class="card team-overview-grid">
+            <div class="overview-panel">
+                <div class="team-hero">
+                    <div>
+                        <h2 id="team-title">Team Profile</h2>
+                        <p class="muted" id="team-subtitle">Select a team from a division standings page.</p>
+                        <div class="team-chip" id="team-division-chip">Division -</div>
+                    </div>
+                    <div class="team-photo-panel">
+                        <div class="team-photo-frame" id="team-photo-frame">
+                            <div class="team-photo-placeholder" id="team-photo-placeholder">No Team Photo</div>
+                            <img id="team-photo" alt="Team profile photo" style="display:none;">
+                        </div>
+                        <div class="team-photo-controls">
+                            <p id="team-photo-status" class="muted">Team profile media is visible to all users. Admin sign-in required to upload.</p>
+                            <input id="team-photo-file" type="file" accept="image/*">
+                            <button id="upload-team-photo-btn" type="button">Upload Team Photo</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="overview-panel">
+                <h3>Standings Snapshot</h3>
+                <ul class="info-list" id="standings-summary"></ul>
+            </div>
+            <div class="overview-panel">
+                <h3>Latest Results</h3>
+                <ul class="info-list" id="latest-results"></ul>
+            </div>
+        </section>
+
+        </section>
+
+        <div class="small-manager-panel">
+            <div class="content-panel">
+                <h3>Team Manager Panel</h3>
+                <div class="manager-toolbar">
+                    <button id="add-player-btn" type="button">Add Player</button>
+                    <button id="remove-player-btn" type="button" class="danger">Remove Player</button>
+                </div>
+            </div>
+        </div>
+
+        <section class="team-content-grid">
+            <div class="content-panel">
+                <h3>Team Schedule</h3>
+                <p class="muted">Includes regular schedule and practice/scrimmage games.</p>
+                <div class="schedule-filters">
+                    <select id="schedule-period-filter" aria-label="Schedule period filter">
+                        <option value="all">All Dates</option>
+                        <option value="month">Month</option>
+                        <option value="week">Week</option>
+                        <option value="day">Day</option>
+                    </select>
+                    <select id="schedule-season-filter" aria-label="Schedule season filter">
+                        <option value="all">All Seasons</option>
+                        <option value="regular">Regular</option>
+                        <option value="winter">Winter</option>
+                        <option value="practice">Practice</option>
+                    </select>
+                    <input id="schedule-anchor-date" type="date" aria-label="Schedule anchor date">
+                </div>
+                <div class="upcoming-games-panel">
+                    <label for="upcoming-game-select">Upcoming scheduled games</label>
+                    <select id="upcoming-game-select" aria-label="Upcoming scheduled games">
+                        <option value="">Select a game to check in players</option>
+                    </select>
+                </div>
+                <div id="team-schedule-wrap"></div>
+                <div id="player-checkin-panel" style="display:none;">
+                    <h4>Player Check-In</h4>
+                    <p id="checkin-game-label" class="muted">Select a player from the roster and add them to the selected game.</p>
+                    <div class="checkin-player-controls">
+                        <label for="checkin-player-select">Player name</label>
+                        <select id="checkin-player-select" aria-label="Player name for check in">
+                            <option value="">Choose a player</option>
+                        </select>
+                        <button id="add-player-checkin-btn" type="button">Add Player</button>
+                    </div>
+                    <div id="checkin-selected-players" class="checkin-player-list"></div>
+                    <div class="checkin-player-actions">
+                        <button id="save-checkin-btn" type="button">Save Check-In</button>
+                        <button id="clear-checkin-btn" type="button" class="secondary">Clear Selection</button>
+                    </div>
+                    <p id="checkin-status" class="checkin-status"></p>
+                </div>
+            </div>
+
+            <div class="content-panel">
+                <h3>Team Roster</h3>
+                <div class="roster-controls">
+                    <p id="roster-admin-status" class="muted">Admin sign-in required to upload roster spreadsheets.</p>
+                    <input id="roster-file" type="file" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                    <button id="upload-roster-btn" type="button">Upload Roster Spreadsheet</button>
+                    <p class="muted">Spreadsheet tip: use column headers like Name, Position, Phone, Email.</p>
+                </div>
+                <div id="roster-grid-wrap" class="roster-grid"></div>
+                <div id="player-profiles-wrap"></div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<footer>
+    <p>&copy; Latin & American Men's Softball League (LAMSL)</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+const SESSION_KEY = 'lamslSessionV1';
+const SCHEDULE_KEY = 'lamslWeeklyScheduleV3';
+const PRACTICE_KEY = 'lamslPracticeScheduleV1';
+const ROSTER_KEY = 'lamslTeamRostersV1';
+const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
+const TEAM_CHECKIN_KEY = 'lamslTeamGameCheckinsV1';
+const TEAM_MANAGER_ASSIGNMENTS_KEY = 'lamslTeamManagerAssignmentsV1';
+
+// Populate rosters from spreadsheet data
+(function() {
+    const rosterData = {
+        "Division A": {
+            "La Tribu": [
+               
+            ],
+            "Nasty Boyz": [
+               
+            ],
+            "Toxic": [
+             
+            ],
+            "Titans": [
+              
+            ],
+            "White Sox": [
+               
+            ],
+            "Legends": [
+               
+            ],
+        },
+        "Division B": {
+            "Cubs": [
+               
+            ],
+            "Primos": [
+               
+            ],
+            "Dodgers": [
+               
+            ],
+            "Diablos": [
+               
+            ],
+            "Charros": [
+               
+            ],
+            "Doom Squad": [
+               
+            ]
+        },
+        "Division C": {
+            "Demons": [
+                
+            ],
+            "Naranjeros": [
+                
+            ],
+            "Caballeros": [
+               
+            ],
+            "Salvajes": [
+              
+            ],
+            "Coyotes": [
+                
+            ],
+            "Bandits": [
+               
+            ],
+            "Orioles": [
+                
+            ],
+            "Goodfellas": [
+            
+            ]
+        },
+        "Division D": {
+            "Strokes": [
+                
+            ],
+            "Dirt Bags": [
+            
+            ],
+            "Camaradas": [
+               
+            ],
+            "Wild Hogz": [
+               
+            ],
+            "Los Pericos": [
+               
+            ],
+            "Xolos": [
+               
+            ],
+            "Desvelados": [
+                
+            ],
+           
+        },
+        "Winter Division 1": {
+            "Charros": [
+              
+            ],
+            "Goodfellas": [
+                
+            ],
+            "La Tribu": [
+               
+            ],
+            "LAMSL OG's": [
+               
+            ],
+            "Legends": [
+              
+            ],
+            "Titans": [
+               
+            ]
+        },
+        "Winter Division 2": {
+            "Balls Out": [
+               
+            ],
+            "Bastards": [
+               
+            ],
+            "Coyotes": [
+                
+            ],
+            "Diablos": [
+              
+            ],
+            "Hitmen": [
+               
+            ],
+            "Peloteros": [
+                
+            ],
+            "Showtime": [
+                
+            ],
+            "Wild Hogz": [
+                
+            ]
+        }
+    };
+
+    const existingRosters = readJson(ROSTER_KEY, {});
+    const mergedRosters = { ...existingRosters };
+
+    for (const division in rosterData) {
+        if (!mergedRosters[division]) mergedRosters[division] = {};
+        for (const team in rosterData[division]) {
+            if (!mergedRosters[division][team]) {
+                mergedRosters[division][team] = rosterData[division][team];
+            }
+        }
+    }
+
+    localStorage.setItem(ROSTER_KEY, JSON.stringify(mergedRosters));
+})();
+
+const standingsByDivision = {
+    A: [
+        { team: 'La Tribu', w: 2, l: 0, t: 0, gb: '' },
+        { team: 'Nasty Boyz', w: 1, l: 2, t: 0, gb: '' },
+        { team: 'Toxic', w: 1, l: 1, t: 0, gb: '' },
+        { team: 'Titans', w: 1, l: 1, t: 0, gb: '' },
+        { team: 'White Sox', w: 1, l: 1, t: 1, gb: '' },
+        { team: 'Legends', w: 0, l: 2, t: 1, gb: '' }
+    ],
+
+    B: [
+        { team: 'Cubs', w: 3, l: 0, t: 1, gb: '' },
+        { team: 'Primos', w: 2, l: 0, t: 1, gb: '' },
+        { team: 'Dodgers', w: 2, l: 1, t: 1, gb: '' },
+        { team: 'Diablos', w: 1, l: 1, t: 1, gb: '' },
+        { team: 'Charros', w: 1, l: 3, t: 0, gb: '' },
+        { team: 'Doom Squad', w: 0, l: 3, t: 0, gb: '' }
+    ],
+
+    C: [
+        { team: 'Demons', w: 4, l: 0, t: 0, gb: '' },
+        { team: 'Naranjeros', w: 3, l: 0, t: 0, gb: '' },
+        { team: 'Caballeros', w: 3, l: 1, t: 0, gb: '' },
+        { team: 'Salvajes', w: 1, l: 2, t: 0, gb: '' },
+        { team: 'Coyotes', w: 1, l: 2, t: 1, gb: '' },
+        { team: 'Bandits', w: 1, l: 3, t: 0, gb: '' },
+        { team: 'Orioles', w: 1, l: 3, t: 0, gb: '' },
+        { team: 'Goodfellas', w: 0, l: 3, t: 1, gb: '' }
+    ],
+
+    D: [
+        { team: 'Strokes', w: 4, l: 0, t: 0, gb: '' },
+        { team: 'Dirt Bags', w: 3, l: 0, t: 0, gb: '' },
+        { team: 'Camaradas', w: 2, l: 1, t: 0, gb: '' },
+        { team: 'Wild Hogz', w: 2, l: 1, t: 0, gb: '' },
+        { team: 'Los Pericos', w: 1, l: 1, t: 0, gb: '' },
+        { team: 'Xolos', w: 0, l: 4, t: 0, gb: '' },
+        { team: 'Desvelados', w: 0, l: 4, t: 0, gb: '' }
+    ]
+    W1: [
+        { team: 'Titans', w: 9, l: 1, t: 0, gb: '' },
+        { team: 'La Tribu', w: 9, l: 1, t: 1, gb: '' },
+        { team: 'Legends', w: 8, l: 3, t: 0, gb: '' },
+        { team: 'LAMSL OG\'s', w: 7, l: 3, t: 0, gb: '' },
+        { team: 'Charros', w: 6, l: 4, t: 0, gb: '' },
+        { team: 'Goodfellas', w: 4, l: 5, t: 0, gb: '' }
+    ],
+    W2: [
+        { team: 'Wild Hogz', w: 2, l: 0, t: 0, gb: '-' },
+        { team: 'Showtime', w: 0, l: 1, t: 0, gb: '-' },
+        { team: 'Diablos', w: 1, l: 0, t: 0, gb: '-' },
+        { team: 'Balls Out', w: 0, l: 2, t: 0, gb: '-' },
+        { team: 'Peloteros', w: 1, l: 0, t: 0, gb: '-' },
+        { team: 'Hitmen', w: 2, l: 0, t: 0, gb: '-' },
+        { team: 'Bastards', w: 0, l: 1, t: 0, gb: '-' },
+        { team: 'Coyotes', w: 0, l: 1, t: 0, gb: '-' }
+    ]
+};
+
+const divisionLabelMap = {
+    A: 'Division A',
+    B: 'Division B',
+    C: 'Division C',
+    D: 'Division D',
+    E: 'Division E',
+    W1: 'Winter Division 1',
+    W2: 'Winter Division 2'
+};
+
+function readJson(key, fallback) {
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+    } catch (error) {
+        return fallback;
+    }
+}
+
+function writeJson(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+}
+
+function getTeamManagerAssignments() {
+    return readJson(TEAM_MANAGER_ASSIGNMENTS_KEY, {});
+}
+
+function isTeamManagerAssignedToTeam(teamName) {
+    const session = readJson(SESSION_KEY, null);
+    if (!session || session.role !== 'team-manager' || !teamName) {
+        return false;
+    }
+    const assignments = getTeamManagerAssignments();
+    const assignedTeams = Array.isArray(assignments[session.username]) ? assignments[session.username] : [];
+    return assignedTeams.includes(teamName);
+}
+
+function isAdminLoggedIn() {
+    const session = readJson(SESSION_KEY, null);
+    return !!(session && session.role === 'admin');
+}
+
+function hasRole(...roles) {
+    const session = readJson(SESSION_KEY, null);
+    return !!(session && roles.includes(session.role));
+}
+
+function canManageTeamContent() {
+    if (isAdminLoggedIn()) {
+        return true;
+    }
+    if (!hasRole('team-manager')) {
+        return false;
+    }
+    return isTeamManagerAssignedToTeam(team);
+}
+
+function canCheckInPlayers() {
+    return hasRole('admin', 'team-manager', 'umpire');
+}
+
+function toStatusLabel(status) {
+    if (!status || status === 'scheduled') return 'On Schedule';
+    return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+const params = new URLSearchParams(window.location.search);
+const team = params.get('team') || '';
+let division = (params.get('division') || '').toUpperCase();
+const gameIdParam = params.get('gameId') || '';
+
+if (!division && team) {
+    for (const key of Object.keys(standingsByDivision)) {
+        if (standingsByDivision[key].some(item => item.team === team)) {
+            division = key;
+            break;
+        }
+    }
+}
+
+let teamTitle, teamSubtitle, teamDivisionChip, teamPhoto, teamPhotoPlaceholder, teamPhotoStatus, teamPhotoFileInput, uploadTeamPhotoBtn,
+    standingsSummary, latestResults, teamScheduleWrap, schedulePeriodFilter, scheduleSeasonFilter, scheduleAnchorDate,
+    rosterAdminStatus, rosterFileInput, uploadRosterBtn, rosterGridWrap, addPlayerBtn, removePlayerBtn,
+    formInstruction, playerIdInput, playerNameInput, playerPositionInput, playerPhoneInput, playerEmailInput, playerPhotoInput,
+    savePlayerBtn, cancelPlayerBtn, upcomingGameSelect, checkinPlayerSelect, addPlayerCheckinBtn, checkinSelectedPlayers,
+    playerCheckinPanel, checkinGameLabel, checkinPlayerList, saveCheckinBtn, clearCheckinBtn, checkinStatus,
+    playerModal, modalTitle, closeModalBtn, playerFormSection, playerProfilesSection, playerList;
+
+let selectedGame = null;
+let selectedGameCheckins = [];
+
+// Initialize DOM references after DOM is ready
+function initDOMReferences() {
+    teamTitle = document.getElementById('team-title');
+    teamSubtitle = document.getElementById('team-subtitle');
+    teamDivisionChip = document.getElementById('team-division-chip');
+    teamPhoto = document.getElementById('team-photo');
+    teamPhotoPlaceholder = document.getElementById('team-photo-placeholder');
+    teamPhotoStatus = document.getElementById('team-photo-status');
+    teamPhotoFileInput = document.getElementById('team-photo-file');
+    uploadTeamPhotoBtn = document.getElementById('upload-team-photo-btn');
+    standingsSummary = document.getElementById('standings-summary');
+    latestResults = document.getElementById('latest-results');
+    teamScheduleWrap = document.getElementById('team-schedule-wrap');
+    schedulePeriodFilter = document.getElementById('schedule-period-filter');
+    scheduleSeasonFilter = document.getElementById('schedule-season-filter');
+    scheduleAnchorDate = document.getElementById('schedule-anchor-date');
+    rosterAdminStatus = document.getElementById('roster-admin-status');
+    rosterFileInput = document.getElementById('roster-file');
+    uploadRosterBtn = document.getElementById('upload-roster-btn');
+    rosterGridWrap = document.getElementById('roster-grid-wrap');
+    addPlayerBtn = document.getElementById('add-player-btn');
+    removePlayerBtn = document.getElementById('remove-player-btn');
+    formInstruction = document.getElementById('form-instruction');
+    playerIdInput = document.getElementById('player-id');
+    playerNameInput = document.getElementById('player-name');
+    playerPositionInput = document.getElementById('player-position');
+    playerPhoneInput = document.getElementById('player-phone');
+    playerEmailInput = document.getElementById('player-email');
+    playerPhotoInput = document.getElementById('player-photo-file');
+    savePlayerBtn = document.getElementById('save-player-btn');
+    cancelPlayerBtn = document.getElementById('cancel-player-btn');
+    upcomingGameSelect = document.getElementById('upcoming-game-select');
+    checkinPlayerSelect = document.getElementById('checkin-player-select');
+    addPlayerCheckinBtn = document.getElementById('add-player-checkin-btn');
+    checkinSelectedPlayers = document.getElementById('checkin-selected-players');
+    playerCheckinPanel = document.getElementById('player-checkin-panel');
+    checkinGameLabel = document.getElementById('checkin-game-label');
+    checkinPlayerList = document.getElementById('checkin-selected-players');
+    saveCheckinBtn = document.getElementById('save-checkin-btn');
+    clearCheckinBtn = document.getElementById('clear-checkin-btn');
+    checkinStatus = document.getElementById('checkin-status');
+    playerModal = document.getElementById('player-modal');
+    modalTitle = document.getElementById('modal-title');
+    closeModalBtn = document.getElementById('close-modal-btn');
+    playerFormSection = document.getElementById('player-form-section');
+    playerProfilesSection = document.getElementById('player-profiles-section');
+    playerList = document.getElementById('player-list');
+}
+
+// Wrap all event listener setup
+
+function apiUrl(path) {
+    return new URL(path, window.location.href).toString();
+}
+
+function parseDateKey(dateKey) {
+    return new Date(`${dateKey}T00:00:00`);
+}
+
+function formatDateKey(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function getSeasonType(game) {
+    if (game.gameType === 'Practice') {
+        return 'practice';
+    }
+    const div = String(game.division || '').toUpperCase();
+    return div.startsWith('W') ? 'winter' : 'regular';
+}
+
+function getWeekRange(anchorDate) {
+    const start = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), anchorDate.getDate());
+    start.setDate(start.getDate() - start.getDay());
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+    return { start, end };
+}
+
+async function readJsonResponse(response) {
+    const text = await response.text();
+    try {
+        return JSON.parse(text);
+    } catch (error) {
+        throw new Error(response.ok ? 'Invalid server response.' : text || `HTTP ${response.status}`);
+    }
+}
+
+function renderHeader() {
+    if (!team) {
+        teamTitle.textContent = 'Team Profile';
+        teamSubtitle.textContent = 'Select a team by clicking its name on a division standings page.';
+        teamDivisionChip.textContent = 'Division -';
+        return;
+    }
+
+    teamTitle.textContent = team;
+    teamSubtitle.textContent = `Detailed team page: schedule, standings, and roster management.`;
+    teamDivisionChip.textContent = division ? (divisionLabelMap[division] || `Division ${division}`) : 'Division N/A';
+}
+
+function renderTeamPhoto(photo) {
+    if (photo && photo.path) {
+        teamPhoto.src = `${photo.path}?t=${Date.now()}`;
+        teamPhoto.alt = `${team || 'Team'} profile photo`;
+        teamPhoto.style.display = 'block';
+        teamPhotoPlaceholder.style.display = 'none';
+        return;
+    }
+
+    teamPhoto.removeAttribute('src');
+    teamPhoto.style.display = 'none';
+    teamPhotoPlaceholder.style.display = 'grid';
+    teamPhotoPlaceholder.textContent = team ? `${team} Photo` : 'No Team Photo';
+}
+
+async function loadTeamPhoto() {
+    if (!team || !division) {
+        renderTeamPhoto(null);
+        return;
+    }
+
+    try {
+        const response = await fetch(apiUrl(`team-profile-photo?team=${encodeURIComponent(team)}&division=${encodeURIComponent(division)}`));
+        const result = await readJsonResponse(response);
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Unable to load team photo.');
+        }
+        renderTeamPhoto(result.photo || null);
+    } catch (error) {
+        renderTeamPhoto(null);
+    }
+}
+
+function renderStandingsSummary() {
+    standingsSummary.innerHTML = '';
+    if (!team || !division || !standingsByDivision[division]) {
+        standingsSummary.innerHTML = '<li>Standings data is not available for this team.</li>';
+        return;
+    }
+
+    const divisionRows = standingsByDivision[division];
+    const row = divisionRows.find(item => item.team === team);
+    if (!row) {
+        standingsSummary.innerHTML = '<li>Team was not found in this division standings snapshot.</li>';
+        return;
+    }
+
+    const rank = divisionRows.findIndex(item => item.team === team) + 1;
+    const items = [
+        `Division: ${divisionLabelMap[division] || division}`,
+        `Rank: ${rank} of ${divisionRows.length}`,
+        `Record: ${row.w}-${row.l}-${row.t}`,
+        `Games Back: ${row.gb || 'N/A'}`
+    ];
+
+    items.forEach(text => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        standingsSummary.appendChild(li);
+    });
+}
+
+function getTeamGames() {
+    if (!team) return [];
+
+    const leagueGames = readJson(SCHEDULE_KEY, []);
+    const practiceGames = readJson(PRACTICE_KEY, []).map(item => ({
+        id: item.id,
+        date: item.date,
+        time: item.time,
+        park: item.park,
+        team1: item.team1,
+        team2: item.team2,
+        score1: '',
+        score2: '',
+        status: item.status || 'scheduled',
+        division: `${item.div1 || '?'}-${item.div2 || '?'}`,
+        gameType: 'Practice'
+    }));
+
+    return [...leagueGames.map(item => ({ ...item, gameType: 'League' })), ...practiceGames]
+        .filter(item => item.team1 === team || item.team2 === team)
+        .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+}
+
+function renderLatestResults(games) {
+    latestResults.innerHTML = '';
+
+    const recent = games
+        .filter(item => item.score1 !== '' && item.score2 !== '')
+        .slice(-5)
+        .reverse();
+
+    if (!recent.length) {
+        latestResults.innerHTML = '<li>No completed scores posted yet.</li>';
+        return;
+    }
+
+    recent.forEach(item => {
+        const li = document.createElement('li');
+        const teamIsHome = item.team1 === team;
+        const sideLabel = teamIsHome ? 'Home' : 'Visitors';
+        const myScore = teamIsHome ? item.score1 : item.score2;
+        const oppTeam = teamIsHome ? item.team2 : item.team1;
+        const oppScore = teamIsHome ? item.score2 : item.score1;
+        li.innerHTML = `<span class="score-highlight">${myScore}-${oppScore}</span> (${sideLabel}) vs ${oppTeam} (${item.date})`;
+        latestResults.appendChild(li);
+    });
+}
+
+function renderScheduleTable(games) {
+    if (!games.length) {
+        teamScheduleWrap.innerHTML = '<p class="muted">No games found for this team yet.</p>';
+        populateUpcomingGamesSelect([]);
+        return;
+    }
+
+    const rows = games.map(item => {
+        const status = item.status || 'scheduled';
+        const scoreText = item.score1 !== '' && item.score2 !== ''
+            ? `Home: ${item.team1} ${item.score1} - ${item.score2} Visitors: ${item.team2}`
+            : '-';
+        const gameId = getGameId(item);
+        const canCheckIn = canCheckInPlayers();
+        return `
+            <tr data-game-id="${gameId}" class="schedule-row">
+                <td>${item.date}</td>
+                <td>${item.time || '-'}</td>
+                <td>${item.gameType}</td>
+                <td>${item.park || '-'}</td>
+                <td>Home: ${item.team1} vs Visitors: ${item.team2}</td>
+                <td>${item.division || '-'}</td>
+                <td><span class="status-badge status-${status}">${toStatusLabel(status)}</span></td>
+                <td>${scoreText}</td>
+                <td><button class="check-in-game-btn" data-game-id="${gameId}" ${!canCheckIn ? 'disabled' : ''}>Check In</button></td>
+            </tr>
+        `;
+    }).join('');
+
+    teamScheduleWrap.innerHTML = `
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Type</th>
+                    <th>Park</th>
+                    <th>Matchup</th>
+                    <th>Division</th>
+                    <th>Status</th>
+                    <th>Score</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+        </table>
+    `;
+
+    populateUpcomingGamesSelect(getUpcomingGames());
+
+    if (selectedGame) {
+        const stillVisible = games.some(g => getGameId(g) === getGameId(selectedGame));
+        if (!stillVisible) {
+            hideCheckinPanel();
+        }
+    }
+}
+
+function populateUpcomingGamesSelect(games) {
+    if (!upcomingGameSelect) return;
+    upcomingGameSelect.innerHTML = '<option value="">Select a game to check in players</option>' +
+        games.map(game => {
+            const gameId = getGameId(game);
+            const label = `${game.date} ${game.time || '—'} ${game.team1} vs ${game.team2}`;
+            return `<option value="${gameId}">${label}</option>`;
+        }).join('');
+}
+
+function applyScheduleFilters(allGames) {
+    if (!Array.isArray(allGames)) {
+        renderScheduleTable([]);
+        return;
+    }
+
+    const period = schedulePeriodFilter ? schedulePeriodFilter.value : 'all';
+    const season = scheduleSeasonFilter ? scheduleSeasonFilter.value : 'all';
+    const anchorDate = scheduleAnchorDate && scheduleAnchorDate.value
+        ? parseDateKey(scheduleAnchorDate.value)
+        : new Date();
+
+    const filteredGames = allGames.filter(game => {
+        if (season !== 'all' && getSeasonType(game) !== season) {
+            return false;
+        }
+
+        if (period === 'all') {
+            return true;
+        }
+
+        const gameDate = parseDateKey(game.date);
+
+        if (period === 'day') {
+            return formatDateKey(gameDate) === formatDateKey(anchorDate);
+        }
+
+        if (period === 'week') {
+            const { start, end } = getWeekRange(anchorDate);
+            return gameDate >= start && gameDate <= end;
+        }
+
+        if (period === 'month') {
+            return gameDate.getFullYear() === anchorDate.getFullYear() &&
+                gameDate.getMonth() === anchorDate.getMonth();
+        }
+
+        return true;
+    });
+
+    renderScheduleTable(filteredGames);
+}
+
+function renderRoster() {
+    const store = readJson(ROSTER_KEY, {});
+    const rawRoster = team ? store[team] : null;
+    const roster = Array.isArray(rawRoster) ? rawRoster : (rawRoster?.rows || []);
+
+    if (!team) {
+        rosterGridWrap.innerHTML = '<p class="muted">Select a team to view roster details.</p>';
+        return;
+    }
+
+    if (!roster || !Array.isArray(roster) || !roster.length) {
+        rosterGridWrap.innerHTML = '<p class="muted">No roster available for this team.</p>';
+        renderPlayerProfiles();
+        return;
+    }
+
+    const cardsHtml = roster.map(player => {
+        const playerId = player.id || player.Id || player.Email || player.email || player.Name || player.name || '';
+        const counts = getPlayerCheckinCounts(playerId);
+        const checkinSummary = `Regular: ${counts.regular}, Winter: ${counts.winter}, Practice: ${counts.practice}`;
+        return `
+        <div class="roster-card">
+            <h4>${player.Name || player.name || 'Unknown'}</h4>
+            <p><strong>Position:</strong> ${player.Position || player.position || 'N/A'}</p>
+            <p><strong>Phone:</strong> ${player.Phone || player.phone || 'N/A'}</p>
+            <p><strong>Email:</strong> ${player.Email || player.email || 'N/A'}</p>
+            <p class="checkin-count"><strong>Check-ins:</strong> ${checkinSummary}</p>
+        </div>
+    `;
+    }).join('');
+
+    rosterGridWrap.innerHTML = `<div class="roster-grid">${cardsHtml}</div>`;
+    renderPlayerProfiles();
+}
+
+function getTeamPlayers() {
+    const store = readJson(TEAM_PLAYERS_KEY, {});
+    return store[team] || { players: [] };
+}
+
+function setTeamPlayers(payload) {
+    const store = readJson(TEAM_PLAYERS_KEY, {});
+    store[team] = payload;
+    writeJson(TEAM_PLAYERS_KEY, store);
+}
+
+function getTeamPlayersForTeam(teamName) {
+    const store = readJson(TEAM_PLAYERS_KEY, {});
+    return store[teamName] || { players: [] };
+}
+
+function setTeamPlayersForTeam(teamName, payload) {
+    const store = readJson(TEAM_PLAYERS_KEY, {});
+    store[teamName] = payload;
+    writeJson(TEAM_PLAYERS_KEY, store);
+}
+
+function getTeamGameCheckins() {
+    const store = readJson(TEAM_CHECKIN_KEY, {});
+    return store[team] || {};
+}
+
+function getPlayerCheckinCounts(playerId) {
+    const checkins = getTeamGameCheckins();
+    const games = getTeamGames();
+    const gameMap = Object.fromEntries(games.map(game => [getGameId(game), game]));
+    const counts = { regular: 0, winter: 0, practice: 0 };
+
+    Object.values(checkins).forEach(entry => {
+        if (!entry || !Array.isArray(entry.checkedIds) || !entry.checkedIds.includes(playerId)) {
+            return;
+        }
+        const game = gameMap[entry.gameId];
+        const season = game ? getSeasonType(game) : 'regular';
+        if (counts[season] !== undefined) {
+            counts[season] += 1;
+        }
+    });
+
+    return counts;
+}
+
+function setTeamGameCheckins(payload) {
+    const store = readJson(TEAM_CHECKIN_KEY, {});
+    store[team] = payload;
+    writeJson(TEAM_CHECKIN_KEY, store);
+}
+
+function getRosterPlayers() {
+    const store = readJson(ROSTER_KEY, {});
+    const rawRoster = team ? store[team] : null;
+    const rows = Array.isArray(rawRoster) ? rawRoster : (rawRoster?.rows || []);
+    return normalizePlayersFromRows(rows);
+}
+
+function getCheckinPlayers() {
+    const stored = getTeamPlayers();
+    const players = Array.isArray(stored.players) ? [...stored.players] : [];
+    if (players.length) {
+        return players;
+    }
+    return getRosterPlayers();
+}
+
+function getUpcomingGames() {
+    return getTeamGames().filter(game => (game.status || 'scheduled') === 'scheduled');
+}
+
+function getGameId(game) {
+    return String(game.id || `${game.date}|${game.time}|${game.team1}|${game.team2}`).trim();
+}
+
+function updateCheckinStatus(message, isError = false) {
+    checkinStatus.textContent = message || '';
+    checkinStatus.style.color = isError ? '#d32f2f' : '#2e7d32';
+}
+
+function showCheckinPanel(game) {
+    if (!game || !team || !canCheckInPlayers()) {
+        hideCheckinPanel();
+        return;
+    }
+
+    selectedGame = game;
+    const gameLabel = `${game.date} ${game.time || ''} — ${game.team1} vs ${game.team2}`;
+    checkinGameLabel.textContent = `Check in players for: ${gameLabel}`;
+    playerCheckinPanel.style.display = 'block';
+
+    const players = getCheckinPlayers();
+    populateCheckinPlayerSelect(players);
+
+    const gameId = getGameId(game);
+    const checkins = getTeamGameCheckins()[gameId] || { checkedIds: [] };
+    selectedGameCheckins = Array.isArray(checkins.checkedIds) ? [...checkins.checkedIds] : [];
+
+    renderSelectedCheckinPlayers(players);
+
+    if (!players.length) {
+        updateCheckinStatus('Upload a roster or add player profiles before checking in players.', true);
+    } else {
+        updateCheckinStatus('Choose players from the roster, then save check-in.');
+    }
+}
+
+function populateCheckinPlayerSelect(players) {
+    if (!checkinPlayerSelect) return;
+    checkinPlayerSelect.innerHTML = '<option value="">Choose a player</option>' +
+        players.map(player => `<option value="${player.id}">${player.name}</option>`).join('');
+}
+
+function renderSelectedCheckinPlayers(players) {
+    const selectedIds = selectedGameCheckins || [];
+    if (!selectedIds.length) {
+        checkinSelectedPlayers.innerHTML = '<p class="muted">No players selected yet.</p>';
+        return;
+    }
+
+    const selected = players.filter(player => selectedIds.includes(player.id));
+    checkinSelectedPlayers.innerHTML = selected.map(player => `
+        <div class="checkin-player-item selected">
+            <span>${player.name} (${player.position || 'TBA'})</span>
+            <button type="button" data-player-id="${player.id}" class="remove-player-checkin">Remove</button>
+        </div>
+    `).join('');
+}
+
+function hideCheckinPanel() {
+    selectedGame = null;
+    selectedGameCheckins = [];
+    playerCheckinPanel.style.display = 'none';
+    checkinPlayerList.innerHTML = '';
+    updateCheckinStatus('');
+}
+
+function saveCheckinSelections() {
+    if (!canCheckInPlayers()) {
+        updateCheckinStatus('Sign in with umpire, team manager, or admin access to save check-ins.', true);
+        return;
+    }
+
+    if (!selectedGame || !team) {
+        updateCheckinStatus('No game selected for check-in.', true);
+        return;
+    }
+
+    const gameId = getGameId(selectedGame);
+    const allPlayers = getCheckinPlayers();
+    const playerMap = Object.fromEntries(allPlayers.map(player => [player.id, player]));
+    const previousCheckins = Array.isArray(getTeamGameCheckins()[gameId]?.checkedIds) ? getTeamGameCheckins()[gameId].checkedIds : [];
+
+    const toAdd = selectedGameCheckins.filter(id => !previousCheckins.includes(id));
+    const toRemove = previousCheckins.filter(id => !selectedGameCheckins.includes(id));
+
+    const players = allPlayers.map(player => {
+        const current = Number(player.gamesPlayed) || 0;
+        if (toAdd.includes(player.id)) {
+            return { ...player, gamesPlayed: current + 1 };
+        }
+        if (toRemove.includes(player.id)) {
+            return { ...player, gamesPlayed: Math.max(0, current - 1) };
+        }
+        return player;
+    });
+
+    setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
+
+    const checkins = getTeamGameCheckins();
+    checkins[gameId] = {
+        gameId,
+        date: selectedGame.date,
+        time: selectedGame.time,
+        team1: selectedGame.team1,
+        team2: selectedGame.team2,
+        checkedIds: selectedGameCheckins
+    };
+    setTeamGameCheckins(checkins);
+
+    renderPlayerProfiles();
+    renderRoster();
+    updateCheckinStatus(`Check-in saved for ${selectedGameCheckins.length} player(s).`);
+}
+
+function clearCheckinSelection() {
+    selectedGameCheckins = [];
+    renderSelectedCheckinPlayers(getCheckinPlayers());
+    if (checkinPlayerSelect) {
+        checkinPlayerSelect.value = '';
+    }
+    updateCheckinStatus('Selection cleared. Save to confirm no players attended this game.');
+}
+
+function normalizePlayersFromRows(rows) {
+    return rows.map((row, index) => ({
+        id: row.id || `${Date.now()}-${index}`,
+        name: String(row.Name || row.name || row['Player Name'] || row.Player || '').trim(),
+        position: String(row.Position || row.position || row.Positions || row.Pos || '').trim(),
+        phone: String(row.Phone || row.phone || row['Phone Number'] || row['Contact Phone'] || '').trim(),
+        email: String(row.Email || row.email || row['Email Address'] || '').trim(),
+        gamesPlayed: Number(row['Games Played'] || row.GamesPlayed || row['Games'] || 0) || 0,
+        photo: String(row.Photo || row.photo || '').trim()
+    })).filter(player => player.name);
+}
+
+function renderPlayerProfiles(filterPlayers = null) {
+    const data = getTeamPlayers();
+    const allPlayers = Array.isArray(data.players) ? data.players : [];
+    const players = filterPlayers || allPlayers;
+    playerList.innerHTML = '';
+
+    if (!team) {
+        playerList.innerHTML = '<p class="player-profiles-empty">Select a team to manage player profiles.</p>';
+        return;
+    }
+
+    if (!players.length) {
+        playerList.innerHTML = '<p class="player-profiles-empty">No player profiles added yet.</p>';
+        return;
+    }
+
+    const canManage = canManageTeamContent();
+    const isRemoveMode = playerFormSection.style.display === 'block' && savePlayerBtn.textContent === 'Remove Player';
+
+    players.forEach(player => {
+        const card = document.createElement('div');
+        card.className = 'player-card';
+        const actionsHtml = isRemoveMode ? '' : `
+            <div class="player-card-actions">
+                <button type="button" data-action="edit" data-player-id="${player.id}" ${canManage ? '' : 'disabled'}>Edit</button>
+                ${canManage ? `<button type="button" class="danger" data-action="remove" data-player-id="${player.id}">Remove</button>` : ''}
+            </div>
+        `;
+        card.innerHTML = `
+            <img src="${player.photo || 'Images/LAMSLLogo.jpg'}" alt="${player.name}">
+            <div class="player-card-content">
+                <h4>${player.name}</h4>
+                <p><strong>Position:</strong> ${player.position || 'TBA'}</p>
+                <p><strong>Phone:</strong> ${player.phone || 'N/A'}</p>
+                <p><strong>Email:</strong> ${player.email || 'N/A'}</p>
+                <p><strong>Games Played:</strong> ${player.gamesPlayed}</p>
+            </div>
+            ${actionsHtml}
+        `;
+
+        if (isRemoveMode) {
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', () => {
+                populatePlayerForm(player);
+            });
+        }
+
+        playerList.appendChild(card);
+    });
+}
+
+function clearPlayerForm() {
+    playerIdInput.value = '';
+    playerNameInput.value = '';
+    playerPositionInput.value = '';
+    playerPhoneInput.value = '';
+    playerEmailInput.value = '';
+    playerPhotoInput.value = '';
+    playerFormSection.style.display = 'none';
+    playerModal.style.display = 'none';
+}
+
+function populatePlayerForm(player) {
+    playerIdInput.value = player.id;
+    playerNameInput.value = player.name || '';
+    playerPositionInput.value = player.position || '';
+    playerPhoneInput.value = player.phone || '';
+    playerEmailInput.value = player.email || '';
+    playerPhotoInput.value = '';
+}
+
+async function createPlayerPhotoValue(file, existingValue) {
+    if (!file) {
+        return existingValue || '';
+    }
+
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result || existingValue || '');
+        reader.onerror = () => reject(new Error('Unable to read player photo'));
+        reader.readAsDataURL(file);
+    });
+}
+
+async function savePlayer() {
+    if (!team) {
+        rosterAdminStatus.textContent = 'Select a team to save player profiles.';
+        return;
+    }
+
+    if (!canManageTeamContent()) {
+        rosterAdminStatus.textContent = 'Sign in as team manager or admin to save player profiles.';
+        return;
+    }
+
+    const isRemove = savePlayerBtn.textContent === 'Remove Player';
+
+    if (isRemove) {
+        const id = playerIdInput.value;
+        if (!id) {
+            rosterAdminStatus.textContent = 'Select a player to remove.';
+            return;
+        }
+
+        const store = getTeamPlayers();
+        const players = Array.isArray(store.players) ? [...store.players] : [];
+        const existingIndex = players.findIndex(item => item.id === id);
+
+        if (existingIndex >= 0) {
+            const name = players[existingIndex].name;
+            players.splice(existingIndex, 1);
+            setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
+            rosterAdminStatus.textContent = `${name} removed from the roster.`;
+            renderPlayerProfiles();
+            clearPlayerForm();
+        } else {
+            rosterAdminStatus.textContent = 'Player not found.';
+        }
+        return;
+    }
+
+    const name = playerNameInput.value.trim();
+    if (!name) {
+        rosterAdminStatus.textContent = 'Enter a player name before saving.';
+        return;
+    }
+
+    const store = getTeamPlayers();
+    const players = Array.isArray(store.players) ? [...store.players] : [];
+    const id = playerIdInput.value || `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const existingIndex = players.findIndex(item => item.id === id);
+    const photoValue = await createPlayerPhotoValue(playerPhotoInput.files && playerPhotoInput.files[0], existingIndex >= 0 ? players[existingIndex].photo : '');
+
+    const playerRecord = {
+        id,
+        name,
+        position: playerPositionInput.value.trim(),
+        phone: playerPhoneInput.value.trim(),
+        email: playerEmailInput.value.trim(),
+        gamesPlayed: existingIndex >= 0 ? (players[existingIndex].gamesPlayed || 0) : 0,
+        photo: photoValue
+    };
+
+    if (existingIndex >= 0) {
+        players[existingIndex] = playerRecord;
+        rosterAdminStatus.textContent = `${name} profile updated.`;
+    } else {
+        players.push(playerRecord);
+        rosterAdminStatus.textContent = `${name} added to the roster.`;
+    }
+
+    setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
+    renderPlayerProfiles();
+    clearPlayerForm();
+}
+
+function editPlayer(id) {
+    const store = getTeamPlayers();
+    const player = (store.players || []).find(item => item.id === id);
+    if (!player) {
+        return;
+    }
+    populatePlayerForm(player);
+}
+
+function showPlayerProfile(playerName) {
+    const store = getTeamPlayers();
+    const player = (store.players || []).find(item => item.name === playerName);
+    if (!player) {
+        return;
+    }
+    modalTitle.textContent = 'Player Profile';
+    playerFormSection.style.display = 'none';
+    playerProfilesSection.style.display = 'block';
+    renderPlayerProfiles([player]); // Render only this player
+    playerModal.style.display = 'flex';
+}
+
+function getPlayerKey(player) {
+    const name = String(player.name || player.Name || '').trim().toLowerCase();
+    const email = String(player.email || player.Email || '').trim().toLowerCase();
+    const phone = String(player.phone || player.Phone || '').trim().toLowerCase();
+    return `${name}|${email || phone}`;
+}
+
+function normalizeRosterRow(row) {
+    const getValue = key => {
+        const keys = Object.keys(row);
+        const match = keys.find(k => k.toLowerCase() === key.toLowerCase());
+        return match ? String(row[match] || '').trim() : '';
+    };
+    return {
+        Team: getValue('Team').replace(/\s+Regular$/i, ''),
+        Name: getValue('Name'),
+        Position: getValue('Position'),
+        Phone: getValue('Phone'),
+        Email: getValue('Email')
+    };
+}
+
+function setRosterStatus(message, isError = false, isSuccess = false) {
+    rosterAdminStatus.textContent = message;
+    rosterAdminStatus.style.color = isError ? '#d32f2f' : isSuccess ? '#2e7d32' : '';
+}
+
+function removePlayer(id) {
+    if (!canManageTeamContent()) {
+        rosterAdminStatus.textContent = 'Sign in as team manager or admin to remove players.';
+        return;
+    }
+
+    const store = getTeamPlayers();
+    const players = (store.players || []).filter(item => item.id !== id);
+    setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
+    renderPlayerProfiles();
+    rosterAdminStatus.textContent = 'Player removed from roster.';
+}
+
+function normalizePlayerDataFromRoster(rows) {
+    const players = normalizePlayersFromRows(rows);
+    if (!players.length) {
+        return null;
+    }
+    return { players, updatedAt: new Date().toLocaleString() };
+}
+
+function applyRosterUploadAccess() {
+    const allowed = canManageTeamContent();
+    const isAdmin = hasRole('admin');
+    const session = readJson(SESSION_KEY, null);
+    const managerAssigned = session && session.role === 'team-manager' && isTeamManagerAssignedToTeam(team);
+
+    if (!team) {
+        setRosterStatus('Select a team to manage roster and player profiles.');
+    } else if (isAdmin) {
+        setRosterStatus('Admin access confirmed. Upload roster Excel/CSV file for this team.');
+    } else if (managerAssigned) {
+        setRosterStatus('Team Manager access confirmed for this team. Upload roster Excel/CSV file.');
+    } else if (session && session.role === 'team-manager') {
+        const assignments = getTeamManagerAssignments();
+        const assignedTeams = Array.isArray(assignments[session.username]) ? assignments[session.username] : [];
+        setRosterStatus(`Team Manager access granted, but not assigned to ${team}. Assigned teams: ${assignedTeams.length ? assignedTeams.join(', ') : 'none'}.`, true);
+    } else {
+        setRosterStatus('Sign in as team manager or admin to upload roster spreadsheets.', true);
+    }
+
+    rosterFileInput.disabled = !allowed || !team;
+    uploadRosterBtn.disabled = !allowed || !team;
+
+    teamPhotoStatus.textContent = allowed
+        ? 'Manager access confirmed. Upload a team profile image.'
+        : 'Team profile photos are visible to all users. Team manager or admin sign-in required to upload.';
+    teamPhotoFileInput.disabled = !allowed || !team;
+    uploadTeamPhotoBtn.disabled = !allowed || !team;
+
+    playerNameInput.disabled = !allowed || !team;
+    playerPositionInput.disabled = !allowed || !team;
+    playerPhoneInput.disabled = !allowed || !team;
+    playerEmailInput.disabled = !allowed || !team;
+    playerPhotoInput.disabled = !allowed || !team;
+    savePlayerBtn.disabled = !allowed || !team;
+    cancelPlayerBtn.disabled = !team;
+}
+
+function setupEventListeners() {
+    uploadRosterBtn.addEventListener('click', async () => {
+    if (!canManageTeamContent()) {
+        rosterAdminStatus.textContent = 'Sign in as team manager or admin first.';
+        return;
+    }
+
+    if (!team) {
+        rosterAdminStatus.textContent = 'No team selected.';
+        return;
+    }
+
+    const file = rosterFileInput.files && rosterFileInput.files[0];
+    if (!file) {
+        setRosterStatus('Choose an Excel/CSV roster file first.', true);
+        return;
+    }
+
+    const confirmUpload = confirm('Uploading this roster will merge new players into the existing roster and may overwrite duplicate rows. Continue?');
+    if (!confirmUpload) {
+        setRosterStatus('Roster upload canceled.');
+        return;
+    }
+
+    try {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+        if (!rows.length) {
+            setRosterStatus('Roster file appears empty.', true);
+            return;
+        }
+
+        const headers = ['Team', 'Name', 'Position', 'Phone', 'Email'];
+        const store = readJson(ROSTER_KEY, {});
+        const existing = store[team] || { headers, rows: [] };
+        const existingRows = Array.isArray(existing) ? existing : (Array.isArray(existing.rows) ? existing.rows : []);
+        const seen = new Set(existingRows.map(row => {
+            const normalized = normalizeRosterRow(row);
+            return `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
+        }));
+
+        const combinedRows = [...existingRows];
+        rows.forEach(rawRow => {
+            const normalized = normalizeRosterRow(rawRow);
+            if (!normalized.Name) return;
+            const rowKey = `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
+            if (!seen.has(rowKey)) {
+                seen.add(rowKey);
+                combinedRows.push(normalized);
+            }
+        });
+
+        store[team] = {
+            headers,
+            rows: combinedRows,
+            uploadedAt: new Date().toLocaleString()
+        };
+        writeJson(ROSTER_KEY, store);
+
+        const currentPlayers = Array.isArray(getTeamPlayers().players) ? [...getTeamPlayers().players] : [];
+        const existingPlayerKeys = new Set(currentPlayers.map(getPlayerKey));
+        const incomingPlayers = normalizePlayersFromRows(combinedRows);
+        let addedCount = 0;
+
+        incomingPlayers.forEach(player => {
+            const playerKey = getPlayerKey(player);
+            if (!existingPlayerKeys.has(playerKey)) {
+                existingPlayerKeys.add(playerKey);
+                currentPlayers.push(player);
+                addedCount += 1;
+            }
+        });
+
+        if (currentPlayers.length) {
+            setTeamPlayers({ players: currentPlayers, updatedAt: new Date().toLocaleString() });
+        }
+
+        if (addedCount > 0) {
+            setRosterStatus(`Roster uploaded for ${team}. ${addedCount} new player(s) added; duplicates ignored.`, false, true);
+        } else {
+            setRosterStatus(`Roster uploaded for ${team}. No new players were added; duplicates were ignored.`, false, true);
+        }
+
+        renderRoster();
+        renderPlayerProfiles();
+    } catch (error) {
+        setRosterStatus(`Roster upload failed: ${error.message}`, true);
+    }
+});
+
+addPlayerBtn.addEventListener('click', () => {
+    modalTitle.textContent = 'Add Player';
+    playerFormSection.style.display = 'block';
+    playerProfilesSection.style.display = 'none';
+    clearPlayerForm();
+    renderPlayerProfiles();
+    playerModal.style.display = 'flex';
+});
+
+removePlayerBtn.addEventListener('click', () => {
+    modalTitle.textContent = 'Remove Player';
+    playerFormSection.style.display = 'block';
+    playerProfilesSection.style.display = 'block';
+    formInstruction.textContent = 'Select a player from the roster to remove.';
+    savePlayerBtn.textContent = 'Remove Player';
+    clearPlayerForm();
+    renderPlayerProfiles();
+    playerModal.style.display = 'flex';
+});
+
+savePlayerBtn.addEventListener('click', savePlayer);
+cancelPlayerBtn.addEventListener('click', clearPlayerForm);
+closeModalBtn.addEventListener('click', () => {
+    playerModal.style.display = 'none';
+});
+playerModal.addEventListener('click', (event) => {
+    if (event.target === playerModal) {
+        playerModal.style.display = 'none';
+    }
+});
+playerList.addEventListener('click', event => {
+    const button = event.target.closest('button');
+    if (!button) return;
+    const action = button.dataset.action;
+    const playerId = button.dataset.playerId;
+    if (!action || !playerId) return;
+
+    if (action === 'edit') {
+        modalTitle.textContent = 'Edit Player';
+        playerFormSection.style.display = 'block';
+        playerProfilesSection.style.display = 'none';
+        editPlayer(playerId);
+        playerModal.style.display = 'flex';
+    } else if (action === 'remove') {
+        removePlayer(playerId);
+        playerModal.style.display = 'none';
+    }
+});
+
+teamScheduleWrap.addEventListener('click', event => {
+    const row = event.target.closest('tr[data-game-id]');
+    if (!row || !canCheckInPlayers()) {
+        return;
+    }
+    const gameId = row.dataset.gameId;
+    const games = getTeamGames();
+    const selected = games.find(game => getGameId(game) === gameId);
+    if (selected) {
+        showCheckinPanel(selected);
+    }
+});
+
+upcomingGameSelect.addEventListener('change', event => {
+    const gameId = event.target.value;
+    if (!gameId) {
+        hideCheckinPanel();
+        return;
+    }
+    const games = getTeamGames();
+    const selected = games.find(game => getGameId(game) === gameId);
+    if (selected) {
+        showCheckinPanel(selected);
+    }
+});
+
+teamScheduleWrap.addEventListener('click', event => {
+    const btn = event.target.closest('.check-in-game-btn');
+    if (!btn || btn.disabled) return;
+    
+    const gameId = btn.dataset.gameId;
+    const games = getTeamGames();
+    const selected = games.find(game => getGameId(game) === gameId);
+    if (selected) {
+        upcomingGameSelect.value = gameId;
+        showCheckinPanel(selected);
+        playerCheckinPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+});
+
+addPlayerCheckinBtn.addEventListener('click', () => {
+    if (!checkinPlayerSelect || !checkinPlayerSelect.value) {
+        updateCheckinStatus('Select a player first.', true);
+        return;
+    }
+
+    const playerId = checkinPlayerSelect.value;
+    if (!selectedGameCheckins.includes(playerId)) {
+        selectedGameCheckins.push(playerId);
+    }
+    
+    const players = getCheckinPlayers();
+    renderSelectedCheckinPlayers(players);
+    checkinPlayerSelect.value = '';
+    updateCheckinStatus('Player added to check-in list.');
+});
+
+checkinSelectedPlayers.addEventListener('click', event => {
+    const btn = event.target.closest('.remove-player-checkin');
+    if (!btn) return;
+    const playerId = btn.dataset.playerId;
+    selectedGameCheckins = selectedGameCheckins.filter(id => id !== playerId);
+    const players = getCheckinPlayers();
+    renderSelectedCheckinPlayers(players);
+    updateCheckinStatus('Player removed from check-in list.');
+});
+
+
+uploadTeamPhotoBtn.addEventListener('click', async () => {
+    if (!canManageTeamContent()) {
+        teamPhotoStatus.textContent = 'Sign in as team manager or admin first.';
+        return;
+    }
+
+    if (!team || !division) {
+        teamPhotoStatus.textContent = 'No team selected.';
+        return;
+    }
+
+    const file = teamPhotoFileInput.files && teamPhotoFileInput.files[0];
+    if (!file) {
+        teamPhotoStatus.textContent = 'Choose an image file first.';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('photo', file);
+    formData.append('team', team);
+    formData.append('division', division);
+    teamPhotoStatus.textContent = `Uploading profile photo for ${team}...`;
+
+    try {
+        const response = await fetch(apiUrl('upload-team-photo'), {
+            method: 'POST',
+            body: formData
+        });
+        const result = await readJsonResponse(response);
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Upload failed.');
+        }
+
+        teamPhotoFileInput.value = '';
+        renderTeamPhoto(result);
+        const savedFolder = result.folder ? `teamProfile images/${result.folder}` : 'the team profile folder';
+        teamPhotoStatus.textContent = `Profile photo saved for ${team} in ${savedFolder}.`;
+    } catch (error) {
+        teamPhotoStatus.textContent = `Photo upload failed: ${error.message}`;
+    }
+});
+
+window.addEventListener('storage', event => {
+    if (event.key === SESSION_KEY) {
+        applyRosterUploadAccess();
+    }
+});
+
+    renderHeader();
+    renderStandingsSummary();
+    const games = getTeamGames();
+renderLatestResults(games);
+renderScheduleTable(games);
+
+// Populate upcoming games select for check-in
+if (upcomingGameSelect && games.length) {
+    upcomingGameSelect.innerHTML = '<option value="">Select a game to check in players</option>' +
+        getUpcomingGames().map(game => `<option value="${getGameId(game)}">${game.date} ${game.time || ''} — ${game.team1} vs ${game.team2}</option>`).join('');
+}
+
+if (gameIdParam && games.length) {
+    const selected = games.find(game => getGameId(game) === gameIdParam);
+    if (selected) {
+        if (upcomingGameSelect) {
+            upcomingGameSelect.value = gameIdParam;
+        }
+        showCheckinPanel(selected);
+        if (playerCheckinPanel) {
+            playerCheckinPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+}
+
+if (scheduleAnchorDate) {
+    scheduleAnchorDate.value = formatDateKey(new Date());
+}
+if (schedulePeriodFilter) {
+    schedulePeriodFilter.addEventListener('change', () => applyScheduleFilters(games));
+}
+if (scheduleSeasonFilter) {
+    scheduleSeasonFilter.addEventListener('change', () => applyScheduleFilters(games));
+}
+if (scheduleAnchorDate) {
+    scheduleAnchorDate.addEventListener('change', () => applyScheduleFilters(games));
+}
+applyScheduleFilters(games);
+applyRosterUploadAccess();
+renderRoster();
+} // End setupEventListeners
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    initDOMReferences();
+    setupEventListeners();
+    loadTeamPhoto();
+
+    // ===== SEASON BANNER =====
+    (function () {
+        try {
+            const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
+            const el = document.getElementById('banner-tagline');
+            if (s && el) {
+                const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
+            }
+        } catch (e) {}
+    })();
+});
+</script>
+
+<!-- Player Management Modal -->
+<div id="player-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">Player Management</h3>
+            <button id="close-modal-btn" type="button" class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="player-form-section" style="display:none;">
+                <p class="muted" id="form-instruction">Fill in player details below.</p>
+                <div class="player-form-grid">
+                    <input id="player-id" type="hidden">
+                    <label for="player-name">Player Name</label>
+                    <input id="player-name" type="text" placeholder="Full name">
+
+                    <label for="player-position">Position(s)</label>
+                    <input id="player-position" type="text" placeholder="Primary positions">
+
+                    <label for="player-phone">Phone Number</label>
+                    <input id="player-phone" type="tel" placeholder="(555) 123-4567">
+
+                    <label for="player-email">Email Address</label>
+                    <input id="player-email" type="email" placeholder="name@example.com">
+
+                    <label for="player-photo-file">Player Photo</label>
+                    <input id="player-photo-file" type="file" accept="*/*">
+                </div>
+                <div class="player-form-actions">
+                    <button id="save-player-btn" type="button">Save Player</button>
+                    <button id="cancel-player-btn" type="button" class="secondary">Clear Form</button>
+                </div>
+            </div>
+            <section id="player-profiles-section">
+                <h4>Player Profiles</h4>
+                <div id="player-list" class="player-list"></div>
+            </section>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

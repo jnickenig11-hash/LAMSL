@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LAMSL - Teams</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+body {
+    margin: 0;
+    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
+    color: #233;
+    background-color: #eef4ea;
+}
+header {
+    background: #12324A;
+    color: white;
+}
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+}
+.navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+    margin: 0;
+    font-size: 20px;
+}
+.navbar-brand-gem {
+    width: 24px;
+    height: 18px;
+    background:
+        linear-gradient(90deg, transparent 0 22%, rgba(255, 255, 255, 0.7) 22% 28%, transparent 28% 72%, rgba(94, 108, 122, 0.24) 72% 78%, transparent 78% 100%),
+        linear-gradient(180deg, #fbfdff 0%, #dfe5ec 34%, #b5c0cb 62%, #7c8a97 100%);
+    clip-path: polygon(24% 6%, 76% 6%, 100% 35%, 67% 100%, 33% 100%, 0% 35%);
+    border: 1px solid rgba(248, 251, 255, 0.78);
+    box-shadow: 0 0 0 1px rgba(86, 96, 108, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.82), inset 0 -1px 0 rgba(85, 96, 108, 0.4);
+}
+.navbar ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    padding: 0;
+    margin: 0;
+}
+.navbar li {
+    margin: 0;
+}
+.navbar a {
+    color: white;
+    text-decoration: none;
+    display: block;
+}
+.navbar a:hover {
+    color: #F1D27A;
+}
+.navbar a.active-tab {
+    color: #F1D27A;
+    border-bottom: 2px solid #C86A2F;
+    padding-bottom: 2px;
+}
+.container {
+    max-width: 1180px;
+    margin: auto;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    padding: 22px;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(17, 40, 56, 0.08);
+    margin-bottom: 20px;
+}
+.card h2, .card h3 {
+    margin-top: 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+}
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+select {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #dbe2ea;
+    font-family: inherit;
+    min-width: 180px;
+}
+.team-grid {
+    display: grid;
+    gap: 18px;
+}
+.division-card {
+    border: 1px solid #d5dee7;
+    border-radius: 12px;
+    padding: 18px;
+    background: #fbfcfd;
+}
+.division-card h3 {
+    margin: 0 0 10px;
+}
+.team-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.team-list li {
+    margin-bottom: 8px;
+}
+.team-link {
+    color: #12324A;
+    text-decoration: none;
+    font-weight: 600;
+}
+.team-link:hover {
+    color: #C86A2F;
+}
+.badge {
+    display: inline-block;
+    background: #dbeaf3;
+    color: #12324A;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 13px;
+    margin-left: 8px;
+}
+.no-data {
+    color: #657887;
+}
+@media (min-width: 900px) {
+    .team-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+/* ===== BANNER ===== */
+.banner {
+    position: relative;
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    gap: 12px;
+    text-align: center;
+}
+.banner h1 {
+    margin: 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0 0;
+}
+.banner .tagline {
+    margin-top: 10px;
+    font-size: 16px;
+    max-width: 620px;
+}
+.banner-logo {
+    width: 220px;
+    height: 160px;
+    object-fit: contain;
+}
+@media (max-width: 700px) {
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .banner h1 {
+        font-size: 32px;
+    }
+    .banner .subtitle,
+    .banner .tagline {
+        font-size: 14px;
+    }
+    .banner-logo {
+        width: 180px;
+        height: auto;
+    }
+}
+
+
+</style>
+</head>
+<body>
+<!-- BANNER -->
+<div class="banner">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
+    <h1>Latin & american men's softball league</h1>
+    <div class="subtitle">Established 1976</div>
+    <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+</div>
+<header>
+    <div class="navbar container">
+        <h2 class="navbar-brand"><span class="navbar-brand-gem" aria-hidden="true"></span>LAMSL</h2>
+        <ul>
+            <li><a href="LAMSL.html">Home</a></li>
+            <li><a href="standings.html">Standings</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="teams.html" class="active-tab">Teams</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="meetingnotes.html">Meeting Notes</a></li>
+            <li><a href="events.html">Events &amp; Fundraisers</a></li>
+            <li><a href="hallofchampions.html">Hall of Champions</a></li>
+            <li><a href="administrators.html">Admin</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</header>
+<div class="container">
+    <section class="card">
+        <h2>Teams by Season</h2>
+        <div class="filters">
+            <label for="season-filter"><strong>Season</strong></label>
+            <select id="season-filter" aria-label="Filter teams by season">
+                <option value="all">All Seasons</option>
+                <option value="regular">Regular Season</option>
+                <option value="winter">Winter Season</option>
+            </select>
+        </div>
+        <p class="no-data">Select a season to filter divisions and view team profiles.</p>
+    </section>
+    <div id="teams-container" class="team-grid"></div>
+</div>
+<footer style="text-align:center;padding:12px 20px;color:#3b4a58;font-size:14px;">
+    <p>&copy; Latin & American Men's Softball League (LAMSL)</p>
+</footer>
+<script>
+const TEAMS_BY_DIVISION = {
+    A: ['La Tribu', 'Nasty Boyz', 'Toxic', 'Titans', 'White Sox', 'Legends'],
+    B: ['Cubs', 'Primos', 'Dodgers', 'Diablos', 'Charros', 'Doom Squad'],
+    C: ['Demons', 'Naranjeros', 'Caballeros', 'Salvajes', 'Coyotes', 'Bandits', 'Orioles', 'Goodfellas'],
+    D: ['Strokes', 'Dirt Bags', 'Camaradas', 'Wild Hogz', 'Los Pericos', 'Xolos', 'Desvelados'],
+    E: ['Tigers','Warriors','Falcons','Rangers','Phoenix','Mustangs'],
+    W1: ['Titans','La Tribu','Legends','LAMSL OG\'s','Charros','Goodfellas'],
+    W2: ['Wild Hogz','Showtime','Diablos','Balls Out','Peloteros','Hitmen','Bastards','Coyotes']
+};
+
+const SEASON_DIVISIONS = {
+    all: ['A','B','C','D','E','W1','W2'],
+    regular: ['A','B','C','D','E'],
+    winter: ['W1','W2']
+};
+
+const DIVISION_LABELS = {
+    A: 'Division A',
+    B: 'Division B',
+    C: 'Division C',
+    D: 'Division D',
+    E: 'Division E',
+    W1: 'Winter Division 1',
+    W2: 'Winter Division 2'
+};
+
+const filterEl = document.getElementById('season-filter');
+const container = document.getElementById('teams-container');
+const emptyNote = document.querySelector('.card .no-data');
+
+function renderTeams(season) {
+    const sections = SEASON_DIVISIONS[season] || SEASON_DIVISIONS.all;
+    container.innerHTML = '';
+
+    if (!sections.length) {
+        container.innerHTML = '<p class="no-data">No divisions available.</p>';
+        return;
+    }
+
+    sections.forEach(division => {
+        const teams = TEAMS_BY_DIVISION[division] || [];
+        const card = document.createElement('section');
+        card.className = 'division-card';
+        card.innerHTML = `
+            <h3>${DIVISION_LABELS[division] || division}</h3>
+            ${teams.length ? '<ul class="team-list">' + teams.map(team => `
+                <li><a class="team-link" href="team.html?team=${encodeURIComponent(team)}&division=${encodeURIComponent(division)}">${team}</a>
+                    <span class="badge">${season === 'all' ? (division.startsWith('W') ? 'Winter' : 'Regular') : season.charAt(0).toUpperCase() + season.slice(1)}</span>
+                </li>`).join('') + '</ul>' : '<p class="no-data">No teams registered for this division yet.</p>'}
+        `;
+        container.appendChild(card);
+    });
+}
+
+filterEl.addEventListener('change', () => {
+    const season = filterEl.value;
+    emptyNote.textContent = 'Teams are grouped by season and division. Click any name to open the team profile.';
+    renderTeams(season);
+});
+
+window.addEventListener('load', () => {
+    renderTeams(filterEl.value);
+    emptyNote.textContent = 'Teams are grouped by season and division. Click any name to open the team profile.';
+});
+
+// ===== SEASON BANNER =====
+(function () {
+    try {
+        const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
+        const el = document.getElementById('banner-tagline');
+        if (s && el) {
+            const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
+        }
+    } catch (e) {}
+})();
+</script>
+</body>
+</html>

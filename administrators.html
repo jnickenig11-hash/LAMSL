@@ -454,13 +454,6 @@ footer {
                 <button id="login-btn" type="button">Sign In</button>
             </div>
 
-            <div class="admin-inline" id="admin-key-row" style="display:none;">
-                <input id="admin-key-input" type="text" placeholder="Render Admin Key" value="">
-                <button id="save-admin-key-btn" type="button">Save Admin Key</button>
-                <button id="clear-admin-key-btn" type="button">Clear Key</button>
-            </div>
-            <div class="admin-status" id="admin-key-status">Admin key not set.</div>
-
             <div class="admin-inline" id="logout-row" style="display:none;">
                 <button id="logout-btn" type="button">Sign Out</button>
             </div>
@@ -619,17 +612,12 @@ const DEFAULT_TEAMS_BY_DIVISION = {
 
 const authStatus = document.getElementById('auth-status');
 const loginRow = document.getElementById('login-row');
-const adminKeyRow = document.getElementById('admin-key-row');
 const logoutRow = document.getElementById('logout-row');
 const adminTools = document.getElementById('admin-tools');
 const loginButton = document.getElementById('login-btn');
 const logoutButton = document.getElementById('logout-btn');
 const loginUsername = document.getElementById('login-username');
 const loginPassword = document.getElementById('login-password');
-const adminKeyInput = document.getElementById('admin-key-input');
-const adminKeyStatus = document.getElementById('admin-key-status');
-const saveAdminKeyBtn = document.getElementById('save-admin-key-btn');
-const clearAdminKeyBtn = document.getElementById('clear-admin-key-btn');
 const announcementForm = document.getElementById('announcement-form');
 const announcementTitle = document.getElementById('announcement-title');
 const announcementDate = document.getElementById('announcement-date');
@@ -694,38 +682,15 @@ function initializeAdminKeyFromQuery() {
     }
 }
 
-function renderAdminKeyState() {
+function initializeAdminKeyFromStorage() {
     const storedKey = (typeof localStorage !== 'undefined') ? localStorage.getItem('LAMSL_ADMIN_KEY') : null;
-    const currentKey = window.ADMIN_API_KEY || storedKey;
-    adminKeyInput.value = currentKey || '';
-    adminKeyStatus.textContent = currentKey ? 'Admin key loaded and ready for protected requests.' : 'Admin key not set. Save the Render admin API key.';
-    adminKeyRow.style.display = currentKey ? 'none' : 'flex';
-}
-
-function saveAdminKey() {
-    const key = adminKeyInput.value.trim();
-    if (!key) {
-        adminKeyStatus.textContent = 'Please enter a valid admin key before saving.';
-        return;
+    if (storedKey) {
+        window.ADMIN_API_KEY = storedKey;
     }
-    localStorage.setItem('LAMSL_ADMIN_KEY', key);
-    window.ADMIN_API_KEY = key;
-    renderAdminKeyState();
-    authStatus.textContent = 'Admin key saved locally. Protected backend requests will now include it.';
-}
-
-function clearAdminKey() {
-    localStorage.removeItem('LAMSL_ADMIN_KEY');
-    window.ADMIN_API_KEY = null;
-    renderAdminKeyState();
-    authStatus.textContent = 'Admin key cleared. Set it again to use protected backend actions.';
 }
 
 initializeAdminKeyFromQuery();
-renderAdminKeyState();
-
-saveAdminKeyBtn.addEventListener('click', saveAdminKey);
-clearAdminKeyBtn.addEventListener('click', clearAdminKey);
+initializeAdminKeyFromStorage();
 
 function logAdminAction(action, details) {
     const session = getSession();
@@ -1292,13 +1257,8 @@ function renderAuthState() {
     document.getElementById('content-tools').style.display = isAdmin ? 'block' : 'none';
 
     if (loggedIn && isAdmin) {
-        const storedKey = (typeof localStorage !== 'undefined') ? localStorage.getItem('LAMSL_ADMIN_KEY') : null;
-        if (storedKey) {
-            window.ADMIN_API_KEY = storedKey;
-        }
+        initializeAdminKeyFromStorage();
     }
-
-    renderAdminKeyState();
 
     if (loggedIn) {
         authStatus.textContent = `Signed in as ${session.username} (${session.role || 'user'}). ${isAdmin ? 'Admin tools unlocked, including Site Content Management.' : 'Admin tools locked.'}`;

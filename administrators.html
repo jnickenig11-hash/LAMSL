@@ -592,8 +592,8 @@ const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
 const TEAM_MANAGER_ASSIGNMENTS_KEY = 'lamslTeamManagerAssignmentsV1';
 const STANDINGS_KEY = 'lamslStandingsV1';
 
-// Backend base URL: prefer localhost during local development
-const backendBase = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:3000' : 'https://lamsl-backend.onrender.com';
+// Backend base URL: always use Render-hosted backend for development
+const backendBase = 'https://lamsl-backend.onrender.com';
 
 function apiUrl(path) {
     if (!path) return backendBase;

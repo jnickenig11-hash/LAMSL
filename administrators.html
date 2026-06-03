@@ -454,7 +454,7 @@ footer {
                 <button id="login-btn" type="button">Sign In</button>
             </div>
 
-            <div class="admin-inline" id="admin-key-row">
+            <div class="admin-inline" id="admin-key-row" style="display:none;">
                 <input id="admin-key-input" type="text" placeholder="Render Admin Key" value="">
                 <button id="save-admin-key-btn" type="button">Save Admin Key</button>
                 <button id="clear-admin-key-btn" type="button">Clear Key</button>
@@ -699,6 +699,7 @@ function renderAdminKeyState() {
     const currentKey = window.ADMIN_API_KEY || storedKey;
     adminKeyInput.value = currentKey || '';
     adminKeyStatus.textContent = currentKey ? 'Admin key loaded and ready for protected requests.' : 'Admin key not set. Save the Render admin API key.';
+    adminKeyRow.style.display = currentKey ? 'none' : 'flex';
 }
 
 function saveAdminKey() {
@@ -1286,7 +1287,6 @@ function renderAuthState() {
     const isAdmin = session && session.role === 'admin';
 
     loginRow.style.display = loggedIn ? 'none' : 'flex';
-    adminKeyRow.style.display = isAdmin ? 'none' : 'flex';
     logoutRow.style.display = loggedIn ? 'flex' : 'none';
     adminTools.style.display = isAdmin ? 'block' : 'none';
     document.getElementById('content-tools').style.display = isAdmin ? 'block' : 'none';
@@ -1296,8 +1296,9 @@ function renderAuthState() {
         if (storedKey) {
             window.ADMIN_API_KEY = storedKey;
         }
-        renderAdminKeyState();
     }
+
+    renderAdminKeyState();
 
     if (loggedIn) {
         authStatus.textContent = `Signed in as ${session.username} (${session.role || 'user'}). ${isAdmin ? 'Admin tools unlocked, including Site Content Management.' : 'Admin tools locked.'}`;

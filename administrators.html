@@ -680,7 +680,7 @@ function logAdminAction(action, details) {
 
     fetch(apiUrl('/api/log-admin-action'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(logPayload)
     }).catch(err => console.error('Failed to log admin action:', err));
 }
@@ -1325,7 +1325,7 @@ document.getElementById('saveContentBtn').addEventListener('click', () => {
 
     fetch(apiUrl('/api/update'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(content)
     })
     .then(res => res.json())
@@ -1349,6 +1349,7 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
 
     fetch(apiUrl('/api/upload-image'), {
         method: 'POST',
+        headers: window.apiHeaders(),
         body: formData
     })
     .then(res => res.json())

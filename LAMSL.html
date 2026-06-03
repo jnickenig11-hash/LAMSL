@@ -728,12 +728,14 @@ header {
     <p>© Latin & American Men's Softball League (LAMSL)</p>
 </footer>
 
+<script src="js/backend-config.js"></script>
 <script>
 const USERS_KEY = 'lamslUsersV1';
 const SESSION_KEY = 'lamslSessionV1';
 const ANNOUNCEMENTS_KEY = 'lamslAnnouncementsV1';
 const PAYMENT_KEY = 'lamslPaymentLinksV1';
-const BACKEND_URL = 'https://lamsl-backend.onrender.com';
+// Use central backend base (can be overridden via localStorage LAMSL_BACKEND)
+const BACKEND_URL = window.BACKEND_BASE || 'https://lamsl-backend.onrender.com';
 
 let currentSlide = 0;
 let slideshowImages = [];
@@ -765,13 +767,9 @@ function writeJson(key, value) {
 }
 
 function apiUrl(path) {
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-        return path;
-    }
-    if (window.location.protocol === 'file:' && path.startsWith('/')) {
-        return `http://localhost:8000${path}`;
-    }
-    return new URL(path, window.location.href).toString();
+    if (window.apiUrl) return window.apiUrl(path);
+    if (path && (path.startsWith('http://') || path.startsWith('https://'))) return path;
+    return BACKEND_URL.replace(/\/$/, '') + (path.startsWith('/') ? path : '/' + path);
 }
 
 emailSignupForm.addEventListener('submit', async (e) => {

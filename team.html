@@ -1044,6 +1044,7 @@ footer {
 }
 
 </style>
+<script src="js/backend-config.js"></script>
 </head>
 
 <body>
@@ -1548,7 +1549,9 @@ function initDOMReferences() {
 // Wrap all event listener setup
 
 function apiUrl(path) {
-    return new URL(path, window.location.href).toString();
+    if (window.apiUrl) return window.apiUrl(path);
+    const backendBase = window.BACKEND_BASE || 'https://lamsl-backend.onrender.com';
+    return backendBase.replace(/\/$/, '') + (path.startsWith('/') ? path : '/' + path);
 }
 
 function parseDateKey(dateKey) {

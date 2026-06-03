@@ -800,6 +800,7 @@ footer {
 
 
 </style>
+<script src="js/backend-config.js"></script>
 </head>
 
 <body>
@@ -1095,10 +1096,12 @@ function parseDateKey(dateKey) {
 }
 
 function apiUrl(path) {
+    if (window.apiUrl) return window.apiUrl(path);
+    const backendBase = window.BACKEND_BASE || 'https://lamsl-backend.onrender.com';
     if (window.location.protocol === 'file:' && path.startsWith('/')) {
-        return path.slice(1);
+        return backendBase.replace(/\/$/, '') + path;
     }
-    return new URL(path, window.location.href).toString();
+    return backendBase.replace(/\/$/, '') + (path.startsWith('/') ? path : '/' + path);
 }
 
 async function notifyScheduleUpdate(game, action) {
@@ -2236,6 +2239,7 @@ renderPracticeGames();
     } catch (e) {}
 })();
 </script>
+<script src="js/backend-config.js"></script>
 </body>
 </html>
 

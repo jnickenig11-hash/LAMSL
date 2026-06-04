@@ -1016,7 +1016,12 @@ footer {
     <p>&copy; Latin & American Men's Softball League (LAMSL)</p>
 </footer>
 <script src="js/schedule.js"></script>
-
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof ensureDefaults === 'function') ensureDefaults();
+    if (typeof renderMiniSchedule === 'function') renderMiniSchedule();
+  });
+</script>
 </body>
 </html>
 

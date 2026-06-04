@@ -1132,7 +1132,9 @@ function renderMiniSchedule() {
     const container = document.getElementById('mini-schedule-content');
     if (!container) return;
 
-    const schedule = readJson(SCHEDULE_KEY, []);
+    const schedule = typeof getSchedule === 'function'
+    ? getSchedule()
+    : readJson(SCHEDULE_KEY, []);
     const checkins = readJson(CHECKINS_KEY, {});
 
     const getGameId = game => String(game.id || `${game.date}|${game.time}|${game.team1}|${game.team2}`).trim();

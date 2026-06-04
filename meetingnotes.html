@@ -43,9 +43,47 @@ const KEYS={
  USERS:'lamslUsersV1',SESSION:'lamslSessionV1',ANN:'lamslAnnouncementsV1',ARCH:'lamslArchivedAnnouncementsV1',
  EFANN:'lamslEFAnnouncementsV1',DIV:'lamslDivisionsV1',SCHED:'lamslWeeklyScheduleV3',PRACT:'lamslPracticeScheduleV1',
  ROSTER:'lamslTeamRostersV1',PLAYERS:'lamslTeamPlayersV1',ASSIGN:'lamslTeamManagerAssignmentsV1',SEASON:'lamslSeasonV1',
- PAY:'lamslPaymentLinksV1',HOME_SLIDES:'lamslHomeSlidesV1',EF_SLIDES:'lamslEventSlidesV1',TEAM_PHOTOS:'lamslTeamPhotosV1',CHECKINS:'lamslTeamGameCheckinsV1'
+ PAY:'lamslPaymentLinksV1',HOME_SLIDES:'lamslHomeSlidesV1',EF_SLIDES:'lamslEventSlidesV1',TEAM_PHOTOS:'lamslTeamPhotosV1',CHECKINS:'lamslTeamGameCheckinsV1',MEETINGS:'lamslManagerMeetingNotesV1'
 };
 const DEFAULT_DIVISIONS={A:['Titans','Doom Squad','Legends','Nasty Boyz','Black Sox','White Sox','Dodgers'],B:['Charros','Toxic','Primos','Demons','Cubs','Borrachos'],C:['Diablos','Brewers','Coyotes','Goodfellas','Bandits','Salvajes','Balls Out','Orioles'],D:['Viejones','No Chance','Los Pericos','Wild Hogz','Strokes','Dawgz','Xolos','Desvelados'],E:[]};
+
+const DEFAULT_ANNOUNCEMENTS=[
+ {id:'ann-1',title:'TO ALL REGULAR SEASON MANAGERS!',date:'2026-05-28',message:'There will be a Mandatory Managers meeting Friday June 12th - 7p at 10111 Park St, Bellflower, CA 90706-6017.'},
+ {id:'ann-2',title:'SCHEDULE & STANDINGS UPDATED',date:'2026-05-26',message:'The Schedule for May 31st has been posted and can be seen on the mini-schedule and schedule tab. Team divisions and standings have also been updated. Scores will be added later.'},
+ {id:'ann-3',title:'SITE UNDER CONSTRUCTION!',date:'2026-04-27',message:'The New League Site is under construction. Site will be used only for game schedules, scores and standings. All other features TBD. Games will be posted by Thursday morning.'}
+];
+const DEFAULT_HOME_SLIDES=[
+ {id:'slide-founder',src:'Images/DonArturoPadillaLAMSLPresident.jpg',caption:'Arturo Padilla, Sr. — LAMSL Founder'},
+ {id:'slide-clubhouse',src:'Images/LAMSLClubhouseCartoonPic.jpg',caption:'Follow @lamsl_league for league photos, event highlights, and game-day updates.'}
+];
+const DEFAULT_MEETING_NOTES=[
+ {id:'meet-2024-04-19',date:'2024-04-19',title:'April 19, 2024 Meeting Notes',notes:'General
+- Roll call done in Division order
+- Teams to discuss division concerns with Art after meeting if needed
+- Regular Season starts 4/28/24
+- Monthly meetings to be held at the clubhouse
+- Next meeting: Friday, May 31st
+- Every team must have one representative (one person per team)
+
+Umpires
+- Umpires will meet with Gil separately
+- Rules will be provided to all umpires
+
+Bats
+- Bats will be provided by the league by unanimous agreement
+- If bats need replacement, teams agree to collectively pay
+- Bats will be tested and approved by the league.'},
+ {id:'meet-2024-05-31',date:'2024-05-31',title:'May 31, 2024 Meeting Notes',notes:'General
+- Teams to provide email addresses for pitcher waivers
+- Meeting notes are available on the LAMSL website
+
+Playoff Scenarios
+- Division A & B: Wild card Sunday starts with 6th vs 7th seed; winner plays 5th seed; then winner plays 4th seed before standard playoff bracket
+- Winter league: everyone makes playoffs to keep teams motivated
+- Division C & D: everyone plays each other once, then divisions split; top teams continue in Division C and remaining teams continue in Division D.'}
+];
+function hasNoContent(value){return value==null || (Array.isArray(value)&&value.length===0) || (typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length===0)}
+
 function readJson(k,f){try{const raw=localStorage.getItem(k);return raw?JSON.parse(raw):f}catch{return f}}
 function writeJson(k,v){localStorage.setItem(k,JSON.stringify(v)); backendSaveKey(k,v).catch(()=>{});}
 const backendBase = (window.BACKEND_BASE || 'https://lamsl-backend.onrender.com').replace(/\/$/, '');
@@ -120,7 +158,14 @@ async function uploadImageToBackend(file){
     return null;
 }
 
-function ensureDefaults(){let u=readJson(KEYS.USERS,[]);if(!u.some(x=>x.username==='admin')){u.push({username:'admin',password:'admin',role:'admin'});writeJson(KEYS.USERS,u)} if(!readJson(KEYS.DIV,null))writeJson(KEYS.DIV,DEFAULT_DIVISIONS); if(!readJson(KEYS.ANN,null))writeJson(KEYS.ANN,[]); if(!readJson(KEYS.ARCH,null))writeJson(KEYS.ARCH,[])}
+function ensureDefaults(){
+ let u=readJson(KEYS.USERS,[]);if(!u.some(x=>x.username==='admin')){u.push({username:'admin',password:'admin',role:'admin'});writeJson(KEYS.USERS,u)}
+ if(hasNoContent(readJson(KEYS.DIV,null)))writeJson(KEYS.DIV,DEFAULT_DIVISIONS);
+ if(hasNoContent(readJson(KEYS.ANN,null)))writeJson(KEYS.ANN,DEFAULT_ANNOUNCEMENTS);
+ if(hasNoContent(readJson(KEYS.ARCH,null)))writeJson(KEYS.ARCH,[]);
+ if(hasNoContent(readJson(KEYS.HOME_SLIDES,null)))writeJson(KEYS.HOME_SLIDES,DEFAULT_HOME_SLIDES);
+ if(hasNoContent(readJson(KEYS.MEETINGS,null)))writeJson(KEYS.MEETINGS,DEFAULT_MEETING_NOTES);
+}
 function session(){return readJson(KEYS.SESSION,null)} function isAdmin(){const s=session();return !!(s&&s.role==='admin')} function hasRole(r){const s=session();return !!(s&&s.role===r)}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function todayKey(){return new Date().toISOString().slice(0,10)} function id(prefix){return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2,7)}`}
@@ -130,5 +175,5 @@ function allTeams(){const d=readJson(KEYS.DIV,DEFAULT_DIVISIONS);return Object.e
 function setSeasonBanner(){const s=readJson(KEYS.SEASON,null), el=document.getElementById('banner-tagline'); if(s&&el)el.textContent=`${s.name} ${s.year} Season • ${fmtDate(s.start)} – ${fmtDate(s.end)}`}
 const __backendReady = syncFromBackend().then(() => { ensureDefaults(); setSeasonBanner(); });
 
-function render(){const a=readJson(KEYS.ARCH,[]);document.getElementById('archived').innerHTML=a.length?a.map(x=>`<div class="item"><h3>${esc(x.title)}</h3><small>${fmtDate(x.date)} archived ${x.archivedAt?new Date(x.archivedAt).toLocaleDateString():''}</small><p>${esc(x.message)}</p></div>`).join(''):'<p>No archived announcements.</p>';const notes=readJson('lamslManagerMeetingNotesV1',[]);document.getElementById('notes').innerHTML=notes.length?notes.map(n=>`<div class="item"><h3>${esc(n.title||'Meeting Notes')}</h3><small>${fmtDate(n.date)}</small><p>${esc(n.notes||n.message||'')}</p></div>`).join(''):'<p>No meeting notes posted.</p>'}__backendReady.then(render);
+function render(){const a=readJson(KEYS.ARCH,[]);document.getElementById('archived').innerHTML=a.length?a.map(x=>`<div class="item"><h3>${esc(x.title)}</h3><small>${fmtDate(x.date)} archived ${x.archivedAt?new Date(x.archivedAt).toLocaleDateString():''}</small><p>${esc(x.message)}</p></div>`).join(''):'<p>No archived announcements.</p>';const notes=readJson(KEYS.MEETINGS,[]);document.getElementById('notes').innerHTML=notes.length?notes.map(n=>`<div class="item"><h3>${esc(n.title||'Meeting Notes')}</h3><small>${fmtDate(n.date)}</small><p>${esc(n.notes||n.message||'')}</p></div>`).join(''):'<p>No meeting notes posted.</p>'}__backendReady.then(render);
 </script></body></html>

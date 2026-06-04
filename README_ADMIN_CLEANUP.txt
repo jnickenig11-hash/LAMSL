@@ -64,3 +64,9 @@ Primary shared data keys:
 Important:
 - These front-end files are now wired to persist through Render, but your Render backend must implement the endpoints above.
 - If the backend only supports your older /api/content and /api/update shape, the pages will still attempt those fallbacks, but the recommended stable implementation is /api/site-data for both GET and POST.
+
+
+MIGRATION UPDATE
+- This package restores the original public content that disappeared after the backend-first rewrite.
+- Default announcements, founder/Instagram cards, home slideshow starter photos, default divisions/teams, and prior meeting-note summaries are seeded when the Render backend returns empty data.
+- Existing browser localStorage data under the old LAMSL keys is still reused. The admin Export/Import area can push that data to Render with Import Data.

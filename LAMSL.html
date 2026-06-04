@@ -1235,11 +1235,14 @@ fetch('https://lamsl-backend.onrender.com/api/content')
       `).join('');
 
     // Zelle info
-    document.getElementById('zelleInfo').innerHTML = `
-      <p><strong>${data.zelle.name}</strong></p>
-      <p>${data.zelle.email}</p>
-      <img src="${data.zelle.qrImage}" style="width:150px;">
-    `;
+    const zelleInfo = document.getElementById('zelleInfo');
+    if (zelleInfo && data.zelle) {
+      zelleInfo.innerHTML = `
+        <p><strong>${data.zelle.name || ''}</strong></p>
+        <p>${data.zelle.email || ''}</p>
+        ${data.zelle.qrImage ? `<img src="${data.zelle.qrImage}" style="width:150px;">` : ''}
+      `;
+    }
 
     // Slideshow
     document.getElementById('slideshow').innerHTML =
@@ -1250,15 +1253,9 @@ fetch('https://lamsl-backend.onrender.com/api/content')
         </div>
       `).join('');
 
-    // Game Schedules (Next Games)
-    document.getElementById('mini-schedule-content').innerHTML =
-      data.gameSchedules.slice(0, 3).map(s => `
-        <div class="mini-schedule-item">
-          <p><strong>${s.team}</strong> vs <strong>${s.opponent}</strong></p>
-          <p>${s.date} at ${s.time}</p>
-          <p>${s.location}</p>
-        </div>
-      `).join('');
+    // Game schedules are rendered by renderMiniSchedule() from schedule.js.
+    // Do not overwrite the mini schedule here with backend content that may be empty
+    // or use a different field structure.
 
     // Game Scores (if you add the section)
     if (document.getElementById('gameScores')) {

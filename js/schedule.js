@@ -273,13 +273,35 @@ function getDefaultBackendContent() {
 }
 
 function getSchedule() {
-    const games = scheduleContent ? scheduleContent.gameSchedules : readJson(SCHEDULE_KEY, []);
-    return games.sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+    const localGames = readJson(SCHEDULE_KEY, []);
+    let games = localGames;
+
+    // Prefer backend schedules only when the backend actually has schedule records.
+    // This prevents an empty /api/content gameSchedules array from blanking the website.
+    if (
+        scheduleContent &&
+        Array.isArray(scheduleContent.gameSchedules) &&
+        scheduleContent.gameSchedules.length > 0
+    ) {
+        games = scheduleContent.gameSchedules;
+    }
+
+    return [...games].sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
 }
 
 function getPracticeSchedule() {
-    const games = scheduleContent ? scheduleContent.practiceSchedules : readJson(PRACTICE_KEY, []);
-    return games.sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+    const localGames = readJson(PRACTICE_KEY, []);
+    let games = localGames;
+
+    if (
+        scheduleContent &&
+        Array.isArray(scheduleContent.practiceSchedules) &&
+        scheduleContent.practiceSchedules.length > 0
+    ) {
+        games = scheduleContent.practiceSchedules;
+    }
+
+    return [...games].sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
 }
 
 function writeBackendCache() {
@@ -393,10 +415,17 @@ async function loadBackendSchedule() {
         const response = await fetch(apiUrl('/api/content'));
         if (!response.ok) throw new Error(`Backend content fetch failed ${response.status}`);
         const data = await response.json();
+        const localSchedules = readJson(SCHEDULE_KEY, []);
+        const localPracticeSchedules = readJson(PRACTICE_KEY, []);
+
         scheduleContent = Object.assign(getDefaultBackendContent(), data, {
-            gameSchedules: Array.isArray(data.gameSchedules) ? data.gameSchedules : [],
+            gameSchedules: Array.isArray(data.gameSchedules) && data.gameSchedules.length > 0
+                ? data.gameSchedules
+                : localSchedules,
             gameScores: Array.isArray(data.gameScores) ? data.gameScores : [],
-            practiceSchedules: Array.isArray(data.practiceSchedules) ? data.practiceSchedules : []
+            practiceSchedules: Array.isArray(data.practiceSchedules) && data.practiceSchedules.length > 0
+                ? data.practiceSchedules
+                : localPracticeSchedules
         });
         writeBackendCache();
     } catch (error) {

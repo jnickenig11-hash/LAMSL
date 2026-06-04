@@ -142,7 +142,9 @@ function ensureDefaults() {
     }
 
     const existing = readJson(SCHEDULE_KEY, null);
-    if (!existing) {
+
+
+    if (!Array.isArray(existing) || existing.length === 0) {
         const seed = [
             { id: 'game-1', date: '2026-04-26', time: '08:00am', park: 'Carson - Calas Park', division: 'All', team1: 'Titans', team2: 'Primos', score1: '', score2: '', status: 'scheduled' },
             { id: 'game-2', date: '2026-04-26', time: '09:50am', park: 'Carson - Calas Park', division: 'All', team1: 'Dodgers', team2: 'Nasty Boyz', score1: '', score2: '', status: 'scheduled' },

@@ -1,1592 +1,1231 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
-<title>LAMSL - League Administrators</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LAMSL - League Administrators</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet" />
 
-<style>
+  <style>
+    :root {
+      --navy: #12324a;
+      --navy-hover: #004080;
+      --orange: #c86a2f;
+      --gold: #f1d27a;
+      --bg: #eef4ea;
+      --border: #dbe2ea;
+      --text: #333;
+      --success-bg: #eef6ed;
+      --success-text: #225522;
+      --success-border: #c9e2cd;
+      --danger: #c12b2b;
+      --danger-hover: #9a2323;
+      --shadow: 0 2px 10px rgba(18, 50, 74, 0.08);
+      --radius: 10px;
+    }
 
-/* ===== GLOBAL ===== */
-body {
-    margin: 0;
-    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
-    background-color: #eef4ea;
-    background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
-    background-repeat: no-repeat;
-    background-position: center 55%;
-    background-size: min(60vw, 540px);
-    background-attachment: fixed;
-    color: #333;
-}
+    * { box-sizing: border-box; }
 
-h1, h2, h3 {
-    margin-bottom: 10px;
-    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-}
+    body {
+      margin: 0;
+      font-family: "Barlow Condensed", "Trebuchet MS", sans-serif;
+      color: var(--text);
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)),
+        url("Images/LAMSLLogo.jpg");
+      background-repeat: no-repeat;
+      background-position: center 55%;
+      background-size: min(60vw, 540px);
+      background-attachment: fixed;
+    }
 
-.container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 20px;
-}
+    h1, h2, h3, h4 {
+      font-family: "Oswald", "Barlow Condensed", sans-serif;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
 
-/* ===== NAVBAR ===== */
-header {
-    background: #12324A;
-    color: white;
-}
+    h1, h2, h3 { margin: 0 0 10px; }
+    h4 { margin: 18px 0 6px; }
+    p { margin: 6px 0; }
 
-.navbar {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 20px;
-    padding: 15px 20px;
-}
+    .container {
+      width: min(100%, 1200px);
+      margin: 0 auto;
+      padding: 20px;
+    }
 
-.navbar-brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 13px;
-    margin: 0;
-    font-size: 20px;
-}
+    .banner {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      justify-items: center;
+      padding: 24px 20px;
+      color: #fff;
+      text-align: center;
+      background: var(--navy);
+      border-bottom: 4px solid var(--orange);
+    }
 
-.navbar-brand-gem {
-    width: 24px;
-    height: 18px;
-    background:
+    .banner-logo {
+      width: 220px;
+      height: 160px;
+      object-fit: contain;
+    }
+
+    .banner h1 { font-size: 42px; }
+    .banner .subtitle { margin-top: 8px; font-size: 18px; font-style: italic; }
+    .banner .tagline { max-width: 620px; margin-top: 10px; font-size: 16px; }
+
+    header { color: #fff; background: var(--navy); }
+
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 20px;
+      padding-block: 15px;
+    }
+
+    .navbar-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 13px;
+      margin: 0;
+      font-size: 20px;
+      white-space: nowrap;
+    }
+
+    .navbar-brand-gem {
+      position: relative;
+      display: inline-block;
+      flex: 0 0 auto;
+      width: 24px;
+      height: 18px;
+      background:
         linear-gradient(90deg, transparent 0 22%, rgba(255, 255, 255, 0.7) 22% 28%, transparent 28% 72%, rgba(94, 108, 122, 0.24) 72% 78%, transparent 78% 100%),
         linear-gradient(180deg, #fbfdff 0%, #dfe5ec 34%, #b5c0cb 62%, #7c8a97 100%);
-    clip-path: polygon(24% 6%, 76% 6%, 100% 35%, 67% 100%, 33% 100%, 0% 35%);
-    border: 1px solid rgba(248, 251, 255, 0.78);
-    box-shadow: 0 0 0 1px rgba(86, 96, 108, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.82), inset 0 -1px 0 rgba(85, 96, 108, 0.4);
-    position: relative;
-    display: inline-block;
-    flex: 0 0 auto;
-}
+      border: 1px solid rgba(248, 251, 255, 0.78);
+      clip-path: polygon(24% 6%, 76% 6%, 100% 35%, 67% 100%, 33% 100%, 0% 35%);
+      box-shadow: 0 0 0 1px rgba(86, 96, 108, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.82), inset 0 -1px 0 rgba(85, 96, 108, 0.4);
+    }
 
-.navbar-brand-gem::after {
-    content: "";
-    position: absolute;
-    inset: 2px 4px 2px 4px;
-    clip-path: polygon(50% 0%, 80% 26%, 64% 100%, 36% 100%, 20% 26%);
-    background:
+    .navbar-brand-gem::after {
+      content: "";
+      position: absolute;
+      inset: 2px 4px;
+      background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.15)),
         linear-gradient(90deg, transparent 0 46%, rgba(126, 138, 151, 0.82) 46% 54%, transparent 54% 100%);
-    opacity: 0.95;
-    pointer-events: none;
-}
-
-.navbar ul {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 20px;
-    padding: 0;
-    margin: 0;
-}
-
-.navbar li {
-    margin: 0;
-}
-
-.navbar a {
-    color: white;
-    text-decoration: none;
-    display: block;
-}
-
-.navbar a:hover {
-    color: #F1D27A;
-}
-
-.navbar a.active-tab {
-    color: #F1D27A;
-    border-bottom: 2px solid #C86A2F;
-    padding-bottom: 2px;
-}
-
-/* ===== BANNER ===== */
-.banner {
-    position: relative;
-    background: #12324A;
-    color: white;
-    padding: 24px 20px;
-    border-bottom: 4px solid #C86A2F;
-    display: grid;
-    grid-template-columns: 240px minmax(0, 1fr);
-    align-items: center;
-    justify-items: center;
-    gap: 12px;
-    text-align: center;
-}
-.banner h1 {
-    margin: 0;
-    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
-    font-size: 42px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-}
-.banner .subtitle {
-    font-size: 18px;
-    font-style: italic;
-    margin: 8px 0 0;
-}
-.banner .tagline {
-    margin-top: 10px;
-    font-size: 16px;
-    max-width: 620px;
-}
-.banner-logo {
-    width: 220px;
-    height: 160px;
-    object-fit: contain;
-}
-@media (max-width: 700px) {
-    .banner {
-        grid-template-columns: 1fr;
-        text-align: center;
+      clip-path: polygon(50% 0%, 80% 26%, 64% 100%, 36% 100%, 20% 26%);
+      pointer-events: none;
     }
-    .banner h1 {
-        font-size: 32px;
+
+    .navbar ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 20px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
     }
-    .banner .subtitle,
-    .banner .tagline {
-        font-size: 14px;
+
+    .navbar a {
+      display: block;
+      color: #fff;
+      text-decoration: none;
     }
-    .banner-logo {
-        width: 180px;
-        height: auto;
+
+    .navbar a:hover,
+    .navbar a.active-tab { color: var(--gold); }
+
+    .navbar a.active-tab {
+      padding-bottom: 2px;
+      border-bottom: 2px solid var(--orange);
     }
-}
 
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 10px rgba(18, 50, 74, 0.08);
-}
-
-.admin-inline,
-.division-manager-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.admin-inline input,
-.admin-inline select,
-.admin-inline button,
-.admin-form input,
-.admin-form textarea,
-.admin-form select,
-.season-form input,
-.season-form select,
-.season-form button {
-    font-family: inherit;
-    font-size: 14px;
-}
-
-.admin-inline input,
-.admin-form input,
-.admin-form textarea,
-.admin-inline select,
-.admin-form select,
-.season-form input,
-.season-form select {
-    padding: 12px 14px;
-    border: 1px solid #dbe2ea;
-    border-radius: 8px;
-    min-width: 180px;
-    box-sizing: border-box;
-}
-
-.admin-form {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-.admin-form textarea {
-    grid-column: span 2;
-    min-height: 120px;
-    resize: vertical;
-}
-
-.admin-form button,
-.season-form button,
-.admin-inline button,
-.division-manager-grid button,
-.admin-list button,
-.remove-btn {
-    background: #12324A;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 12px 18px;
-    cursor: pointer;
-    font-weight: 700;
-}
-
-.admin-form button:hover,
-.season-form button:hover,
-.admin-inline button:hover,
-.division-manager-grid button:hover,
-.admin-list button:hover,
-.remove-btn:hover {
-    background: #004080;
-}
-
-.admin-only {
-    background: #f0f0f0;
-    border: 2px solid #12324A;
-    border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 20px;
-    margin-top: 20px;
-}
-
-.admin-only h3 {
-    margin-top: 0;
-    color: #12324A;
-}
-
-.admin-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: 12px;
-}
-
-.admin-list li {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 12px;
-    align-items: center;
-    background: #fff;
-    border: 1px solid #dbe2ea;
-    border-radius: 10px;
-    padding: 14px 16px;
-}
-
-.admin-list li button {
-    min-width: 96px;
-}
-
-.division-team-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    display: grid;
-    gap: 8px;
-}
-
-.division-team-list li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    background: #fff;
-    border: 1px solid #dbe2ea;
-    border-radius: 8px;
-}
-
-.division-team-list li span {
-    font-weight: 600;
-}
-
-.division-manager-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 12px;
-    align-items: start;
-}
-
-.division-manager {
-    background: #f8fbff;
-    border: 1px solid #dbe2ea;
-    border-radius: 10px;
-    padding: 18px;
-}
-
-.division-team-list.full-row {
-    grid-column: 1 / -1;
-}
-
-.season-current {
-    background: #fff;
-    border: 1px solid #dbe2ea;
-    border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 16px;
-}
-
-.season-form {
-    display: grid;
-    gap: 12px;
-}
-
-.danger-btn {
-    background: #c12b2b;
-    color: white;
-}
-
-.danger-btn:hover {
-    background: #9a2323;
-}
-
-.admin-status {
-    margin-top: 12px;
-    padding: 12px 14px;
-    border-radius: 8px;
-    background: #eef6ed;
-    color: #225522;
-    border: 1px solid #c9e2cd;
-}
-
-footer {
-    text-align: center;
-    padding: 20px;
-    background: #12324A;
-    color: white;
-    margin-top: 20px;
-}
-
-@media (max-width: 880px) {
-    .division-manager-grid,
-    .admin-inline {
-        display: grid;
-        grid-template-columns: 1fr;
+    .card {
+      padding: 20px;
+      margin-bottom: 20px;
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
     }
-}
 
-</style>
+    .admin-only {
+      padding: 16px;
+      margin: 20px 0;
+      background: #f0f0f0;
+      border: 2px solid var(--navy);
+      border-radius: var(--radius);
+    }
+
+    .admin-only h3 { color: var(--navy); }
+
+    .admin-inline,
+    .admin-form,
+    .season-form,
+    .division-manager-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .admin-inline { grid-template-columns: repeat(auto-fit, minmax(180px, max-content)); }
+    .admin-form { grid-template-columns: repeat(2, minmax(220px, 1fr)); }
+    .season-form { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    .division-manager-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: start; }
+
+    input, select, textarea, button {
+      font: inherit;
+      font-size: 14px;
+    }
+
+    input, select, textarea {
+      min-width: 0;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .admin-form textarea { grid-column: 1 / -1; }
+    .full-row { grid-column: 1 / -1; }
+
+    button {
+      padding: 12px 18px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      background: var(--navy);
+      border: 0;
+      border-radius: 8px;
+    }
+
+    button:hover { background: var(--navy-hover); }
+    button:disabled { cursor: not-allowed; opacity: 0.55; }
+    .danger-btn { background: var(--danger); }
+    .danger-btn:hover { background: var(--danger-hover); }
+
+    .admin-status {
+      padding: 12px 14px;
+      margin-top: 12px;
+      color: var(--success-text);
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      border-radius: 8px;
+    }
+
+    .admin-list,
+    .division-team-list {
+      display: grid;
+      gap: 8px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .admin-list li,
+    .division-team-list li {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .division-manager {
+      padding: 18px;
+      margin-top: 20px;
+      background: #f8fbff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .season-current {
+      padding: 16px;
+      margin-bottom: 16px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .season-badge {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 2px 8px;
+      font-size: 12px;
+      color: #fff;
+      background: var(--navy);
+      border-radius: 999px;
+    }
+
+    footer {
+      padding: 20px;
+      margin-top: 20px;
+      color: #fff;
+      text-align: center;
+      background: var(--navy);
+    }
+
+    @media (max-width: 700px) {
+      .banner { grid-template-columns: 1fr; }
+      .banner h1 { font-size: 32px; }
+      .banner .subtitle, .banner .tagline { font-size: 14px; }
+      .banner-logo { width: 180px; height: auto; }
+      .navbar { align-items: flex-start; flex-direction: column; }
+      .admin-form, .admin-inline { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
-
 <body>
-
-<!-- BANNER -->
-<div class="banner">
-    <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
-    <h1>Latin & american men's softball league</h1>
-    <div class="subtitle">Established 1976</div>
-    <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
-</div>
-
-<!-- HEADER -->
-<header>
-    <div class="navbar container">
-        <h2 class="navbar-brand"><span class="navbar-brand-gem" aria-hidden="true"></span>LAMSL</h2>
-        <ul>
-            <li><a href="LAMSL.html">Home</a></li>
-            <li><a href="standings.html">Standings</a></li>
-            <li><a href="schedule.html">Schedule</a></li>
-            <li><a href="teams.html">Teams</a></li>
-            <li><a href="rules.html">Rules</a></li>
-            <li><a href="meetingnotes.html">Meeting Notes</a></li>
-            <li><a href="events.html">Events &amp; Fundraisers</a></li>
-            <li><a href="hallofchampions.html">Hall of Champions</a></li>
-            <li><a href="administrators.html" class="active-tab">Admin</a></li>
-            <li><a href="about.html">About</a></li>
-        </ul>
+  <section class="banner" aria-label="LAMSL banner">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo" />
+    <div>
+      <h1>Latin &amp; American Men's Softball League</h1>
+      <div class="subtitle">Established 1976</div>
+      <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
     </div>
-</header>
+  </section>
 
-<!-- MAIN -->
-<div class="container">
+  <header>
+    <nav class="navbar container" aria-label="Main navigation">
+      <h2 class="navbar-brand"><span class="navbar-brand-gem" aria-hidden="true"></span>LAMSL</h2>
+      <ul>
+        <li><a href="LAMSL.html">Home</a></li>
+        <li><a href="standings.html">Standings</a></li>
+        <li><a href="schedule.html">Schedule</a></li>
+        <li><a href="teams.html">Teams</a></li>
+        <li><a href="rules.html">Rules</a></li>
+        <li><a href="meetingnotes.html">Meeting Notes</a></li>
+        <li><a href="events.html">Events &amp; Fundraisers</a></li>
+        <li><a href="hallofchampions.html">Hall of Champions</a></li>
+        <li><a href="administrators.html" class="active-tab" aria-current="page">Admin</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+    </nav>
+  </header>
 
-    <main>
-        <section class="card">
-            <h2>User Administration</h2>
-            <p class="admin-status" id="auth-status">Not signed in.</p>
-            <h2>Site Content Management</h2>
-            <div id="content-admin">
-              <!-- Homepage message, Zelle info, schedules, scores, slideshow -->
-             <!-- Site Content Management -->
-            <div class="admin-only" id="content-tools" style="display:none;">
-              <h3>Homepage Message</h3>
-              <form class="admin-form">
-                <textarea id="homepageMessage" rows="2" placeholder="Welcome message..."></textarea>
-              </form>
-            
-              <h3>Zelle / Payment Info</h3>
-              <form class="admin-form">
-                <textarea id="zelle" rows="5" placeholder="Zelle name, email, QR image URL..."></textarea>
-              </form>
-            
-              <h3>Game Schedules</h3>
-              <form class="admin-form">
-                <textarea id="gameSchedules" rows="8" placeholder="[{team, opponent, date, time, location}]"></textarea>
-              </form>
-            
-              <h3>Game Scores</h3>
-              <form class="admin-form">
-                <textarea id="gameScores" rows="8" placeholder="[{teamA, teamB, scoreA, scoreB, date}]"></textarea>
-              </form>
-            
-              <h3>Slideshow Images</h3>
-              <form class="admin-form">
-                <textarea id="slideshow" rows="8" placeholder="[{imageUrl, caption}]"></textarea>
-                <input type="file" id="slideUpload" accept="image/*">
-                <button type="button" id="uploadBtn">Upload Slide</button>
-                <div id="uploadMessage"></div>
-              </form>
-            
-              <button type="button" id="saveContentBtn" class="admin-form-btn">Save All Changes</button>
-           
+  <main class="container">
+    <section class="card" aria-labelledby="admin-heading">
+      <h2 id="admin-heading">User Administration</h2>
+      <p class="admin-status" id="auth-status">Not signed in.</p>
+
+      <div class="admin-inline" id="login-row">
+        <input id="login-username" type="text" placeholder="Username" autocomplete="username" />
+        <input id="login-password" type="password" placeholder="Password" autocomplete="current-password" />
+        <button id="login-btn" type="button">Sign In</button>
+      </div>
+
+      <div class="admin-inline" id="logout-row" hidden>
+        <button id="logout-btn" type="button">Sign Out</button>
+      </div>
+
+      <section class="admin-only" id="content-tools" hidden aria-labelledby="content-heading">
+        <h2 id="content-heading">Site Content Management</h2>
+
+        <h3>Homepage Message</h3>
+        <textarea id="homepageMessage" rows="2" placeholder="Welcome message..."></textarea>
+
+        <h3>Zelle / Payment Info</h3>
+        <textarea id="zelle" rows="5" placeholder='{"name":"...","email":"...","qrImageUrl":"..."}'></textarea>
+
+        <h3>Game Schedules</h3>
+        <textarea id="gameSchedules" rows="8" placeholder='[{"team":"...","opponent":"...","date":"...","time":"...","location":"..."}]'></textarea>
+
+        <h3>Game Scores</h3>
+        <textarea id="gameScores" rows="8" placeholder='[{"teamA":"...","teamB":"...","scoreA":0,"scoreB":0,"date":"..."}]'></textarea>
+
+        <h3>Slideshow Images</h3>
+        <textarea id="slideshow" rows="8" placeholder='[{"imageUrl":"...","caption":"..."}]'></textarea>
+        <div class="admin-inline">
+          <input type="file" id="slideUpload" accept="image/*" />
+          <button type="button" id="uploadBtn">Upload Slide</button>
+        </div>
+        <p id="uploadMessage" class="admin-status" hidden></p>
+        <button type="button" id="saveContentBtn">Save All Changes</button>
+      </section>
+
+      <section class="admin-only" id="admin-tools" hidden aria-labelledby="tools-heading">
+        <h2 id="tools-heading">Administrator Tools</h2>
+
+        <h3>Add Announcement</h3>
+        <form class="admin-form" id="announcement-form">
+          <input id="announcement-title" type="text" placeholder="Announcement title" required />
+          <input id="announcement-date" type="date" required />
+          <textarea id="announcement-message" placeholder="Announcement details" required></textarea>
+          <button type="submit">Publish Announcement</button>
+        </form>
+
+        <h3>Active Announcements</h3>
+        <ul id="active-announcements" class="admin-list"></ul>
+
+        <h3>Create Additional User</h3>
+        <div class="admin-inline">
+          <input id="new-admin-username" type="text" placeholder="New username" autocomplete="off" />
+          <input id="new-admin-password" type="password" placeholder="New user password" autocomplete="new-password" />
+          <select id="new-user-role" aria-label="Select role">
+            <option value="">Select role</option>
+            <option value="admin">Admin</option>
+            <option value="umpire">Umpire</option>
+            <option value="team-manager">Team Manager</option>
+          </select>
+          <button id="create-admin-btn" type="button">Create User</button>
+        </div>
+
+        <h3>User Accounts</h3>
+        <ul id="user-accounts-list" class="admin-list"></ul>
+
+        <div class="division-manager">
+          <h3>Division &amp; Team Manager</h3>
+          <p id="division-manager-status" class="admin-status">Sign in as admin to manage divisions and teams.</p>
+
+          <div class="division-manager-grid">
+            <input id="new-division-name" type="text" placeholder="New Division (e.g., E or Masters)" />
+            <button id="add-division-btn" type="button">Add Division</button>
+
+            <select id="manage-division-select" aria-label="Select division to manage"></select>
+            <input id="rename-division-name" type="text" placeholder="Rename Selected Division" />
+            <button id="rename-division-btn" type="button">Rename Division</button>
+            <button id="delete-division-btn" type="button" class="danger-btn">Delete Selected Division</button>
+
+            <input id="new-team-name" type="text" placeholder="New Team Name" />
+            <button id="add-team-btn" type="button">Add Team to Selected Division</button>
+
+            <ul id="division-team-list" class="division-team-list full-row"></ul>
+
+            <div class="assignment-panel full-row">
+              <h4>Team Manager Assignments</h4>
+              <div class="admin-inline">
+                <select id="assign-team-select" aria-label="Select team"></select>
+                <select id="assign-manager-select" aria-label="Select manager"></select>
+                <button id="assign-manager-btn" type="button">Assign Manager</button>
+              </div>
+              <ul id="team-manager-assignments-list" class="admin-list"></ul>
+              <div class="admin-inline" style="margin-top:12px;">
+                <input id="admin-roster-file" type="file" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+                <button id="upload-all-rosters-admin-btn" type="button">Upload All Rosters</button>
+              </div>
             </div>
-                    
-          
-            
-            <div class="admin-inline" id="login-row">
-                <input id="login-username" type="text" placeholder="Username" value="">
-                <input id="login-password" type="password" placeholder="Password" value="">
-                <button id="login-btn" type="button">Sign In</button>
-            </div>
+          </div>
+        </div>
+      </section>
+    </section>
 
-            <div class="admin-inline" id="logout-row" style="display:none;">
-                <button id="logout-btn" type="button">Sign Out</button>
-            </div>
+    <section class="card" id="season-card" aria-labelledby="season-heading">
+      <h2 id="season-heading">League Season Settings</h2>
+      <p class="admin-status" id="season-auth-note">Sign in as admin to configure the active season.</p>
+      <div id="season-current-display" class="season-current" hidden></div>
+      <form class="season-form" id="season-form" hidden>
+        <select id="season-name" required>
+          <option value="">Select Season</option>
+          <option value="Spring">Spring</option>
+          <option value="Summer">Summer</option>
+          <option value="Fall">Fall</option>
+          <option value="Winter">Winter</option>
+        </select>
+        <input id="season-year" type="number" min="2000" max="2100" placeholder="Year (e.g. 2026)" required />
+        <input id="season-start" type="date" required />
+        <input id="season-end" type="date" required />
+        <button type="submit">Save Season</button>
+      </form>
+    </section>
 
-            <div class="admin-only" id="admin-tools" style="display:none;">
-                <h3>Add Announcement</h3>
-                <form class="admin-form" id="announcement-form">
-                    <input id="announcement-title" type="text" placeholder="Announcement title" required>
-                    <input id="announcement-date" type="date" required>
-                    <textarea id="announcement-message" placeholder="Announcement details" required></textarea>
-                    <button type="submit">Publish Announcement</button>
-                </form>
+    <section class="card" aria-labelledby="league-admins-heading">
+      <h2 id="league-admins-heading">League Administrators</h2>
+      <h4>Founder</h4>
+      <p>Arturo Padilla, Sr. (RIP)</p>
+      <h4>President</h4>
+      <p>Arturo Padilla, Jr.</p>
+      <p>Cell/Text: 310-754-5950</p>
+      <p>E-mail: artpadilla19@gmail.com</p>
+      <h4>Vice-President</h4>
+      <p>Gilbert Cuevas</p>
+      <p>Cell/Text: 323-228-1112</p>
+      <p>E-mail: gilbertcuevas2010@gmail.com</p>
+      <h4>League Administrative Assistant</h4>
+      <p>Belen Rocha</p>
+      <p>Cell/Text: (323) 942-4032</p>
+      <p>Alejandra Pierce Padilla</p>
+      <p>Cell/Text: (562) 299-3978</p>
+      <p>E-mail: lamsl1976@gmail.com</p>
+      <h4>Women's Modified Coordinator</h4>
+      <p>Alyssa Ruiz</p>
+      <p>Cell/Text: (323) 348-6329</p>
+      <p>E-mail: alyssa15ruiz@icloud.com</p>
+      <h4>Social Media Coordinator</h4>
+      <p>Belen Rocha</p>
+      <p>IG: lamsl_league</p>
+    </section>
+  </main>
 
-                <h3>Active Announcements</h3>
-                <ul id="active-announcements" class="admin-list"></ul>
+  <footer>
+    <p>© Latin &amp; American Men's Softball League (LAMSL)</p>
+  </footer>
 
-                <h3>Create Additional User</h3>
-                <div class="admin-inline">
-                    <input id="new-admin-username" type="text" placeholder="New username">
-                    <input id="new-admin-password" type="password" placeholder="New user password">
-                    <select id="new-user-role" aria-label="Select role">
-                        <option value="">Select role</option>
-                        <option value="admin">Admin</option>
-                        <option value="umpire">Umpire</option>
-                        <option value="team-manager">Team Manager</option>
-                    </select>
-                    <button id="create-admin-btn" type="button">Create User</button>
-                </div>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="js/backend-config.js"></script>
 
-                <h3>User Accounts</h3>
-                <ul id="user-accounts-list" class="admin-list"></ul>
+  <script>
+    (() => {
+      'use strict';
 
-                <div class="division-manager">
-                    <h3>Division &amp; Team Manager</h3>
-                    <p id="division-manager-status" class="admin-status">Sign in as admin to manage divisions and teams.</p>
-                    <div class="division-manager-grid">
-                        <input id="new-division-name" type="text" placeholder="New Division (e.g., E or Masters)">
-                        <button id="add-division-btn" type="button">Add Division</button>
+      const STORAGE_KEYS = Object.freeze({
+        users: 'lamslUsersV1',
+        session: 'lamslSessionV1',
+        announcements: 'lamslAnnouncementsV1',
+        archive: 'lamslArchivedAnnouncementsV1',
+        season: 'lamslSeasonV1',
+        divisions: 'lamslDivisionsV1',
+        schedule: 'lamslWeeklyScheduleV3',
+        practice: 'lamslPracticeScheduleV1',
+        roster: 'lamslTeamRostersV1',
+        teamPlayers: 'lamslTeamPlayersV1',
+        managerAssignments: 'lamslTeamManagerAssignmentsV1',
+        standings: 'lamslStandingsV1'
+      });
 
-                        <select id="manage-division-select"></select>
-                        <input id="rename-division-name" type="text" placeholder="Rename Selected Division">
-                        <button id="rename-division-btn" type="button">Rename Division</button>
-                        <button id="delete-division-btn" type="button" class="danger-btn">Delete Selected Division</button>
+      const DEFAULT_TEAMS_BY_DIVISION = Object.freeze({
+        A: ['Titans', 'Doom Squad', 'Legends', 'Nasty Boyz', 'Black Sox', 'White Sox', 'Dodgers'],
+        B: ['Charros', 'Toxic', 'Primos', 'Demons', 'Cubs', 'Borrachos'],
+        C: ['Diablos', 'Brewers', 'Coyotes', 'Goodfellas', 'Bandits', 'Salvajes', 'Balls Out', 'Orioles'],
+        D: ['Viejones', 'No Chance', 'Los Pericos', 'Wild Hogz', 'Strokes', 'Dawgz', 'Xolos', 'Desvelados'],
+        E: []
+      });
 
-                        <input id="new-team-name" type="text" placeholder="New Team Name">
-                        <button id="add-team-btn" type="button">Add Team to Selected Division</button>
+      const backendBase = window.BACKEND_BASE || 'https://lamsl-backend.onrender.com';
+      const apiHeaders = headers => typeof window.apiHeaders === 'function' ? window.apiHeaders(headers) : headers;
+      const $ = id => document.getElementById(id);
 
-                        <ul id="division-team-list" class="division-team-list full-row"></ul>
+      const el = {
+        authStatus: $('auth-status'),
+        loginRow: $('login-row'),
+        logoutRow: $('logout-row'),
+        adminTools: $('admin-tools'),
+        contentTools: $('content-tools'),
+        loginButton: $('login-btn'),
+        logoutButton: $('logout-btn'),
+        loginUsername: $('login-username'),
+        loginPassword: $('login-password'),
+        announcementForm: $('announcement-form'),
+        announcementTitle: $('announcement-title'),
+        announcementDate: $('announcement-date'),
+        announcementMessage: $('announcement-message'),
+        activeAnnouncementsList: $('active-announcements'),
+        createAdminButton: $('create-admin-btn'),
+        newAdminUsername: $('new-admin-username'),
+        newAdminPassword: $('new-admin-password'),
+        newUserRole: $('new-user-role'),
+        userAccountsList: $('user-accounts-list'),
+        divisionManagerStatus: $('division-manager-status'),
+        newDivisionInput: $('new-division-name'),
+        addDivisionButton: $('add-division-btn'),
+        manageDivisionSelect: $('manage-division-select'),
+        renameDivisionInput: $('rename-division-name'),
+        renameDivisionButton: $('rename-division-btn'),
+        deleteDivisionButton: $('delete-division-btn'),
+        newTeamInput: $('new-team-name'),
+        addTeamButton: $('add-team-btn'),
+        divisionTeamList: $('division-team-list'),
+        assignTeamSelect: $('assign-team-select'),
+        assignManagerSelect: $('assign-manager-select'),
+        assignManagerButton: $('assign-manager-btn'),
+        teamManagerAssignmentsList: $('team-manager-assignments-list'),
+        adminRosterFile: $('admin-roster-file'),
+        uploadAllRostersAdminButton: $('upload-all-rosters-admin-btn'),
+        homepageMessage: $('homepageMessage'),
+        zelle: $('zelle'),
+        gameSchedules: $('gameSchedules'),
+        gameScores: $('gameScores'),
+        slideshow: $('slideshow'),
+        slideUpload: $('slideUpload'),
+        uploadButton: $('uploadBtn'),
+        uploadMessage: $('uploadMessage'),
+        saveContentButton: $('saveContentBtn'),
+        seasonForm: $('season-form'),
+        seasonName: $('season-name'),
+        seasonYear: $('season-year'),
+        seasonStart: $('season-start'),
+        seasonEnd: $('season-end'),
+        seasonCurrent: $('season-current-display'),
+        seasonAuthNote: $('season-auth-note'),
+        bannerTagline: $('banner-tagline')
+      };
 
-                        <div class="assignment-panel full-row">
-                            <h4>Team Manager Assignments</h4>
-                            <div class="admin-inline">
-                                <select id="assign-team-select" aria-label="Select team"></select>
-                                <select id="assign-manager-select" aria-label="Select manager"></select>
-                                <button id="assign-manager-btn" type="button">Assign Manager</button>
-                            </div>
-                            <ul id="team-manager-assignments-list" class="admin-list"></ul>
-                            <div class="manager-upload-controls">
-                                <input id="admin-roster-file" type="file" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-                                <button id="upload-all-rosters-admin-btn" type="button">Upload All Rosters</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+      let siteContent = {};
 
-        <section class="card" id="season-card">
-            <h2>League Season Settings</h2>
-            <p class="admin-status" id="season-auth-note">Sign in as admin to configure the active season.</p>
-            <div id="season-current-display" class="season-current" style="display:none;"></div>
-            <form class="season-form" id="season-form" style="display:none;">
-                <select id="season-name" required>
-                    <option value="">Select Season</option>
-                    <option value="Spring">Spring</option>
-                    <option value="Summer">Summer</option>
-                    <option value="Fall">Fall</option>
-                    <option value="Winter">Winter</option>
-                </select>
-                <input id="season-year" type="number" min="2000" max="2100" placeholder="Year (e.g. 2026)" required>
-                <input id="season-start" type="date" required>
-                <input id="season-end" type="date" required>
-                <button type="submit">Save Season</button>
-            </form>
-        </section>
+      function apiUrl(path = '') {
+        if (path.startsWith('http://') || path.startsWith('https://')) return path;
+        return backendBase.replace(/\/$/, '') + (path.startsWith('/') ? path : `/${path}`);
+      }
 
-            
-        <section class="card">
-            <h2>League Administrators</h2>
-            <h4>Founder</h4>
-            <p>Arturo Padilla, Sr. (RIP)</p>
-            <h4>President</h4>
-            <p>Arturo Padilla, Jr.</p>
-            <p>Cell/Text: 310-754-5950</p>
-            <p>E-mail: artpadilla19@gmail.com</p>
-            <h4>Vice-President</h4>
-            <p>Gilbert Cuevas</p>
-            <p>Cell/Text: 323-228-1112</p>
-            <p>E-mail: gilbertcuevas2010@gmail.com</p>
-            <h4>League Administrative Assistant</h4>
-            <p>Belen Rocha</p>
-            <p>Cell/Text: (323) 942-4032</p>
-            <p>Alejandra Pierce Padilla</p>
-            <p>Cell/Text: (562) 299-3978</p>
-            <p>E-mail: lamsl1976@gmail.com</p>
-            <h4>Women's Modified Coordinator</h4>
-            <p>Alyssa Ruiz</p>
-            <p>Cell/Text: (323) 348-6329</p>
-            <p>E-mail: alyssa15ruiz@icloud.com</p>
-            <h4>Social Media Coordinator</h4>
-            <p>Belen Rocha</p>
-            <p>IG: lamsl_league</p>
-        </section>
-    </main>
+      function readJson(key, fallback) {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw ? JSON.parse(raw) : fallback;
+        } catch {
+          return fallback;
+        }
+      }
 
-</div>
+      function writeJson(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+      }
 
-<!-- FOOTER -->
-<footer>
-    <p>© Latin & American Men's Softball League (LAMSL)</p>
-</footer>
+      function deepClone(value) {
+        return JSON.parse(JSON.stringify(value));
+      }
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="js/backend-config.js"></script>
-    
-<script>
-const USERS_KEY = 'lamslUsersV1';
-const SESSION_KEY = 'lamslSessionV1';
-const ANNOUNCEMENTS_KEY = 'lamslAnnouncementsV1';
-const ARCHIVE_KEY = 'lamslArchivedAnnouncementsV1';
-const SEASON_KEY = 'lamslSeasonV1';
-const DIVISIONS_KEY = 'lamslDivisionsV1';
-const SCHEDULE_KEY = 'lamslWeeklyScheduleV3';
-const PRACTICE_KEY = 'lamslPracticeScheduleV1';
-const ROSTER_KEY = 'lamslTeamRostersV1';
-const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
-const TEAM_MANAGER_ASSIGNMENTS_KEY = 'lamslTeamManagerAssignmentsV1';
-const STANDINGS_KEY = 'lamslStandingsV1';
+      function setStatus(target, message) {
+        if (target) target.textContent = message;
+      }
 
-// Backend base URL: always use Render-hosted backend for development
-const backendBase = window.BACKEND_BASE || 'https://lamsl-backend.onrender.com';
+      function setHidden(target, hidden) {
+        if (target) target.hidden = hidden;
+      }
 
-function apiUrl(path) {
-    if (!path) return backendBase;
-    if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    return backendBase.replace(/\/$/, '') + (path.startsWith('/') ? path : '/' + path);
-}
+      function getSession() {
+        return readJson(STORAGE_KEYS.session, null);
+      }
 
-const DEFAULT_TEAMS_BY_DIVISION = {
-    A: ['Titans', 'Doom Squad', 'Legends', 'Nasty Boyz', 'Black Sox', 'White Sox', 'Dodgers'],
-    B: ['Charros', 'Toxic', 'Primos', 'Demons', 'Cubs', 'Borrachos'],
-    C: ['Diablos', 'Brewers', 'Coyotes', 'Goodfellas', 'Bandits', 'Salvajes', 'Balls Out', 'Orioles'],
-    D: ['Viejones', 'No Chance', 'Los Pericos', 'Wild Hogz', 'Strokes', 'Dawgz', 'Xolos', 'Desvelados'],
-    E: []
-};
+      function isAdminLoggedIn() {
+        const session = getSession();
+        return Boolean(session && session.role === 'admin');
+      }
 
-const authStatus = document.getElementById('auth-status');
-const loginRow = document.getElementById('login-row');
-const logoutRow = document.getElementById('logout-row');
-const adminTools = document.getElementById('admin-tools');
-const loginButton = document.getElementById('login-btn');
-const logoutButton = document.getElementById('logout-btn');
-const loginUsername = document.getElementById('login-username');
-const loginPassword = document.getElementById('login-password');
-const announcementForm = document.getElementById('announcement-form');
-const announcementTitle = document.getElementById('announcement-title');
-const announcementDate = document.getElementById('announcement-date');
-const announcementMessage = document.getElementById('announcement-message');
-const activeAnnouncementsList = document.getElementById('active-announcements');
-const createAdminButton = document.getElementById('create-admin-btn');
-const newAdminUsername = document.getElementById('new-admin-username');
-const newAdminPassword = document.getElementById('new-admin-password');
-const newUserRole = document.getElementById('new-user-role');
-const userAccountsList = document.getElementById('user-accounts-list');
-const divisionManagerStatus = document.getElementById('division-manager-status');
-const newDivisionInput = document.getElementById('new-division-name');
-const addDivisionButton = document.getElementById('add-division-btn');
-const manageDivisionSelect = document.getElementById('manage-division-select');
-const renameDivisionInput = document.getElementById('rename-division-name');
-const renameDivisionButton = document.getElementById('rename-division-btn');
-const deleteDivisionButton = document.getElementById('delete-division-btn');
-const newTeamInput = document.getElementById('new-team-name');
-const addTeamButton = document.getElementById('add-team-btn');
-const divisionTeamList = document.getElementById('division-team-list');
-const assignTeamSelect = document.getElementById('assign-team-select');
-const assignManagerSelect = document.getElementById('assign-manager-select');
-const assignManagerButton = document.getElementById('assign-manager-btn');
-const teamManagerAssignmentsList = document.getElementById('team-manager-assignments-list');
-const adminRosterFile = document.getElementById('admin-roster-file');
-const uploadAllRostersAdminBtn = document.getElementById('upload-all-rosters-admin-btn');
-// Site Content Management elements
-const homepageMessage = document.getElementById('homepageMessage');
-const zelle = document.getElementById('zelle');
-const gameSchedules = document.getElementById('gameSchedules');
-const gameScores = document.getElementById('gameScores');
-const slideshow = document.getElementById('slideshow');
-const slideUpload = document.getElementById('slideUpload');
-const uploadBtn = document.getElementById('uploadBtn');
-const uploadMessage = document.getElementById('uploadMessage');
-const saveContentBtn = document.getElementById('saveContentBtn');
+      function requireAdmin(statusTarget, message = 'Sign in as admin first.') {
+        if (isAdminLoggedIn()) return true;
+        setStatus(statusTarget || el.authStatus, message);
+        return false;
+      }
 
-function readJson(key, fallback) {
-    try {
-        const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : fallback;
-    } catch (error) {
-        return fallback;
-    }
-}
+      function initializeAdminKey() {
+        const adminKey = new URLSearchParams(window.location.search).get('adminKey');
+        if (adminKey && !localStorage.getItem('LAMSL_ADMIN_KEY')) {
+          localStorage.setItem('LAMSL_ADMIN_KEY', adminKey);
+        }
 
-function writeJson(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
-}
+        const storedKey = localStorage.getItem('LAMSL_ADMIN_KEY');
+        if (storedKey) window.ADMIN_API_KEY = storedKey;
+      }
 
-function getQueryParam(name) {
-    const params = new URLSearchParams(window.location.search);
-    return params.get(name);
-}
+      function logAdminAction(action, details = {}) {
+        const session = getSession();
+        if (!session?.username) return;
 
-function initializeAdminKeyFromQuery() {
-    const adminKey = getQueryParam('adminKey');
-    if (adminKey && !localStorage.getItem('LAMSL_ADMIN_KEY')) {
-        localStorage.setItem('LAMSL_ADMIN_KEY', adminKey);
-        window.ADMIN_API_KEY = adminKey;
-        console.log('LAMSL_ADMIN_KEY set from query parameter');
-    }
-}
+        fetch(apiUrl('/api/log-admin-action'), {
+          method: 'POST',
+          headers: apiHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ username: session.username, action, details })
+        }).catch(error => console.error('Failed to log admin action:', error));
+      }
 
-function initializeAdminKeyFromStorage() {
-    const storedKey = (typeof localStorage !== 'undefined') ? localStorage.getItem('LAMSL_ADMIN_KEY') : null;
-    if (storedKey) {
-        window.ADMIN_API_KEY = storedKey;
-    }
-}
+      function ensureDefaults() {
+        const users = readJson(STORAGE_KEYS.users, []);
+        if (!users.some(user => user.username === 'admin')) {
+          users.push({ username: 'admin', password: 'admin', role: 'admin' });
+          writeJson(STORAGE_KEYS.users, users);
+        }
 
-initializeAdminKeyFromQuery();
-initializeAdminKeyFromStorage();
-
-function logAdminAction(action, details) {
-    const session = getSession();
-    if (!session || !session.username) return;
-
-    const logPayload = {
-        username: session.username,
-        action,
-        details
-    };
-
-    fetch(apiUrl('/api/log-admin-action'), {
-        method: 'POST',
-        headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(logPayload)
-    }).catch(err => console.error('Failed to log admin action:', err));
-}
-
-function ensureDefaults() {
-    const users = readJson(USERS_KEY, []);
-    if (!users.some(user => user.username === 'admin')) {
-        users.push({ username: 'admin', password: 'admin', role: 'admin' });
-        writeJson(USERS_KEY, users);
-    }
-
-    const announcements = readJson(ANNOUNCEMENTS_KEY, null);
-    if (!announcements) {
-        writeJson(ANNOUNCEMENTS_KEY, [
+        if (!readJson(STORAGE_KEYS.announcements, null)) {
+          writeJson(STORAGE_KEYS.announcements, [
             {
-                id: 'ann-1',
-                title: 'TO ALL REGULAR SEASON MANAGERS',
-                date: '2026-03-20',
-                message: 'MANDATORY MANAGERS MEETING FRIDAY MARCH 20th @ 7:30 P.M. 7527 Otis Ave. Cudahy, 90201'
+              id: 'ann-1',
+              title: 'TO ALL REGULAR SEASON MANAGERS',
+              date: '2026-03-20',
+              message: 'MANDATORY MANAGERS MEETING FRIDAY MARCH 20th @ 7:30 P.M. 7527 Otis Ave. Cudahy, 90201'
             },
             {
-                id: 'ann-2',
-                title: '2026 50th Anniversary Regular Season',
-                date: '2026-03-15',
-                message: 'Early Registration: $600 due no later than 2/28/26. Regular Registration: $650 due 3/1/26 through 3/15/26.'
+              id: 'ann-2',
+              title: '2026 50th Anniversary Regular Season',
+              date: '2026-03-15',
+              message: 'Early Registration: $600 due no later than 2/28/26. Regular Registration: $650 due 3/1/26 through 3/15/26.'
             }
-        ]);
-    }
-
-    const archives = readJson(ARCHIVE_KEY, null);
-    if (!archives) {
-        writeJson(ARCHIVE_KEY, []);
-    }
-
-    const divisions = readJson(DIVISIONS_KEY, null);
-    if (!divisions) {
-        writeJson(DIVISIONS_KEY, DEFAULT_TEAMS_BY_DIVISION);
-    }
-}
-
-function getDivisionMap() {
-    return readJson(DIVISIONS_KEY, JSON.parse(JSON.stringify(DEFAULT_TEAMS_BY_DIVISION)));
-}
-
-function saveDivisionMap(map) {
-    writeJson(DIVISIONS_KEY, map);
-}
-
-function getSchedule() {
-    return readJson(SCHEDULE_KEY, []);
-}
-
-function saveSchedule(games) {
-    writeJson(SCHEDULE_KEY, games);
-}
-
-function getPracticeSchedule() {
-    return readJson(PRACTICE_KEY, []);
-}
-
-function savePracticeSchedule(games) {
-    writeJson(PRACTICE_KEY, games);
-}
-
-function getTeamManagerAssignments() {
-    return readJson(TEAM_MANAGER_ASSIGNMENTS_KEY, {});
-}
-
-function saveTeamManagerAssignments(assignments) {
-    writeJson(TEAM_MANAGER_ASSIGNMENTS_KEY, assignments);
-}
-
-function getTeamPlayersForTeam(teamName) {
-    const store = readJson(TEAM_PLAYERS_KEY, {});
-    return store[teamName] || { players: [] };
-}
-
-function setTeamPlayersForTeam(teamName, payload) {
-    const store = readJson(TEAM_PLAYERS_KEY, {});
-    store[teamName] = payload;
-    writeJson(TEAM_PLAYERS_KEY, store);
-}
-
-function getTeamManagerUsers() {
-    return readJson(USERS_KEY, []).filter(user => user.role === 'team-manager');
-}
-
-function normalizePlayersFromRows(rows) {
-    return rows.map((row, index) => ({
-        id: row.id || `${Date.now()}-${index}`,
-        name: String(row.Name || row.name || row['Player Name'] || row.Player || '').trim(),
-        position: String(row.Position || row.position || row.Positions || row.Pos || '').trim(),
-        phone: String(row.Phone || row.phone || row['Phone Number'] || row['Contact Phone'] || '').trim(),
-        email: String(row.Email || row.email || row['Email Address'] || '').trim(),
-        gamesPlayed: Number(row['Games Played'] || row.GamesPlayed || row['Games'] || 0) || 0,
-        photo: String(row.Photo || row.photo || '').trim()
-    })).filter(player => player.name);
-}
-
-function getPlayerKey(player) {
-    const name = String(player.name || player.Name || '').trim().toLowerCase();
-    const email = String(player.email || player.Email || '').trim().toLowerCase();
-    const phone = String(player.phone || player.Phone || '').trim().toLowerCase();
-    return `${name}|${email || phone}`;
-}
-
-function populateAssignTeamSelect(selectedDivision = '') {
-    if (!assignTeamSelect) return;
-    const divisionMap = getDivisionMap();
-    const division = selectedDivision || manageDivisionSelect?.value || '';
-    const teams = divisionMap[division] || [];
-    assignTeamSelect.innerHTML = '<option value="">Select team</option>' +
-        teams.map(team => `<option value="${team}">${team}</option>`).join('');
-}
-
-function populateAssignManagerSelect() {
-    if (!assignManagerSelect) return;
-    const managers = getTeamManagerUsers();
-    assignManagerSelect.innerHTML = '<option value="">Select manager</option>' +
-        managers.map(manager => `<option value="${manager.username}">${manager.username}</option>`).join('');
-}
-
-function renderTeamManagerAssignments() {
-    if (!teamManagerAssignmentsList) return;
-    const assignments = getTeamManagerAssignments();
-    const managerUsers = getTeamManagerUsers().map(user => user.username);
-    const entries = Object.entries(assignments);
-
-    teamManagerAssignmentsList.innerHTML = '';
-    if (!entries.length) {
-        const li = document.createElement('li');
-        li.textContent = 'No team manager assignments configured yet.';
-        teamManagerAssignmentsList.appendChild(li);
-        return;
-    }
-
-    entries.forEach(([username, teams]) => {
-        teams.forEach(teamName => {
-            const li = document.createElement('li');
-            li.textContent = `${username} � ${teamName}` + (managerUsers.includes(username) ? '' : ' (manager account not active)');
-            const removeBtn = document.createElement('button');
-            removeBtn.type = 'button';
-            removeBtn.className = 'remove-btn';
-            removeBtn.textContent = 'Unassign';
-            removeBtn.addEventListener('click', () => {
-                unassignTeamManager(username, teamName);
-            });
-            li.appendChild(removeBtn);
-            teamManagerAssignmentsList.appendChild(li);
-        });
-    });
-}
-
-function assignTeamManagerToTeam() {
-    if (!isAdminLoggedIn()) {
-        divisionManagerStatus.textContent = 'Sign in as admin first.';
-        return;
-    }
-    const manager = assignManagerSelect?.value || '';
-    const teamName = assignTeamSelect?.value || '';
-    if (!manager) {
-        divisionManagerStatus.textContent = 'Select a team manager to assign.';
-        return;
-    }
-    if (!teamName) {
-        divisionManagerStatus.textContent = 'Select a team to assign.';
-        return;
-    }
-
-    const assignments = getTeamManagerAssignments();
-    Object.keys(assignments).forEach(existingManager => {
-        assignments[existingManager] = (assignments[existingManager] || []).filter(team => team !== teamName);
-        if (!assignments[existingManager].length) {
-            delete assignments[existingManager];
+          ]);
         }
-    });
 
-    assignments[manager] = assignments[manager] || [];
-    if (!assignments[manager].includes(teamName)) {
-        assignments[manager].push(teamName);
-    }
+        if (!readJson(STORAGE_KEYS.archive, null)) writeJson(STORAGE_KEYS.archive, []);
+        if (!readJson(STORAGE_KEYS.divisions, null)) writeJson(STORAGE_KEYS.divisions, deepClone(DEFAULT_TEAMS_BY_DIVISION));
+      }
 
-    saveTeamManagerAssignments(assignments);
-    renderTeamManagerAssignments();
-    divisionManagerStatus.textContent = `${manager} is now assigned to ${teamName}.`;
-}
+      function getDivisionMap() {
+        return readJson(STORAGE_KEYS.divisions, deepClone(DEFAULT_TEAMS_BY_DIVISION));
+      }
 
-function unassignTeamManager(username, teamName) {
-    if (!isAdminLoggedIn()) {
-        divisionManagerStatus.textContent = 'Sign in as admin first.';
-        return;
-    }
-    const assignments = getTeamManagerAssignments();
-    if (!assignments[username]) return;
+      function saveDivisionMap(map) { writeJson(STORAGE_KEYS.divisions, map); }
+      function getSchedule() { return readJson(STORAGE_KEYS.schedule, []); }
+      function saveSchedule(games) { writeJson(STORAGE_KEYS.schedule, games); }
+      function getPracticeSchedule() { return readJson(STORAGE_KEYS.practice, []); }
+      function savePracticeSchedule(games) { writeJson(STORAGE_KEYS.practice, games); }
+      function getManagerAssignments() { return readJson(STORAGE_KEYS.managerAssignments, {}); }
+      function saveManagerAssignments(assignments) { writeJson(STORAGE_KEYS.managerAssignments, assignments); }
+      function getTeamManagerUsers() { return readJson(STORAGE_KEYS.users, []).filter(user => user.role === 'team-manager'); }
+      function getActiveSeason() { return readJson(STORAGE_KEYS.season, null); }
 
-    assignments[username] = assignments[username].filter(team => team !== teamName);
-    if (!assignments[username].length) {
-        delete assignments[username];
-    }
-    saveTeamManagerAssignments(assignments);
-    renderTeamManagerAssignments();
-    divisionManagerStatus.textContent = `${username} is no longer assigned to ${teamName}.`;
-}
+      function getTeamPlayersForTeam(teamName) {
+        return readJson(STORAGE_KEYS.teamPlayers, {})[teamName] || { players: [] };
+      }
 
-function setAssignmentControlsEnabled(enabled) {
-    [assignTeamSelect, assignManagerSelect, assignManagerButton, adminRosterFile, uploadAllRostersAdminBtn].forEach(control => {
-        if (control) control.disabled = !enabled;
-    });
-}
+      function setTeamPlayersForTeam(teamName, payload) {
+        const store = readJson(STORAGE_KEYS.teamPlayers, {});
+        store[teamName] = payload;
+        writeJson(STORAGE_KEYS.teamPlayers, store);
+      }
 
-function normalizeRosterRow(row) {
-    const getValue = key => {
-        const keys = Object.keys(row);
-        const match = keys.find(k => k.toLowerCase() === key.toLowerCase());
-        return match ? String(row[match] || '').trim() : '';
-    };
-    return {
-        Team: getValue('Team').replace(/\s+Regular$/i, ''),
-        Name: getValue('Name'),
-        Position: getValue('Position'),
-        Phone: getValue('Phone'),
-        Email: getValue('Email')
-    };
-}
+      function normalizeDivisionName(raw) {
+        return String(raw || '').trim().replace(/\s+/g, ' ');
+      }
 
-function uploadAllRostersByAdmin() {
-    if (!isAdminLoggedIn()) {
-        divisionManagerStatus.textContent = 'Admin access required to upload all rosters.';
-        return;
-    }
+      function formatSeasonDate(dateKey) {
+        if (!dateKey) return '—';
+        return new Date(`${dateKey}T00:00:00`).toLocaleDateString(undefined, {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+      }
 
-    const file = adminRosterFile?.files?.[0];
-    if (!file) {
-        divisionManagerStatus.textContent = 'Choose an Excel/CSV roster file first.';
-        return;
-    }
+      function fillDivisionSelect(selectedValue = '') {
+        const divisions = Object.keys(getDivisionMap());
+        el.manageDivisionSelect.innerHTML = '<option value="">Select Division to Manage</option>';
+        divisions.forEach(division => {
+          const option = document.createElement('option');
+          option.value = division;
+          option.textContent = `Division ${division}`;
+          el.manageDivisionSelect.appendChild(option);
+        });
+        if (selectedValue && divisions.includes(selectedValue)) el.manageDivisionSelect.value = selectedValue;
+      }
 
-    const confirmUpload = confirm('Uploading this roster will populate rosters for ALL teams in the spreadsheet. Existing rosters will be merged. Continue?');
-    if (!confirmUpload) {
-        divisionManagerStatus.textContent = 'All rosters upload canceled.';
-        return;
-    }
+      function populateAssignTeamSelect(selectedDivision = '') {
+        const division = selectedDivision || el.manageDivisionSelect.value || '';
+        const teams = getDivisionMap()[division] || [];
+        el.assignTeamSelect.innerHTML = '<option value="">Select team</option>';
+        teams.forEach(team => {
+          const option = document.createElement('option');
+          option.value = team;
+          option.textContent = team;
+          el.assignTeamSelect.appendChild(option);
+        });
+      }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-        try {
-            const workbook = XLSX.read(reader.result, { type: 'array' });
-            const sheetName = workbook.SheetNames[0];
-            const sheet = workbook.Sheets[sheetName];
-            const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-            if (!rows.length) {
-                divisionManagerStatus.textContent = 'Roster file appears empty.';
-                return;
-            }
+      function populateAssignManagerSelect() {
+        el.assignManagerSelect.innerHTML = '<option value="">Select manager</option>';
+        getTeamManagerUsers().forEach(manager => {
+          const option = document.createElement('option');
+          option.value = manager.username;
+          option.textContent = manager.username;
+          el.assignManagerSelect.appendChild(option);
+        });
+      }
 
-            const headers = ['Team', 'Name', 'Position', 'Phone', 'Email'];
-            const store = readJson(ROSTER_KEY, {});
-            const teamGroups = {};
+      function setDivisionManagerEnabled(enabled) {
+        [
+          el.newDivisionInput,
+          el.addDivisionButton,
+          el.manageDivisionSelect,
+          el.renameDivisionInput,
+          el.renameDivisionButton,
+          el.deleteDivisionButton,
+          el.newTeamInput,
+          el.addTeamButton,
+          el.assignTeamSelect,
+          el.assignManagerSelect,
+          el.assignManagerButton,
+          el.adminRosterFile,
+          el.uploadAllRostersAdminButton
+        ].forEach(control => { if (control) control.disabled = !enabled; });
 
-            rows.forEach(rawRow => {
-                const normalized = normalizeRosterRow(rawRow);
-                if (!normalized.Name || !normalized.Team) return;
-                const teamName = normalized.Team;
-                if (!teamGroups[teamName]) {
-                    teamGroups[teamName] = [];
-                }
-                teamGroups[teamName].push(normalized);
-            });
+        el.divisionTeamList.querySelectorAll('button').forEach(button => { button.disabled = !enabled; });
+      }
 
-            let totalAdded = 0;
-            let teamsUpdated = 0;
+      function renderDivisionTeamList() {
+        const selectedDivision = el.manageDivisionSelect.value;
+        const divisionMap = getDivisionMap();
+        el.divisionTeamList.innerHTML = '';
 
-            Object.entries(teamGroups).forEach(([teamName, teamRows]) => {
-                const existing = store[teamName] || { headers, rows: [] };
-                const existingRows = Array.isArray(existing.rows) ? existing.rows : [];
-                const seen = new Set(existingRows.map(row => {
-                    const normalized = normalizeRosterRow(row);
-                    return `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
-                }));
-
-                const combinedRows = [...existingRows];
-                teamRows.forEach(row => {
-                    const rowKey = `${row.Team}|${row.Name}|${row.Position}|${row.Email}|${row.Phone}`.toLowerCase();
-                    if (!seen.has(rowKey)) {
-                        seen.add(rowKey);
-                        combinedRows.push(row);
-                        totalAdded += 1;
-                    }
-                });
-
-                if (combinedRows.length > existingRows.length) {
-                    store[teamName] = {
-                        headers,
-                        rows: combinedRows,
-                        uploadedAt: new Date().toLocaleString()
-                    };
-                    teamsUpdated += 1;
-
-                    const currentPlayers = Array.isArray(getTeamPlayersForTeam(teamName).players) ? [...getTeamPlayersForTeam(teamName).players] : [];
-                    const existingPlayerKeys = new Set(currentPlayers.map(getPlayerKey));
-                    const incomingPlayers = normalizePlayersFromRows(combinedRows);
-                    incomingPlayers.forEach(player => {
-                        const playerKey = getPlayerKey(player);
-                        if (!existingPlayerKeys.has(playerKey)) {
-                            existingPlayerKeys.add(playerKey);
-                            currentPlayers.push(player);
-                        }
-                    });
-                    if (currentPlayers.length) {
-                        setTeamPlayersForTeam(teamName, { players: currentPlayers, updatedAt: new Date().toLocaleString() });
-                    }
-                }
-            });
-
-            writeJson(ROSTER_KEY, store);
-            divisionManagerStatus.textContent = `All rosters uploaded. ${teamsUpdated} team(s) updated, ${totalAdded} new player(s) added across all teams.`;
-        } catch (error) {
-            divisionManagerStatus.textContent = `All rosters upload failed: ${error.message}`;
+        if (!selectedDivision || !divisionMap[selectedDivision]) {
+          el.divisionTeamList.appendChild(createListItem('Select a division to view teams.'));
+          return;
         }
-    };
-    reader.onerror = () => {
-        divisionManagerStatus.textContent = 'Unable to read roster file.';
-    };
-    reader.readAsArrayBuffer(file);
-}
 
-function renderDivisionManager(selectedDivision = '') {
-    fillDivisionSelect(manageDivisionSelect, selectedDivision || (manageDivisionSelect ? manageDivisionSelect.value : ''));
-    renderDivisionTeamList();
-    populateAssignTeamSelect(selectedDivision || (manageDivisionSelect ? manageDivisionSelect.value : ''));
-    populateAssignManagerSelect();
-    renderTeamManagerAssignments();
-    if (!isAdminLoggedIn()) {
-        divisionManagerStatus.textContent = 'Sign in as admin to manage divisions and teams.';
-    }
-}
-
-function normalizeDivisionName(raw) {
-    return String(raw || '').trim().replace(/\s+/g, ' ');
-}
-
-function fillDivisionSelect(selectElement, selectedValue = '') {
-    if (!selectElement) return;
-    const divisions = Object.keys(getDivisionMap());
-    selectElement.innerHTML = '<option value="">Select Division to Manage</option>';
-    divisions.forEach(division => {
-        const option = document.createElement('option');
-        option.value = division;
-        option.textContent = `Division ${division}`;
-        selectElement.appendChild(option);
-    });
-    if (selectedValue && divisions.includes(selectedValue)) {
-        selectElement.value = selectedValue;
-    }
-}
-
-function setDivisionManagerEnabled(enabled) {
-    [newDivisionInput, addDivisionButton, manageDivisionSelect, renameDivisionInput, renameDivisionButton, deleteDivisionButton, newTeamInput, addTeamButton].forEach(el => {
-        if (el) el.disabled = !enabled;
-    });
-    if (divisionTeamList) {
-        divisionTeamList.querySelectorAll('button').forEach(button => {
-            button.disabled = !enabled;
-        });
-    }
-    setAssignmentControlsEnabled(enabled);
-}
-
-function renderDivisionTeamList() {
-    if (!divisionTeamList || !manageDivisionSelect) return;
-    const divisionMap = getDivisionMap();
-    const selectedDivision = manageDivisionSelect.value;
-    divisionTeamList.innerHTML = '';
-
-    if (!selectedDivision || !divisionMap[selectedDivision]) {
-        const li = document.createElement('li');
-        li.textContent = 'Select a division to view teams.';
-        divisionTeamList.appendChild(li);
-        return;
-    }
-
-    const teams = divisionMap[selectedDivision];
-    if (!teams.length) {
-        const li = document.createElement('li');
-        li.textContent = 'No teams in this division yet.';
-        divisionTeamList.appendChild(li);
-        return;
-    }
-
-    teams.forEach(team => {
-        const li = document.createElement('li');
-        const text = document.createElement('span');
-        text.textContent = team;
-        const removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.className = 'remove-btn';
-        removeBtn.textContent = 'Remove';
-        removeBtn.addEventListener('click', () => {
-            if (!isAdminLoggedIn()) {
-                divisionManagerStatus.textContent = 'Sign in as admin first.';
-                return;
-            }
-
-            const confirmDelete = confirm(`Delete team ${team} from Division ${selectedDivision}? This also removes related scheduled and practice games.`);
-            if (!confirmDelete) {
-                divisionManagerStatus.textContent = 'Team delete canceled.';
-                return;
-            }
-
-            const token = prompt(`Type DELETE TEAM to confirm removing ${team}.`);
-            if (token !== 'DELETE TEAM') {
-                divisionManagerStatus.textContent = 'Confirmation text did not match. Team was not deleted.';
-                return;
-            }
-
-            const latestMap = getDivisionMap();
-            latestMap[selectedDivision] = (latestMap[selectedDivision] || []).filter(item => item !== team);
-            saveDivisionMap(latestMap);
-
-            const existingGames = getSchedule();
-            const updatedGames = existingGames.filter(game => game.team1 !== team && game.team2 !== team);
-            saveSchedule(updatedGames);
-
-            const existingPractice = getPracticeSchedule();
-            const updatedPractice = existingPractice.filter(game => game.team1 !== team && game.team2 !== team);
-            savePracticeSchedule(updatedPractice);
-
-            const removedGameCount = existingGames.length - updatedGames.length;
-            const removedPracticeCount = existingPractice.length - updatedPractice.length;
-
-            renderDivisionManager(selectedDivision);
-            divisionManagerStatus.textContent = `Removed team ${team} from Division ${selectedDivision}. Cleaned up ${removedGameCount} scheduled game(s) and ${removedPracticeCount} practice game(s).`;
-        });
-
-        li.appendChild(text);
-        li.appendChild(removeBtn);
-        divisionTeamList.appendChild(li);
-    });
-
-    setDivisionManagerEnabled(isAdminLoggedIn());
-}
-
-function getSession() {
-    return readJson(SESSION_KEY, null);
-}
-
-function isAdminLoggedIn() {
-    const session = getSession();
-    return !!(session && session.role === 'admin');
-}
-
-function renderUserAccounts() {
-    if (!userAccountsList) return;
-    const users = readJson(USERS_KEY, []);
-    userAccountsList.innerHTML = '';
-
-    if (!users.length) {
-        const li = document.createElement('li');
-        li.textContent = 'No users found.';
-        userAccountsList.appendChild(li);
-        return;
-    }
-
-    users.forEach(user => {
-        const li = document.createElement('li');
-        li.style.display = 'flex';
-        li.style.justifyContent = 'space-between';
-        li.style.alignItems = 'center';
-        li.style.gap = '12px';
-        li.innerHTML = `<span>${user.username} � <strong>${user.role}</strong></span>`;
-
-        const removeButton = document.createElement('button');
-        removeButton.type = 'button';
-        removeButton.className = 'archive-btn';
-        removeButton.textContent = 'Remove';
-        removeButton.addEventListener('click', () => {
-            if (!isAdminLoggedIn()) {
-                authStatus.textContent = 'Sign in as admin to remove users.';
-                return;
-            }
-            if (user.username === 'admin') {
-                authStatus.textContent = 'Cannot remove the default admin user.';
-                return;
-            }
-            const remaining = readJson(USERS_KEY, []).filter(item => item.username !== user.username);
-            writeJson(USERS_KEY, remaining);
-            
-            // Log user deletion
-            logAdminAction('user_deleted', { deletedUsername: user.username });
-            
-            renderUserAccounts();
-            authStatus.textContent = `User ${user.username} removed.`;
-        });
-
-        li.appendChild(removeButton);
-        userAccountsList.appendChild(li);
-    });
-    populateAssignManagerSelect();
-}
-
-function renderAnnouncements() {
-    const announcements = readJson(ANNOUNCEMENTS_KEY, []);
-    activeAnnouncementsList.innerHTML = '';
-
-    if (!announcements.length) {
-        const empty = document.createElement('li');
-        empty.textContent = 'No active announcements.';
-        activeAnnouncementsList.appendChild(empty);
-        return;
-    }
-
-    announcements.forEach(item => {
-        const li = document.createElement('li');
-        const text = document.createElement('div');
-        text.innerHTML = `<strong>${item.title}</strong><br>${item.date}<br>${item.message}`;
-
-        const archiveButton = document.createElement('button');
-        archiveButton.type = 'button';
-        archiveButton.className = 'archive-btn';
-        archiveButton.textContent = 'Archive';
-        archiveButton.addEventListener('click', () => {
-            if (!isAdminLoggedIn()) {
-                authStatus.textContent = 'Sign in as admin to archive announcements.';
-                return;
-            }
-
-            const remaining = announcements.filter(announcement => announcement.id !== item.id);
-            const archived = readJson(ARCHIVE_KEY, []);
-            archived.unshift({ ...item, archivedAt: new Date().toISOString() });
-            writeJson(ANNOUNCEMENTS_KEY, remaining);
-            writeJson(ARCHIVE_KEY, archived);
-            renderAnnouncements();
-            authStatus.textContent = 'Announcement archived to Meeting Notes.';
-        });
-
-        li.appendChild(text);
-        li.appendChild(archiveButton);
-        activeAnnouncementsList.appendChild(li);
-    });
-}
-
-function renderAuthState() {
-    const session = getSession();
-    const loggedIn = !!session;
-    const isAdmin = session && session.role === 'admin';
-
-    loginRow.style.display = loggedIn ? 'none' : 'flex';
-    logoutRow.style.display = loggedIn ? 'flex' : 'none';
-    adminTools.style.display = isAdmin ? 'block' : 'none';
-    document.getElementById('content-tools').style.display = isAdmin ? 'block' : 'none';
-
-    if (loggedIn && isAdmin) {
-        initializeAdminKeyFromStorage();
-    }
-
-    if (loggedIn) {
-        authStatus.textContent = `Signed in as ${session.username} (${session.role || 'user'}). ${isAdmin ? 'Admin tools unlocked, including Site Content Management.' : 'Admin tools locked.'}`;
-    } else {
-        authStatus.textContent = 'Not signed in.';
-    }
-
-    setDivisionManagerEnabled(isAdmin);
-    renderDivisionManager();
-    renderUserAccounts();
-    renderSeasonPanel();
-}
-
-loginButton.addEventListener('click', () => {
-    const username = loginUsername.value.trim();
-    const password = loginPassword.value;
-    const users = readJson(USERS_KEY, []);
-    const user = users.find(entry => entry.username === username && entry.password === password);
-
-    if (!user) {
-        authStatus.textContent = 'Invalid username or password.';
-        return;
-    }
-
-    writeJson(SESSION_KEY, {
-        username: user.username,
-        role: user.role,
-        loggedInAt: new Date().toISOString()
-    });
-
-    // Log admin login action
-    if (user.role === 'admin') {
-        logAdminAction('admin_login', { username: user.username });
-    }
-
-    // Set admin auth flag for other pages (like meeting notes)
-    if (user.role === 'admin') {
-        localStorage.setItem('lamslAdminAuthV1', 'true');
-    }
-
-    renderAuthState();
-    renderAnnouncements();
-});
-
-logoutButton.addEventListener('click', () => {
-    localStorage.removeItem(SESSION_KEY);
-    localStorage.removeItem('lamslAdminAuthV1');
-    renderAuthState();
-});
-
-announcementForm.addEventListener('submit', event => {
-    event.preventDefault();
-
-// === Step 8: Site Content Management Logic ===
-let content = {};
-
-// Load existing content (use local backend when running locally)
-fetch(apiUrl('/api/content'))
-    .then(res => res.json())
-    .then(data => {
-        content = data || {};
-        document.getElementById('homepageMessage').value = data.homepageMessage || '';
-        document.getElementById('zelle').value = JSON.stringify(data.zelle || {}, null, 2);
-        document.getElementById('gameSchedules').value = JSON.stringify(data.gameSchedules || [], null, 2);
-        document.getElementById('gameScores').value = JSON.stringify(data.gameScores || [], null, 2);
-        document.getElementById('slideshow').value = JSON.stringify(data.slideshow || [], null, 2);
-    }).catch(err => {
-        console.warn('Failed to load site content from backend:', err);
-    });
-
-// Save all content
-document.getElementById('saveContentBtn').addEventListener('click', () => {
-    try {
-        content.homepageMessage = document.getElementById('homepageMessage').value;
-        try {
-            content.zelle = JSON.parse(document.getElementById('zelle').value || '{}');
-        } catch (e) { throw new Error('Zelle JSON invalid: ' + e.message); }
-        try {
-            content.gameSchedules = JSON.parse(document.getElementById('gameSchedules').value || '[]');
-        } catch (e) { throw new Error('Game schedules JSON invalid: ' + e.message); }
-        try {
-            content.gameScores = JSON.parse(document.getElementById('gameScores').value || '[]');
-        } catch (e) { throw new Error('Game scores JSON invalid: ' + e.message); }
-        try {
-            content.slideshow = JSON.parse(document.getElementById('slideshow').value || '[]');
-        } catch (e) { throw new Error('Slideshow JSON invalid: ' + e.message); }
-    } catch (err) {
-        alert('Unable to save content: ' + err.message);
-        return;
-    }
-
-    fetch(apiUrl('/api/update'), {
-        method: 'POST',
-        headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(content)
-    })
-    .then(res => res.json())
-    .then(() => {
-        alert('Content updated successfully!');
-        logAdminAction('update_site_content', { by: getSession()?.username || 'unknown' });
-    })
-    .catch(err => {
-        console.error('Error saving content', err);
-        alert('Error saving content. See console for details.');
-    });
-});
-
-// Upload slideshow image
-document.getElementById('uploadBtn').addEventListener('click', () => {
-    const file = document.getElementById('slideUpload').files[0];
-    if (!file) return alert('Please select an image first.');
-
-    const formData = new FormData();
-    formData.append('image', file);
-
-    fetch(apiUrl('/api/upload-image'), {
-        method: 'POST',
-        headers: window.apiHeaders(),
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data && data.success) {
-            content.slideshow = content.slideshow || [];
-            content.slideshow.push({
-                id: Date.now(),
-                imageUrl: data.url || data.path || data.filepath || '',
-                caption: "New Slide"
-            });
-            document.getElementById('slideshow').value = JSON.stringify(content.slideshow, null, 2);
-            document.getElementById('uploadMessage').innerText = "Uploaded!";
-            logAdminAction('upload_slide', { filename: data.url || data.path });
-        } else {
-            throw new Error(data && data.error ? data.error : 'Upload failed');
+        const teams = divisionMap[selectedDivision];
+        if (!teams.length) {
+          el.divisionTeamList.appendChild(createListItem('No teams in this division yet.'));
+          return;
         }
-    })
-    .catch(err => {
-        console.error('Upload error', err);
-        document.getElementById('uploadMessage').innerText = 'Upload failed.';
-        alert('Upload failed: ' + err.message);
-    });
-});
 
+        teams.forEach(team => {
+          const li = document.createElement('li');
+          const text = document.createElement('span');
+          const removeButton = document.createElement('button');
 
-    
-    if (!isAdminLoggedIn()) {
-        authStatus.textContent = 'Sign in as admin to publish announcements.';
-        return;
-    }
+          text.textContent = team;
+          removeButton.type = 'button';
+          removeButton.textContent = 'Remove';
+          removeButton.addEventListener('click', () => removeTeam(selectedDivision, team));
 
-    const title = announcementTitle.value.trim();
-    const date = announcementDate.value;
-    const message = announcementMessage.value.trim();
-    if (!title || !date || !message) {
-        authStatus.textContent = 'Please complete all announcement fields.';
-        return;
-    }
+          li.append(text, removeButton);
+          el.divisionTeamList.appendChild(li);
+        });
+      }
 
-    const announcements = readJson(ANNOUNCEMENTS_KEY, []);
-    announcements.unshift({
-        id: `ann-${Date.now()}`,
-        title,
-        date,
-        message
-    });
-    writeJson(ANNOUNCEMENTS_KEY, announcements);
-    announcementForm.reset();
-    renderAnnouncements();
-    authStatus.textContent = 'Announcement published.';
-});
-
-createAdminButton.addEventListener('click', () => {
-    if (!isAdminLoggedIn()) {
-        authStatus.textContent = 'Sign in as admin to create users.';
-        return;
-    }
-
-    const username = newAdminUsername.value.trim();
-    const password = newAdminPassword.value;
-    const role = newUserRole.value;
-    if (!username || !password || !role) {
-        authStatus.textContent = 'Enter a username, password, and role for the new user.';
-        return;
-    }
-
-    const users = readJson(USERS_KEY, []);
-    if (users.some(user => user.username.toLowerCase() === username.toLowerCase())) {
-        authStatus.textContent = 'That username already exists.';
-        return;
-    }
-
-    users.push({ username, password, role });
-    writeJson(USERS_KEY, users);
-    
-    // Log user creation
-    logAdminAction('user_created', { newUsername: username, role });
-    
-    newAdminUsername.value = '';
-    newAdminPassword.value = '';
-    newUserRole.value = '';
-    renderUserAccounts();
-    authStatus.textContent = `User ${username} (${role}) created.`;
-});
-
-if (manageDivisionSelect) {
-    manageDivisionSelect.addEventListener('change', () => {
+      function renderDivisionManager(selectedDivision = '') {
+        const currentSelection = selectedDivision || el.manageDivisionSelect.value || '';
+        fillDivisionSelect(currentSelection);
         renderDivisionTeamList();
-        populateAssignTeamSelect();
-    });
-}
+        populateAssignTeamSelect(currentSelection);
+        populateAssignManagerSelect();
+        renderManagerAssignments();
+        setDivisionManagerEnabled(isAdminLoggedIn());
+        if (!isAdminLoggedIn()) setStatus(el.divisionManagerStatus, 'Sign in as admin to manage divisions and teams.');
+      }
 
-if (assignManagerButton) {
-    assignManagerButton.addEventListener('click', assignTeamManagerToTeam);
-}
+      function renderManagerAssignments() {
+        const assignments = getManagerAssignments();
+        const activeManagers = new Set(getTeamManagerUsers().map(user => user.username));
+        const entries = Object.entries(assignments);
+        el.teamManagerAssignmentsList.innerHTML = '';
 
-if (uploadAllRostersAdminBtn) {
-    uploadAllRostersAdminBtn.addEventListener('click', uploadAllRostersByAdmin);
-}
-
-if (addDivisionButton) {
-    addDivisionButton.addEventListener('click', () => {
-        if (!isAdminLoggedIn()) {
-            divisionManagerStatus.textContent = 'Sign in as admin first.';
-            return;
+        if (!entries.length) {
+          el.teamManagerAssignmentsList.appendChild(createListItem('No team manager assignments configured yet.'));
+          return;
         }
 
-        const divisionName = normalizeDivisionName(newDivisionInput.value);
-        if (!divisionName) {
-            divisionManagerStatus.textContent = 'Enter a division name.';
-            return;
+        entries.forEach(([username, teams]) => {
+          teams.forEach(teamName => {
+            const li = document.createElement('li');
+            const text = document.createElement('span');
+            const removeButton = document.createElement('button');
+
+            text.textContent = `${username} — ${teamName}${activeManagers.has(username) ? '' : ' (manager account not active)'}`;
+            removeButton.type = 'button';
+            removeButton.textContent = 'Unassign';
+            removeButton.addEventListener('click', () => unassignManager(username, teamName));
+
+            li.append(text, removeButton);
+            el.teamManagerAssignmentsList.appendChild(li);
+          });
+        });
+      }
+
+      function createListItem(text) {
+        const li = document.createElement('li');
+        li.textContent = text;
+        return li;
+      }
+
+      function removeTeam(selectedDivision, team) {
+        if (!requireAdmin(el.divisionManagerStatus)) return;
+        if (!confirm(`Delete team ${team} from Division ${selectedDivision}? This also removes related scheduled and practice games.`)) {
+          setStatus(el.divisionManagerStatus, 'Team delete canceled.');
+          return;
+        }
+        if (prompt(`Type DELETE TEAM to confirm removing ${team}.`) !== 'DELETE TEAM') {
+          setStatus(el.divisionManagerStatus, 'Confirmation text did not match. Team was not deleted.');
+          return;
         }
 
         const divisionMap = getDivisionMap();
-        if (divisionMap[divisionName]) {
-            divisionManagerStatus.textContent = 'Division already exists.';
-            return;
+        divisionMap[selectedDivision] = (divisionMap[selectedDivision] || []).filter(item => item !== team);
+        saveDivisionMap(divisionMap);
+
+        const schedule = getSchedule();
+        const nextSchedule = schedule.filter(game => game.team1 !== team && game.team2 !== team);
+        saveSchedule(nextSchedule);
+
+        const practice = getPracticeSchedule();
+        const nextPractice = practice.filter(game => game.team1 !== team && game.team2 !== team);
+        savePracticeSchedule(nextPractice);
+
+        renderDivisionManager(selectedDivision);
+        setStatus(el.divisionManagerStatus, `Removed team ${team} from Division ${selectedDivision}. Cleaned up ${schedule.length - nextSchedule.length} scheduled game(s) and ${practice.length - nextPractice.length} practice game(s).`);
+      }
+
+      function assignManagerToTeam() {
+        if (!requireAdmin(el.divisionManagerStatus)) return;
+
+        const manager = el.assignManagerSelect.value;
+        const teamName = el.assignTeamSelect.value;
+        if (!manager) return setStatus(el.divisionManagerStatus, 'Select a team manager to assign.');
+        if (!teamName) return setStatus(el.divisionManagerStatus, 'Select a team to assign.');
+
+        const assignments = getManagerAssignments();
+        Object.keys(assignments).forEach(existingManager => {
+          assignments[existingManager] = assignments[existingManager].filter(team => team !== teamName);
+          if (!assignments[existingManager].length) delete assignments[existingManager];
+        });
+
+        assignments[manager] = assignments[manager] || [];
+        if (!assignments[manager].includes(teamName)) assignments[manager].push(teamName);
+
+        saveManagerAssignments(assignments);
+        renderManagerAssignments();
+        setStatus(el.divisionManagerStatus, `${manager} is now assigned to ${teamName}.`);
+      }
+
+      function unassignManager(username, teamName) {
+        if (!requireAdmin(el.divisionManagerStatus)) return;
+
+        const assignments = getManagerAssignments();
+        if (!assignments[username]) return;
+
+        assignments[username] = assignments[username].filter(team => team !== teamName);
+        if (!assignments[username].length) delete assignments[username];
+
+        saveManagerAssignments(assignments);
+        renderManagerAssignments();
+        setStatus(el.divisionManagerStatus, `${username} is no longer assigned to ${teamName}.`);
+      }
+
+      function renderUserAccounts() {
+        const users = readJson(STORAGE_KEYS.users, []);
+        el.userAccountsList.innerHTML = '';
+
+        if (!users.length) {
+          el.userAccountsList.appendChild(createListItem('No users found.'));
+          return;
         }
+
+        users.forEach(user => {
+          const li = document.createElement('li');
+          const text = document.createElement('span');
+          const removeButton = document.createElement('button');
+
+          text.innerHTML = `${escapeHtml(user.username)} — <strong>${escapeHtml(user.role)}</strong>`;
+          removeButton.type = 'button';
+          removeButton.textContent = 'Remove';
+          removeButton.addEventListener('click', () => removeUser(user.username));
+
+          li.append(text, removeButton);
+          el.userAccountsList.appendChild(li);
+        });
+
+        populateAssignManagerSelect();
+      }
+
+      function removeUser(username) {
+        if (!requireAdmin(el.authStatus, 'Sign in as admin to remove users.')) return;
+        if (username === 'admin') return setStatus(el.authStatus, 'Cannot remove the default admin user.');
+
+        const remaining = readJson(STORAGE_KEYS.users, []).filter(user => user.username !== username);
+        writeJson(STORAGE_KEYS.users, remaining);
+        logAdminAction('user_deleted', { deletedUsername: username });
+        renderUserAccounts();
+        renderManagerAssignments();
+        setStatus(el.authStatus, `User ${username} removed.`);
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>'"]/g, char => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[char]));
+      }
+
+      function renderAnnouncements() {
+        const announcements = readJson(STORAGE_KEYS.announcements, []);
+        el.activeAnnouncementsList.innerHTML = '';
+
+        if (!announcements.length) {
+          el.activeAnnouncementsList.appendChild(createListItem('No active announcements.'));
+          return;
+        }
+
+        announcements.forEach(item => {
+          const li = document.createElement('li');
+          const text = document.createElement('div');
+          const archiveButton = document.createElement('button');
+
+          text.innerHTML = `<strong>${escapeHtml(item.title)}</strong><br>${escapeHtml(item.date)}<br>${escapeHtml(item.message)}`;
+          archiveButton.type = 'button';
+          archiveButton.textContent = 'Archive';
+          archiveButton.addEventListener('click', () => archiveAnnouncement(item));
+
+          li.append(text, archiveButton);
+          el.activeAnnouncementsList.appendChild(li);
+        });
+      }
+
+      function archiveAnnouncement(item) {
+        if (!requireAdmin(el.authStatus, 'Sign in as admin to archive announcements.')) return;
+
+        const announcements = readJson(STORAGE_KEYS.announcements, []);
+        const archived = readJson(STORAGE_KEYS.archive, []);
+        writeJson(STORAGE_KEYS.announcements, announcements.filter(announcement => announcement.id !== item.id));
+        writeJson(STORAGE_KEYS.archive, [{ ...item, archivedAt: new Date().toISOString() }, ...archived]);
+
+        renderAnnouncements();
+        setStatus(el.authStatus, 'Announcement archived to Meeting Notes.');
+      }
+
+      function renderAuthState() {
+        const session = getSession();
+        const loggedIn = Boolean(session);
+        const isAdmin = isAdminLoggedIn();
+
+        setHidden(el.loginRow, loggedIn);
+        setHidden(el.logoutRow, !loggedIn);
+        setHidden(el.adminTools, !isAdmin);
+        setHidden(el.contentTools, !isAdmin);
+
+        if (loggedIn && isAdmin) initializeAdminKey();
+
+        setStatus(
+          el.authStatus,
+          loggedIn
+            ? `Signed in as ${session.username} (${session.role || 'user'}). ${isAdmin ? 'Admin tools unlocked, including Site Content Management.' : 'Admin tools locked.'}`
+            : 'Not signed in.'
+        );
+
+        renderDivisionManager();
+        renderUserAccounts();
+        renderSeasonPanel();
+      }
+
+      function signIn() {
+        const username = el.loginUsername.value.trim();
+        const password = el.loginPassword.value;
+        const user = readJson(STORAGE_KEYS.users, []).find(entry => entry.username === username && entry.password === password);
+
+        if (!user) return setStatus(el.authStatus, 'Invalid username or password.');
+
+        writeJson(STORAGE_KEYS.session, {
+          username: user.username,
+          role: user.role,
+          loggedInAt: new Date().toISOString()
+        });
+
+        if (user.role === 'admin') {
+          localStorage.setItem('lamslAdminAuthV1', 'true');
+          logAdminAction('admin_login', { username: user.username });
+        }
+
+        renderAuthState();
+        renderAnnouncements();
+      }
+
+      function signOut() {
+        localStorage.removeItem(STORAGE_KEYS.session);
+        localStorage.removeItem('lamslAdminAuthV1');
+        renderAuthState();
+      }
+
+      function createUser() {
+        if (!requireAdmin(el.authStatus, 'Sign in as admin to create users.')) return;
+
+        const username = el.newAdminUsername.value.trim();
+        const password = el.newAdminPassword.value;
+        const role = el.newUserRole.value;
+
+        if (!username || !password || !role) return setStatus(el.authStatus, 'Enter a username, password, and role for the new user.');
+
+        const users = readJson(STORAGE_KEYS.users, []);
+        if (users.some(user => user.username.toLowerCase() === username.toLowerCase())) {
+          return setStatus(el.authStatus, 'That username already exists.');
+        }
+
+        users.push({ username, password, role });
+        writeJson(STORAGE_KEYS.users, users);
+        logAdminAction('user_created', { newUsername: username, role });
+
+        el.newAdminUsername.value = '';
+        el.newAdminPassword.value = '';
+        el.newUserRole.value = '';
+        renderUserAccounts();
+        setStatus(el.authStatus, `User ${username} (${role}) created.`);
+      }
+
+      function publishAnnouncement(event) {
+        event.preventDefault();
+        if (!requireAdmin(el.authStatus, 'Sign in as admin to publish announcements.')) return;
+
+        const title = el.announcementTitle.value.trim();
+        const date = el.announcementDate.value;
+        const message = el.announcementMessage.value.trim();
+
+        if (!title || !date || !message) return setStatus(el.authStatus, 'Please complete all announcement fields.');
+
+        const announcements = readJson(STORAGE_KEYS.announcements, []);
+        announcements.unshift({ id: `ann-${Date.now()}`, title, date, message });
+        writeJson(STORAGE_KEYS.announcements, announcements);
+
+        el.announcementForm.reset();
+        renderAnnouncements();
+        setStatus(el.authStatus, 'Announcement published.');
+      }
+
+      async function loadSiteContent() {
+        try {
+          const response = await fetch(apiUrl('/api/content'));
+          if (!response.ok) throw new Error(`Backend returned ${response.status}`);
+
+          siteContent = await response.json() || {};
+          el.homepageMessage.value = siteContent.homepageMessage || '';
+          el.zelle.value = JSON.stringify(siteContent.zelle || {}, null, 2);
+          el.gameSchedules.value = JSON.stringify(siteContent.gameSchedules || [], null, 2);
+          el.gameScores.value = JSON.stringify(siteContent.gameScores || [], null, 2);
+          el.slideshow.value = JSON.stringify(siteContent.slideshow || [], null, 2);
+        } catch (error) {
+          console.warn('Failed to load site content from backend:', error);
+        }
+      }
+
+      function parseJsonField(field, fallback, label) {
+        try {
+          return JSON.parse(field.value || JSON.stringify(fallback));
+        } catch (error) {
+          throw new Error(`${label} JSON invalid: ${error.message}`);
+        }
+      }
+
+      async function saveSiteContent() {
+        if (!requireAdmin(el.authStatus, 'Sign in as admin to save site content.')) return;
+
+        try {
+          siteContent = {
+            ...siteContent,
+            homepageMessage: el.homepageMessage.value,
+            zelle: parseJsonField(el.zelle, {}, 'Zelle'),
+            gameSchedules: parseJsonField(el.gameSchedules, [], 'Game schedules'),
+            gameScores: parseJsonField(el.gameScores, [], 'Game scores'),
+            slideshow: parseJsonField(el.slideshow, [], 'Slideshow')
+          };
+        } catch (error) {
+          alert(`Unable to save content: ${error.message}`);
+          return;
+        }
+
+        try {
+          const response = await fetch(apiUrl('/api/update'), {
+            method: 'POST',
+            headers: apiHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify(siteContent)
+          });
+          if (!response.ok) throw new Error(`Backend returned ${response.status}`);
+
+          alert('Content updated successfully.');
+          logAdminAction('update_site_content', { by: getSession()?.username || 'unknown' });
+        } catch (error) {
+          console.error('Error saving content:', error);
+          alert(`Error saving content: ${error.message}`);
+        }
+      }
+
+      async function uploadSlide() {
+        if (!requireAdmin(el.authStatus, 'Sign in as admin to upload slideshow images.')) return;
+
+        const file = el.slideUpload.files?.[0];
+        if (!file) return alert('Please select an image first.');
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+          const response = await fetch(apiUrl('/api/upload-image'), {
+            method: 'POST',
+            headers: apiHeaders(),
+            body: formData
+          });
+          if (!response.ok) throw new Error(`Backend returned ${response.status}`);
+
+          const data = await response.json();
+          if (!data?.success) throw new Error(data?.error || 'Upload failed');
+
+          siteContent.slideshow = Array.isArray(siteContent.slideshow) ? siteContent.slideshow : [];
+          siteContent.slideshow.push({
+            id: Date.now(),
+            imageUrl: data.url || data.path || data.filepath || '',
+            caption: 'New Slide'
+          });
+
+          el.slideshow.value = JSON.stringify(siteContent.slideshow, null, 2);
+          el.uploadMessage.hidden = false;
+          el.uploadMessage.textContent = 'Uploaded.';
+          logAdminAction('upload_slide', { filename: data.url || data.path || file.name });
+        } catch (error) {
+          console.error('Upload error:', error);
+          el.uploadMessage.hidden = false;
+          el.uploadMessage.textContent = 'Upload failed.';
+          alert(`Upload failed: ${error.message}`);
+        }
+      }
+
+      function addDivision() {
+        if (!requireAdmin(el.divisionManagerStatus)) return;
+
+        const divisionName = normalizeDivisionName(el.newDivisionInput.value);
+        if (!divisionName) return setStatus(el.divisionManagerStatus, 'Enter a division name.');
+
+        const divisionMap = getDivisionMap();
+        if (divisionMap[divisionName]) return setStatus(el.divisionManagerStatus, 'Division already exists.');
 
         divisionMap[divisionName] = [];
         saveDivisionMap(divisionMap);
-        newDivisionInput.value = '';
+        el.newDivisionInput.value = '';
         renderDivisionManager(divisionName);
-        divisionManagerStatus.textContent = `Added Division ${divisionName}.`;
-    });
-}
+        setStatus(el.divisionManagerStatus, `Added Division ${divisionName}.`);
+      }
 
-if (renameDivisionButton) {
-    renameDivisionButton.addEventListener('click', () => {
-        if (!isAdminLoggedIn()) {
-            divisionManagerStatus.textContent = 'Sign in as admin first.';
-            return;
-        }
+      function renameDivision() {
+        if (!requireAdmin(el.divisionManagerStatus)) return;
 
-        const selectedDivision = manageDivisionSelect.value;
-        const renamedDivision = normalizeDivisionName(renameDivisionInput.value);
-        if (!selectedDivision) {
-            divisionManagerStatus.textContent = 'Select a division to rename.';
-            return;
-        }
-        if (!renamedDivision) {
-            divisionManagerStatus.textContent = 'Enter a new division name.';
-            return;
-        }
-        if (selectedDivision === renamedDivision) {
-            divisionManagerStatus.textContent = 'Division name is unchanged.';
-            return;
-        }
+        const selectedDivision = el.manageDivisionSelect.value;
+        const renamedDivision = normalizeDivisionName(el.renameDivisionInput.value);
+
+        if (!selectedDivision) return setStatus(el.divisionManagerStatus, 'Select a division to rename.');
+        if (!renamedDivision) return setStatus(el.divisionManagerStatus, 'Enter a new division name.');
+        if (selectedDivision === renamedDivision) return setStatus(el.divisionManagerStatus, 'Division name is unchanged.');
 
         const divisionMap = getDivisionMap();
-        if (divisionMap[renamedDivision]) {
-            divisionManagerStatus.textContent = 'A division with that name already exists.';
-            return;
-        }
+        if (divisionMap[renamedDivision]) return setStatus(el.divisionManagerStatus, 'A division with that name already exists.');
 
         const updatedMap = {};
         Object.keys(divisionMap).forEach(division => {
-            if (division === selectedDivision) {
-                updatedMap[renamedDivision] = divisionMap[division];
-            } else {
-                updatedMap[division] = divisionMap[division];
-            }
+          updatedMap[division === selectedDivision ? renamedDivision : division] = divisionMap[division];
         });
         saveDivisionMap(updatedMap);
 
-        const schedule = getSchedule();
-        schedule.forEach(game => {
-            if (game.division === selectedDivision) {
-                game.division = renamedDivision;
-            }
-        });
+        const schedule = getSchedule().map(game => game.division === selectedDivision ? { ...game, division: renamedDivision } : game);
         saveSchedule(schedule);
 
-        const practice = getPracticeSchedule();
-        practice.forEach(game => {
-            if (game.div1 === selectedDivision) game.div1 = renamedDivision;
-            if (game.div2 === selectedDivision) game.div2 = renamedDivision;
-        });
+        const practice = getPracticeSchedule().map(game => ({
+          ...game,
+          div1: game.div1 === selectedDivision ? renamedDivision : game.div1,
+          div2: game.div2 === selectedDivision ? renamedDivision : game.div2
+        }));
         savePracticeSchedule(practice);
 
-        renameDivisionInput.value = '';
+        el.renameDivisionInput.value = '';
         renderDivisionManager(renamedDivision);
-        divisionManagerStatus.textContent = `Renamed Division ${selectedDivision} to Division ${renamedDivision}.`;
-    });
-}
+        setStatus(el.divisionManagerStatus, `Renamed Division ${selectedDivision} to Division ${renamedDivision}.`);
+      }
 
-if (deleteDivisionButton) {
-    deleteDivisionButton.addEventListener('click', () => {
-        if (!isAdminLoggedIn()) {
-            divisionManagerStatus.textContent = 'Sign in as admin first.';
-            return;
+      function deleteDivision() {
+        if (!requireAdmin(el.divisionManagerStatus)) return;
+
+        const selectedDivision = el.manageDivisionSelect.value;
+        if (!selectedDivision) return setStatus(el.divisionManagerStatus, 'Select a division to delete.');
+
+        if (!confirm(`Delete Division ${selectedDivision}? This removes the division, its teams, and related schedule/practice games.`)) {
+          return setStatus(el.divisionManagerStatus, 'Division delete canceled.');
         }
-
-        const selectedDivision = manageDivisionSelect.value;
-        if (!selectedDivision) {
-            divisionManagerStatus.textContent = 'Select a division to delete.';
-            return;
-        }
-
-        const confirmDelete = confirm(`Delete Division ${selectedDivision}? This removes the division, its teams, and related schedule/practice games.`);
-        if (!confirmDelete) {
-            divisionManagerStatus.textContent = 'Division delete canceled.';
-            return;
-        }
-
-        const token = prompt(`Type DELETE DIVISION ${selectedDivision} to confirm.`);
-        if (token !== `DELETE DIVISION ${selectedDivision}`) {
-            divisionManagerStatus.textContent = 'Confirmation text did not match. Division was not deleted.';
-            return;
+        if (prompt(`Type DELETE DIVISION ${selectedDivision} to confirm.`) !== `DELETE DIVISION ${selectedDivision}`) {
+          return setStatus(el.divisionManagerStatus, 'Confirmation text did not match. Division was not deleted.');
         }
 
         const divisionMap = getDivisionMap();
@@ -1595,151 +1234,238 @@ if (deleteDivisionButton) {
         saveDivisionMap(divisionMap);
 
         const schedule = getSchedule();
-        const nextSchedule = schedule.filter(game => {
-            const teamMatch = teams.includes(game.team1) || teams.includes(game.team2);
-            return game.division !== selectedDivision && !teamMatch;
-        });
+        const nextSchedule = schedule.filter(game => game.division !== selectedDivision && !teams.includes(game.team1) && !teams.includes(game.team2));
         saveSchedule(nextSchedule);
 
         const practice = getPracticeSchedule();
         const nextPractice = practice.filter(game => {
-            const byDivision = game.div1 === selectedDivision || game.div2 === selectedDivision;
-            const byTeam = teams.includes(game.team1) || teams.includes(game.team2);
-            return !byDivision && !byTeam;
+          const byDivision = game.div1 === selectedDivision || game.div2 === selectedDivision;
+          const byTeam = teams.includes(game.team1) || teams.includes(game.team2);
+          return !byDivision && !byTeam;
         });
         savePracticeSchedule(nextPractice);
 
-        const removedGameCount = schedule.length - nextSchedule.length;
-        const removedPracticeCount = practice.length - nextPractice.length;
-
         renderDivisionManager();
-        divisionManagerStatus.textContent = `Deleted Division ${selectedDivision}. Removed ${teams.length} team(s), ${removedGameCount} scheduled game(s), and ${removedPracticeCount} practice game(s).`;
-    });
-}
+        setStatus(el.divisionManagerStatus, `Deleted Division ${selectedDivision}. Removed ${teams.length} team(s), ${schedule.length - nextSchedule.length} scheduled game(s), and ${practice.length - nextPractice.length} practice game(s).`);
+      }
 
-if (addTeamButton) {
-    addTeamButton.addEventListener('click', () => {
-        if (!isAdminLoggedIn()) {
-            divisionManagerStatus.textContent = 'Sign in as admin first.';
-            return;
-        }
+      function addTeam() {
+        if (!requireAdmin(el.divisionManagerStatus)) return;
 
-        const selectedDivision = manageDivisionSelect.value;
-        const teamName = String(newTeamInput.value || '').trim();
-        if (!selectedDivision) {
-            divisionManagerStatus.textContent = 'Select a division first.';
-            return;
-        }
-        if (!teamName) {
-            divisionManagerStatus.textContent = 'Enter a team name.';
-            return;
-        }
+        const selectedDivision = el.manageDivisionSelect.value;
+        const teamName = el.newTeamInput.value.trim();
+
+        if (!selectedDivision) return setStatus(el.divisionManagerStatus, 'Select a division first.');
+        if (!teamName) return setStatus(el.divisionManagerStatus, 'Enter a team name.');
 
         const divisionMap = getDivisionMap();
-        const exists = (divisionMap[selectedDivision] || []).some(team => team.toLowerCase() === teamName.toLowerCase());
-        if (exists) {
-            divisionManagerStatus.textContent = 'Team already exists in this division.';
-            return;
+        if ((divisionMap[selectedDivision] || []).some(team => team.toLowerCase() === teamName.toLowerCase())) {
+          return setStatus(el.divisionManagerStatus, 'Team already exists in this division.');
         }
 
         divisionMap[selectedDivision].push(teamName);
         saveDivisionMap(divisionMap);
-        newTeamInput.value = '';
+        el.newTeamInput.value = '';
         renderDivisionManager(selectedDivision);
-        divisionManagerStatus.textContent = `Added ${teamName} to Division ${selectedDivision}.`;
-    });
-}
+        setStatus(el.divisionManagerStatus, `Added ${teamName} to Division ${selectedDivision}.`);
+      }
 
-// ===== SEASON SETTINGS =====
-const seasonForm         = document.getElementById('season-form');
-const seasonNameSelect   = document.getElementById('season-name');
-const seasonYearInput    = document.getElementById('season-year');
-const seasonStartInput   = document.getElementById('season-start');
-const seasonEndInput     = document.getElementById('season-end');
-const seasonCurrentDiv   = document.getElementById('season-current-display');
-const seasonAuthNote     = document.getElementById('season-auth-note');
+      function getCaseInsensitiveValue(row, key) {
+        const match = Object.keys(row).find(k => k.toLowerCase() === key.toLowerCase());
+        return match ? String(row[match] || '').trim() : '';
+      }
 
-function getActiveSeason() {
-    return readJson(SEASON_KEY, null);
-}
+      function normalizeRosterRow(row) {
+        return {
+          Team: getCaseInsensitiveValue(row, 'Team').replace(/\s+Regular$/i, ''),
+          Name: getCaseInsensitiveValue(row, 'Name'),
+          Position: getCaseInsensitiveValue(row, 'Position'),
+          Phone: getCaseInsensitiveValue(row, 'Phone'),
+          Email: getCaseInsensitiveValue(row, 'Email')
+        };
+      }
 
-function formatSeasonDate(dateKey) {
-    if (!dateKey) return '�';
-    const d = new Date(`${dateKey}T00:00:00`);
-    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-}
+      function normalizePlayersFromRows(rows) {
+        return rows.map((row, index) => ({
+          id: row.id || `${Date.now()}-${index}`,
+          name: String(row.Name || row.name || row['Player Name'] || row.Player || '').trim(),
+          position: String(row.Position || row.position || row.Positions || row.Pos || '').trim(),
+          phone: String(row.Phone || row.phone || row['Phone Number'] || row['Contact Phone'] || '').trim(),
+          email: String(row.Email || row.email || row['Email Address'] || '').trim(),
+          gamesPlayed: Number(row['Games Played'] || row.GamesPlayed || row.Games || 0) || 0,
+          photo: String(row.Photo || row.photo || '').trim()
+        })).filter(player => player.name);
+      }
 
-function renderSeasonPanel() {
-    const loggedIn = isAdminLoggedIn();
-    const season = getActiveSeason();
+      function getPlayerKey(player) {
+        const name = String(player.name || player.Name || '').trim().toLowerCase();
+        const email = String(player.email || player.Email || '').trim().toLowerCase();
+        const phone = String(player.phone || player.Phone || '').trim().toLowerCase();
+        return `${name}|${email || phone}`;
+      }
 
-    seasonAuthNote.style.display = loggedIn ? 'none' : 'block';
-    seasonForm.style.display = loggedIn ? 'grid' : 'none';
+      function uploadAllRosters() {
+        if (!requireAdmin(el.divisionManagerStatus, 'Admin access required to upload all rosters.')) return;
 
-    if (season) {
-        seasonCurrentDiv.style.display = 'block';
-        seasonCurrentDiv.innerHTML =
-            `<strong>${season.name} ${season.year}</strong><span class="season-badge">Active</span><br>` +
-            `<span style="font-size:13px;color:#555;">${formatSeasonDate(season.start)} &ndash; ${formatSeasonDate(season.end)}</span>`;
-    } else {
-        seasonCurrentDiv.style.display = loggedIn ? 'block' : 'none';
-        seasonCurrentDiv.innerHTML = '<em style="color:#888;font-size:13px;">No season configured yet.</em>';
-    }
-
-    if (loggedIn && season) {
-        seasonNameSelect.value  = season.name  || '';
-        seasonYearInput.value   = season.year  || '';
-        seasonStartInput.value  = season.start || '';
-        seasonEndInput.value    = season.end   || '';
-    }
-}
-
-seasonForm.addEventListener('submit', event => {
-    event.preventDefault();
-    if (!isAdminLoggedIn()) {
-        seasonAuthNote.textContent = 'Sign in as admin to save season settings.';
-        seasonAuthNote.style.display = 'block';
-        return;
-    }
-
-    const name  = seasonNameSelect.value;
-    const year  = parseInt(seasonYearInput.value, 10);
-    const start = seasonStartInput.value;
-    const end   = seasonEndInput.value;
-
-    if (!name || !year || !start || !end) {
-        authStatus.textContent = 'Please complete all season fields.';
-        return;
-    }
-
-    if (end < start) {
-        authStatus.textContent = 'Season end date must be on or after the start date.';
-        return;
-    }
-
-    writeJson(SEASON_KEY, { name, year, start, end });
-    writeJson(STANDINGS_KEY, {});
-    renderSeasonPanel();
-    authStatus.textContent = `${name} ${year} season saved (${formatSeasonDate(start)} � ${formatSeasonDate(end)}).`;
-});
-
-ensureDefaults();
-renderAuthState();
-renderAnnouncements();
-renderSeasonPanel();
-renderDivisionManager();
-
-// ===== SEASON BANNER =====
-(function () {
-    try {
-        const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
-        const el = document.getElementById('banner-tagline');
-        if (s && el) {
-            const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-            el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
+        const file = el.adminRosterFile.files?.[0];
+        if (!file) return setStatus(el.divisionManagerStatus, 'Choose an Excel/CSV roster file first.');
+        if (!confirm('Uploading this roster will populate rosters for ALL teams in the spreadsheet. Existing rosters will be merged. Continue?')) {
+          return setStatus(el.divisionManagerStatus, 'All rosters upload canceled.');
         }
-    } catch (e) {}
-})();
-</script>
+        if (!window.XLSX) return setStatus(el.divisionManagerStatus, 'XLSX library failed to load.');
 
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const workbook = XLSX.read(reader.result, { type: 'array' });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+            if (!rows.length) return setStatus(el.divisionManagerStatus, 'Roster file appears empty.');
+
+            const headers = ['Team', 'Name', 'Position', 'Phone', 'Email'];
+            const store = readJson(STORAGE_KEYS.roster, {});
+            const teamGroups = {};
+
+            rows.forEach(rawRow => {
+              const normalized = normalizeRosterRow(rawRow);
+              if (!normalized.Name || !normalized.Team) return;
+              teamGroups[normalized.Team] = teamGroups[normalized.Team] || [];
+              teamGroups[normalized.Team].push(normalized);
+            });
+
+            let totalAdded = 0;
+            let teamsUpdated = 0;
+
+            Object.entries(teamGroups).forEach(([teamName, teamRows]) => {
+              const existing = store[teamName] || { headers, rows: [] };
+              const existingRows = Array.isArray(existing.rows) ? existing.rows : [];
+              const seen = new Set(existingRows.map(row => {
+                const normalized = normalizeRosterRow(row);
+                return `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
+              }));
+              const combinedRows = [...existingRows];
+
+              teamRows.forEach(row => {
+                const rowKey = `${row.Team}|${row.Name}|${row.Position}|${row.Email}|${row.Phone}`.toLowerCase();
+                if (!seen.has(rowKey)) {
+                  seen.add(rowKey);
+                  combinedRows.push(row);
+                  totalAdded += 1;
+                }
+              });
+
+              if (combinedRows.length > existingRows.length) {
+                store[teamName] = { headers, rows: combinedRows, uploadedAt: new Date().toLocaleString() };
+                teamsUpdated += 1;
+
+                const currentPlayers = Array.isArray(getTeamPlayersForTeam(teamName).players) ? [...getTeamPlayersForTeam(teamName).players] : [];
+                const existingPlayerKeys = new Set(currentPlayers.map(getPlayerKey));
+                normalizePlayersFromRows(combinedRows).forEach(player => {
+                  const playerKey = getPlayerKey(player);
+                  if (!existingPlayerKeys.has(playerKey)) {
+                    existingPlayerKeys.add(playerKey);
+                    currentPlayers.push(player);
+                  }
+                });
+                if (currentPlayers.length) setTeamPlayersForTeam(teamName, { players: currentPlayers, updatedAt: new Date().toLocaleString() });
+              }
+            });
+
+            writeJson(STORAGE_KEYS.roster, store);
+            setStatus(el.divisionManagerStatus, `All rosters uploaded. ${teamsUpdated} team(s) updated, ${totalAdded} new player(s) added across all teams.`);
+          } catch (error) {
+            setStatus(el.divisionManagerStatus, `All rosters upload failed: ${error.message}`);
+          }
+        };
+        reader.onerror = () => setStatus(el.divisionManagerStatus, 'Unable to read roster file.');
+        reader.readAsArrayBuffer(file);
+      }
+
+      function renderSeasonPanel() {
+        const loggedIn = isAdminLoggedIn();
+        const season = getActiveSeason();
+
+        setHidden(el.seasonAuthNote, loggedIn);
+        setHidden(el.seasonForm, !loggedIn);
+
+        if (season) {
+          setHidden(el.seasonCurrent, false);
+          el.seasonCurrent.innerHTML =
+            `<strong>${escapeHtml(season.name)} ${escapeHtml(season.year)}</strong><span class="season-badge">Active</span><br>` +
+            `<span style="font-size:13px;color:#555;">${formatSeasonDate(season.start)} &ndash; ${formatSeasonDate(season.end)}</span>`;
+        } else {
+          setHidden(el.seasonCurrent, !loggedIn);
+          el.seasonCurrent.innerHTML = '<em style="color:#888;font-size:13px;">No season configured yet.</em>';
+        }
+
+        if (loggedIn && season) {
+          el.seasonName.value = season.name || '';
+          el.seasonYear.value = season.year || '';
+          el.seasonStart.value = season.start || '';
+          el.seasonEnd.value = season.end || '';
+        }
+      }
+
+      function saveSeason(event) {
+        event.preventDefault();
+        if (!requireAdmin(el.seasonAuthNote, 'Sign in as admin to save season settings.')) return;
+
+        const name = el.seasonName.value;
+        const year = parseInt(el.seasonYear.value, 10);
+        const start = el.seasonStart.value;
+        const end = el.seasonEnd.value;
+
+        if (!name || !year || !start || !end) return setStatus(el.authStatus, 'Please complete all season fields.');
+        if (end < start) return setStatus(el.authStatus, 'Season end date must be on or after the start date.');
+
+        writeJson(STORAGE_KEYS.season, { name, year, start, end });
+        writeJson(STORAGE_KEYS.standings, {});
+        renderSeasonPanel();
+        renderSeasonBanner();
+        setStatus(el.authStatus, `${name} ${year} season saved (${formatSeasonDate(start)} — ${formatSeasonDate(end)}).`);
+      }
+
+      function renderSeasonBanner() {
+        const season = getActiveSeason();
+        if (!season || !el.bannerTagline) return;
+        el.bannerTagline.textContent = `${season.name} ${season.year} Season • ${formatSeasonDate(season.start)} – ${formatSeasonDate(season.end)}`;
+      }
+
+      function bindEvents() {
+        el.loginButton.addEventListener('click', signIn);
+        el.logoutButton.addEventListener('click', signOut);
+        el.announcementForm.addEventListener('submit', publishAnnouncement);
+        el.createAdminButton.addEventListener('click', createUser);
+        el.saveContentButton.addEventListener('click', saveSiteContent);
+        el.uploadButton.addEventListener('click', uploadSlide);
+        el.manageDivisionSelect.addEventListener('change', () => {
+          renderDivisionTeamList();
+          populateAssignTeamSelect();
+          setDivisionManagerEnabled(isAdminLoggedIn());
+        });
+        el.assignManagerButton.addEventListener('click', assignManagerToTeam);
+        el.uploadAllRostersAdminButton.addEventListener('click', uploadAllRosters);
+        el.addDivisionButton.addEventListener('click', addDivision);
+        el.renameDivisionButton.addEventListener('click', renameDivision);
+        el.deleteDivisionButton.addEventListener('click', deleteDivision);
+        el.addTeamButton.addEventListener('click', addTeam);
+        el.seasonForm.addEventListener('submit', saveSeason);
+      }
+
+      function init() {
+        initializeAdminKey();
+        ensureDefaults();
+        bindEvents();
+        renderAuthState();
+        renderAnnouncements();
+        renderSeasonPanel();
+        renderDivisionManager();
+        renderSeasonBanner();
+        loadSiteContent();
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+    })();
+  </script>
+</body>
 </html>

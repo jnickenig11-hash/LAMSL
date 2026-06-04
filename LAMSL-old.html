@@ -1119,6 +1119,7 @@ renderPaymentLinks();
 applyPaymentSection();
 applyUploadPermissions();
 loadSlidesFromFolder();
+renderMiniSchedule();
 
 // Autoplay every 20 seconds
 setInterval(nextSlide, 20000);
@@ -1132,8 +1133,9 @@ function renderMiniSchedule() {
     if (!container) return;
 
     const schedule = typeof getSchedule === 'function'
-        ? getSchedule()
-        : readJson(SCHEDULE_KEY, []);
+    ? getSchedule()
+    : readJson(SCHEDULE_KEY, []);
+
     const checkins = readJson(CHECKINS_KEY, {});
 
     const getGameId = game => String(game.id || `${game.date}|${game.time}|${game.team1}|${game.team2}`).trim();
@@ -1148,7 +1150,7 @@ function renderMiniSchedule() {
     // Find the earliest upcoming date that has at least one non-cancelled game.
     const upcomingDates = [...new Set(
         schedule
-            .filter(g => g.date >= todayKey && (g.status || 'scheduled') !== 'cancelled')
+            .filter(g => g.date >= todayKey && g.status !== 'cancelled')
             .map(g => g.date)
     )].sort();
 
@@ -1165,7 +1167,7 @@ function renderMiniSchedule() {
     const nextDateKey = upcomingDates[0];
     const nextDate = new Date(`${nextDateKey}T00:00:00`);
     const dayGames = schedule
-        .filter(g => g.date === nextDateKey && (g.status || 'scheduled') !== 'cancelled')
+        .filter(g => g.date === nextDateKey && g.status !== 'cancelled')
         .sort((a, b) => {
             if (a.park !== b.park) return ALL_PARKS.indexOf(a.park) - ALL_PARKS.indexOf(b.park);
             return a.time.localeCompare(b.time);
@@ -1220,51 +1222,20 @@ function renderMiniSchedule() {
     } catch (e) {}
 })();
 </script>
-<script src="js/schedule.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-  ensureDefaults();
-
-  const miniScheduleContainer = document.getElementById('mini-schedule-content');
-  if (miniScheduleContainer) {
-    miniScheduleContainer.innerHTML = '<p class="mini-schedule-empty">Loading upcoming games...</p>';
-  }
-
-  try {
-    const res = await fetch('https://lamsl-backend.onrender.com/api/content');
-    if (!res.ok) throw new Error(`Backend content fetch failed ${res.status}`);
-    const data = await res.json();
-
-    // Keep backend schedule data available to schedule.js and localStorage.
-    if (Array.isArray(data.gameSchedules) && data.gameSchedules.length > 0) {
-      writeJson('lamslWeeklyScheduleV3', data.gameSchedules);
-    }
-    if (Array.isArray(data.practiceSchedules) && data.practiceSchedules.length > 0) {
-      writeJson('lamslPracticeScheduleV1', data.practiceSchedules);
-    }
-    if (typeof scheduleContent !== 'undefined' && typeof getDefaultBackendContent === 'function') {
-      scheduleContent = Object.assign(getDefaultBackendContent(), data, {
-        gameSchedules: Array.isArray(data.gameSchedules) && data.gameSchedules.length > 0
-          ? data.gameSchedules
-          : readJson('lamslWeeklyScheduleV3', []),
-        gameScores: Array.isArray(data.gameScores) ? data.gameScores : [],
-        practiceSchedules: Array.isArray(data.practiceSchedules) && data.practiceSchedules.length > 0
-          ? data.practiceSchedules
-          : readJson('lamslPracticeScheduleV1', [])
-      });
-    }
+fetch('https://lamsl-backend.onrender.com/api/content')
+  .then(res => res.json())
+  .then(data => {
 
     // Announcements
-    const announcementsList = document.getElementById('announcements-list');
-    if (announcementsList && Array.isArray(data.announcements)) {
-      announcementsList.innerHTML = data.announcements.map(a => `
+    document.getElementById('announcements-list').innerHTML =
+      data.announcements.map(a => `
         <div class="announcement">
-          <h4>${a.title || ''}</h4>
-          <p>${a.message || ''}</p>
-          <small>${a.date || ''}</small>
+          <h4>${a.title}</h4>
+          <p>${a.message}</p>
+          <small>${a.date}</small>
         </div>
       `).join('');
-    }
 
     // Zelle info
     const zelleInfo = document.getElementById('zelleInfo');
@@ -1277,32 +1248,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Slideshow
-    const slideshow = document.getElementById('slideshow');
-    if (slideshow && Array.isArray(data.slideshow) && data.slideshow.length > 0) {
-      slideshow.innerHTML = data.slideshow.map((s, i) => `
+    document.getElementById('slideshow').innerHTML =
+      data.slideshow.map((s, i) => `
         <div class="slide ${i === 0 ? 'active' : ''}">
-          <img src="${s.imageUrl || s.url || ''}" alt="${s.caption || ''}">
-          <p>${s.caption || ''}</p>
+          <img src="${s.imageUrl}" alt="${s.caption}">
+          <p>${s.caption}</p>
         </div>
       `).join('');
+
+    // Game schedules are rendered by renderMiniSchedule() from schedule.js.
+    // Do not overwrite the mini schedule here with backend content that may be empty
+    // or use a different field structure.
+
+    // Game Scores (if you add the section)
+    if (document.getElementById('gameScores')) {
+      document.getElementById('gameScores').innerHTML =
+        data.gameScores.map(g => `
+          <div class="score-item">
+            <p>${g.teamA} ${g.scoreA} - ${g.scoreB} ${g.teamB}</p>
+            <small>${g.date}</small>
+          </div>
+        `).join('');
     }
 
-    // Game Scores
-    const gameScores = document.getElementById('gameScores');
-    if (gameScores && Array.isArray(data.gameScores)) {
-      gameScores.innerHTML = data.gameScores.map(g => `
-        <div class="score-item">
-          <p>${g.teamA || g.team1 || ''} ${g.scoreA || g.score1 || ''} - ${g.scoreB || g.score2 || ''} ${g.teamB || g.team2 || ''}</p>
-          <small>${g.date || ''}</small>
-        </div>
-      `).join('');
-    }
+  })
+  .catch(err => console.error('Error loading content:', err));
+</script>
 
-  } catch (err) {
-    console.error('Error loading backend content:', err);
+<script src="js/schedule.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  ensureDefaults();
+
+  if (typeof loadBackendSchedule === 'function') {
+    await loadBackendSchedule();
   }
 
-  // Render after backend/local fallback data is ready.
   renderMiniSchedule();
 });
 </script>

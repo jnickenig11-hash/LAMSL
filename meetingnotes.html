@@ -1,179 +1,877 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet"><title>LAMSL - Meeting Notes</title><style>
-:root{--blue:#12324A;--orange:#C86A2F;--gold:#F1D27A;--bg:#eef4ea;--border:#dbe2ea;--muted:#647384;--good:#1f7a3a;--bad:#a92f2f}
-*{box-sizing:border-box}
-body{margin:0;font-family:'Barlow Condensed','Trebuchet MS',sans-serif;background-color:var(--bg);background-image:linear-gradient(rgba(233,244,231,.88),rgba(233,244,231,.88)),url("Images/LAMSLLogo.jpg");background-repeat:no-repeat;background-position:center 55%;background-size:min(60vw,540px);background-attachment:fixed;color:#24313f}
-h1,h2,h3,h4{font-family:'Oswald','Barlow Condensed',sans-serif;letter-spacing:.6px;text-transform:uppercase;color:var(--blue);margin:0 0 10px}
-p{line-height:1.45}
-.container{max-width:1200px;margin:auto;padding:20px}
-.banner{background:var(--blue);color:white;border-bottom:4px solid var(--orange);padding:24px 20px;display:grid;grid-template-columns:220px 1fr;gap:16px;align-items:center;text-align:center}
-.banner h1{color:white;font-size:40px;margin:0}
-.banner-logo{width:200px;height:150px;object-fit:contain}
-.subtitle{font-style:italic;margin-top:6px}.tagline{margin-top:8px}
-header{background:var(--blue);color:white}
-.navbar{display:flex;gap:20px;align-items:center;padding:15px 20px}
-.navbar-brand{color:white;margin:0;font-size:20px}
-.navbar ul{list-style:none;display:flex;flex-wrap:wrap;gap:10px 18px;margin:0;padding:0}
-.navbar a{color:white;text-decoration:none}.navbar a:hover,.navbar a.active-tab{color:var(--gold)}
-.navbar a.active-tab{border-bottom:2px solid var(--orange);padding-bottom:2px}
-.card{background:white;border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:18px;box-shadow:0 2px 10px rgba(18,50,74,.08)}
-.grid{display:grid;gap:14px}.two{grid-template-columns:repeat(2,minmax(0,1fr))}.three{grid-template-columns:repeat(3,minmax(0,1fr))}
-label{font-weight:700;color:var(--blue)}
-input,select,textarea,button{font:inherit}
-input,select,textarea{width:100%;padding:10px 12px;border:1px solid #c7d1dc;border-radius:8px;background:white}
-textarea{min-height:90px;resize:vertical}
-button,.btn{background:var(--blue);color:white;border:none;border-radius:8px;padding:10px 14px;cursor:pointer;font-weight:700;text-decoration:none;display:inline-block}
-button:hover,.btn:hover{background:#004080}.danger{background:var(--bad)}.secondary{background:#d7e0e8;color:var(--blue)}
-.status{background:#f2f7fb;border:1px solid var(--border);border-radius:8px;padding:10px;color:#304b64}
-.status.good{background:#edf8f0;color:var(--good)}.status.bad{background:#fff0f0;color:var(--bad)}
-.list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-.list li,.item{border:1px solid var(--border);border-radius:10px;padding:12px;background:#fbfdff}
-.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse}th,td{border:1px solid var(--border);padding:8px;text-align:left}th{background:var(--blue);color:white}
-.slidebox{position:relative;min-height:320px;background:var(--blue);border-radius:10px;overflow:hidden}.slidebox img{width:100%;height:320px;object-fit:cover;display:block}.caption{padding:8px 10px;background:rgba(18,50,74,.88);color:white}
-footer{text-align:center;padding:20px;background:var(--blue);color:white;margin-top:20px}
-@media(max-width:800px){.banner{grid-template-columns:1fr}.navbar{flex-direction:column;align-items:flex-start}.two,.three{grid-template-columns:1fr}.banner h1{font-size:30px}}
-</style></head><body>
-<div class="banner"><img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo"><div><h1>Latin &amp; American Men's Softball League</h1><div class="subtitle">Established 1976</div><div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div></div></div>
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<title>LAMSL - Meeting Notes</title>
 
-<header><div class="navbar container"><h2 class="navbar-brand">LAMSL</h2><ul>
-<li><a href="LAMSL.html">Home</a></li><li><a href="standings.html">Standings</a></li><li><a href="schedule.html">Schedule</a></li><li><a href="teams.html">Teams</a></li><li><a href="rules.html">Rules</a></li><li><a href="meetingnotes.html">Meeting Notes</a></li><li><a href="events.html">Events &amp; Fundraisers</a></li><li><a href="hallofchampions.html">Hall of Champions</a></li><li><a href="administrators.html">Admin</a></li><li><a href="about.html">About</a></li>
-</ul></div></header>
-<main class="container"><section class="card"><h2>Archived Announcements</h2><div id="archived"></div></section><section class="card"><h2>Meeting Notes</h2><div id="notes"></div></section></main><footer><p>© Latin &amp; American Men's Softball League (LAMSL)</p></footer><script>
-const KEYS={
- USERS:'lamslUsersV1',SESSION:'lamslSessionV1',ANN:'lamslAnnouncementsV1',ARCH:'lamslArchivedAnnouncementsV1',
- EFANN:'lamslEFAnnouncementsV1',DIV:'lamslDivisionsV1',SCHED:'lamslWeeklyScheduleV3',PRACT:'lamslPracticeScheduleV1',
- ROSTER:'lamslTeamRostersV1',PLAYERS:'lamslTeamPlayersV1',ASSIGN:'lamslTeamManagerAssignmentsV1',SEASON:'lamslSeasonV1',
- PAY:'lamslPaymentLinksV1',HOME_SLIDES:'lamslHomeSlidesV1',EF_SLIDES:'lamslEventSlidesV1',TEAM_PHOTOS:'lamslTeamPhotosV1',CHECKINS:'lamslTeamGameCheckinsV1',MEETINGS:'lamslManagerMeetingNotesV1'
-};
-const DEFAULT_DIVISIONS={A:['Titans','Doom Squad','Legends','Nasty Boyz','Black Sox','White Sox','Dodgers'],B:['Charros','Toxic','Primos','Demons','Cubs','Borrachos'],C:['Diablos','Brewers','Coyotes','Goodfellas','Bandits','Salvajes','Balls Out','Orioles'],D:['Viejones','No Chance','Los Pericos','Wild Hogz','Strokes','Dawgz','Xolos','Desvelados'],E:[]};
+<style>
 
-const DEFAULT_ANNOUNCEMENTS=[
- {id:'ann-1',title:'TO ALL REGULAR SEASON MANAGERS!',date:'2026-05-28',message:'There will be a Mandatory Managers meeting Friday June 12th - 7p at 10111 Park St, Bellflower, CA 90706-6017.'},
- {id:'ann-2',title:'SCHEDULE & STANDINGS UPDATED',date:'2026-05-26',message:'The Schedule for May 31st has been posted and can be seen on the mini-schedule and schedule tab. Team divisions and standings have also been updated. Scores will be added later.'},
- {id:'ann-3',title:'SITE UNDER CONSTRUCTION!',date:'2026-04-27',message:'The New League Site is under construction. Site will be used only for game schedules, scores and standings. All other features TBD. Games will be posted by Thursday morning.'}
-];
-const DEFAULT_HOME_SLIDES=[
- {id:'slide-founder',src:'Images/DonArturoPadillaLAMSLPresident.jpg',caption:'Arturo Padilla, Sr. — LAMSL Founder'},
- {id:'slide-clubhouse',src:'Images/LAMSLClubhouseCartoonPic.jpg',caption:'Follow @lamsl_league for league photos, event highlights, and game-day updates.'}
-];
-const DEFAULT_MEETING_NOTES=[
- {id:'meet-2024-04-19',date:'2024-04-19',title:'April 19, 2024 Meeting Notes',notes:'General
-- Roll call done in Division order
-- Teams to discuss division concerns with Art after meeting if needed
-- Regular Season starts 4/28/24
-- Monthly meetings to be held at the clubhouse
-- Next meeting: Friday, May 31st
-- Every team must have one representative (one person per team)
-
-Umpires
-- Umpires will meet with Gil separately
-- Rules will be provided to all umpires
-
-Bats
-- Bats will be provided by the league by unanimous agreement
-- If bats need replacement, teams agree to collectively pay
-- Bats will be tested and approved by the league.'},
- {id:'meet-2024-05-31',date:'2024-05-31',title:'May 31, 2024 Meeting Notes',notes:'General
-- Teams to provide email addresses for pitcher waivers
-- Meeting notes are available on the LAMSL website
-
-Playoff Scenarios
-- Division A & B: Wild card Sunday starts with 6th vs 7th seed; winner plays 5th seed; then winner plays 4th seed before standard playoff bracket
-- Winter league: everyone makes playoffs to keep teams motivated
-- Division C & D: everyone plays each other once, then divisions split; top teams continue in Division C and remaining teams continue in Division D.'}
-];
-function hasNoContent(value){return value==null || (Array.isArray(value)&&value.length===0) || (typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length===0)}
-
-function readJson(k,f){try{const raw=localStorage.getItem(k);return raw?JSON.parse(raw):f}catch{return f}}
-function writeJson(k,v){localStorage.setItem(k,JSON.stringify(v)); backendSaveKey(k,v).catch(()=>{});}
-const backendBase = (window.BACKEND_BASE || 'https://lamsl-backend.onrender.com').replace(/\/$/, '');
-function apiUrl(path){return backendBase + (path.startsWith('/') ? path : '/' + path)}
-function apiHeaders(extra={}){
-    const storedKey = localStorage.getItem('LAMSL_ADMIN_KEY') || window.ADMIN_API_KEY || '';
-    return storedKey ? {...extra, 'x-admin-key': storedKey} : extra;
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
+    background-color: #eef4ea;
+    background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    background-size: min(60vw, 540px);
+    background-attachment: fixed;
+    color: #333;
 }
-async function backendGetAll(){
-    const candidates = ['/api/site-data','/api/data','/api/content'];
-    for (const path of candidates) {
-        try {
-            const res = await fetch(apiUrl(path), {headers: apiHeaders()});
-            if (!res.ok) continue;
-            const data = await res.json();
-            return data && data.data ? data.data : data;
-        } catch (_) {}
+
+h1, h2, h3 {
+    margin-bottom: 10px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* ===== NAVBAR ===== */
+header {
+    background: #12324A;
+    color: white;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+}
+
+.navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+    margin: 0;
+    font-size: 20px;
+}
+
+.navbar-brand-gem {
+    width: 24px;
+    height: 18px;
+    background:
+        linear-gradient(90deg, transparent 0 22%, rgba(255, 255, 255, 0.7) 22% 28%, transparent 28% 72%, rgba(94, 108, 122, 0.24) 72% 78%, transparent 78% 100%),
+        linear-gradient(180deg, #fbfdff 0%, #dfe5ec 34%, #b5c0cb 62%, #7c8a97 100%);
+    clip-path: polygon(24% 6%, 76% 6%, 100% 35%, 67% 100%, 33% 100%, 0% 35%);
+    border: 1px solid rgba(248, 251, 255, 0.78);
+    box-shadow: 0 0 0 1px rgba(86, 96, 108, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.82), inset 0 -1px 0 rgba(85, 96, 108, 0.4);
+    position: relative;
+    display: inline-block;
+    flex: 0 0 auto;
+}
+
+.navbar-brand-gem::after {
+    content: "";
+    position: absolute;
+    inset: 2px 4px 2px 4px;
+    clip-path: polygon(50% 0%, 80% 26%, 64% 100%, 36% 100%, 20% 26%);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.15)),
+        linear-gradient(90deg, transparent 0 46%, rgba(126, 138, 151, 0.82) 46% 54%, transparent 54% 100%);
+    opacity: 0.95;
+    pointer-events: none;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar li {
+    margin: 0;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    display: block;
+}
+
+.navbar a:hover {
+    color: #F1D27A;
+}
+
+.navbar a.active-tab {
+    color: #F1D27A;
+    border-bottom: 2px solid #C86A2F;
+    padding-bottom: 2px;
+}
+/* ===== BANNER ===== */
+
+.meeting-date {
+    background: #12324A;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+    margin-bottom: 0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+    user-select: none;
+}
+
+.meeting-date:hover {
+    background: #004080;
+}
+
+.meeting-date.active {
+    background: #004080;
+}
+
+.meeting-toggle {
+    font-size: 20px;
+}
+
+.meeting-content {
+    background: #f9f9f9;
+    padding: 20px;
+    border-left: 4px solid #12324A;
+    margin-bottom: 10px;
+    display: none;
+}
+
+.meeting-content.active {
+    display: block;
+}
+
+.meeting-topic {
+    margin-bottom: 15px;
+}
+
+.meeting-topic h4 {
+    color: #12324A;
+    margin: 10px 0 8px 0;
+    font-size: 16px;
+}
+
+.meeting-topic ul {
+    margin: 5px 0;
+    padding-left: 20px;
+}
+
+.meeting-topic li {
+    margin: 4px 0;
+    line-height: 1.5;
+}
+
+.meeting-topic p {
+    margin: 5px 0;
+    line-height: 1.5;
+}
+
+.archived-announcements {
+    background: #f4f8fc;
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 18px;
+}
+
+.archived-announcements ul {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+}
+
+.archived-announcements li {
+    background: #eef2f7;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+}
+
+.admin-only {
+    background: #f0f0f0;
+    border: 2px solid #12324A;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.admin-only h3 {
+    margin-top: 0;
+    color: #12324A;
+}
+
+.admin-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.admin-form input,
+.admin-form textarea {
+    padding: 10px;
+    border: 1px solid #dbe2ea;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.admin-form textarea {
+    grid-column: span 2;
+    min-height: 120px;
+    resize: vertical;
+}
+
+.admin-form button {
+    grid-column: span 2;
+    padding: 10px 16px;
+    background: #12324A;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.admin-form button:hover {
+    background: #004080;
+}
+
+.admin-status {
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 6px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    display: none;
+}
+
+.admin-status.show {
+    display: block;
+}
+
+.meeting-timestamp {
+    font-size: 12px;
+    color: #666;
+    margin-top: 8px;
+    font-style: italic;
+}
+
+/* ===== FOOTER ===== */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #12324A;
+    color: white;
+    margin-top: 20px;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    body {
+        background-attachment: scroll;
     }
-    return null;
+
+    .container {
+        padding: 16px;
+    }
+
+    .navbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 14px 16px;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        width: 100%;
+        gap: 4px;
+    }
+
+    .navbar li {
+        margin: 0;
+    }
+
+    .navbar a {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 6px;
+        box-sizing: border-box;
+    }
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    .meeting-date {
+        font-size: 16px;
+    }
+
+    .meeting-content {
+        padding: 15px;
+    }
 }
-async function backendSaveKey(key, value){
-    const payload = {key, value};
-    const candidates = ['/api/site-data','/api/data','/api/update-key'];
-    for (const path of candidates) {
-        try {
-            const res = await fetch(apiUrl(path), {
-                method: 'POST',
-                headers: apiHeaders({'Content-Type':'application/json'}),
-                body: JSON.stringify(payload)
+
+/* ===== BANNER ===== */
+.banner {
+    position: relative;
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    gap: 12px;
+    text-align: center;
+}
+.banner h1 {
+    margin: 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0 0;
+}
+.banner .tagline {
+    margin-top: 10px;
+    font-size: 16px;
+    max-width: 620px;
+}
+.banner-logo {
+    width: 220px;
+    height: 160px;
+    object-fit: contain;
+}
+@media (max-width: 700px) {
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .banner h1 {
+        font-size: 32px;
+    }
+    .banner .subtitle,
+    .banner .tagline {
+        font-size: 14px;
+    }
+    .banner-logo {
+        width: 180px;
+        height: auto;
+    }
+}
+
+
+</style>
+</head>
+
+<body>
+
+<!-- BANNER -->
+<div class="banner">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
+    <h1>Latin & american men's softball league</h1>
+    <div class="subtitle">Established 1976</div>
+    <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+</div>
+
+<!-- HEADER -->
+<header>
+    <div class="navbar container">
+        <h2 class="navbar-brand"><span class="navbar-brand-gem" aria-hidden="true"></span>LAMSL</h2>
+        <ul>
+            <li><a href="LAMSL.html">Home</a></li>
+            <li><a href="standings.html">Standings</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="teams.html">Teams</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="meetingnotes.html" class="active-tab">Meeting Notes</a></li>
+            <li><a href="events.html">Events &amp; Fundraisers</a></li>
+            <li><a href="hallofchampions.html">Hall of Champions</a></li>
+            <li><a href="administrators.html">Admin</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</header>
+
+<!-- MAIN -->
+<div class="container">
+    <main>
+        <section class="card">
+            <h2>Meeting Notes</h2>
+            <p>Click on a date to expand/collapse meeting details.</p>
+
+            <!-- ADMIN SECTION -->
+            <div class="admin-only" id="admin-section" style="display: none;">
+                <h3>Add Manager Meeting Notes (Admin Only)</h3>
+                <div class="admin-form">
+                    <input type="date" id="meeting-date-input" placeholder="Meeting Date">
+                    <input type="text" id="meeting-title-input" placeholder="Meeting Title (e.g., Division A Review)">
+                    <textarea id="meeting-notes-input" placeholder="Enter meeting notes here..."></textarea>
+                    <button onclick="addMeetingNote()">Add Meeting Note</button>
+                </div>
+                <div class="admin-status" id="admin-status"></div>
+            </div>
+
+            <div class="archived-announcements">
+                <h3>Archived Announcements</h3>
+                <ul id="archived-announcements-list">
+                    <li>No archived announcements yet.</li>
+                </ul>
+            </div>
+
+            <div id="meetings-container">
+            <!-- April 19, 2024 Meeting -->
+            <div class="meeting-date active" onclick="toggleMeeting(this)">
+                <span>April 19, 2024</span>
+                <span class="meeting-toggle">âˆ’</span>
+            </div>
+            <div class="meeting-content active">
+                <div class="meeting-topic">
+                    <h4>General</h4>
+                    <ul>
+                        <li>Roll call done in Division order</li>
+                        <li>Teams to discuss division concerns with Art after meeting if needed</li>
+                        <li>Regular Season starts 4/28/24</li>
+                        <li>Monthly meetings to be held at the clubhouse</li>
+                        <li>Next meeting: Friday, May 31st</li>
+                        <li>Every team must have one representative (one person per team)</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Umpires</h4>
+                    <ul>
+                        <li>Umpires will meet with Gil separately</li>
+                        <li>Rules will be provided to all umpires</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Bats</h4>
+                    <ul>
+                        <li>Bats will be provided by the league (unanimous agreement)</li>
+                        <li>If bats need replacement, teams agree to collectively pay</li>
+                        <li>Bats will be tested periodically</li>
+                        <li>League can buy bats off teams if new/semi-new and bought within the last year</li>
+                        <li>Bats must pass 200 compressions</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Parks</h4>
+                    <ul>
+                        <li>Los Nietos secured until end of June</li>
+                        <li>Trying to secure Little Lake (upcoming meeting with SFS)</li>
+                        <li>Salt Lake Park and Ford Park may be future options</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Rules & Disputes</h4>
+                    <ul>
+                        <li>Registration agreement letter to be sent by Art to managers</li>
+                        <li>Council to be created for disputes/protests regarding calls or game problems</li>
+                        <li>Possibly one manager from each division on council</li>
+                        <li>Volunteers for council should reach out to Art</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Clubhouse</h4>
+                    <ul>
+                        <li>$20/month fee to help sustain clubhouse for league use only</li>
+                        <li>Available for managers/players to use for private events</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Uniforms & Code of Conduct</h4>
+                    <ul>
+                        <li>Rules regarding uniforms and "no bottle use" will be enforced</li>
+                        <li>Fines will be created for violations</li>
+                        <li>All teams must be in full uniform by 3rd game</li>
+                        <li>No disrespectful or hot-headed behavior during games</li>
+                        <li>Friendly banter acceptable, but keep it respectful</li>
+                        <li>Cannot risk losing parks due to player misbehavior</li>
+                        <li>Consequences for players who don't adhere to rules</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Other</h4>
+                    <ul>
+                        <li>Looking into filming games to promote league and showcase teams</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- May 31, 2024 Meeting -->
+            <div class="meeting-date" onclick="toggleMeeting(this)">
+                <span>May 31, 2024</span>
+                <span class="meeting-toggle">+</span>
+            </div>
+            <div class="meeting-content">
+                <div class="meeting-topic">
+                    <h4>General</h4>
+                    <ul>
+                        <li>Teams to provide email addresses for pitcher's waivers</li>
+                        <li>Meeting notes now available on LAMSL website</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Playoff Scenarios</h4>
+                    <p><strong>Division A & B:</strong></p>
+                    <ul>
+                        <li>Wild card Sunday: 6th vs 7th seed, winner plays 5th seed (single elimination)</li>
+                        <li>Following Sunday: winner vs 4th seed (single elimination)</li>
+                        <li>Then standard playoff scenario</li>
+                        <li>Winter league: everyone makes playoffs to keep motivated</li>
+                    </ul>
+                    <p><strong>Division C & D:</strong></p>
+                    <ul>
+                        <li>Everyone plays each other once, then split</li>
+                        <li>Top 5 go to Division C, bottom 6 go to Division D</li>
+                        <li>Each division plays another round if season allows</li>
+                        <li>Playoffs start after split if season is lagging</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Byes</h4>
+                    <ul>
+                        <li>Most divisions have odd number of teams, so byes already scheduled</li>
+                        <li>Teams allowed one "emergency" bye per season (not enough players)</li>
+                        <li>Additional emergency byes require paying both team fees or forfeit</li>
+                        <li>No byes in playoffs (only true emergencies considered)</li>
+                        <li>In 2 of 3 playoff games: emergency bye gives loss, must be true emergency</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Father's Day</h4>
+                    <ul>
+                        <li>Teams can opt out of playing on Father's Day</li>
+                        <li>Does not count against team byes</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Rules Clarifications</h4>
+                    <p><strong>Hit-by-Pitch:</strong></p>
+                    <ul>
+                        <li>Umpire's discretion if batter could have avoided being hit</li>
+                        <li>Speed of pitch doesn't matter if batter in batter's box</li>
+                        <li>Players cannot argue with umpire (same as strike calls)</li>
+                    </ul>
+                    <p><strong>Double Play Obstruction:</strong></p>
+                    <ul>
+                        <li>Players must slide or run to right field to clear double play</li>
+                        <li>Cannot wait until last minute to move</li>
+                        <li>Umpires will call automatic double play if obstruction appears close</li>
+                    </ul>
+                    <p><strong>Dead Ball:</strong></p>
+                    <ul>
+                        <li>Anything in front of plate = dead ball</li>
+                        <li>Anything crossing plate = live ball</li>
+                        <li>Umpire's call (angle may vary)</li>
+                    </ul>
+                    <p><strong>Umpires:</strong></p>
+                    <ul>
+                        <li>Some umpires work other leagues; rules will be reviewed with new umpires</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Schedules</h4>
+                    <ul>
+                        <li>Season schedule posts 2 weeks out</li>
+                        <li>Give advance notice for byes; hard to reschedule after posting</li>
+                        <li>Schedule sent out showing teams, byes, and opponents (not time or park)</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Team Photo IDs</h4>
+                    <ul>
+                        <li>All teams must send player photos with names</li>
+                        <li>Preferably in email with name under each photo</li>
+                        <li>Teams have max player limit per roster</li>
+                        <li>IDs crucial for playoffs to prevent extra players</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Game Day Procedures</h4>
+                    <ul>
+                        <li>Sign-in sheets must be signed every week</li>
+                        <li>Ask umpire if not provided</li>
+                        <li>Pitcher's waivers needed for those not wearing mask</li>
+                        <li>As of 6/9/24: all teams must be in full uniform with tucked shirts</li>
+                        <li>Fines for not tucking in shirts</li>
+                        <li>Shirts must be tucked all the way around, not just front</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Uniforms & Equipment</h4>
+                    <ul>
+                        <li>No metal spikes on cleats - NO EXCEPTIONS</li>
+                        <li>Composite spikes allowed</li>
+                        <li>City officials inspect parks; want to present good impression</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>NO BOTTLES AT PARKS</h4>
+                    <ul>
+                        <li>Tell fans and players, especially young ones</li>
+                        <li>Teams caught with bottles will not be scheduled at that park</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Rainouts</h4>
+                    <ul>
+                        <li>Expect to play until games are canceled</li>
+                        <li>Decision made Sunday morning unless heavy rain forecasted for hours</li>
+                        <li>8:00 AM games may show in questionable weather</li>
+                        <li>Do not text asking about cancellations; announcement will be sent</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Sportsmanship</h4>
+                    <ul>
+                        <li>Encourage good sportsmanship from players</li>
+                        <li>Do not contest balls and strikes</li>
+                        <li>Park staff reports to officials; losing parks due to bad behavior</li>
+                        <li>Managers must control players</li>
+                        <li>Only 2 players at plate when game time called can act as managers</li>
+                        <li>Control fans; they're extension of team</li>
+                    </ul>
+                </div>
+
+                <div class="meeting-topic">
+                    <h4>Meeting Attendance</h4>
+                    <ul>
+                        <li>Missing a meeting = fine + visitor status following month</li>
+                        <li>Will be posted on website</li>
+                    </ul>
+                </div>
+            </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const ARCHIVE_KEY = 'lamslArchivedAnnouncementsV1';
+        const MEETING_NOTES_KEY = 'lamslManagerMeetingNotesV1';
+        const ADMIN_AUTH_KEY = 'lamslAdminAuthV1';
+        const archivedAnnouncementsList = document.getElementById('archived-announcements-list');
+
+        // Check admin auth and show/hide admin section
+        function checkAdminAccess() {
+            try {
+                const adminSection = document.getElementById('admin-section');
+                if (!adminSection) return;
+
+                // Check session for admin or team-manager role
+                const session = JSON.parse(localStorage.getItem('lamslSessionV1') || '{}');
+                const hasAccess = session.role === 'admin' || session.role === 'team-manager';
+
+                if (hasAccess) {
+                    adminSection.style.display = 'block';
+                } else {
+                    adminSection.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Admin check failed:', error);
+            }
+        }
+
+        function readArchive() {
+            try {
+                const raw = localStorage.getItem(ARCHIVE_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function readMeetingNotes() {
+            try {
+                const raw = localStorage.getItem(MEETING_NOTES_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function saveMeetingNotes(notes) {
+            try {
+                localStorage.setItem(MEETING_NOTES_KEY, JSON.stringify(notes));
+            } catch (error) {
+                console.error('Failed to save meeting notes:', error);
+            }
+        }
+
+        function addMeetingNote() {
+            const dateInput = document.getElementById('meeting-date-input');
+            const titleInput = document.getElementById('meeting-title-input');
+            const notesInput = document.getElementById('meeting-notes-input');
+            const statusEl = document.getElementById('admin-status');
+
+            if (!dateInput.value || !titleInput.value || !notesInput.value) {
+                statusEl.textContent = 'Error: Please fill in all fields.';
+                statusEl.classList.add('show');
+                setTimeout(() => statusEl.classList.remove('show'), 4000);
+                return;
+            }
+
+            const meetingDate = new Date(dateInput.value + 'T00:00:00');
+            const formattedDate = meetingDate.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
             });
-            if (res.ok) return true;
-        } catch (_) {}
-    }
-    return false;
-}
-async function backendSaveAll(){
-    const data = {};
-    Object.values(KEYS).forEach(k => data[k] = readJson(k, null));
-    const candidates = ['/api/site-data','/api/update','/api/data'];
-    for (const path of candidates) {
-        try {
-            const res = await fetch(apiUrl(path), {
-                method: 'POST',
-                headers: apiHeaders({'Content-Type':'application/json'}),
-                body: JSON.stringify(data)
+
+            const note = {
+                id: Date.now().toString(),
+                date: formattedDate,
+                dateValue: dateInput.value,
+                title: titleInput.value,
+                content: notesInput.value,
+                addedAt: new Date().toISOString(),
+                addedAtFormatted: new Date().toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                })
+            };
+
+            const notes = readMeetingNotes();
+            notes.unshift(note);
+            saveMeetingNotes(notes);
+
+            dateInput.value = '';
+            titleInput.value = '';
+            notesInput.value = '';
+
+            statusEl.textContent = '✓ Meeting note added for ' + formattedDate;
+            statusEl.classList.add('show');
+            setTimeout(() => statusEl.classList.remove('show'), 3000);
+
+            renderMeetingNotes();
+        }
+
+        function renderMeetingNotes() {
+            const container = document.getElementById('meetings-container');
+            const notes = readMeetingNotes();
+
+            let html = '';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            notes.forEach(note => {
+                const noteDate = new Date(note.dateValue + 'T00:00:00');
+                const isPast = noteDate < today;
+                const isActive = !isPast;
+
+                html += '<div class="meeting-date ' + (isActive ? 'active' : '') + '" onclick="toggleMeeting(this)">';
+                html += '<span>' + note.date + (note.title ? ' - ' + note.title : '') + '</span>';
+                html += '<span class="meeting-toggle">' + (isActive ? '−' : '+') + '</span>';
+                html += '</div>';
+                html += '<div class="meeting-content ' + (isActive ? 'active' : '') + '">';
+                html += '<div class="meeting-topic">';
+                html += '<h4>Notes</h4>';
+                html += '<p>' + note.content.replace(/\n/g, '<br>') + '</p>';
+                html += '</div>';
+                html += '<div class="meeting-timestamp">Added: ' + note.addedAtFormatted + '</div>';
+                html += '</div>';
             });
-            if (res.ok) return true;
-        } catch (_) {}
-    }
-    return false;
-}
-async function syncFromBackend(){
-    const data = await backendGetAll();
-    if (!data || typeof data !== 'object') return false;
-    Object.entries(data).forEach(([key,value]) => {
-        if (Object.values(KEYS).includes(key)) localStorage.setItem(key, JSON.stringify(value));
-    });
-    return true;
-}
-async function uploadImageToBackend(file){
-    const formData = new FormData();
-    formData.append('image', file);
-    const candidates = ['/api/upload-image','/api/upload'];
-    for (const path of candidates) {
-        try {
-            const res = await fetch(apiUrl(path), {method:'POST', headers: apiHeaders(), body: formData});
-            if (!res.ok) continue;
-            const data = await res.json();
-            if (data && (data.url || data.path || data.filepath)) return data.url || data.path || data.filepath;
-        } catch (_) {}
-    }
-    return null;
-}
 
-function ensureDefaults(){
- let u=readJson(KEYS.USERS,[]);if(!u.some(x=>x.username==='admin')){u.push({username:'admin',password:'admin',role:'admin'});writeJson(KEYS.USERS,u)}
- if(hasNoContent(readJson(KEYS.DIV,null)))writeJson(KEYS.DIV,DEFAULT_DIVISIONS);
- if(hasNoContent(readJson(KEYS.ANN,null)))writeJson(KEYS.ANN,DEFAULT_ANNOUNCEMENTS);
- if(hasNoContent(readJson(KEYS.ARCH,null)))writeJson(KEYS.ARCH,[]);
- if(hasNoContent(readJson(KEYS.HOME_SLIDES,null)))writeJson(KEYS.HOME_SLIDES,DEFAULT_HOME_SLIDES);
- if(hasNoContent(readJson(KEYS.MEETINGS,null)))writeJson(KEYS.MEETINGS,DEFAULT_MEETING_NOTES);
-}
-function session(){return readJson(KEYS.SESSION,null)} function isAdmin(){const s=session();return !!(s&&s.role==='admin')} function hasRole(r){const s=session();return !!(s&&s.role===r)}
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function todayKey(){return new Date().toISOString().slice(0,10)} function id(prefix){return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2,7)}`}
-function fmtDate(key){if(!key)return '';const d=new Date(key+'T00:00:00');return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}
-function gameId(g){return String(g.id||`${g.date}|${g.time}|${g.team1}|${g.team2}`).trim()}
-function allTeams(){const d=readJson(KEYS.DIV,DEFAULT_DIVISIONS);return Object.entries(d).flatMap(([division,teams])=>teams.map(team=>({division,team})))}
-function setSeasonBanner(){const s=readJson(KEYS.SEASON,null), el=document.getElementById('banner-tagline'); if(s&&el)el.textContent=`${s.name} ${s.year} Season • ${fmtDate(s.start)} – ${fmtDate(s.end)}`}
-const __backendReady = syncFromBackend().then(() => { ensureDefaults(); setSeasonBanner(); });
+            container.innerHTML = html;
+        }
 
-function render(){const a=readJson(KEYS.ARCH,[]);document.getElementById('archived').innerHTML=a.length?a.map(x=>`<div class="item"><h3>${esc(x.title)}</h3><small>${fmtDate(x.date)} archived ${x.archivedAt?new Date(x.archivedAt).toLocaleDateString():''}</small><p>${esc(x.message)}</p></div>`).join(''):'<p>No archived announcements.</p>';const notes=readJson(KEYS.MEETINGS,[]);document.getElementById('notes').innerHTML=notes.length?notes.map(n=>`<div class="item"><h3>${esc(n.title||'Meeting Notes')}</h3><small>${fmtDate(n.date)}</small><p>${esc(n.notes||n.message||'')}</p></div>`).join(''):'<p>No meeting notes posted.</p>'}__backendReady.then(render);
-</script></body></html>
+        function renderArchivedAnnouncements() {
+            const archive = readArchive();
+            archivedAnnouncementsList.innerHTML = '';
+
+            if (!archive.length) {
+                const emptyItem = document.createElement('li');
+                emptyItem.textContent = 'No archived announcements yet.';
+                archivedAnnouncementsList.appendChild(emptyItem);
+                return;
+            }
+
+            archive.forEach(item => {
+                const li = document.createElement('li');
+                const archivedDate = item.archivedAt ? new Date(item.archivedAt).toLocaleDateString() : 'Unknown';
+                li.innerHTML = '<strong>' + item.title + '</strong><br>' + item.date + '<br>' + item.message + '<br><em>Archived on ' + archivedDate + '</em>';
+                archivedAnnouncementsList.appendChild(li);
+            });
+        }
+
+        function toggleMeeting(element) {
+            const content = element.nextElementSibling;
+            const toggle = element.querySelector('.meeting-toggle');
+            
+            element.classList.toggle('active');
+            content.classList.toggle('active');
+            
+            toggle.textContent = element.classList.contains('active') ? '−' : '+';
+        }
+
+        renderMeetingNotes();
+        renderArchivedAnnouncements();
+        checkAdminAccess();
+
+        // ===== SEASON BANNER =====
+        (function () {
+            try {
+                const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
+                const el = document.getElementById('banner-tagline');
+                if (s && el) {
+                    const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                    el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
+                }
+            } catch (e) {}
+        })();
+    </script>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2024 LAMSL. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

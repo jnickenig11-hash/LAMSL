@@ -1314,4 +1314,3 @@ initializeSchedulePage();
     } catch (e) {}
 })();
 
-<script src="js/backend-config.js"></script>

@@ -1275,16 +1275,15 @@ fetch('https://lamsl-backend.onrender.com/api/content')
   .catch(err => console.error('Error loading content:', err));
 </script>
 
+<script src="schedule.html"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    // Use the same fetch logic as in schedule.html
-    const response = await fetch('https://www.lamsl.com/backend/data/schedule.json?nocache=' + Date.now());
-    const data = await response.json();
-    
-    // Store in localStorage for renderMiniSchedule() to use
-    localStorage.setItem('lamslWeeklyScheduleV3', JSON.stringify(data));
+  document.addEventListener('DOMContentLoaded', () => {
+    // Initialize schedule data if missing
+    if (typeof ensureDefaults === 'function') {
+      ensureDefaults();
+    }
 
-    // Now render the mini-schedule
+    // Render mini-schedule
     if (typeof renderMiniSchedule === 'function') {
       renderMiniSchedule();
     }

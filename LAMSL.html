@@ -1276,6 +1276,22 @@ fetch('https://lamsl-backend.onrender.com/api/content')
 </script>
 
 <script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Use the same fetch logic as in schedule.html
+    const response = await fetch('https://www.lamsl.com/backend/data/schedule.json?nocache=' + Date.now());
+    const data = await response.json();
+    
+    // Store in localStorage for renderMiniSchedule() to use
+    localStorage.setItem('lamslWeeklyScheduleV3', JSON.stringify(data));
+
+    // Now render the mini-schedule
+    if (typeof renderMiniSchedule === 'function') {
+      renderMiniSchedule();
+    }
+  });
+</script>
+
+<script>
   document.addEventListener('DOMContentLoaded', () => {
     if (typeof renderMiniSchedule === 'function') {
       renderMiniSchedule();

@@ -1275,5 +1275,13 @@ fetch('https://lamsl-backend.onrender.com/api/content')
   .catch(err => console.error('Error loading content:', err));
 </script>
 
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof loadSchedule === 'function') {
+      loadSchedule();
+    }
+  });
+</script>
+
 </body>
 </html>

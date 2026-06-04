@@ -1403,7 +1403,7 @@ function getParkRangeLabel() {
     if (parkViewPeriod === 'month') {
         return parseDateKey(start).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
     }
-    return `${parseDateKey(start).toLocaleDateString()} ï¿½ ${parseDateKey(end).toLocaleDateString()}`;
+    return `${parseDateKey(start).toLocaleDateString()} - ${parseDateKey(end).toLocaleDateString()}`;
 }
 
 function navigateParkView(direction) {

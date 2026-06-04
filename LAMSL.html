@@ -1277,26 +1277,13 @@ fetch('https://lamsl-backend.onrender.com/api/content')
 
 <script src="js/schedule.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // Initialize schedule data if missing
-    if (typeof ensureDefaults === 'function') {
-      ensureDefaults();
-    }
-
-    // Render mini-schedule
-    if (typeof renderMiniSchedule === 'function') {
-      renderMiniSchedule();
-    }
-  });
-</script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    if (typeof renderMiniSchedule === 'function') {
-      renderMiniSchedule();
-    }
-  });
+document.addEventListener('DOMContentLoaded', () => {
+  ensureDefaults();
+  renderMiniSchedule();
+});
 </script>
 
 </body>
 </html>
+
+

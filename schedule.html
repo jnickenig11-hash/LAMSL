@@ -2313,6 +2313,17 @@ async function initializeSchedulePage() {
 
 initializeSchedulePage();
 
+function loadSchedule() {
+  fetch('data/schedule.json?nocache=' + Date.now())
+    .then(response => response.json())
+    .then(data => {
+      renderMiniSchedule(data);
+    })
+    .catch(error => console.error('Error loading schedule:', error));
+}
+
+
+
 // ===== SEASON BANNER =====
 (function () {
     try {

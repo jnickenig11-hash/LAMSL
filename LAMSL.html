@@ -1135,6 +1135,7 @@ function renderMiniSchedule() {
     const schedule = typeof getSchedule === 'function'
     ? getSchedule()
     : readJson(SCHEDULE_KEY, []);
+    
     const checkins = readJson(CHECKINS_KEY, {});
 
     const getGameId = game => String(game.id || `${game.date}|${game.time}|${game.team1}|${game.team2}`).trim();
@@ -1277,8 +1278,13 @@ fetch('https://lamsl-backend.onrender.com/api/content')
 <script src="js/schedule.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  ensureDefaults();
-  renderMiniSchedule();
+  async function initializeHomePage() {
+    await loadBackendSchedule();
+    ensureDefaults();
+    renderMiniSchedule();
+}
+
+initializeHomePage();
 });
 </script>
 

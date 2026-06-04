@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<title>LAMSL - League Administrators</title>
+<style>
+
+
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
+    background-color: #eef4ea;
+    background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    background-size: min(60vw, 540px);
+    background-attachment: fixed;
+    color: #333;
+}
+
+h1, h2, h3 {
+    margin-bottom: 10px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* ===== NAVBAR ===== */
+header {
+    background: #12324A;
+    color: white;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+}
+
+.navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+    margin: 0;
+    font-size: 20px;
+}
+
+.navbar-brand-gem {
+    width: 24px;
+    height: 18px;
+    background:
+        linear-gradient(90deg, transparent 0 22%, rgba(255, 255, 255, 0.7) 22% 28%, transparent 28% 72%, rgba(94, 108, 122, 0.24) 72% 78%, transparent 78% 100%),
+        linear-gradient(180deg, #fbfdff 0%, #dfe5ec 34%, #b5c0cb 62%, #7c8a97 100%);
+    clip-path: polygon(24% 6%, 76% 6%, 100% 35%, 67% 100%, 33% 100%, 0% 35%);
+    border: 1px solid rgba(248, 251, 255, 0.78);
+    box-shadow: 0 0 0 1px rgba(86, 96, 108, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.82), inset 0 -1px 0 rgba(85, 96, 108, 0.4);
+    position: relative;
+    display: inline-block;
+    flex: 0 0 auto;
+}
+
+.navbar-brand-gem::after {
+    content: "";
+    position: absolute;
+    inset: 2px 4px 2px 4px;
+    clip-path: polygon(50% 0%, 80% 26%, 64% 100%, 36% 100%, 20% 26%);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.15)),
+        linear-gradient(90deg, transparent 0 46%, rgba(126, 138, 151, 0.82) 46% 54%, transparent 54% 100%);
+    opacity: 0.95;
+    pointer-events: none;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar li {
+    margin: 0;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    display: block;
+}
+
+.navbar a:hover {
+    color: #F1D27A;
+}
+
+.navbar a.active-tab {
+    color: #F1D27A;
+    border-bottom: 2px solid #C86A2F;
+    padding-bottom: 2px;
+}
+
+/* ===== BANNER ===== */
+.banner {
+    position: relative;
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    gap: 12px;
+    text-align: center;
+}
+.banner h1 {
+    margin: 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0 0;
+}
+.banner .tagline {
+    margin-top: 10px;
+    font-size: 16px;
+    max-width: 620px;
+}
+.banner-logo {
+    width: 220px;
+    height: 160px;
+    object-fit: contain;
+}
+@media (max-width: 700px) {
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .banner h1 {
+        font-size: 32px;
+    }
+    .banner .subtitle,
+    .banner .tagline {
+        font-size: 14px;
+    }
+    .banner-logo {
+        width: 180px;
+        height: auto;
+    }
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(18, 50, 74, 0.08);
+}
+
+.admin-inline,
+.division-manager-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.admin-inline input,
+.admin-inline select,
+.admin-inline button,
+.admin-form input,
+.admin-form textarea,
+.admin-form select,
+.season-form input,
+.season-form select,
+.season-form button {
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.admin-inline input,
+.admin-form input,
+.admin-form textarea,
+.admin-inline select,
+.admin-form select,
+.season-form input,
+.season-form select {
+    padding: 12px 14px;
+    border: 1px solid #dbe2ea;
+    border-radius: 8px;
+    min-width: 180px;
+    box-sizing: border-box;
+}
+
+.admin-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.admin-form textarea {
+    grid-column: span 2;
+    min-height: 120px;
+    resize: vertical;
+}
+
+.admin-form button,
+.season-form button,
+.admin-inline button,
+.division-manager-grid button,
+.admin-list button,
+.remove-btn {
+    background: #12324A;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 18px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.admin-form button:hover,
+.season-form button:hover,
+.admin-inline button:hover,
+.division-manager-grid button:hover,
+.admin-list button:hover,
+.remove-btn:hover {
+    background: #004080;
+}
+
+.admin-only {
+    background: #f0f0f0;
+    border: 2px solid #12324A;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.admin-only h3 {
+    margin-top: 0;
+    color: #12324A;
+}
+
+.admin-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 12px;
+}
+
+.admin-list li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+.admin-list li button {
+    min-width: 96px;
+}
+
+.division-team-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    display: grid;
+    gap: 8px;
+}
+
+.division-team-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #fff;
+    border: 1px solid #dbe2ea;
+    border-radius: 8px;
+}
+
+.division-team-list li span {
+    font-weight: 600;
+}
+
+.division-manager-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    align-items: start;
+}
+
+.division-manager {
+    background: #f8fbff;
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    padding: 18px;
+}
+
+.division-team-list.full-row {
+    grid-column: 1 / -1;
+}
+
+.season-current {
+    background: #fff;
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.season-form {
+    display: grid;
+    gap: 12px;
+}
+
+.danger-btn {
+    background: #c12b2b;
+    color: white;
+}
+
+.danger-btn:hover {
+    background: #9a2323;
+}
+
+.admin-status {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: #eef6ed;
+    color: #225522;
+    border: 1px solid #c9e2cd;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #12324A;
+    color: white;
+    margin-top: 20px;
+}
+
+@media (max-width: 880px) {
+    .division-manager-grid,
+    .admin-inline {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+:root {
+    --lamsl-blue: #12324A;
+    --lamsl-orange: #C86A2F;
+    --lamsl-border: #dbe2ea;
+    --lamsl-bg: #f8fbff;
+}
+.admin-dashboard {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+}
+.admin-nav {
+    position: sticky;
+    top: 12px;
+    display: grid;
+    gap: 8px;
+    background: white;
+    border: 1px solid var(--lamsl-border);
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 2px 10px rgba(18, 50, 74, 0.08);
+}
+.admin-nav button {
+    text-align: left;
+    background: #f7fbff;
+    color: var(--lamsl-blue);
+    border: 1px solid var(--lamsl-border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-weight: 700;
+}
+.admin-nav button.active {
+    background: var(--lamsl-blue);
+    color: white;
+    border-color: var(--lamsl-blue);
+}
+.admin-section {
+    display: none;
+}
+.admin-section.active {
+    display: block;
+}
+.admin-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+.admin-grid.three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.admin-grid .full {
+    grid-column: 1 / -1;
+}
+.admin-grid input,
+.admin-grid select,
+.admin-grid textarea,
+.admin-form input,
+.admin-form textarea,
+.admin-form select {
+    width: 100%;
+}
+.admin-grid textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+.list-card {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+}
+.item-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--lamsl-border);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+.item-row small {
+    color: #596b78;
+}
+.item-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.item-actions button,
+.admin-grid button,
+.admin-nav-actions button,
+.admin-action-btn {
+    background: var(--lamsl-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: 700;
+}
+.item-actions button.danger,
+.admin-action-btn.danger {
+    background: #9a1616;
+}
+.item-actions button.secondary,
+.admin-action-btn.secondary {
+    background: #ced7df;
+    color: var(--lamsl-blue);
+}
+.muted {
+    color: #5d6c72;
+}
+.admin-note {
+    background: #eef6ed;
+    color: #225522;
+    border: 1px solid #c9e2cd;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+.hidden {
+    display: none !important;
+}
+@media (max-width: 900px) {
+    .admin-dashboard,
+    .admin-grid,
+    .admin-grid.three {
+        grid-template-columns: 1fr;
+    }
+    .admin-nav {
+        position: static;
+    }
+    .item-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+</style>
+</head>
+<body>
+<!-- BANNER -->
+<div class="banner">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
+    <h1>Latin & american men's softball league</h1>
+    <div class="subtitle">Established 1976</div>
+    <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+</div>
+
+<!-- HEADER -->
+<header>
+    <div class="navbar container">
+        <h2 class="navbar-brand"><span class="navbar-brand-gem" aria-hidden="true"></span>LAMSL</h2>
+        <ul>
+            <li><a href="LAMSL.html">Home</a></li>
+            <li><a href="standings.html">Standings</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="teams.html">Teams</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="meetingnotes.html">Meeting Notes</a></li>
+            <li><a href="events.html">Events &amp; Fundraisers</a></li>
+            <li><a href="hallofchampions.html">Hall of Champions</a></li>
+            <li><a href="administrators.html" class="active-tab">Admin</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</header>
+
+
+<div class="container">
+<main>
+<section class="card">
+    <h2>Administrator Dashboard</h2>
+    <p class="admin-status" id="auth-status">Not signed in.</p>
+    <div class="admin-inline" id="login-row">
+        <input id="login-username" type="text" placeholder="Username">
+        <input id="login-password" type="password" placeholder="Password">
+        <button id="login-btn" type="button">Sign In</button>
+    </div>
+    <div class="admin-inline hidden" id="logout-row">
+        <button id="logout-btn" type="button">Sign Out</button>
+        <button id="sync-backend-btn" type="button">Sync Backend Content</button>
+    </div>
+</section>
+
+<section class="admin-dashboard" id="admin-dashboard" style="display:none;">
+    <aside class="admin-nav" aria-label="Admin sections">
+        <button type="button" data-section="content" class="active">Site Content</button>
+        <button type="button" data-section="announcements">Announcements</button>
+        <button type="button" data-section="schedule">Game Schedule</button>
+        <button type="button" data-section="scores">Scores</button>
+        <button type="button" data-section="slides">Pictures / Slideshow</button>
+        <button type="button" data-section="teams">Teams / Divisions</button>
+        <button type="button" data-section="players">Players / Rosters</button>
+        <button type="button" data-section="users">Users / Roles</button>
+        <button type="button" data-section="season">Season Settings</button>
+        <button type="button" data-section="subscribers">Email Subscribers</button>
+    </aside>
+
+    <div>
+        <section class="card admin-section active" id="section-content">
+            <h2>Site Content</h2>
+            <p class="muted">Manage homepage message, payment text, Instagram text, and public event text from one place.</p>
+            <div class="admin-grid">
+                <label class="full">Homepage Message<textarea id="homepage-message"></textarea></label>
+                <label>Zelle / Payment Info<textarea id="payment-info"></textarea></label>
+                <label>Instagram / Social Text<textarea id="instagram-info"></textarea></label>
+                <button type="button" class="admin-action-btn full" id="save-site-content-btn">Save Site Content</button>
+            </div>
+            <p class="admin-note" id="content-status"></p>
+        </section>
+
+        <section class="card admin-section" id="section-announcements">
+            <h2>Announcements</h2>
+            <form class="admin-grid" id="announcement-form">
+                <input id="announcement-title" type="text" placeholder="Announcement title" required>
+                <input id="announcement-date" type="date" required>
+                <textarea id="announcement-message" class="full" placeholder="Announcement details" required></textarea>
+                <button type="submit" class="full">Publish Announcement</button>
+            </form>
+            <h3>Active Announcements</h3>
+            <div id="announcements-list" class="list-card"></div>
+            <h3>Archived Announcements</h3>
+            <div id="archived-announcements-list" class="list-card"></div>
+        </section>
+
+        <section class="card admin-section" id="section-schedule">
+            <h2>Game Schedule</h2>
+            <form class="admin-grid three" id="game-form">
+                <input id="game-id" type="hidden">
+                <input id="game-date" type="date" required>
+                <input id="game-time" type="time" required>
+                <select id="game-location" required>
+                    <option value="">Select Park</option>
+                    <option>Bell Gardens - Ford Park</option>
+                    <option>Carson - Stevenson Park</option>
+                    <option>Carson - Dolphin Park</option>
+                    <option>Carson - Calas Park</option>
+                    <option>Carson - Veterans Park</option>
+                </select>
+                <select id="game-division" required></select>
+                <select id="game-team1" required></select>
+                <select id="game-team2" required></select>
+                <select id="game-status">
+                    <option value="scheduled">Scheduled</option>
+                    <option value="postponed">Postponed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <button type="submit">Save Game</button>
+                <button type="button" class="admin-action-btn secondary" id="clear-game-form">Clear Form</button>
+            </form>
+            <h3>Scheduled Games</h3>
+            <div id="games-list" class="list-card"></div>
+        </section>
+
+        <section class="card admin-section" id="section-scores">
+            <h2>Game Scores</h2>
+            <form class="admin-grid" id="score-form">
+                <select id="score-game-select" class="full"></select>
+                <input id="score-team1" type="number" min="0" placeholder="Team 1 Score">
+                <input id="score-team2" type="number" min="0" placeholder="Team 2 Score">
+                <button type="submit" class="full">Save Score</button>
+            </form>
+            <div id="scores-list" class="list-card"></div>
+        </section>
+
+        <section class="card admin-section" id="section-slides">
+            <h2>Pictures / Slideshow</h2>
+            <form class="admin-grid" id="slide-form">
+                <input id="slide-caption" type="text" placeholder="Caption">
+                <input id="slide-url" type="url" placeholder="Image URL">
+                <input id="slide-file" type="file" accept="image/*">
+                <button type="submit">Add Slide</button>
+            </form>
+            <div id="slides-list" class="list-card"></div>
+        </section>
+
+        <section class="card admin-section" id="section-teams">
+            <h2>Teams / Divisions</h2>
+            <div class="admin-grid">
+                <input id="new-division-name" placeholder="New Division">
+                <button id="add-division-btn" type="button">Add Division</button>
+                <select id="manage-division-select"></select>
+                <input id="rename-division-name" placeholder="Rename selected division">
+                <button id="rename-division-btn" type="button">Rename Division</button>
+                <button id="delete-division-btn" type="button" class="admin-action-btn danger">Delete Division</button>
+                <input id="new-team-name" placeholder="New Team Name">
+                <button id="add-team-btn" type="button">Add Team</button>
+            </div>
+            <h3>Division Teams</h3>
+            <div id="division-team-list" class="list-card"></div>
+        </section>
+
+        <section class="card admin-section" id="section-players">
+            <h2>Players / Rosters</h2>
+            <form class="admin-grid" id="player-form">
+                <select id="player-team-select" required></select>
+                <input id="player-name" type="text" placeholder="Player Name" required>
+                <input id="player-position" type="text" placeholder="Position">
+                <input id="player-phone" type="text" placeholder="Phone">
+                <input id="player-email" type="email" placeholder="Email">
+                <input id="player-photo" type="url" placeholder="Player Photo URL">
+                <button type="submit" class="full">Add Player</button>
+            </form>
+            <div class="admin-grid" style="margin-top:16px;">
+                <input id="admin-roster-file" type="file" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                <button id="upload-roster-btn" type="button">Upload Roster Spreadsheet</button>
+            </div>
+            <h3>Players</h3>
+            <div id="players-list" class="list-card"></div>
+        </section>
+
+        <section class="card admin-section" id="section-users">
+            <h2>Users / Roles</h2>
+            <div class="admin-grid">
+                <input id="new-admin-username" type="text" placeholder="New username">
+                <input id="new-admin-password" type="password" placeholder="Password">
+                <select id="new-user-role">
+                    <option value="">Select role</option>
+                    <option value="admin">Admin</option>
+                    <option value="umpire">Umpire</option>
+                    <option value="team-manager">Team Manager</option>
+                </select>
+                <button id="create-user-btn" type="button">Create User</button>
+            </div>
+            <h3>User Accounts</h3>
+            <div id="users-list" class="list-card"></div>
+            <h3>Team Manager Assignments</h3>
+            <div class="admin-grid">
+                <select id="assign-team-select"></select>
+                <select id="assign-manager-select"></select>
+                <button id="assign-manager-btn" type="button" class="full">Assign Manager</button>
+            </div>
+            <div id="assignments-list" class="list-card"></div>
+        </section>
+
+        <section class="card admin-section" id="section-season">
+            <h2>Season Settings</h2>
+            <form class="admin-grid" id="season-form">
+                <select id="season-name" required>
+                    <option value="">Select Season</option>
+                    <option>Spring</option><option>Summer</option><option>Fall</option><option>Winter</option>
+                </select>
+                <input id="season-year" type="number" min="2000" max="2100" placeholder="Year" required>
+                <input id="season-start" type="date" required>
+                <input id="season-end" type="date" required>
+                <button type="submit" class="full">Save Season</button>
+            </form>
+            <div id="season-current-display" class="season-current"></div>
+        </section>
+
+        <section class="card admin-section" id="section-subscribers">
+            <h2>Email Subscribers</h2>
+            <div class="admin-grid">
+                <input id="subscriber-email" type="email" placeholder="Email address">
+                <button id="add-subscriber-btn" type="button">Add Subscriber</button>
+            </div>
+            <div id="subscribers-list" class="list-card"></div>
+        </section>
+    </div>
+</section>
+
+<section class="card">
+            <h2>League Administrators</h2>
+            <h4>Founder</h4>
+            <p>Arturo Padilla, Sr. (RIP)</p>
+            <h4>President</h4>
+            <p>Arturo Padilla, Jr.</p>
+            <p>Cell/Text: 310-754-5950</p>
+            <p>E-mail: artpadilla19@gmail.com</p>
+            <h4>Vice-President</h4>
+            <p>Gilbert Cuevas</p>
+            <p>Cell/Text: 323-228-1112</p>
+            <p>E-mail: gilbertcuevas2010@gmail.com</p>
+            <h4>League Administrative Assistant</h4>
+            <p>Belen Rocha</p>
+            <p>Cell/Text: (323) 942-4032</p>
+            <p>Alejandra Pierce Padilla</p>
+            <p>Cell/Text: (562) 299-3978</p>
+            <p>E-mail: lamsl1976@gmail.com</p>
+            <h4>Women's Modified Coordinator</h4>
+            <p>Alyssa Ruiz</p>
+            <p>Cell/Text: (323) 348-6329</p>
+            <p>E-mail: alyssa15ruiz@icloud.com</p>
+            <h4>Social Media Coordinator</h4>
+            <p>Belen Rocha</p>
+            <p>IG: lamsl_league</p>
+        </section>
+</main>
+</div>
+<footer>
+    <p>© Latin & American Men's Softball League (LAMSL)</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="js/backend-config.js"></script>
+<script src="js/lamsl-admin-store.js"></script>
+<script>
+/* Administrator dashboard controller */
+(function () {
+    const $ = id => document.getElementById(id);
+    const status = $('auth-status');
+    const loginRow = $('login-row');
+    const logoutRow = $('logout-row');
+    const dashboard = $('admin-dashboard');
+
+    const DEFAULT_TEAMS = {
+        A: ['Titans', 'Doom Squad', 'Legends', 'Nasty Boyz', 'Black Sox', 'White Sox', 'Dodgers'],
+        B: ['Charros', 'Toxic', 'Primos', 'Demons', 'Cubs', 'Borrachos'],
+        C: ['Diablos', 'Brewers', 'Coyotes', 'Goodfellas', 'Bandits', 'Salvajes', 'Balls Out', 'Orioles'],
+        D: ['Viejones', 'No Chance', 'Los Pericos', 'Wild Hogz', 'Strokes', 'Dawgz', 'Xolos', 'Desvelados'],
+        E: []
+    };
+
+    function readJson(key, fallback) { return LAMSLStore.read(key, fallback); }
+    function writeJson(key, value) { LAMSLStore.write(key, value); }
+    function session() { return readJson(LAMSLStore.keys.session, null); }
+    function isAdmin() { const s = session(); return !!(s && s.role === 'admin'); }
+    function setStatus(msg) { status.textContent = msg; }
+
+    function ensureDefaults() {
+        const users = readJson(LAMSLStore.keys.users, []);
+        if (!users.some(u => u.username === 'admin')) {
+            users.push({ username: 'admin', password: 'admin', role: 'admin' });
+            writeJson(LAMSLStore.keys.users, users);
+        }
+        if (!readJson(LAMSLStore.keys.divisions, null)) writeJson(LAMSLStore.keys.divisions, DEFAULT_TEAMS);
+        if (!readJson(LAMSLStore.keys.announcements, null)) {
+            writeJson(LAMSLStore.keys.announcements, [
+                { id:'ann-1', title:'TO ALL REGULAR SEASON MANAGERS', date:'2026-03-20', message:'MANDATORY MANAGERS MEETING FRIDAY MARCH 20th @ 7:30 P.M. 7527 Otis Ave. Cudahy, 90201' },
+                { id:'ann-2', title:'2026 50th Anniversary Regular Season', date:'2026-03-15', message:'Early Registration: $600 due no later than 2/28/26. Regular Registration: $650 due 3/1/26 through 3/15/26.' }
+            ]);
+        }
+        if (!readJson(LAMSLStore.keys.archivedAnnouncements, null)) writeJson(LAMSLStore.keys.archivedAnnouncements, []);
+        if (!readJson(LAMSLStore.keys.slides, null)) writeJson(LAMSLStore.keys.slides, []);
+        if (!readJson(LAMSLStore.keys.subscribers, null)) writeJson(LAMSLStore.keys.subscribers, []);
+    }
+
+    function logAction(action, details) {
+        LAMSLStore.post('/api/log-admin-action', { username: session()?.username || 'unknown', action, details }).catch(() => {});
+    }
+
+    function renderAuth() {
+        const s = session();
+        loginRow.style.display = s ? 'none' : 'flex';
+        logoutRow.classList.toggle('hidden', !s);
+        dashboard.style.display = isAdmin() ? 'grid' : 'none';
+        setStatus(s ? `Signed in as ${s.username} (${s.role || 'user'}). ${isAdmin() ? 'Admin tools unlocked.' : 'Admin access required.'}` : 'Not signed in.');
+        if (isAdmin()) renderAll();
+    }
+
+    function saveContentMirror() {
+        const content = LAMSLStore.buildContentPayload();
+        return LAMSLStore.post('/api/update', content).catch(() => null);
+    }
+
+    function renderAll() {
+        renderSiteContent();
+        renderAnnouncements();
+        renderSchedule();
+        renderScores();
+        renderSlides();
+        renderTeams();
+        renderPlayers();
+        renderUsers();
+        renderAssignments();
+        renderSeason();
+        renderSubscribers();
+    }
+
+    document.querySelectorAll('.admin-nav button').forEach(button => {
+        button.addEventListener('click', () => {
+            document.querySelectorAll('.admin-nav button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            button.classList.add('active');
+            $('section-' + button.dataset.section).classList.add('active');
+        });
+    });
+
+    $('login-btn').addEventListener('click', () => {
+        const username = $('login-username').value.trim();
+        const password = $('login-password').value;
+        const user = readJson(LAMSLStore.keys.users, []).find(u => u.username === username && u.password === password);
+        if (!user) { setStatus('Invalid username or password.'); return; }
+        writeJson(LAMSLStore.keys.session, { username: user.username, role: user.role, loggedInAt: new Date().toISOString() });
+        if (user.role === 'admin') localStorage.setItem('lamslAdminAuthV1', 'true');
+        logAction('login', { username });
+        renderAuth();
+    });
+    $('logout-btn').addEventListener('click', () => {
+        localStorage.removeItem(LAMSLStore.keys.session);
+        localStorage.removeItem('lamslAdminAuthV1');
+        renderAuth();
+    });
+    $('sync-backend-btn').addEventListener('click', async () => {
+        await LAMSLStore.loadBackendContent();
+        await saveContentMirror();
+        renderAll();
+        setStatus('Backend content synced with administrator-managed content.');
+    });
+
+    function renderSiteContent() {
+        const c = readJson(LAMSLStore.keys.siteContent, {});
+        $('homepage-message').value = c.homepageMessage || '';
+        $('payment-info').value = c.paymentInfo || '';
+        $('instagram-info').value = c.instagramInfo || '';
+    }
+    $('save-site-content-btn').addEventListener('click', async () => {
+        const c = readJson(LAMSLStore.keys.siteContent, {});
+        c.homepageMessage = $('homepage-message').value.trim();
+        c.paymentInfo = $('payment-info').value.trim();
+        c.instagramInfo = $('instagram-info').value.trim();
+        writeJson(LAMSLStore.keys.siteContent, c);
+        await saveContentMirror();
+        $('content-status').textContent = 'Site content saved.';
+        logAction('site_content_saved', {});
+    });
+
+    $('announcement-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const list = readJson(LAMSLStore.keys.announcements, []);
+        const item = {
+            id: $('announcement-id')?.value || `ann-${Date.now()}`,
+            title: $('announcement-title').value.trim(),
+            date: $('announcement-date').value,
+            message: $('announcement-message').value.trim()
+        };
+        list.unshift(item);
+        writeJson(LAMSLStore.keys.announcements, list);
+        e.target.reset();
+        renderAnnouncements();
+        await saveContentMirror();
+        logAction('announcement_saved', item);
+    });
+
+    function renderAnnouncements() {
+        const list = readJson(LAMSLStore.keys.announcements, []);
+        const archived = readJson(LAMSLStore.keys.archivedAnnouncements, []);
+        $('announcements-list').innerHTML = list.length ? list.map(a => rowHtml(a.id, `<strong>${esc(a.title)}</strong><br><small>${esc(a.date)}</small><br>${esc(a.message)}`, ['Archive','Delete'])).join('') : '<p class="muted">No active announcements.</p>';
+        $('archived-announcements-list').innerHTML = archived.length ? archived.map(a => rowHtml(a.id, `<strong>${esc(a.title)}</strong><br><small>${esc(a.date)} archived ${esc(a.archivedAt || '')}</small><br>${esc(a.message)}`, ['Restore','Delete'])).join('') : '<p class="muted">No archived announcements.</p>';
+        bindListActions('announcements-list', {
+            Archive: id => {
+                const anns = readJson(LAMSLStore.keys.announcements, []);
+                const item = anns.find(a => a.id === id);
+                writeJson(LAMSLStore.keys.announcements, anns.filter(a => a.id !== id));
+                writeJson(LAMSLStore.keys.archivedAnnouncements, [{ ...item, archivedAt: new Date().toISOString() }, ...archived]);
+                renderAnnouncements(); saveContentMirror();
+            },
+            Delete: id => { writeJson(LAMSLStore.keys.announcements, list.filter(a => a.id !== id)); renderAnnouncements(); saveContentMirror(); }
+        });
+        bindListActions('archived-announcements-list', {
+            Restore: id => {
+                const arcs = readJson(LAMSLStore.keys.archivedAnnouncements, []);
+                const item = arcs.find(a => a.id === id);
+                writeJson(LAMSLStore.keys.archivedAnnouncements, arcs.filter(a => a.id !== id));
+                writeJson(LAMSLStore.keys.announcements, [item, ...readJson(LAMSLStore.keys.announcements, [])]);
+                renderAnnouncements(); saveContentMirror();
+            },
+            Delete: id => { writeJson(LAMSLStore.keys.archivedAnnouncements, archived.filter(a => a.id !== id)); renderAnnouncements(); saveContentMirror(); }
+        });
+    }
+
+    function renderSchedule() {
+        populateDivisionSelects();
+        const games = readJson(LAMSLStore.keys.schedule, []).sort((a,b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+        $('games-list').innerHTML = games.length ? games.map(g => rowHtml(g.id, `<strong>${esc(g.date)} ${esc(g.time)} — ${esc(g.team1)} vs ${esc(g.team2)}</strong><br><small>${esc(g.division)} | ${esc(g.location || g.park)} | ${esc(g.status || 'scheduled')}</small>`, ['Edit','Delete'])).join('') : '<p class="muted">No games scheduled.</p>';
+        bindListActions('games-list', { Edit: editGame, Delete: deleteGame });
+        renderScores();
+    }
+    function populateDivisionSelects() {
+        const divisions = readJson(LAMSLStore.keys.divisions, DEFAULT_TEAMS);
+        const opts = '<option value="">Select Division</option>' + Object.keys(divisions).map(d => `<option value="${esc(d)}">Division ${esc(d)}</option>`).join('');
+        ['game-division','manage-division-select'].forEach(id => { const el=$(id); if(el) { const v=el.value; el.innerHTML=opts; el.value=v; } });
+        populateTeamSelects();
+        populatePlayerTeamSelect();
+        populateAssignTeamSelect();
+    }
+    function populateTeamSelects() {
+        const divisions = readJson(LAMSLStore.keys.divisions, DEFAULT_TEAMS);
+        const d = $('game-division').value;
+        const teams = d ? (divisions[d] || []) : Object.values(divisions).flat();
+        const opts = '<option value="">Select Team</option>' + teams.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+        ['game-team1','game-team2'].forEach(id => { const el=$(id); if(el) { const v=el.value; el.innerHTML=opts; el.value=v; } });
+    }
+    $('game-division').addEventListener('change', populateTeamSelects);
+    $('game-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const games = readJson(LAMSLStore.keys.schedule, []);
+        const id = $('game-id').value || `game-${Date.now()}`;
+        const game = {
+            id, date: $('game-date').value, time: $('game-time').value,
+            location: $('game-location').value, park: $('game-location').value,
+            division: $('game-division').value, team1: $('game-team1').value, team2: $('game-team2').value,
+            status: $('game-status').value || 'scheduled'
+        };
+        if (game.team1 === game.team2) { alert('Team 1 and Team 2 must be different.'); return; }
+        const idx = games.findIndex(g => g.id === id);
+        if (idx >= 0) games[idx] = game; else games.push(game);
+        writeJson(LAMSLStore.keys.schedule, games);
+        e.target.reset(); $('game-id').value = '';
+        renderSchedule(); await saveContentMirror();
+    });
+    $('clear-game-form').addEventListener('click', () => { $('game-form').reset(); $('game-id').value=''; });
+    function editGame(id) {
+        const g = readJson(LAMSLStore.keys.schedule, []).find(x => x.id === id); if (!g) return;
+        $('game-id').value=g.id; $('game-date').value=g.date||''; $('game-time').value=g.time||''; $('game-location').value=g.location||g.park||'';
+        $('game-division').value=g.division||''; populateTeamSelects(); $('game-team1').value=g.team1||''; $('game-team2').value=g.team2||''; $('game-status').value=g.status||'scheduled';
+        document.querySelector('[data-section="schedule"]').click();
+    }
+    function deleteGame(id) { if(!confirm('Delete this game?')) return; writeJson(LAMSLStore.keys.schedule, readJson(LAMSLStore.keys.schedule, []).filter(g=>g.id!==id)); renderSchedule(); saveContentMirror(); }
+
+    function renderScores() {
+        const games = readJson(LAMSLStore.keys.schedule, []);
+        $('score-game-select').innerHTML = '<option value="">Select Game</option>' + games.map(g => `<option value="${esc(g.id)}">${esc(g.date)} ${esc(g.time)} — ${esc(g.team1)} vs ${esc(g.team2)}</option>`).join('');
+        const scored = games.filter(g => g.score1 !== undefined || g.score2 !== undefined || g.scoreTeam1 !== undefined || g.scoreTeam2 !== undefined);
+        $('scores-list').innerHTML = scored.length ? scored.map(g => rowHtml(g.id, `<strong>${esc(g.team1)} ${score(g,1)} - ${score(g,2)} ${esc(g.team2)}</strong><br><small>${esc(g.date)} ${esc(g.time)}</small>`, ['Clear'])).join('') : '<p class="muted">No scores entered.</p>';
+        bindListActions('scores-list', { Clear: id => { const arr=readJson(LAMSLStore.keys.schedule, []); const g=arr.find(x=>x.id===id); if(g) { delete g.score1; delete g.score2; delete g.scoreTeam1; delete g.scoreTeam2; } writeJson(LAMSLStore.keys.schedule, arr); renderScores(); saveContentMirror(); } });
+    }
+    $('score-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const id = $('score-game-select').value; if (!id) return;
+        const games = readJson(LAMSLStore.keys.schedule, []);
+        const game = games.find(g => g.id === id); if (!game) return;
+        game.score1 = Number($('score-team1').value || 0);
+        game.score2 = Number($('score-team2').value || 0);
+        game.scoreTeam1 = game.score1; game.scoreTeam2 = game.score2;
+        writeJson(LAMSLStore.keys.schedule, games);
+        e.target.reset(); renderScores(); await saveContentMirror();
+    });
+    function score(g,n) { return g['score'+n] ?? g['scoreTeam'+n] ?? 0; }
+
+    $('slide-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        let imageUrl = $('slide-url').value.trim();
+        const file = $('slide-file').files[0];
+        if (!imageUrl && file) imageUrl = await fileToDataUrl(file);
+        if (!imageUrl) { alert('Add an image URL or choose a file.'); return; }
+        const slides = readJson(LAMSLStore.keys.slides, []);
+        slides.push({ id:`slide-${Date.now()}`, imageUrl, url:imageUrl, caption:$('slide-caption').value.trim() || 'LAMSL Photo' });
+        writeJson(LAMSLStore.keys.slides, slides);
+        e.target.reset(); renderSlides(); await saveContentMirror();
+    });
+    function renderSlides() {
+        const slides = readJson(LAMSLStore.keys.slides, []);
+        $('slides-list').innerHTML = slides.length ? slides.map(s => rowHtml(s.id, `<strong>${esc(s.caption || 'LAMSL Photo')}</strong><br><small>${esc(s.imageUrl || s.url)}</small>`, ['Delete'])).join('') : '<p class="muted">No slideshow images configured.</p>';
+        bindListActions('slides-list', { Delete: id => { writeJson(LAMSLStore.keys.slides, slides.filter(s=>s.id!==id)); renderSlides(); saveContentMirror(); } });
+    }
+
+    function renderTeams(selected) {
+        populateDivisionSelects();
+        const d = selected || $('manage-division-select').value;
+        if (d) $('manage-division-select').value = d;
+        const divisions = readJson(LAMSLStore.keys.divisions, DEFAULT_TEAMS);
+        const teams = divisions[d] || [];
+        $('division-team-list').innerHTML = d ? (teams.length ? teams.map(t => rowHtml(t, `<strong>${esc(t)}</strong><br><small>Division ${esc(d)}</small>`, ['Delete'])).join('') : '<p class="muted">No teams in selected division.</p>') : '<p class="muted">Select a division.</p>';
+        bindListActions('division-team-list', { Delete: team => { divisions[d]=teams.filter(t=>t!==team); writeJson(LAMSLStore.keys.divisions, divisions); renderTeams(d); saveContentMirror(); } });
+    }
+    $('manage-division-select').addEventListener('change', () => renderTeams());
+    $('add-division-btn').addEventListener('click', () => {
+        const name = $('new-division-name').value.trim(); if(!name) return;
+        const divs=readJson(LAMSLStore.keys.divisions, DEFAULT_TEAMS); if(!divs[name]) divs[name]=[];
+        writeJson(LAMSLStore.keys.divisions, divs); $('new-division-name').value=''; renderTeams(name); saveContentMirror();
+    });
+    $('rename-division-btn').addEventListener('click', () => {
+        const old=$('manage-division-select').value, name=$('rename-division-name').value.trim(); if(!old||!name) return;
+        const divs=readJson(LAMSLStore.keys.divisions, DEFAULT_TEAMS); divs[name]=divs[old]||[]; delete divs[old]; writeJson(LAMSLStore.keys.divisions, divs);
+        writeJson(LAMSLStore.keys.schedule, readJson(LAMSLStore.keys.schedule, []).map(g => g.division===old ? {...g, division:name} : g));
+        $('rename-division-name').value=''; renderTeams(name); saveContentMirror();
+    });
+    $('delete-division-btn').addEventListener('click', () => {
+        const d=$('manage-division-select').value; if(!d || !confirm(`Delete Division ${d}?`)) return;
+        const divs=readJson(LAMSLStore.keys.divisions, DEFAULT_TEAMS); delete divs[d]; writeJson(LAMSLStore.keys.divisions, divs); renderTeams(); saveContentMirror();
+    });
+    $('add-team-btn').addEventListener('click', () => {
+        const d=$('manage-division-select').value, team=$('new-team-name').value.trim(); if(!d||!team) return;
+        const divs=readJson(LAMSLStore.keys.divisions, DEFAULT_TEAMS); divs[d]=divs[d]||[]; if(!divs[d].some(t=>t.toLowerCase()===team.toLowerCase())) divs[d].push(team);
+        writeJson(LAMSLStore.keys.divisions, divs); $('new-team-name').value=''; renderTeams(d); saveContentMirror();
+    });
+
+    function populatePlayerTeamSelect() {
+        const teams = Object.values(readJson(LAMSLStore.keys.divisions, DEFAULT_TEAMS)).flat();
+        const opts = '<option value="">Select Team</option>' + teams.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+        ['player-team-select','assign-team-select'].forEach(id => { if($(id)) $(id).innerHTML = opts; });
+    }
+    function renderPlayers() {
+        populatePlayerTeamSelect();
+        const playersStore = readJson(LAMSLStore.keys.teamPlayers, {});
+        const rows = [];
+        Object.entries(playersStore).forEach(([team, payload]) => (payload.players || []).forEach(p => rows.push({team, ...p})));
+        $('players-list').innerHTML = rows.length ? rows.map(p => rowHtml(`${p.team}|${p.id || p.name}`, `<strong>${esc(p.name)}</strong><br><small>${esc(p.team)} | ${esc(p.position || '')} | ${esc(p.email || '')}</small>`, ['Delete'])).join('') : '<p class="muted">No player profiles saved.</p>';
+        bindListActions('players-list', { Delete: key => {
+            const [team, id] = key.split('|'); const store=readJson(LAMSLStore.keys.teamPlayers, {}); store[team].players=(store[team].players||[]).filter(p => String(p.id||p.name)!==id); writeJson(LAMSLStore.keys.teamPlayers, store); renderPlayers(); saveContentMirror();
+        } });
+    }
+    $('player-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const team=$('player-team-select').value; if(!team) return;
+        const store=readJson(LAMSLStore.keys.teamPlayers, {}); store[team]=store[team]||{players:[]};
+        store[team].players.push({ id:`player-${Date.now()}`, name:$('player-name').value.trim(), position:$('player-position').value.trim(), phone:$('player-phone').value.trim(), email:$('player-email').value.trim(), photo:$('player-photo').value.trim() });
+        store[team].updatedAt = new Date().toLocaleString();
+        writeJson(LAMSLStore.keys.teamPlayers, store); e.target.reset(); renderPlayers(); await saveContentMirror();
+    });
+    $('upload-roster-btn').addEventListener('click', () => {
+        const file=$('admin-roster-file').files[0]; if(!file) return alert('Choose a roster file first.');
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const workbook = XLSX.read(reader.result, { type:'array' });
+                const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval:'' });
+                const store = readJson(LAMSLStore.keys.teamPlayers, {});
+                rows.forEach((r,i) => {
+                    const team = String(r.Team || r.team || '').trim();
+                    const name = String(r.Name || r.name || r.Player || r['Player Name'] || '').trim();
+                    if(!team || !name) return;
+                    store[team]=store[team]||{players:[]};
+                    store[team].players.push({ id:`roster-${Date.now()}-${i}`, name, position:String(r.Position||r.position||'').trim(), phone:String(r.Phone||r.phone||'').trim(), email:String(r.Email||r.email||'').trim() });
+                });
+                writeJson(LAMSLStore.keys.teamPlayers, store); renderPlayers(); saveContentMirror();
+            } catch(err) { alert('Roster upload failed: ' + err.message); }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+
+    function renderUsers() {
+        const users = readJson(LAMSLStore.keys.users, []);
+        $('users-list').innerHTML = users.map(u => rowHtml(u.username, `<strong>${esc(u.username)}</strong><br><small>${esc(u.role)}</small>`, u.username === 'admin' ? [] : ['Delete'])).join('');
+        bindListActions('users-list', { Delete: username => { writeJson(LAMSLStore.keys.users, users.filter(u=>u.username!==username)); renderUsers(); } });
+        const managers = users.filter(u => u.role === 'team-manager');
+        $('assign-manager-select').innerHTML = '<option value="">Select Manager</option>' + managers.map(u => `<option value="${esc(u.username)}">${esc(u.username)}</option>`).join('');
+    }
+    $('create-user-btn').addEventListener('click', () => {
+        const username=$('new-admin-username').value.trim(), password=$('new-admin-password').value, role=$('new-user-role').value;
+        if(!username||!password||!role) return;
+        const users=readJson(LAMSLStore.keys.users, []); if(users.some(u=>u.username.toLowerCase()===username.toLowerCase())) return alert('Username already exists.');
+        users.push({username,password,role}); writeJson(LAMSLStore.keys.users, users); $('new-admin-username').value=''; $('new-admin-password').value=''; $('new-user-role').value=''; renderUsers();
+    });
+    function populateAssignTeamSelect() { populatePlayerTeamSelect(); }
+    $('assign-manager-btn').addEventListener('click', () => {
+        const team=$('assign-team-select').value, manager=$('assign-manager-select').value; if(!team||!manager) return;
+        const assignments=readJson(LAMSLStore.keys.assignments, {});
+        Object.keys(assignments).forEach(m => { assignments[m]=(assignments[m]||[]).filter(t=>t!==team); if(!assignments[m].length) delete assignments[m]; });
+        assignments[manager]=assignments[manager]||[]; assignments[manager].push(team);
+        writeJson(LAMSLStore.keys.assignments, assignments); renderAssignments(); saveContentMirror();
+    });
+    function renderAssignments() {
+        const a=readJson(LAMSLStore.keys.assignments, {}); const rows=[];
+        Object.entries(a).forEach(([m,teams]) => teams.forEach(t => rows.push({m,t})));
+        $('assignments-list').innerHTML = rows.length ? rows.map(x => rowHtml(`${x.m}|${x.t}`, `<strong>${esc(x.m)}</strong><br><small>${esc(x.t)}</small>`, ['Delete'])).join('') : '<p class="muted">No manager assignments.</p>';
+        bindListActions('assignments-list', { Delete: key => { const [m,t]=key.split('|'); const a=readJson(LAMSLStore.keys.assignments, {}); a[m]=(a[m]||[]).filter(x=>x!==t); if(!a[m].length) delete a[m]; writeJson(LAMSLStore.keys.assignments,a); renderAssignments(); } });
+    }
+
+    $('season-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const season={ name:$('season-name').value, year:Number($('season-year').value), start:$('season-start').value, end:$('season-end').value };
+        if(season.end < season.start) return alert('Season end date must be on or after the start date.');
+        writeJson(LAMSLStore.keys.season, season); renderSeason(); await saveContentMirror();
+    });
+    function renderSeason() {
+        const s=readJson(LAMSLStore.keys.season, null);
+        if(s) {
+            $('season-name').value=s.name||''; $('season-year').value=s.year||''; $('season-start').value=s.start||''; $('season-end').value=s.end||'';
+            $('season-current-display').innerHTML = `<strong>${esc(s.name)} ${esc(s.year)}</strong><br><small>${esc(s.start)} – ${esc(s.end)}</small>`;
+        } else $('season-current-display').innerHTML = '<em>No active season configured.</em>';
+    }
+
+    $('add-subscriber-btn').addEventListener('click', () => {
+        const email=$('subscriber-email').value.trim(); if(!email) return;
+        const list=readJson(LAMSLStore.keys.subscribers, []); if(!list.includes(email)) list.push(email);
+        writeJson(LAMSLStore.keys.subscribers, list); $('subscriber-email').value=''; renderSubscribers(); saveContentMirror();
+    });
+    function renderSubscribers() {
+        const list=readJson(LAMSLStore.keys.subscribers, []);
+        $('subscribers-list').innerHTML = list.length ? list.map(email => rowHtml(email, `<strong>${esc(email)}</strong>`, ['Delete'])).join('') : '<p class="muted">No subscribers.</p>';
+        bindListActions('subscribers-list', { Delete: email => { writeJson(LAMSLStore.keys.subscribers, list.filter(e=>e!==email)); renderSubscribers(); saveContentMirror(); } });
+    }
+
+    function rowHtml(id, content, actions) {
+        return `<div class="item-row" data-id="${esc(id)}"><div>${content}</div><div class="item-actions">${actions.map(a => `<button type="button" data-action="${esc(a)}" class="${a==='Delete'||a==='Clear'?'danger':''}">${esc(a)}</button>`).join('')}</div></div>`;
+    }
+    function bindListActions(containerId, handlers) {
+        const el=$(containerId); if(!el) return;
+        el.querySelectorAll('button[data-action]').forEach(btn => btn.addEventListener('click', () => handlers[btn.dataset.action]?.(btn.closest('.item-row').dataset.id)));
+    }
+    function esc(value) { return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch])); }
+    function fileToDataUrl(file) { return new Promise((resolve,reject)=>{ const r=new FileReader(); r.onload=()=>resolve(r.result); r.onerror=reject; r.readAsDataURL(file); }); }
+
+    ensureDefaults();
+    LAMSLStore.loadBackendContent().finally(() => renderAuth());
+})();
+</script>
+</body>
+</html>

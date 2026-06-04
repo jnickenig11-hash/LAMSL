@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<title>LAMSL - Latin & American Men's Softball League</title>
+
+<style>
+
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
+    background-color: #eef4ea;
+    background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    background-size: min(60vw, 540px);
+    background-attachment: fixed;
+    color: #333;
+}
+
+.team-link {
+    color: #0d4f85;
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.team-link:hover {
+    color: #08375a;
+    text-decoration: underline;
+}
+
+h1, h2, h3 {
+    margin-bottom: 8px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 16px;
+}
+
+/* ===== BANNER ===== */
+
+/* ===== SLIDESHOW ===== */
+.slideshow {
+    position: relative;
+    max-width: 1200px;
+    margin: 0;
+    background: #12324A;
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 14px;
+}
+
+.slides {
+    position: relative;
+    height: 340px;
+    overflow: hidden;
+}
+
+.slide {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.slide.active {
+    display: block;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.slide-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, rgba(18, 50, 74, 0), rgba(18, 50, 74, 0.88));
+    color: white;
+    font-size: 13px;
+    line-height: 1.35;
+    border-radius: 0 0 8px 8px;
+    box-sizing: border-box;
+}
+
+.slideshow-locked {
+    display: none;
+    padding: 28px 18px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #f3f6fa;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.indicators {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.indicator {
+    cursor: pointer;
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background: #ccc;
+    border-radius: 50%;
+    margin: 0;
+    transition: background 0.3s;
+}
+
+.indicator.active {
+    background: #C86A2F;
+}
+
+.prev, .next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #12324A;
+    color: white;
+    border: 2px solid #C86A2F;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 18px;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.prev:hover, .next:hover {
+    background: #C86A2F;
+    color: #12324A;
+}
+
+.prev {
+    left: 20px;
+}
+
+.next {
+    right: 20px;
+}
+
+.upload-form {
+    margin-top: 12px;
+    text-align: center;
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.upload-form h3 {
+    margin-top: 0;
+    color: #12324A;
+}
+
+.upload-form form {
+    display: grid;
+    gap: 10px;
+}
+
+.upload-form input[type="file"] {
+    margin: 10px 0;
+}
+
+.upload-form input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #c9d2dc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.upload-form button {
+    background: #12324A;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.upload-form button:hover {
+    background: #C86A2F;
+    color: #12324A;
+}
+
+.upload-form p {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 0;
+}
+
+/* ===== PAYMENT LINKS ===== */
+.payment-section {
+    border: 3px solid #C86A2F;
+    border-radius: 10px;
+    background: white;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+.payment-section > h2 {
+    color: #12324A;
+    margin-top: 0;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+}
+.payment-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+.payment-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #12324A;
+    color: white;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 7px;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
+}
+.payment-link-btn:hover {
+    background: #C86A2F;
+}
+.payment-edit-form {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 6px 10px;
+    align-items: center;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+}
+.payment-edit-form label {
+    font-weight: 700;
+    font-size: 13px;
+    color: #12324A;
+    text-transform: uppercase;
+}
+.payment-edit-form input {
+    padding: 7px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+.payment-save-btn {
+    grid-column: 1 / -1;
+    background: #C86A2F;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+    transition: background 0.2s;
+}
+.payment-save-btn:hover {
+    background: #12324A;
+}
+
+/* ===== NAVBAR ===== */
+header {
+    background: #12324A;
+    color: white;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+}
+
+.navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+    margin: 0;
+    font-size: 20px;
+}
+
+.navbar-brand-gem {
+    width: 24px;
+    height: 18px;
+    background:
+        linear-gradient(90deg, transparent 0 22%, rgba(255, 255, 255, 0.7) 22% 28%, transparent 28% 72%, rgba(94, 108, 122, 0.24) 72% 78%, transparent 78% 100%),
+        linear-gradient(180deg, #fbfdff 0%, #dfe5ec 34%, #b5c0cb 62%, #7c8a97 100%);
+    clip-path: polygon(24% 6%, 76% 6%, 100% 35%, 67% 100%, 33% 100%, 0% 35%);
+    border: 1px solid rgba(248, 251, 255, 0.78);
+    box-shadow: 0 0 0 1px rgba(86, 96, 108, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.82), inset 0 -1px 0 rgba(85, 96, 108, 0.4);
+    position: relative;
+    display: inline-block;
+    flex: 0 0 auto;
+}
+
+.navbar-brand-gem::after {
+    content: "";
+    position: absolute;
+    inset: 2px 4px 2px 4px;
+    clip-path: polygon(50% 0%, 80% 26%, 64% 100%, 36% 100%, 20% 26%);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.15)),
+        linear-gradient(90deg, transparent 0 46%, rgba(126, 138, 151, 0.82) 46% 54%, transparent 54% 100%);
+    opacity: 0.95;
+    pointer-events: none;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar li {
+    margin: 0;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    display: block;
+}
+
+.navbar a:hover {
+    color: #F1D27A;
+}
+
+.navbar a.active-tab {
+    color: #F1D27A;
+    border-bottom: 2px solid #C86A2F;
+    padding-bottom: 2px;
+}
+
+/* ===== LAYOUT ===== */
+.main-layout {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 14px;
+}
+
+/* ===== HOME GRID ===== */
+.home-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas:
+        "schedule announcements rightstack"
+        "slideshow slideshow rightstack";
+    gap: 14px;
+    align-items: start;
+}
+
+.home-region {
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.home-region h2,
+.home-region h3 {
+    margin-top: 0;
+}
+
+.region-schedule {
+    grid-area: schedule;
+}
+
+.region-announcements {
+    grid-area: announcements;
+}
+
+.region-payment {
+    grid-area: payment;
+}
+
+.region-founder {
+    grid-area: founder;
+}
+
+.region-instagram {
+    grid-area: instagram;
+}
+
+.region-rightstack {
+    grid-area: rightstack;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.region-rightstack > .home-region {
+    height: auto;
+}
+
+.region-rightstack .payment-section {
+    margin-bottom: 0;
+}
+
+.region-slideshow {
+    grid-area: slideshow;
+}
+
+.region-slideshow .slides {
+    height: 460px;
+}
+
+.mini-schedule-panel {
+    background: white;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.founder-region img + img {
+    margin-top: 8px;
+}
+
+.founder-region p {
+    margin: 8px 0 0;
+}
+
+.mini-schedule-panel > h3 {
+    color: #12324A;
+    font-size: 12pt;
+    margin: 0 0 2px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.mini-schedule-date {
+    font-size: 12pt;
+    color: #C86A2F;
+    font-weight: 700;
+    margin-bottom: 8px;
+    border-bottom: 2px solid #C86A2F;
+    padding-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mini-park-section {
+    margin-bottom: 8px;
+}
+
+.mini-park-name {
+    background: #12324A;
+    color: white;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 12pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+}
+
+.mini-game-row {
+    font-size: 12pt;
+    padding: 3px 2px;
+    border-bottom: 1px solid #f0f0f0;
+    display: grid;
+    grid-template-columns: 58px 38px 1fr;
+    gap: 3px;
+    align-items: center;
+}
+
+.mini-time {
+    font-weight: 700;
+    color: #12324A;
+    white-space: nowrap;
+}
+
+.mini-div {
+    color: #888;
+    font-size: 12pt;
+}
+
+.mini-teams {
+    color: #333;
+    font-size: 12pt;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mini-schedule-empty {
+    font-size: 12pt;
+    color: #888;
+    font-style: italic;
+    text-align: center;
+    margin: 16px 0 0;
+}
+
+.mini-schedule-link {
+    display: block;
+    text-align: center;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #C86A2F;
+    text-decoration: none;
+    font-weight: 600;
+    border-top: 1px solid #eee;
+    padding-top: 8px;
+}
+
+.mini-schedule-link:hover {
+    color: #12324A;
+}
+
+/* ===== BANNER ===== */
+.banner {
+    position: relative;
+    background: #12324A;
+    color: white;
+    padding: 24px 20px;
+    border-bottom: 4px solid #C86A2F;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    gap: 12px;
+    text-align: center;
+}
+.banner h1 {
+    margin: 0;
+    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.banner .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 8px 0 0;
+}
+.banner .tagline {
+    margin-top: 10px;
+    font-size: 16px;
+    max-width: 620px;
+}
+.banner-logo {
+    width: 220px;
+    height: 160px;
+    object-fit: contain;
+}
+@media (max-width: 700px) {
+    .banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .banner h1 {
+        font-size: 32px;
+    }
+    .banner .subtitle,
+    .banner .tagline {
+        font-size: 14px;
+    }
+    .banner-logo {
+        width: 180px;
+        height: auto;
+    }
+}
+
+
+</style>
+</head>
+
+<body>
+
+<!-- BANNER -->
+<div class="banner">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo">
+    <h1>Latin & american men's softball league</h1>
+    <div class="subtitle">Established 1976</div>
+    <div class="tagline" id="banner-tagline">Celebrating Our 50th Year as California's Top Modified-Pitch League</div>
+</div>
+
+<!-- HEADER -->
+<header>
+    <div class="navbar container">
+        <h2 class="navbar-brand"><span class="navbar-brand-gem" aria-hidden="true"></span>LAMSL</h2>
+        <ul>
+            <li><a href="LAMSL.html" class="active-tab">Home</a></li>
+            <li><a href="standings.html">Standings</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="teams.html">Teams</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="meetingnotes.html">Meeting Notes</a></li>
+            <li><a href="events.html">Events &amp; Fundraisers</a></li>
+            <li><a href="hallofchampions.html">Hall of Champions</a></li>
+            <li><a href="administrators.html">Admin</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</header>
+
+<!-- MAIN -->
+<div class="container home-grid">
+
+    <!-- TOP ROW: Next Games | Announcements | Payment -->
+    <section class="card mini-schedule-panel home-region region-schedule">
+        <h3>&#9918; Next Games</h3>
+        <div id="mini-schedule-content"></div>
+        <a class="mini-schedule-link" href="schedule.html">&#8594; Full Schedule</a>
+    </section>
+
+    <section class="card home-region region-scores">
+        <h3>Recent Scores</h3>
+        <div id="gameScores"></div>
+    </section>
+    
+    <section class="card home-region region-announcements">
+        <h2>LAMSL Announcements</h2>
+        <p>League updates are managed in the Administrators section.</p>
+        <p><a href="Images/Non_Approved_Batlist_2024.pdf" target="_blank" rel="noopener noreferrer">Banned Bat List</a></p>
+        <div id="announcements-list"></div>
+    </section>
+
+    <div class="home-region region-rightstack">
+        <section class="payment-section home-region region-payment">
+            <h2>League Registration Fee &mdash; Click Link to Submit Payment</h2>
+            <div class="payment-links" id="payment-links-display"></div>
+            <div class="payment-edit-form" id="payment-edit-form" style="display:none;">
+                <label>Zelle</label>
+                <input id="pay-zelle" type="url" placeholder="Zelle link or phone/email...">
+                <label>PayPal</label>
+                <input id="pay-paypal" type="url" placeholder="https://paypal.me...">
+                <label>Google Pay</label>
+                <input id="pay-googlepay" type="url" placeholder="https://pay.google.com/..."></input>
+                <label>Venmo</label>
+                <input id="pay-venmo" type="url" placeholder="https://venmo.com/..."></input>
+                <button class="payment-save-btn" onclick="savePaymentLinks()">Save Payment Links</button>
+            </div>
+        </section>
+
+        <section class="card home-region region-notifications">
+            <h3>Stay Informed by Email</h3>
+            <p>Enter your email to receive fundraiser and schedule update announcements.</p>
+            <form id="email-signup-form">
+              <input type="email" id="email-input" placeholder="Enter your email" required />
+              <button type="submit">Sign Up</button>
+              <div id="email-signup-message"></div>
+            </form>
+        </section>
+
+        <section class="card home-region founder-region region-founder">
+            <h3>Founder</h3>
+            <img src="Images/DonArturoPadillaLAMSLPresident.jpg" alt="Arturo Padilla, Sr., founder and president of LAMSL" style="width:100%;border-radius:8px;    ">
+            <p>Arturo Padilla, Sr.</p>
+        </section>
+
+        <section class="card instagram-card home-region region-instagram">
+            <h3>Instagram</h3>
+            <p class="instagram-copy">Follow <strong>@lamsl_league</strong> for league photos, event highlights, and game-day updates.</p>
+            <div class="instagram-preview-grid">
+                <a href="https://www.instagram.com/lamsl_league/" target="_blank" rel="noopener noreferrer" aria-label="Open LAMSL Instagram profile">
+                    <img src="Images/LAMSLClubhouseCartoonPic.jpg" alt="LAMSL Instagram preview showing clubhouse artwork.">
+                </a>
+            </div>
+            <a class="instagram-link" href="https://www.instagram.com/lamsl_league/" target="_blank" rel="noopener noreferrer">View IG: lamsl_league</a>
+        </section>
+    </div>
+
+    <!-- MIDDLE/BOTTOM: Slideshow spans left space, Founder and Instagram on right -->
+    <section class="slideshow home-region region-slideshow">
+        <div class="slides" id="slideshow"></div>
+        <div class="indicators">
+            <span class="indicator active" data-slide="0"></span>
+            <span class="indicator" data-slide="1"></span>
+            <span class="indicator" data-slide="2"></span>
+            <span class="indicator" data-slide="3"></span>
+            <span class="indicator" data-slide="4"></span>
+        </div>
+        <button class="prev">&lt;</button>
+        <button class="next">&gt;</button>
+        <div class="upload-form">
+            <h3>Upload New Photo</h3>
+            <form id="image-upload-form" enctype="multipart/form-data">
+              <input type="file" id="image-input" accept="image/*" required />
+              <button type="submit">Upload Image</button>
+              <div id="image-upload-message"></div>
+            </form>
+        </div>
+    </section>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>© Latin & American Men's Softball League (LAMSL)</p>
+</footer>
+
+<script src="js/backend-config.js"></script>
+<script src="js/lamsl-admin-store.js"></script>
+<script>
+const USERS_KEY = 'lamslUsersV1';
+const SESSION_KEY = 'lamslSessionV1';
+const ANNOUNCEMENTS_KEY = 'lamslAnnouncementsV1';
+const PAYMENT_KEY = 'lamslPaymentLinksV1';
+// Use central backend base (can be overridden via localStorage LAMSL_BACKEND)
+const BACKEND_URL = window.BACKEND_BASE || 'https://lamsl-backend.onrender.com';
+
+let currentSlide = 0;
+let slideshowImages = [];
+const indicatorsContainer = document.querySelector('.indicators');
+const slidesContainer = document.querySelector('.slides');
+const uploadForm = document.getElementById('image-upload-form');
+const imageInput = document.getElementById('image-input');
+const uploadMessage = document.getElementById('image-upload-message');
+const homeSlideshowPrev = document.querySelector('.prev');
+const homeSlideshowNext = document.querySelector('.next');
+const announcementsList = document.getElementById('announcements-list');
+const emailSignupForm = document.getElementById('email-signup-form');
+const emailInput = document.getElementById('email-input');
+const messageBox = document.getElementById('email-signup-message');
+const paymentLinksDisplay = document.getElementById('payment-links-display');
+const paymentEditForm = document.getElementById('payment-edit-form');
+
+function readJson(key, fallback) {
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+    } catch (error) {
+        return fallback;
+    }
+}
+
+function writeJson(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+}
+
+function apiUrl(path) {
+    if (window.apiUrl) return window.apiUrl(path);
+    if (path && (path.startsWith('http://') || path.startsWith('https://'))) return path;
+    return BACKEND_URL.replace(/\/$/, '') + (path.startsWith('/') ? path : '/' + path);
+}
+
+emailSignupForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = emailInput.value.trim();
+    messageBox.textContent = "Submitting...";
+
+    try {
+      const res = await fetch(BACKEND_URL + "/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        messageBox.style.color = "red";
+        messageBox.textContent = data.message || "Signup failed";
+        return;
+      }
+
+      messageBox.style.color = "green";
+      messageBox.textContent = "You're signed up!";
+      emailSignupForm.reset();
+
+    } catch (err) {
+      messageBox.style.color = "red";
+      messageBox.textContent = "Server error — is your backend running?";
+    }
+});
+
+function ensureDefaults() {
+    const users = readJson(USERS_KEY, []);
+    if (!users.some(user => user.username === 'admin')) {
+        users.push({ username: 'admin', password: 'admin', role: 'admin' });
+        writeJson(USERS_KEY, users);
+    }
+
+    const announcements = readJson(ANNOUNCEMENTS_KEY, null);
+    if (!announcements) {
+        writeJson(ANNOUNCEMENTS_KEY, [
+            {
+                id: 'ann-1',
+                title: 'TO ALL REGULAR SEASON MANAGERS! ',
+                date: '2026-05-28',
+                message: 'There will be a Mandatory Managers meeting Friday June 12th - 7p at 10111 Park St, Bellflower, CA 90706-6017. '
+            },
+          
+            {
+                id: 'ann-2',//*********enter id here-ann-#*******
+                title: 'SCHEDULE & STANDINGS UPDATED',//*********enter title here********
+                date: '2026-05-26',//******enter date here*******
+                message: 'The Schedule for May 31st has been posted and can be seen on the mini-schedule and schedule tab. Team divisions and standings have also been updated.Scores will be added later. '// *****enter message hear*****
+            },
+              {
+                id: 'ann-3',
+                title: 'SITE UNDER CONSTRUCTION!',
+                date: '2026-04-27',
+                message: 'The New League Site is under constructure. Site will be used only for game schedules, Scores and standings. All other features TBD. Games will be posted by Thursday morning. '
+            }
+        ]);
+    }
+}
+
+function isAdminLoggedIn() {
+    const session = readJson(SESSION_KEY, null);
+    return !!(session && session.role === 'admin');
+}
+
+// ===== PAYMENT LINKS =====
+const PAYMENT_PROVIDERS = [
+    { key: 'zelle',     inputId: 'pay-zelle',     label: '💸 Zelle'      },
+    { key: 'paypal',    inputId: 'pay-paypal',    label: '🅿 PayPal'     },
+    { key: 'googlepay', inputId: 'pay-googlepay', label: '🇬 Google Pay' },
+    { key: 'venmo',     inputId: 'pay-venmo',     label: '✔ Venmo'      },
+];
+
+function renderPaymentLinks() {
+    const links = readJson(PAYMENT_KEY, {});
+    paymentLinksDisplay.innerHTML = '';
+    let hasAny = false;
+    PAYMENT_PROVIDERS.forEach(p => {
+        const url = links[p.key];
+        if (url) {
+            hasAny = true;
+            const a = document.createElement('a');
+            a.href = url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.className = 'payment-link-btn';
+            a.textContent = p.label;
+            paymentLinksDisplay.appendChild(a);
+        }
+    });
+    if (!hasAny) {
+        paymentLinksDisplay.innerHTML = '<em style="color:#888;font-size:14px;">Payment links not yet configured by admin.</em>';
+    }
+    // Populate edit inputs
+    PAYMENT_PROVIDERS.forEach(p => {
+        const input = document.getElementById(p.inputId);
+        if (input) input.value = links[p.key] || '';
+    });
+}
+
+function savePaymentLinks() {
+    if (!isAdminLoggedIn()) return;
+    const links = {};
+    PAYMENT_PROVIDERS.forEach(p => {
+        const input = document.getElementById(p.inputId);
+        if (input && input.value.trim()) links[p.key] = input.value.trim();
+    });
+    writeJson(PAYMENT_KEY, links);
+    renderPaymentLinks();
+}
+
+function applyPaymentSection() {
+    paymentEditForm.style.display = isAdminLoggedIn() ? 'grid' : 'none';
+}
+
+function renderAnnouncements() {
+    const announcements = readJson(ANNOUNCEMENTS_KEY, []);
+    announcementsList.innerHTML = '';
+
+    if (!announcements.length) {
+        const emptyCard = document.createElement('div');
+        emptyCard.className = 'card';
+        emptyCard.textContent = 'No announcements posted yet.';
+        announcementsList.appendChild(emptyCard);
+        return;
+    }
+
+    announcements.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `<h3>${item.title}</h3><p><strong>${item.date}</strong></p><p>${item.message}</p>`;
+        announcementsList.appendChild(card);
+    });
+}
+
+function createSlideElement(image) {
+    const slide = document.createElement('div');
+    slide.className = 'slide';
+
+    const img = document.createElement('img');
+    img.src = image.path;
+    img.alt = image.caption || image.name || 'Game Photo';
+    slide.appendChild(img);
+
+    if (image.caption) {
+        const caption = document.createElement('div');
+        caption.className = 'slide-caption';
+        caption.textContent = image.caption;
+        slide.appendChild(caption);
+    }
+
+    return slide;
+}
+
+function applyUploadPermissions() {
+    const isAdmin = isAdminLoggedIn();
+    imageInput.disabled = !isAdmin;
+    uploadForm.querySelector('button[type="submit"]').disabled = !isAdmin;
+    uploadMessage.style.display = isAdmin ? 'block' : 'none';
+}
+
+function getSlides() {
+    return Array.from(document.querySelectorAll('.slide'));
+}
+
+function getIndicators() {
+    return Array.from(document.querySelectorAll('.indicator'));
+}
+
+function normalizeImageItem(image) {
+    if (typeof image === 'string') {
+        return { name: image, path: `SlideshowImages/${image}`, caption: '' };
+    }
+    return {
+        name: image.name || '',
+        path: image.path || '',
+        caption: image.caption || ''
+    };
+}
+
+function buildSlides(images) {
+    slidesContainer.innerHTML = '';
+    indicatorsContainer.innerHTML = '';
+    slideshowImages = images.map(normalizeImageItem);
+
+    slideshowImages.forEach((image, index) => {
+        const slide = createSlideElement(image);
+        slide.classList.toggle('active', index === 0);
+        slide.dataset.filename = image.name || '';
+        slidesContainer.appendChild(slide);
+
+        const indicator = document.createElement('span');
+        indicator.className = index === 0 ? 'indicator active' : 'indicator';
+        indicator.dataset.slide = String(index);
+        indicatorsContainer.appendChild(indicator);
+    });
+
+    currentSlide = 0;
+}
+
+async function loadSlidesFromFolder() {
+    try {
+        const response = await fetch('/slideshow-images');
+        const result = await response.json();
+        if (!response.ok || !result.success || !Array.isArray(result.images)) {
+            return;
+        }
+
+        buildSlides(result.images);
+    } catch (error) {
+        // Keep existing fallback slides if endpoint is unavailable.
+    }
+}
+
+function showSlide(index) {
+    const slides = getSlides();
+    const indicators = getIndicators();
+    if (!slides.length) {
+        return;
+    }
+
+    const safeIndex = ((index % slides.length) + slides.length) % slides.length;
+    slides.forEach(slide => slide.classList.remove('active'));
+    indicators.forEach(ind => ind.classList.remove('active'));
+    slides[safeIndex].classList.add('active');
+    if (indicators[safeIndex]) {
+        indicators[safeIndex].classList.add('active');
+    }
+    currentSlide = safeIndex;
+}
+
+function nextSlide() {
+    const slides = getSlides();
+    if (!slides.length) {
+        return;
+    }
+    currentSlide = (currentSlide + 1) % slides.length;
+    showSlide(currentSlide);
+}
+
+function prevSlide() {
+    const slides = getSlides();
+    if (!slides.length) {
+        return;
+    }
+    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+    showSlide(currentSlide);
+}
+
+function addSlide(image) {
+    const normalized = normalizeImageItem(image);
+    slideshowImages.push(normalized);
+    const slides = getSlides();
+    const newIndex = slides.length;
+
+    const slide = createSlideElement(normalized);
+    slide.className = 'slide';
+    slide.dataset.filename = normalized.name || '';
+    slidesContainer.appendChild(slide);
+
+    const indicator = document.createElement('span');
+    indicator.className = 'indicator';
+    indicator.dataset.slide = String(newIndex);
+    indicatorsContainer.appendChild(indicator);
+
+    showSlide(newIndex);
+}
+
+homeSlideshowNext.addEventListener('click', nextSlide);
+homeSlideshowPrev.addEventListener('click', prevSlide);
+
+indicatorsContainer.addEventListener('click', (event) => {
+    if (!event.target.classList.contains('indicator')) {
+        return;
+    }
+    const index = Number(event.target.dataset.slide);
+    if (!Number.isNaN(index)) {
+        showSlide(index);
+    }
+});
+
+uploadForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const file = imageInput.files[0];
+    if (!file) {
+      uploadMessage.textContent = "Please select an image first.";
+      return;
+    }
+
+    uploadMessage.textContent = "Uploading...";
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const res = await fetch(BACKEND_URL + "/api/upload-image", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        uploadMessage.style.color = "red";
+        uploadMessage.textContent = data.message || "Upload failed";
+        return;
+      }
+
+      uploadMessage.style.color = "green";
+      uploadMessage.textContent = "Upload successful!";
+
+      // Optional: show uploaded image
+      if (data.url) {
+        const img = document.createElement("img");
+        img.src = BACKEND_URL + data.url;
+        img.style.maxWidth = "200px";
+        uploadMessage.appendChild(document.createElement("br"));
+        uploadMessage.appendChild(img);
+      }
+
+    } catch (err) {
+      uploadMessage.style.color = "red";
+      uploadMessage.textContent = "Server error — is your backend running?";
+    }
+  });
+
+window.addEventListener('storage', (event) => {
+    if (event.key === SESSION_KEY) {
+        applyUploadPermissions();
+    }
+});
+
+window.addEventListener('focus', () => {
+    applyUploadPermissions();
+});
+
+ensureDefaults();
+renderAnnouncements();
+renderPaymentLinks();
+applyPaymentSection();
+applyUploadPermissions();
+loadSlidesFromFolder();
+
+// Autoplay every 20 seconds
+setInterval(nextSlide, 20000);
+
+// ===== MINI SCHEDULE =====
+function renderMiniSchedule() {
+    const SCHEDULE_KEY = 'lamslWeeklyScheduleV3';
+    const CHECKINS_KEY = 'lamslGameCheckinsV1';
+    const ALL_PARKS = ['Carson - Stevenson Park', 'Carson - Dolphin Park', 'Carson - Calas Park', 'Carson - Veterans Park','Bell Gardens - Ford Park'];
+    const container = document.getElementById('mini-schedule-content');
+    if (!container) return;
+
+    const schedule = typeof getSchedule === 'function'
+        ? getSchedule()
+        : readJson(SCHEDULE_KEY, []);
+    const checkins = readJson(CHECKINS_KEY, {});
+
+    const getGameId = game => String(game.id || `${game.date}|${game.time}|${game.team1}|${game.team2}`).trim();
+    const getTeamPageUrl = (team, division, gameId) =>
+        `team.html?team=${encodeURIComponent(team)}&division=${encodeURIComponent(division)}&gameId=${encodeURIComponent(gameId)}`;
+
+    const pad = n => String(n).padStart(2, '0');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayKey = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+
+    // Find the earliest upcoming date that has at least one non-cancelled game.
+    const upcomingDates = [...new Set(
+        schedule
+            .filter(g => g.date >= todayKey && (g.status || 'scheduled') !== 'cancelled')
+            .map(g => g.date)
+    )].sort();
+
+    container.innerHTML = '';
+
+    if (!upcomingDates.length) {
+        const empty = document.createElement('p');
+        empty.className = 'mini-schedule-empty';
+        empty.textContent = 'No upcoming games scheduled.';
+        container.appendChild(empty);
+        return;
+    }
+
+    const nextDateKey = upcomingDates[0];
+    const nextDate = new Date(`${nextDateKey}T00:00:00`);
+    const dayGames = schedule
+        .filter(g => g.date === nextDateKey && (g.status || 'scheduled') !== 'cancelled')
+        .sort((a, b) => {
+            if (a.park !== b.park) return ALL_PARKS.indexOf(a.park) - ALL_PARKS.indexOf(b.park);
+            return a.time.localeCompare(b.time);
+        });
+
+    const dateEl = document.createElement('div');
+    dateEl.className = 'mini-schedule-date';
+    dateEl.textContent = nextDate.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+    container.appendChild(dateEl);
+
+    ALL_PARKS.forEach(park => {
+        const parkGames = dayGames.filter(g => g.park === park);
+        if (!parkGames.length) return;
+
+        const section = document.createElement('div');
+        section.className = 'mini-park-section';
+
+        const header = document.createElement('div');
+        header.className = 'mini-park-name';
+        header.textContent = park;
+        section.appendChild(header);
+
+        parkGames.forEach(game => {
+            const row = document.createElement('div');
+            row.className = 'mini-game-row';
+            const [h, m] = game.time.split(':');
+            const hr = parseInt(h, 10);
+            const ampm = hr >= 12 ? 'PM' : 'AM';
+            const hr12 = hr % 12 || 12;
+            const timeStr = `${hr12}:${m} ${ampm}`;
+            const statusBit = game.status === 'postponed'
+                ? ' <span style="font-size:9px;color:#C86A2F;font-weight:700;">PPD</span>' : '';
+            const checkinBit = checkins[game.id]
+                ? ' <span style="font-size:9px;background:#1a8f1a;color:white;padding:1px 4px;border-radius:3px;font-weight:700;">✓ IN</span>' : '';
+            row.innerHTML = `<span class="mini-time">${timeStr}</span><span class="mini-div">Div ${game.division}</span><span class="mini-teams">H: <a class="team-link" href="${getTeamPageUrl(game.team1, game.division, getGameId(game))}">${game.team1}</a> | V: <a class="team-link" href="${getTeamPageUrl(game.team2, game.division, getGameId(game))}">${game.team2}</a>${statusBit}${checkinBit}</span>`;
+            section.appendChild(row);
+        });
+
+        container.appendChild(section);
+    });
+}
+
+// ===== SEASON BANNER =====
+(function () {
+    try {
+        const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
+        const el = document.getElementById('banner-tagline');
+        if (s && el) {
+            const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
+        }
+    } catch (e) {}
+})();
+</script>
+<script src="js/schedule.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  ensureDefaults();
+
+  const miniScheduleContainer = document.getElementById('mini-schedule-content');
+  if (miniScheduleContainer) {
+    miniScheduleContainer.innerHTML = '<p class="mini-schedule-empty">Loading upcoming games...</p>';
+  }
+
+  try {
+    const res = await fetch('https://lamsl-backend.onrender.com/api/content');
+    if (!res.ok) throw new Error(`Backend content fetch failed ${res.status}`);
+    const data = await res.json();
+
+    // Keep backend schedule data available to schedule.js and localStorage.
+    if (Array.isArray(data.gameSchedules) && data.gameSchedules.length > 0) {
+      writeJson('lamslWeeklyScheduleV3', data.gameSchedules);
+    }
+    if (Array.isArray(data.practiceSchedules) && data.practiceSchedules.length > 0) {
+      writeJson('lamslPracticeScheduleV1', data.practiceSchedules);
+    }
+    if (typeof scheduleContent !== 'undefined' && typeof getDefaultBackendContent === 'function') {
+      scheduleContent = Object.assign(getDefaultBackendContent(), data, {
+        gameSchedules: Array.isArray(data.gameSchedules) && data.gameSchedules.length > 0
+          ? data.gameSchedules
+          : readJson('lamslWeeklyScheduleV3', []),
+        gameScores: Array.isArray(data.gameScores) ? data.gameScores : [],
+        practiceSchedules: Array.isArray(data.practiceSchedules) && data.practiceSchedules.length > 0
+          ? data.practiceSchedules
+          : readJson('lamslPracticeScheduleV1', [])
+      });
+    }
+
+    // Announcements
+    const announcementsList = document.getElementById('announcements-list');
+    if (announcementsList && Array.isArray(data.announcements)) {
+      announcementsList.innerHTML = data.announcements.map(a => `
+        <div class="announcement">
+          <h4>${a.title || ''}</h4>
+          <p>${a.message || ''}</p>
+          <small>${a.date || ''}</small>
+        </div>
+      `).join('');
+    }
+
+    // Zelle info
+    const zelleInfo = document.getElementById('zelleInfo');
+    if (zelleInfo && data.zelle) {
+      zelleInfo.innerHTML = `
+        <p><strong>${data.zelle.name || ''}</strong></p>
+        <p>${data.zelle.email || ''}</p>
+        ${data.zelle.qrImage ? `<img src="${data.zelle.qrImage}" style="width:150px;">` : ''}
+      `;
+    }
+
+    // Slideshow
+    const slideshow = document.getElementById('slideshow');
+    if (slideshow && Array.isArray(data.slideshow) && data.slideshow.length > 0) {
+      slideshow.innerHTML = data.slideshow.map((s, i) => `
+        <div class="slide ${i === 0 ? 'active' : ''}">
+          <img src="${s.imageUrl || s.url || ''}" alt="${s.caption || ''}">
+          <p>${s.caption || ''}</p>
+        </div>
+      `).join('');
+    }
+
+    // Game Scores
+    const gameScores = document.getElementById('gameScores');
+    if (gameScores && Array.isArray(data.gameScores)) {
+      gameScores.innerHTML = data.gameScores.map(g => `
+        <div class="score-item">
+          <p>${g.teamA || g.team1 || ''} ${g.scoreA || g.score1 || ''} - ${g.scoreB || g.score2 || ''} ${g.teamB || g.team2 || ''}</p>
+          <small>${g.date || ''}</small>
+        </div>
+      `).join('');
+    }
+
+  } catch (err) {
+    console.error('Error loading backend content:', err);
+  }
+
+  // Render after backend/local fallback data is ready.
+  renderMiniSchedule();
+});
+</script>
+
+</body>
+</html>
+
+

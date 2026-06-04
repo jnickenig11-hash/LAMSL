@@ -1,6 +1,4 @@
 
-
-
 const USERS_KEY      = 'lamslUsersV1';
 const SESSION_KEY    = 'lamslSessionV1';
 const SCHEDULE_KEY   = 'lamslWeeklyScheduleV3';

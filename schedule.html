@@ -799,6 +799,9 @@ footer {
 }
 
 
+
+/* Public schedule page: admin editing is managed from administrators.html */
+.management-grid, .practice-section { display: none !important; }
 </style>
 <script src="js/backend-config.js"></script>
 </head>
@@ -879,136 +882,11 @@ footer {
             </div>
         </section>
 
-        <section class="card management-grid">
-            <div class="admin-panel">
-                <h3>Schedule Editor</h3>
-                <p id="admin-status" class="admin-status">Locked. Sign in at administrators.html as an admin user to edit schedules.</p>
-                <div class="admin-controls">
-                    <button id="refresh-admin-access" type="button">Refresh Admin Access</button>
-                </div>
-
-                <form id="schedule-form">
-                    <input id="game-date" type="date" required>
-                    <select id="game-time" required>
-                        <option value="">Select Time Slot</option>
-                        <option value="08:00am">08:00am</option>
-                        <option value="09:50am">09:50am</option>
-                        <option value="11:45am">11:45am</option>
-                        <option value="01:45pm">01:45pm</option>
-                    </select>
-                    <select id="game-park" required>
-                        <option value="">Select Park</option>
-                        <option value="Bell Gardens - Ford Park">Bell Gardens - Ford Park</option>
-                        <option value="Carson - Stevenson Park">Carson - Stevenson Park</option>
-                        <option value="Carson - Dolphin Park">Carson - Dolphin Park</option>
-                        <option value="Carson - Calas Park">Carson - Calas Park</option>
-                        <option value="Carson - Veterans Park">Carson - Veterans Park</option>
-                    </select>
-                    <select id="game-division" required>
-                        <option value="">Select Division</option>
-                        <option value="ALL">All Divisions</option>
-                        <option value="A">Division A</option>
-                        <option value="B">Division B</option>
-                        <option value="C">Division C</option>
-                        <option value="D">Division D</option>
-                        <option value="E">Division E</option>
-                    </select>
-                    <select id="game-team1" required disabled>
-                        <option value="">Select Team 1</option>
-                    </select>
-                    <select id="game-team2" required disabled>
-                        <option value="">Select Team 2</option>
-                    </select>
-                    <select id="game-status">
-                        <option value="scheduled">On Schedule</option>
-                        <option value="postponed">Postponed</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
-                    <button id="save-schedule-btn" type="submit">Save Scheduled Game</button>
-                </form>
-                <p class="admin-status" style="margin-top:10px;">
-                    Manual scheduling rules: Sundays only, 8:00AM, 9:50AM, 11:45AM, 1:45PM time slots, one game per field/time slot, max 3 games per field/day.
-                </p>
-
-            </div>
-
-            <div class="admin-panel">
-                <h3>Score Keeping</h3>
-                <p id="score-admin-status" class="score-admin-status">Admin sign-in required to update scores.</p>
-                <form id="score-form">
-                    <select id="scheduled-game-select" required>
-                        <option value="">Select Scheduled Game</option>
-                    </select>
-                    <input id="score-team1" type="number" min="0" placeholder="Home Team Score" required>
-                    <input id="score-team2" type="number" min="0" placeholder="Visitors Team Score" required>
-                    <div class="score-actions">
-                        <button id="delete-scheduled-game-btn" type="button" disabled>Delete Scheduled Game</button>
-                        <button id="save-score-btn" type="submit">Save Score Update</button>
-                    </div>
-                </form>
-                <ul id="scores-list"></ul>
-            </div>
+        <section class="card" id="schedule-page-note">
+            <h3>Schedule Updates</h3>
+            <p>Game schedules, park assignments, and scores are managed from the administrator dashboard.</p>
         </section>
 
-        <!-- PRACTICE & SCRIMMAGE SCHEDULE -->
-        <section class="practice-section">
-            <div class="practice-header">
-                <h3>&#9918; Practice &amp; Scrimmage Schedule</h3>
-            </div>
-            <div class="practice-body">
-                <p id="practice-admin-status">Admin sign-in required to manage practice games.</p>
-                <button id="practice-refresh-admin" type="button" style="background:#12324A;color:white;border:none;border-radius:6px;padding:7px 14px;cursor:pointer;font-family:inherit;font-size: 12pt;margin-bottom:14px;">Refresh Admin Access</button>
-                <div class="practice-layout">
-                    <div>
-                        <h4 style="margin:0 0 10px;color:#12324A;font-family:'Oswald','Barlow Condensed',sans-serif;text-transform:uppercase;">Schedule Practice Game</h4>
-                        <form id="practice-form">
-                            <input id="practice-date" type="date" required>
-                            <input id="practice-time" type="time" required>
-                            <select id="practice-park" required>
-                                <option value="">Select Park</option>
-                                <option value="Bell Gardens - Ford Park">Bell Gardens - Ford Park</option>
-                                <option value="Carson - Stevenson Park">Carson - Stevenson Park</option>
-                                <option value="Carson - Dolphin Park">Carson - Dolphin Park</option>
-                                <option value="Carson - Calas Park">Carson - Calas Park</option>
-                                <option value="Carson - Veterans Park">Carson - Veterans Park</option>
-                            </select>
-                            <select id="practice-div1">
-                                <option value="">Team 1 Division</option>
-                                <option value="A">Division A</option>
-                                <option value="B">Division B</option>
-                                <option value="C">Division C</option>
-                                <option value="D">Division D</option>
-                                <option value="E">Division E</option>
-                            </select>
-                            <select id="practice-team1" required disabled>
-                                <option value="">Select Team 1</option>
-                            </select>
-                            <select id="practice-div2">
-                                <option value="">Team 2 Division</option>
-                                <option value="A">Division A</option>
-                                <option value="B">Division B</option>
-                                <option value="C">Division C</option>
-                                <option value="D">Division D</option>
-                                <option value="E">Division E</option>
-                            </select>
-                            <select id="practice-team2" required disabled>
-                                <option value="">Select Team 2</option>
-                            </select>
-                            <select id="practice-status">
-                                <option value="scheduled">On Schedule</option>
-                                <option value="postponed">Postponed</option>
-                                <option value="cancelled">Cancelled</option>
-                            </select>
-                            <button id="save-practice-btn" type="submit">Save Practice Game</button>
-                        </form>
-                    </div>
-                    <div>
-                        <h4 style="margin:0 0 10px;color:#12324A;font-family:'Oswald','Barlow Condensed',sans-serif;text-transform:uppercase;">Practice Games</h4>
-                        <ul id="practice-games-list"></ul>
-                    </div>
-                </div>
-            </div>
-        </section>
     </main>
 </div>
 

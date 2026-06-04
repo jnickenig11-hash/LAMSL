@@ -18,6 +18,48 @@ const GAME_TIME_SLOTS = ['08:00am', '09:50am', '11:45am','01:45pm'];
 const ALLOWED_GAME_DAYS = [0]; // Sundays only
 const CHECKINS_KEY = 'lamslGameCheckinsV1';
 
+const STANDINGS_KEY = 'lamslStandingsV1';
+
+function getTeamDivision(teamName) {
+    const divisions = teamsByDivision && Object.keys(teamsByDivision).length ? teamsByDivision : DEFAULT_TEAMS_BY_DIVISION;
+    for (const [division, teams] of Object.entries(divisions)) {
+        if ((teams || []).includes(teamName)) return division;
+    }
+    return 'All';
+}
+
+function buildStandingsFromGames(games) {
+    const standings = {};
+    const divisions = teamsByDivision && Object.keys(teamsByDivision).length ? teamsByDivision : DEFAULT_TEAMS_BY_DIVISION;
+    Object.entries(divisions).forEach(([division, teams]) => {
+        standings[division] = {};
+        (teams || []).forEach(team => { standings[division][team] = { w: 0, l: 0, t: 0, rf: 0, ra: 0, gp: 0 }; });
+    });
+    (games || []).forEach(game => {
+        if (game.score1 === '' || game.score2 === '' || game.score1 == null || game.score2 == null) return;
+        const s1 = Number(game.score1), s2 = Number(game.score2);
+        if (!Number.isFinite(s1) || !Number.isFinite(s2)) return;
+        const d1 = getTeamDivision(game.team1);
+        const d2 = getTeamDivision(game.team2);
+        [[game.team1, d1, s1, s2], [game.team2, d2, s2, s1]].forEach(([team, division, rf, ra]) => {
+            standings[division] = standings[division] || {};
+            standings[division][team] = standings[division][team] || { w: 0, l: 0, t: 0, rf: 0, ra: 0, gp: 0 };
+            const row = standings[division][team];
+            row.gp += 1; row.rf += rf; row.ra += ra;
+            if (rf > ra) row.w += 1; else if (rf < ra) row.l += 1; else row.t += 1;
+        });
+    });
+    return standings;
+}
+
+function updateStoredStandings(games) {
+    const standings = buildStandingsFromGames(games || []);
+    writeJson(STANDINGS_KEY, standings);
+    if (scheduleContent) scheduleContent.standings = standings;
+    return standings;
+}
+
+
 
 
 function readJson(key, fallback) {
@@ -269,6 +311,7 @@ function getDefaultBackendContent() {
         zelle: {},
         gameSchedules: [],
         gameScores: [],
+        standings: {},
         practiceSchedules: [],
         slideshow: []
     };
@@ -334,10 +377,12 @@ function saveSchedule(games) {
     if (scheduleContent) {
         scheduleContent.gameSchedules = games;
         scheduleContent.gameScores = games.filter(game => game.score1 !== '' && game.score2 !== '');
+        updateStoredStandings(games);
         writeBackendCache();
         persistBackendContent();
     } else {
         writeJson(SCHEDULE_KEY, games);
+        updateStoredStandings(games);
     }
 }
 
@@ -425,11 +470,13 @@ async function loadBackendSchedule() {
                 ? data.gameSchedules
                 : localSchedules,
             gameScores: Array.isArray(data.gameScores) ? data.gameScores : [],
+            standings: data.standings || {},
             practiceSchedules: Array.isArray(data.practiceSchedules) && data.practiceSchedules.length > 0
                 ? data.practiceSchedules
                 : localPracticeSchedules
         });
         writeBackendCache();
+        updateStoredStandings(scheduleContent.gameSchedules || []);
     } catch (error) {
         console.warn('Could not load schedule content from backend:', error);
         scheduleContent = null;

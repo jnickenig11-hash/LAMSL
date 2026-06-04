@@ -2,6 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import cors from 'cors';
 
 const app = express();
@@ -20,19 +21,21 @@ function requireAdminKey(req, res, next) {
 }
 
 // Ensure required directories exist
-const uploadDir = path.join(process.cwd(), 'uploads');
-const logsDir = path.join(process.cwd(), 'logs');
-const efDir = path.join(process.cwd(), '..', 'EF_Images');
-const dataDir = path.join(process.cwd(), 'data');
-const teamProfileDir = path.join(process.cwd(), '..', 'teamProfile images');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(__dirname, '..');
+const uploadDir = path.join(__dirname, 'uploads');
+const logsDir = path.join(projectRoot, 'logs');
+const efDir = path.join(projectRoot, 'EF_Images');
+const dataDir = path.join(projectRoot, 'data');
+const teamProfileDir = path.join(projectRoot, 'teamProfile images');
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir);
+  fs.mkdirSync(logsDir, { recursive: true });
 }
 if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir);
+  fs.mkdirSync(dataDir, { recursive: true });
 }
 if (!fs.existsSync(efDir)) {
   fs.mkdirSync(efDir, { recursive: true });
@@ -52,7 +55,13 @@ app.post('/api/subscribe', (req, res) => {
     });
   }
 
-  fs.appendFileSync('subscribers.txt', email + '\n');
+  const subscribersFile = path.join(projectRoot, 'email_subscribers.json');
+  let subscribers = [];
+  try { subscribers = fs.existsSync(subscribersFile) ? JSON.parse(fs.readFileSync(subscribersFile, 'utf8') || '[]') : []; } catch (e) { subscribers = []; }
+  if (!subscribers.some(item => String(item.email || item).toLowerCase() === email.toLowerCase())) {
+    subscribers.push({ email, subscribedAt: new Date().toISOString() });
+    fs.writeFileSync(subscribersFile, JSON.stringify(subscribers, null, 2));
+  }
 
   res.json({
     success: true,
@@ -80,7 +89,7 @@ app.post('/api/upload-image', requireAdminKey, upload.single('image'), (req, res
 });
 
 // Serve uploaded images
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(uploadDir));
 
 // Admin action logging endpoint
 app.post('/api/log-admin-action', requireAdminKey, (req, res) => {
@@ -143,7 +152,7 @@ app.post('/api/update', requireAdminKey, (req, res) => {
 });
 
 // ===== EF Images (Events) =====
-const efMetaFile = path.join(process.cwd(), '..', 'ef_images_metadata.json');
+const efMetaFile = path.join(projectRoot, 'ef_images_metadata.json');
 function readEfMeta() {
   try {
     if (!fs.existsSync(efMetaFile)) return [];
@@ -216,7 +225,7 @@ app.post('/notify-announcement', requireAdminKey, (req, res) => {
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
-// ===== Team photo uploads =====n
+// ===== Team photo uploads =====
 const uploadTeam = multer({ storage: multer.diskStorage({
   destination: (req, file, cb) => {
     const team = (req.body.team || 'unknown').toString();
@@ -232,7 +241,7 @@ const uploadTeam = multer({ storage: multer.diskStorage({
   }
 })});
 
-const teamMetaFile = path.join(process.cwd(), '..', 'team_profile_metadata.json');
+const teamMetaFile = path.join(projectRoot, 'team_profile_metadata.json');
 function readTeamMeta() { try { return fs.existsSync(teamMetaFile) ? JSON.parse(fs.readFileSync(teamMetaFile, 'utf8')) : {}; } catch (e) { return {}; } }
 function writeTeamMeta(m) { try { fs.writeFileSync(teamMetaFile, JSON.stringify(m, null, 2)); } catch (e) {} }
 
@@ -250,6 +259,18 @@ app.post('/upload-team-photo', requireAdminKey, uploadTeam.single('photo'), (req
   } catch (e) {
     res.status(500).json({ success: false, error: e.message });
   }
+});
+
+
+app.get('/api/team-metadata', (req, res) => {
+  res.json({ success: true, teams: readTeamMeta() });
+});
+
+app.post('/api/team-metadata', requireAdminKey, (req, res) => {
+  try {
+    writeTeamMeta(req.body || {});
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
 app.get('/', (req, res) => {
@@ -292,6 +313,7 @@ app.get('/api/admin-health', (req, res) => {
   res.json({ adminApiKeyConfigured: !!ADMIN_API_KEY });
 });
 
-app.listen(3000, () => {
-  console.log('Backend running at http://localhost:3000');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Backend running at http://localhost:${PORT}`);
 });

@@ -623,7 +623,7 @@ button:hover,
         </section>
 
         <!-- PRACTICE & SCRIMMAGE SCHEDULE -->
-        <section class="practice-section">
+        <section class="card management-grid admin-only practice-section">
             <div class="practice-header">
                 <h3>&#9918; Practice &amp; Scrimmage Schedule</h3>
             </div>
@@ -2226,6 +2226,315 @@ async function initializeAdminScheduleDashboard() {
     });
     adminRenderScheduledGameOptions(); adminRenderPracticeGames();
 }
+
+
+// ===== ADMIN SCHEDULE/PRACTICE/SCORE/SEASON STABILITY PATCH =====
+function adminNormalizeDivisionKey(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    const upper = raw.toUpperCase().replace(/^DIVISION\s+/, '');
+    if (['A','B','C','D','E'].includes(upper)) return upper;
+    if (upper === 'ALL' || upper === 'ALL DIVISIONS') return 'ALL';
+    return upper;
+}
+
+function adminBuildTeamMapFromAllSources() {
+    const map = JSON.parse(JSON.stringify(DEFAULT_TEAMS_BY_DIVISION || {}));
+    Object.keys(map).forEach(k => { if (!Array.isArray(map[k])) map[k] = []; });
+
+    const addTeam = (division, team) => {
+        const div = adminNormalizeDivisionKey(division) || 'ALL';
+        const name = String(team || '').trim();
+        if (!name) return;
+        if (!map[div]) map[div] = [];
+        if (!map[div].some(t => String(t).toLowerCase() === name.toLowerCase())) map[div].push(name);
+    };
+
+    try {
+        const localDivisions = readJson(DIVISIONS_KEY, null);
+        if (localDivisions && typeof localDivisions === 'object') {
+            Object.entries(localDivisions).forEach(([div, teams]) => (teams || []).forEach(team => addTeam(div, team)));
+        }
+    } catch (e) {}
+
+    const source = scheduleContent || content || {};
+    if (source.divisions && typeof source.divisions === 'object') {
+        Object.entries(source.divisions).forEach(([div, teams]) => (teams || []).forEach(team => addTeam(div, team)));
+    }
+    if (Array.isArray(source.teams)) {
+        source.teams.forEach(team => addTeam(team.division || team.div || team.group, team.name || team.teamName || team));
+    }
+    (source.gameSchedules || []).forEach(game => {
+        const div = adminNormalizeDivisionKey(game.division) || getTeamDivision(game.team1) || getTeamDivision(game.team2) || 'ALL';
+        addTeam(div, game.team1);
+        addTeam(div, game.team2);
+    });
+    (source.practiceSchedules || []).forEach(game => {
+        addTeam(game.div1 || game.division1 || game.division || getTeamDivision(game.team1), game.team1);
+        addTeam(game.div2 || game.division2 || game.division || getTeamDivision(game.team2), game.team2);
+    });
+
+    Object.keys(map).forEach(div => map[div].sort((a,b) => String(a).localeCompare(String(b))));
+    teamsByDivision = map;
+    writeJson(DIVISIONS_KEY, map);
+    return map;
+}
+
+async function adminReloadContentForEditors() {
+    await loadBackendSchedule();
+    adminBuildTeamMapFromAllSources();
+    return scheduleContent || content || getDefaultBackendContent();
+}
+
+function adminGetTeamsForDivision(division) {
+    adminBuildTeamMapFromAllSources();
+    const div = adminNormalizeDivisionKey(division);
+    if (div === 'ALL') return [...new Set(Object.values(teamsByDivision).flat())].filter(Boolean).sort();
+    return (teamsByDivision[div] || []).slice().sort();
+}
+
+function adminPopulateTeamSelects() {
+    const divisionEl = document.getElementById('game-division');
+    const division = divisionEl ? divisionEl.value : '';
+    const teams = adminGetTeamsForDivision(division);
+    ['game-team1','game-team2'].forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        const previous = sel.value;
+        sel.disabled = !division || teams.length === 0;
+        sel.innerHTML = '<option value="">Select Team</option>' + teams.map(t => `<option value="${escapeAdminHtml(t)}">${escapeAdminHtml(t)}</option>`).join('');
+        if (previous && teams.includes(previous)) sel.value = previous;
+    });
+    const status = document.getElementById('admin-status');
+    if (status && division && teams.length === 0) status.textContent = 'No teams found for the selected division. Add teams in Division & Team Management first.';
+}
+
+function adminRenderScheduledGameOptions() {
+    const sel = document.getElementById('scheduled-game-select');
+    const list = document.getElementById('scores-list');
+    if (!sel) return;
+    const previous = sel.value;
+    const games = getSchedule().filter(g => g && g.id && g.date && g.team1 && g.team2);
+    sel.innerHTML = '<option value="">Select Scheduled Game</option>' + games.map(g => {
+        const label = `${g.date || 'TBD'} ${g.time || ''} | ${g.park || 'TBD'} | ${g.team1 || 'TBD'} vs ${g.team2 || 'TBD'}`;
+        return `<option value="${escapeAdminHtml(g.id)}">${escapeAdminHtml(label)}</option>`;
+    }).join('');
+    if (previous && games.some(g => g.id === previous)) sel.value = previous;
+    const del = document.getElementById('delete-scheduled-game-btn');
+    if (del) del.disabled = !sel.value;
+    if (list) {
+        const scored = games.filter(g => g.score1 !== '' && g.score2 !== '' && g.score1 != null && g.score2 != null);
+        list.innerHTML = scored.length ? scored.map(g => `<li>${escapeAdminHtml(g.date || '')} ${escapeAdminHtml(g.time || '')} | ${escapeAdminHtml(g.team1)} ${escapeAdminHtml(g.score1)}-${escapeAdminHtml(g.score2)} ${escapeAdminHtml(g.team2)}</li>`).join('') : '<li>No scored games yet.</li>';
+    }
+}
+
+function adminPopulatePracticeTeams(divId, teamId) {
+    const div = document.getElementById(divId)?.value || '';
+    const teams = adminGetTeamsForDivision(div);
+    const sel = document.getElementById(teamId);
+    if (!sel) return;
+    const previous = sel.value;
+    sel.disabled = !div || teams.length === 0;
+    sel.innerHTML = '<option value="">Select Team</option>' + teams.map(t => `<option value="${escapeAdminHtml(t)}">${escapeAdminHtml(t)}</option>`).join('');
+    if (previous && teams.includes(previous)) sel.value = previous;
+}
+
+function adminRenderPracticeGames() {
+    const list = document.getElementById('practice-games-list');
+    if (!list) return;
+    const games = getPracticeSchedule();
+    list.innerHTML = games.length ? games.map(g => `<li>${escapeAdminHtml(g.date || 'TBD')} ${escapeAdminHtml(g.time || '')} | ${escapeAdminHtml(g.park || 'TBD')} | ${escapeAdminHtml(g.team1 || 'TBD')} vs ${escapeAdminHtml(g.team2 || 'TBD')} (${escapeAdminHtml(g.status || 'scheduled')}) <button type="button" data-del-practice="${escapeAdminHtml(g.id)}">Delete</button></li>`).join('') : '<li>No practice/scrimmage games scheduled yet.</li>';
+    list.querySelectorAll('[data-del-practice]').forEach(btn => btn.addEventListener('click', async () => {
+        if (!isAdminLoggedIn()) { document.getElementById('practice-admin-status').textContent = 'Sign in as admin first.'; return; }
+        const ok = await savePracticeSchedule(getPracticeSchedule().filter(g => g.id !== btn.dataset.delPractice));
+        adminRenderPracticeGames();
+        const status = document.getElementById('practice-admin-status');
+        if (status) status.textContent = ok ? 'Practice/scrimmage game deleted from backend.' : 'Practice/scrimmage game deleted locally, but backend save failed.';
+    }));
+}
+
+function adminReplaceNode(id) {
+    const node = document.getElementById(id);
+    if (!node || !node.parentNode) return null;
+    const clone = node.cloneNode(true);
+    node.parentNode.replaceChild(clone, node);
+    return clone;
+}
+
+function adminBindStableEditorHandlers() {
+    const scheduleForm = adminReplaceNode('schedule-form');
+    const scoreForm = adminReplaceNode('score-form');
+    const practiceForm = adminReplaceNode('practice-form');
+    const gameDivision = adminReplaceNode('game-division');
+    const gameSelect = adminReplaceNode('scheduled-game-select');
+    const deleteGameBtn = adminReplaceNode('delete-scheduled-game-btn');
+    const practiceDiv1 = adminReplaceNode('practice-div1');
+    const practiceDiv2 = adminReplaceNode('practice-div2');
+    const refreshBtn = adminReplaceNode('refresh-admin-access');
+    const practiceRefreshBtn = adminReplaceNode('practice-refresh-admin');
+
+    gameDivision?.addEventListener('change', adminPopulateTeamSelects);
+    gameSelect?.addEventListener('change', e => {
+        const btn = document.getElementById('delete-scheduled-game-btn');
+        if (btn) btn.disabled = !e.target.value;
+        const game = getSchedule().find(g => g.id === e.target.value);
+        if (game) {
+            const s1 = document.getElementById('score-team1');
+            const s2 = document.getElementById('score-team2');
+            if (s1) s1.placeholder = `${game.team1} Score`;
+            if (s2) s2.placeholder = `${game.team2} Score`;
+        }
+    });
+    practiceDiv1?.addEventListener('change', () => adminPopulatePracticeTeams('practice-div1','practice-team1'));
+    practiceDiv2?.addEventListener('change', () => adminPopulatePracticeTeams('practice-div2','practice-team2'));
+
+    scheduleForm?.addEventListener('submit', async e => {
+        e.preventDefault();
+        if (!isAdminLoggedIn()) { document.getElementById('admin-status').textContent = 'Sign in as admin first.'; return; }
+        const game = {
+            id: adminEditingGameId || `game-${Date.now()}`,
+            date: document.getElementById('game-date').value,
+            time: document.getElementById('game-time').value,
+            park: document.getElementById('game-park').value,
+            division: adminNormalizeDivisionKey(document.getElementById('game-division').value),
+            team1: document.getElementById('game-team1').value,
+            team2: document.getElementById('game-team2').value,
+            status: document.getElementById('game-status').value || 'scheduled',
+            score1: '', score2: ''
+        };
+        if (!game.date || !game.time || !game.park || !game.division || !game.team1 || !game.team2) { document.getElementById('admin-status').textContent = 'Complete all schedule fields.'; return; }
+        if (game.team1 === game.team2) { document.getElementById('admin-status').textContent = 'Teams must be different.'; return; }
+        const games = getSchedule().filter(g => g.id !== game.id);
+        const err = validateSchedulingConstraints({ date: game.date, time: game.time, park: game.park, team1: game.team1, team2: game.team2, existingGames: games, ignoreId: game.id });
+        if (err) { document.getElementById('admin-status').textContent = err; return; }
+        games.push(game);
+        const ok = await saveSchedule(games);
+        await adminReloadContentForEditors();
+        scheduleForm.reset();
+        document.getElementById('game-date').value = formatDateKey(new Date());
+        adminPopulateTeamSelects();
+        adminRenderScheduledGameOptions();
+        document.getElementById('admin-status').textContent = ok ? 'Scheduled game saved to backend.' : 'Scheduled game saved locally, but backend save failed.';
+    });
+
+    scoreForm?.addEventListener('submit', async e => {
+        e.preventDefault();
+        if (!canManageScores()) { document.getElementById('score-admin-status').textContent = 'Sign in as admin or umpire first.'; return; }
+        const id = document.getElementById('scheduled-game-select').value;
+        const games = getSchedule();
+        const game = games.find(g => g.id === id);
+        if (!game) { document.getElementById('score-admin-status').textContent = 'Select an existing scheduled game.'; return; }
+        game.score1 = document.getElementById('score-team1').value;
+        game.score2 = document.getElementById('score-team2').value;
+        const ok = await saveSchedule(games);
+        await adminReloadContentForEditors();
+        adminRenderScheduledGameOptions();
+        scoreForm.reset();
+        document.getElementById('score-admin-status').textContent = ok ? 'Score saved to backend. Standings updated.' : 'Score saved locally, but backend standings save failed.';
+    });
+
+    deleteGameBtn?.addEventListener('click', async () => {
+        const id = document.getElementById('scheduled-game-select').value;
+        if (!id || !isAdminLoggedIn()) return;
+        if (!confirm('Delete this scheduled game?')) return;
+        const ok = await saveSchedule(getSchedule().filter(g => g.id !== id));
+        await adminReloadContentForEditors();
+        adminRenderScheduledGameOptions();
+        document.getElementById('admin-status').textContent = ok ? 'Scheduled game deleted from backend.' : 'Scheduled game deleted locally, but backend save failed.';
+    });
+
+    practiceForm?.addEventListener('submit', async e => {
+        e.preventDefault();
+        if (!isAdminLoggedIn()) { document.getElementById('practice-admin-status').textContent = 'Sign in as admin first.'; return; }
+        const game = {
+            id: adminEditingPracticeId || `practice-${Date.now()}`,
+            date: document.getElementById('practice-date').value,
+            time: document.getElementById('practice-time').value,
+            park: document.getElementById('practice-park').value,
+            div1: adminNormalizeDivisionKey(document.getElementById('practice-div1').value),
+            team1: document.getElementById('practice-team1').value,
+            div2: adminNormalizeDivisionKey(document.getElementById('practice-div2').value),
+            team2: document.getElementById('practice-team2').value,
+            status: document.getElementById('practice-status').value || 'scheduled'
+        };
+        if (!game.date || !game.time || !game.park || !game.div1 || !game.team1 || !game.div2 || !game.team2) { document.getElementById('practice-admin-status').textContent = 'Complete all practice/scrimmage fields.'; return; }
+        if (game.team1 === game.team2) { document.getElementById('practice-admin-status').textContent = 'Teams must be different.'; return; }
+        const games = getPracticeSchedule().filter(g => g.id !== game.id);
+        games.push(game);
+        const ok = await savePracticeSchedule(games);
+        await adminReloadContentForEditors();
+        practiceForm.reset();
+        document.getElementById('practice-date').value = formatDateKey(new Date());
+        adminRenderPracticeGames();
+        document.getElementById('practice-admin-status').textContent = ok ? 'Practice/scrimmage game saved to backend.' : 'Practice/scrimmage game saved locally, but backend save failed.';
+    });
+
+    refreshBtn?.addEventListener('click', async () => {
+        renderAuthState();
+        await adminReloadContentForEditors();
+        adminPopulateTeamSelects();
+        adminRenderScheduledGameOptions();
+        const status = document.getElementById('admin-status');
+        if (status) status.textContent = isAdminLoggedIn() ? 'Admin access refreshed. Teams and scheduled games reloaded from backend.' : 'Sign in as admin first.';
+    });
+    practiceRefreshBtn?.addEventListener('click', async () => {
+        renderAuthState();
+        await adminReloadContentForEditors();
+        adminPopulatePracticeTeams('practice-div1','practice-team1');
+        adminPopulatePracticeTeams('practice-div2','practice-team2');
+        adminRenderPracticeGames();
+        const status = document.getElementById('practice-admin-status');
+        if (status) status.textContent = isAdminLoggedIn() ? 'Admin access refreshed. Practice/scrimmage schedule reloaded.' : 'Sign in as admin first.';
+    });
+}
+
+async function initializeAdminScheduleDashboard() {
+    await adminReloadContentForEditors();
+    const today = formatDateKey(new Date());
+    if (document.getElementById('game-date')) document.getElementById('game-date').value = today;
+    if (document.getElementById('practice-date')) document.getElementById('practice-date').value = today;
+    adminBindStableEditorHandlers();
+    adminPopulateTeamSelects();
+    adminPopulatePracticeTeams('practice-div1','practice-team1');
+    adminPopulatePracticeTeams('practice-div2','practice-team2');
+    adminRenderScheduledGameOptions();
+    adminRenderPracticeGames();
+    const adminStatus = document.getElementById('admin-status');
+    if (adminStatus) adminStatus.textContent = 'Schedule editor loaded from backend.';
+    const scoreStatus = document.getElementById('score-admin-status');
+    if (scoreStatus) scoreStatus.textContent = 'Select an existing game to enter scores.';
+    const practiceStatus = document.getElementById('practice-admin-status');
+    if (practiceStatus) practiceStatus.textContent = 'Practice/scrimmage editor loaded from backend.';
+}
+
+async function persistSeasonSettingsToBackend(season) {
+    try {
+        await adminReloadContentForEditors();
+        scheduleContent = Object.assign(getDefaultBackendContent(), content || {}, scheduleContent || {}, { seasonSettings: season, activeSeason: season });
+        content = Object.assign({}, content || {}, scheduleContent);
+        return await persistBackendContent();
+    } catch (e) {
+        console.warn('Season backend save failed', e);
+        return false;
+    }
+}
+
+function bindSeasonBackendSavePatch() {
+    const form = document.getElementById('season-form');
+    if (!form || form.dataset.backendSeasonPatch === '1') return;
+    form.dataset.backendSeasonPatch = '1';
+    form.addEventListener('submit', async () => {
+        setTimeout(async () => {
+            const season = readJson(SEASON_KEY, null);
+            if (!season) return;
+            const ok = await persistSeasonSettingsToBackend(season);
+            const status = document.getElementById('auth-status') || document.getElementById('admin-status');
+            if (status) status.textContent = ok ? `${season.name} ${season.year} season saved to backend.` : `${season.name} ${season.year} season saved locally, but backend save failed.`;
+        }, 0);
+    }, true);
+}
+
+bindSeasonBackendSavePatch();
 
 initializeAdminScheduleDashboard();
 

@@ -441,6 +441,7 @@ footer {
               <div class="management-grid">
                 <div class="admin-panel"><h3>Backend Connection</h3><p class="admin-status" id="backend-dashboard-status">Logged-in admin users save directly to the backend. Manual API key entry is optional.</p><input id="backend-base-input" type="text" placeholder="Backend URL"><input id="admin-api-key-input" type="password" placeholder="Optional fallback API key"><div class="score-actions"><button type="button" id="save-admin-settings-btn">Save Settings</button><button type="button" id="check-backend-btn">Check Backend</button></div></div>
                 <div class="admin-panel"><h3>Content Summary</h3><p id="dashboard-summary">Loading content counts...</p><p class="admin-status">Schedules, practices, scores, announcements, teams, rosters, divisions, payment info, and homepage slideshow media are managed in their dedicated dashboard sections.</p></div>
+                <div class="admin-panel"><h3>One-Time Data Migration</h3><p class="admin-status" id="migration-status">Copies existing browser-saved schedule and announcement data to the Render backend without deleting local data.</p><div class="score-actions"><button type="button" id="migrate-local-content-btn">Migrate Local Schedule & Announcements</button><button type="button" id="preview-local-content-btn">Preview Local Data</button></div></div>
                 <div class="admin-panel"><h3>Zelle / Payment Info</h3><textarea id="zelle" rows="5" placeholder="Zelle JSON"></textarea><button type="button" id="saveZelleBtn" class="admin-form-btn">Save Zelle Info</button></div>
                 <div class="admin-panel"><h3>Homepage Slideshow Media</h3><p class="admin-status" id="slideshow-upload-status">Upload homepage slideshow photos here. Uploaded images are written to backend content.</p><input id="admin-slideshow-file" type="file" accept="image/*"><input id="admin-slideshow-caption" type="text" placeholder="Optional caption"><div class="score-actions"><button type="button" id="upload-slideshow-btn">Upload Slideshow Image</button><button type="button" id="refresh-slideshow-btn">Refresh Slideshow List</button></div><ul id="admin-slideshow-list" class="admin-list"></ul></div>
               </div>
@@ -883,6 +884,9 @@ const uploadSlideshowBtn = document.getElementById('upload-slideshow-btn');
 const refreshSlideshowBtn = document.getElementById('refresh-slideshow-btn');
 const adminSlideshowList = document.getElementById('admin-slideshow-list');
 const slideshowUploadStatus = document.getElementById('slideshow-upload-status');
+const migrateLocalContentBtn = document.getElementById('migrate-local-content-btn');
+const previewLocalContentBtn = document.getElementById('preview-local-content-btn');
+const migrationStatus = document.getElementById('migration-status');
 
 function readJson(key, fallback) {
     try {
@@ -1464,7 +1468,9 @@ function renderUserAccounts() {
 }
 
 function renderAnnouncements() {
-    const announcements = readJson(ANNOUNCEMENTS_KEY, []);
+    const backendAnnouncements = content && Array.isArray(content.announcements) ? content.announcements : null;
+    const announcements = backendAnnouncements || readJson(ANNOUNCEMENTS_KEY, []);
+    if (!activeAnnouncementsList) return;
     activeAnnouncementsList.innerHTML = '';
 
     if (!announcements.length) {
@@ -1494,6 +1500,8 @@ function renderAnnouncements() {
             archived.unshift({ ...item, archivedAt: new Date().toISOString() });
             writeJson(ANNOUNCEMENTS_KEY, remaining);
             writeJson(ARCHIVE_KEY, archived);
+            content = Object.assign({}, content || {}, { announcements: remaining, archivedAnnouncements: archived });
+            saveAnnouncementsToBackend(remaining, archived).catch(err => console.warn('Announcement archive backend sync failed:', err));
             renderAnnouncements();
             authStatus.textContent = 'Announcement archived to Meeting Notes.';
         });
@@ -1594,8 +1602,11 @@ announcementForm.addEventListener('submit', event => {
         message
     });
     writeJson(ANNOUNCEMENTS_KEY, announcements);
+    content = Object.assign({}, content || {}, { announcements });
+    saveAnnouncementsToBackend(announcements).catch(err => console.warn('Announcement backend sync failed:', err));
     announcementForm.reset();
     renderAnnouncements();
+    updateDashboardSummary?.();
     authStatus.textContent = 'Announcement published.';
 });
 
@@ -1605,20 +1616,138 @@ function updateDashboardSummary() {
     const games = (content.gameSchedules || []).length;
     const scores = (content.gameScores || []).length;
     const practices = (content.practiceSchedules || []).length;
+    const announcements = (content.announcements || readJson(ANNOUNCEMENTS_KEY, []) || []).length;
     const summary = document.getElementById('dashboard-summary');
-    if (summary) summary.textContent = `Games: ${games} | Completed scores: ${scores} | Practices: ${practices}`;
+    if (summary) summary.textContent = `Games: ${games} | Completed scores: ${scores} | Practices: ${practices} | Announcements: ${announcements}`;
     const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
     setText('dash-schedule-count', games);
     setText('dash-score-count', scores);
 }
+
+function getFirstLocalArray(keys) {
+    for (const key of keys) {
+        const value = readJson(key, null);
+        if (Array.isArray(value) && value.length) return value;
+    }
+    return [];
+}
+
+function mergeByStableKey(existing, incoming, keyBuilder) {
+    const merged = [];
+    const seen = new Set();
+    [...(incoming || []), ...(existing || [])].forEach(item => {
+        if (!item) return;
+        const key = keyBuilder(item);
+        if (seen.has(key)) return;
+        seen.add(key);
+        merged.push(item);
+    });
+    return merged;
+}
+
+function getLocalMigrationPayload() {
+    const localSchedules = getFirstLocalArray([
+        SCHEDULE_KEY,
+        'lamslWeeklyScheduleV3',
+        'lamslWeeklyScheduleV2',
+        'lamslSchedule',
+        'schedule'
+    ]);
+    const localAnnouncements = getFirstLocalArray([
+        ANNOUNCEMENTS_KEY,
+        'lamslAnnouncements',
+        'lamslAnnouncementsV2',
+        'announcements'
+    ]);
+    const localArchivedAnnouncements = getFirstLocalArray([
+        ARCHIVE_KEY,
+        'lamslArchivedAnnouncements',
+        'archivedAnnouncements'
+    ]);
+    return { localSchedules, localAnnouncements, localArchivedAnnouncements };
+}
+
+function previewLocalMigrationData() {
+    const { localSchedules, localAnnouncements, localArchivedAnnouncements } = getLocalMigrationPayload();
+    if (migrationStatus) {
+        migrationStatus.textContent = `Local data found: ${localSchedules.length} scheduled games, ${localAnnouncements.length} active announcements, ${localArchivedAnnouncements.length} archived announcements. Nothing was changed.`;
+    }
+}
+
+async function migrateLocalContentToBackend() {
+    if (!isAdminLoggedIn()) {
+        if (migrationStatus) migrationStatus.textContent = 'Sign in as admin before running migration.';
+        return;
+    }
+    const { localSchedules, localAnnouncements, localArchivedAnnouncements } = getLocalMigrationPayload();
+    if (!localSchedules.length && !localAnnouncements.length && !localArchivedAnnouncements.length) {
+        if (migrationStatus) migrationStatus.textContent = 'No local schedule or announcement data found to migrate.';
+        return;
+    }
+    try {
+        if (migrationStatus) migrationStatus.textContent = 'Migrating local schedule and announcement data to backend...';
+        const res = await fetch(apiUrl('/api/content'), { cache: 'no-store' });
+        const current = Object.assign(getDefaultBackendContent(), res.ok ? await res.json() : {}, content || {}, scheduleContent || {});
+        const mergedSchedules = mergeByStableKey(current.gameSchedules || [], localSchedules, game => game.id || [game.date, game.time, game.park, game.team1, game.team2].join('|'));
+        const mergedAnnouncements = mergeByStableKey(current.announcements || [], localAnnouncements, item => item.id || [item.title, item.date, item.message].join('|'));
+        const mergedArchived = mergeByStableKey(current.archivedAnnouncements || [], localArchivedAnnouncements, item => item.id || [item.title, item.date, item.message, item.archivedAt].join('|'));
+        const migrated = Object.assign({}, current, {
+            gameSchedules: mergedSchedules,
+            announcements: mergedAnnouncements,
+            archivedAnnouncements: mergedArchived,
+            gameScores: mergedSchedules.filter(g => g.score1 !== '' && g.score2 !== '' && g.score1 != null && g.score2 != null),
+            standings: buildStandingsFromGames(mergedSchedules)
+        });
+        const updateRes = await fetch(apiUrl('/api/update'), {
+            method: 'POST',
+            headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify(migrated)
+        });
+        const result = await updateRes.json().catch(() => ({}));
+        if (!updateRes.ok || result.success === false) throw new Error(result.error || result.message || `HTTP ${updateRes.status}`);
+        content = Object.assign({}, migrated, result.content || {});
+        scheduleContent = Object.assign(getDefaultBackendContent(), content);
+        writeJson(SCHEDULE_KEY, content.gameSchedules || []);
+        writeJson(ANNOUNCEMENTS_KEY, content.announcements || []);
+        if (Array.isArray(content.archivedAnnouncements)) writeJson(ARCHIVE_KEY, content.archivedAnnouncements);
+        writeJson(STANDINGS_KEY, content.standings || buildStandingsFromGames(content.gameSchedules || []));
+        renderAnnouncements();
+        updateDashboardSummary();
+        renderAdminSlideshowList?.();
+        if (migrationStatus) migrationStatus.textContent = `Migration complete. Backend now has ${content.gameSchedules?.length || 0} scheduled games and ${content.announcements?.length || 0} active announcements. Local browser data was not deleted.`;
+        logAdminAction?.('migrate_local_content_to_backend', { schedules: localSchedules.length, announcements: localAnnouncements.length });
+    } catch (err) {
+        if (migrationStatus) migrationStatus.textContent = 'Migration failed: ' + err.message;
+    }
+}
+
+async function saveAnnouncementsToBackend(announcements, archivedAnnouncements) {
+    if (!isAdminLoggedIn()) return false;
+    const current = Object.assign(getDefaultBackendContent(), content || {}, scheduleContent || {});
+    current.announcements = Array.isArray(announcements) ? announcements : readJson(ANNOUNCEMENTS_KEY, []);
+    if (Array.isArray(archivedAnnouncements)) current.archivedAnnouncements = archivedAnnouncements;
+    const response = await fetch(apiUrl('/api/update'), {
+        method: 'POST',
+        headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(current)
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || result.success === false) throw new Error(result.error || result.message || `HTTP ${response.status}`);
+    content = Object.assign({}, current, result.content || {});
+    scheduleContent = Object.assign(getDefaultBackendContent(), content);
+    return true;
+}
+
 async function loadAdminContentDashboard() {
     try {
         const res = await fetch(apiUrl('/api/content'));
         const data = res.ok ? await res.json() : {};
         content = data || {};
+        if (Array.isArray(content.announcements)) writeJson(ANNOUNCEMENTS_KEY, content.announcements);
         const zelleEl = document.getElementById('zelle');
         if (zelleEl) zelleEl.value = JSON.stringify(content.zelle || {}, null, 2);
         updateDashboardSummary();
+        renderAnnouncements?.();
     } catch (err) {
         console.warn('Failed to load site content from backend:', err);
     }
@@ -1691,6 +1820,8 @@ async function saveDashboardContent(fields) {
 }
 loadAdminContentDashboard();
 document.getElementById('saveZelleBtn')?.addEventListener('click', () => saveDashboardContent(['zelle']));
+previewLocalContentBtn?.addEventListener('click', previewLocalMigrationData);
+migrateLocalContentBtn?.addEventListener('click', migrateLocalContentToBackend);
 
 uploadSlideshowBtn?.addEventListener('click', uploadAdminSlideshowImage);
 refreshSlideshowBtn?.addEventListener('click', async () => { await loadBackendSchedule(); renderAdminSlideshowList(); if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Slideshow list refreshed.'; });

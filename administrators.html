@@ -386,6 +386,86 @@ footer {
 .delete-managed-image-btn { background: #9b1c1c; color: #fff; border: 0; border-radius: 6px; padding: 8px 12px; cursor: pointer; }
 .delete-managed-image-btn:hover { filter: brightness(1.1); }
 
+
+
+/* ===== UNIFORM ADMIN DASHBOARD THEME ===== */
+.card:not(.dashboard-hero) {
+    border: 1px solid #d8e0e8;
+    border-top: 4px solid #C86A2F;
+    box-shadow: 0 3px 14px rgba(18, 50, 74, 0.10);
+}
+.card:not(.dashboard-hero) > h2 {
+    color: #12324A;
+    border-bottom: 1px solid #d8e0e8;
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+.card:not(.dashboard-hero) h3,
+.card:not(.dashboard-hero) h4 {
+    color: #12324A;
+}
+.card:not(.dashboard-hero) .admin-section-title {
+    background: #f8fbfd;
+    border: 1px solid #d8e0e8;
+    border-left: 6px solid #C86A2F;
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+.management-grid,
+.practice-layout,
+.division-manager-grid {
+    align-items: stretch;
+}
+.admin-panel,
+.practice-body,
+.division-manager,
+.season-current,
+.admin-only {
+    background: #f8fbfd;
+    border: 1px solid #d8e0e8;
+    border-top: 4px solid #12324A;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(18, 50, 74, 0.06);
+}
+.admin-panel h3,
+.practice-body h3,
+.division-manager h3,
+.season-current h3 {
+    margin-top: 0;
+}
+.admin-form,
+.season-form,
+.admin-inline,
+.division-manager-grid {
+    background: #ffffff;
+    border: 1px solid #e4ebf1;
+    border-radius: 10px;
+    padding: 12px;
+}
+.admin-list li,
+.division-team-list li {
+    border-left: 4px solid #C86A2F;
+}
+button,
+.admin-form button,
+.season-form button,
+.admin-inline button,
+.division-manager-grid button,
+.admin-list button,
+.remove-btn {
+    transition: background .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+button:hover,
+.admin-form button:hover,
+.season-form button:hover,
+.admin-inline button:hover,
+.division-manager-grid button:hover,
+.admin-list button:hover,
+.remove-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(18, 50, 74, 0.16);
+}
+
 </style>
 </head>
 
@@ -425,7 +505,7 @@ footer {
         <section class="card dashboard-hero">
             <div>
                 <h2>Administrator Dashboard</h2>
-                <p>Manage schedules, scores, announcements, teams, rosters, divisions, and league content from one dashboard.</p>
+                <p>Manage schedules, scores, announcements, divisions, teams, and league content from one dashboard.</p>
                 <div class="quick-actions">
                     <a href="#schedule-dashboard">Schedules & Scores</a>
                     <a href="#content-tools">Site Content</a>
@@ -449,7 +529,7 @@ footer {
               </div>
               <div class="management-grid">
                 <div class="admin-panel"><h3>Backend Connection</h3><p class="admin-status" id="backend-dashboard-status">Logged-in admin users save directly to the backend. Manual API key entry is optional.</p><input id="backend-base-input" type="text" placeholder="Backend URL"><input id="admin-api-key-input" type="password" placeholder="Optional fallback API key"><div class="score-actions"><button type="button" id="save-admin-settings-btn">Save Settings</button><button type="button" id="check-backend-btn">Check Backend</button></div></div>
-                <div class="admin-panel"><h3>Content Summary</h3><p id="dashboard-summary">Loading content counts...</p><p class="admin-status">Schedules, practices, scores, announcements, teams, rosters, divisions, payment info, and homepage slideshow media are managed in their dedicated dashboard sections.</p></div>
+                <div class="admin-panel"><h3>Content Summary</h3><p id="dashboard-summary">Loading content counts...</p><p class="admin-status">Schedules, practices, scores, announcements, teams, divisions, payment info, and homepage slideshow media are managed in their dedicated dashboard sections.</p></div>
                 <div class="admin-panel"><h3>One-Time Data Migration</h3><p class="admin-status" id="migration-status">Copies existing browser-saved schedule and announcement data to the Render backend without deleting local data.</p><div class="score-actions"><button type="button" id="migrate-local-content-btn">Migrate Local Schedule & Announcements</button><button type="button" id="preview-local-content-btn">Preview Local Data</button></div></div>
                 <div class="admin-panel"><h3>Zelle / Payment Info</h3><textarea id="zelle" rows="5" placeholder="Zelle JSON"></textarea><button type="button" id="saveZelleBtn" class="admin-form-btn">Save Zelle Info</button></div>
                 <div class="admin-panel image-management-panel"><h3>Image Uploads</h3><p class="admin-status" id="slideshow-upload-status">Choose where to save the image. Homepage images display in the homepage slideshow. Event/fundraiser images save to EFimages.</p><label for="admin-image-destination"><strong>Image Destination</strong></label><select id="admin-image-destination"><option value="homepage">Homepage slideshow</option><option value="events">Events / Fundraisers</option></select><input id="admin-slideshow-file" type="file" accept="image/*"><input id="admin-slideshow-caption" type="text" placeholder="Optional caption"><div class="score-actions"><button type="button" id="upload-slideshow-btn">Upload Image</button><button type="button" id="refresh-slideshow-btn">Refresh Image Lists</button></div></div>
@@ -619,7 +699,6 @@ footer {
                         <option value="">Select role</option>
                         <option value="admin">Admin</option>
                         <option value="umpire">Umpire</option>
-                        <option value="team-manager">Team Manager</option>
                     </select>
                     <button id="create-admin-btn" type="button">Create User</button>
                 </div>
@@ -644,19 +723,6 @@ footer {
 
                         <ul id="division-team-list" class="division-team-list full-row"></ul>
 
-                        <div class="assignment-panel full-row">
-                            <h4>Team Manager Assignments</h4>
-                            <div class="admin-inline">
-                                <select id="assign-team-select" aria-label="Select team"></select>
-                                <select id="assign-manager-select" aria-label="Select manager"></select>
-                                <button id="assign-manager-btn" type="button">Assign Manager</button>
-                            </div>
-                            <ul id="team-manager-assignments-list" class="admin-list"></ul>
-                            <div class="manager-upload-controls">
-                                <input id="admin-roster-file" type="file" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-                                <button id="upload-all-rosters-admin-btn" type="button">Upload All Rosters</button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -730,7 +796,6 @@ const SCHEDULE_KEY = 'lamslWeeklyScheduleV3';
 const PRACTICE_KEY = 'lamslPracticeScheduleV1';
 const ROSTER_KEY = 'lamslTeamRostersV1';
 const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
-const TEAM_MANAGER_ASSIGNMENTS_KEY = 'lamslTeamManagerAssignmentsV1';
 const STANDINGS_KEY = 'lamslStandingsV1';
 
 // Backend base URL: always use Render-hosted backend for development
@@ -906,12 +971,6 @@ const deleteDivisionButton = document.getElementById('delete-division-btn');
 const newTeamInput = document.getElementById('new-team-name');
 const addTeamButton = document.getElementById('add-team-btn');
 const divisionTeamList = document.getElementById('division-team-list');
-const assignTeamSelect = document.getElementById('assign-team-select');
-const assignManagerSelect = document.getElementById('assign-manager-select');
-const assignManagerButton = document.getElementById('assign-manager-btn');
-const teamManagerAssignmentsList = document.getElementById('team-manager-assignments-list');
-const adminRosterFile = document.getElementById('admin-roster-file');
-const uploadAllRostersAdminBtn = document.getElementById('upload-all-rosters-admin-btn');
 // Site Content Management elements
 const zelle = document.getElementById('zelle');
 const adminSlideshowFile = document.getElementById('admin-slideshow-file');
@@ -1057,287 +1116,9 @@ async function savePracticeSchedule(games) {
     return await persistBackendContent();
 }
 
-function getTeamManagerAssignments() {
-    return readJson(TEAM_MANAGER_ASSIGNMENTS_KEY, {});
-}
-
-function saveTeamManagerAssignments(assignments) {
-    writeJson(TEAM_MANAGER_ASSIGNMENTS_KEY, assignments);
-}
-
-function getTeamPlayersForTeam(teamName) {
-    const store = readJson(TEAM_PLAYERS_KEY, {});
-    return store[teamName] || { players: [] };
-}
-
-function setTeamPlayersForTeam(teamName, payload) {
-    const store = readJson(TEAM_PLAYERS_KEY, {});
-    store[teamName] = payload;
-    writeJson(TEAM_PLAYERS_KEY, store);
-}
-
-function getTeamManagerUsers() {
-    return readJson(USERS_KEY, []).filter(user => user.role === 'team-manager');
-}
-
-function normalizePlayersFromRows(rows) {
-    return rows.map((row, index) => ({
-        id: row.id || `${Date.now()}-${index}`,
-        name: String(row.Name || row.name || row['Player Name'] || row.Player || '').trim(),
-        position: String(row.Position || row.position || row.Positions || row.Pos || '').trim(),
-        phone: String(row.Phone || row.phone || row['Phone Number'] || row['Contact Phone'] || '').trim(),
-        email: String(row.Email || row.email || row['Email Address'] || '').trim(),
-        gamesPlayed: Number(row['Games Played'] || row.GamesPlayed || row['Games'] || 0) || 0,
-        photo: String(row.Photo || row.photo || '').trim()
-    })).filter(player => player.name);
-}
-
-function getPlayerKey(player) {
-    const name = String(player.name || player.Name || '').trim().toLowerCase();
-    const email = String(player.email || player.Email || '').trim().toLowerCase();
-    const phone = String(player.phone || player.Phone || '').trim().toLowerCase();
-    return `${name}|${email || phone}`;
-}
-
-function populateAssignTeamSelect(selectedDivision = '') {
-    if (!assignTeamSelect) return;
-    const divisionMap = getDivisionMap();
-    const division = selectedDivision || manageDivisionSelect?.value || '';
-    const teams = divisionMap[division] || [];
-    assignTeamSelect.innerHTML = '<option value="">Select team</option>' +
-        teams.map(team => `<option value="${team}">${team}</option>`).join('');
-}
-
-function populateAssignManagerSelect() {
-    if (!assignManagerSelect) return;
-    const managers = getTeamManagerUsers();
-    assignManagerSelect.innerHTML = '<option value="">Select manager</option>' +
-        managers.map(manager => `<option value="${manager.username}">${manager.username}</option>`).join('');
-}
-
-function renderTeamManagerAssignments() {
-    if (!teamManagerAssignmentsList) return;
-    const assignments = getTeamManagerAssignments();
-    const managerUsers = getTeamManagerUsers().map(user => user.username);
-    const entries = Object.entries(assignments);
-
-    teamManagerAssignmentsList.innerHTML = '';
-    if (!entries.length) {
-        const li = document.createElement('li');
-        li.textContent = 'No team manager assignments configured yet.';
-        teamManagerAssignmentsList.appendChild(li);
-        return;
-    }
-
-    entries.forEach(([username, teams]) => {
-        teams.forEach(teamName => {
-            const li = document.createElement('li');
-            li.textContent = `${username} � ${teamName}` + (managerUsers.includes(username) ? '' : ' (manager account not active)');
-            const removeBtn = document.createElement('button');
-            removeBtn.type = 'button';
-            removeBtn.className = 'remove-btn';
-            removeBtn.textContent = 'Unassign';
-            removeBtn.addEventListener('click', () => {
-                unassignTeamManager(username, teamName);
-            });
-            li.appendChild(removeBtn);
-            teamManagerAssignmentsList.appendChild(li);
-        });
-    });
-}
-
-function assignTeamManagerToTeam() {
-    if (!isAdminLoggedIn()) {
-        divisionManagerStatus.textContent = 'Sign in as admin first.';
-        return;
-    }
-    const manager = assignManagerSelect?.value || '';
-    const teamName = assignTeamSelect?.value || '';
-    if (!manager) {
-        divisionManagerStatus.textContent = 'Select a team manager to assign.';
-        return;
-    }
-    if (!teamName) {
-        divisionManagerStatus.textContent = 'Select a team to assign.';
-        return;
-    }
-
-    const assignments = getTeamManagerAssignments();
-    Object.keys(assignments).forEach(existingManager => {
-        assignments[existingManager] = (assignments[existingManager] || []).filter(team => team !== teamName);
-        if (!assignments[existingManager].length) {
-            delete assignments[existingManager];
-        }
-    });
-
-    assignments[manager] = assignments[manager] || [];
-    if (!assignments[manager].includes(teamName)) {
-        assignments[manager].push(teamName);
-    }
-
-    saveTeamManagerAssignments(assignments);
-    renderTeamManagerAssignments();
-    divisionManagerStatus.textContent = `${manager} is now assigned to ${teamName}.`;
-}
-
-function unassignTeamManager(username, teamName) {
-    if (!isAdminLoggedIn()) {
-        divisionManagerStatus.textContent = 'Sign in as admin first.';
-        return;
-    }
-    const assignments = getTeamManagerAssignments();
-    if (!assignments[username]) return;
-
-    assignments[username] = assignments[username].filter(team => team !== teamName);
-    if (!assignments[username].length) {
-        delete assignments[username];
-    }
-    saveTeamManagerAssignments(assignments);
-    renderTeamManagerAssignments();
-    divisionManagerStatus.textContent = `${username} is no longer assigned to ${teamName}.`;
-}
-
-function setAssignmentControlsEnabled(enabled) {
-    [assignTeamSelect, assignManagerSelect, assignManagerButton, adminRosterFile, uploadAllRostersAdminBtn].forEach(control => {
-        if (control) control.disabled = !enabled;
-    });
-}
-
-function normalizeRosterRow(row) {
-    const getValue = key => {
-        const keys = Object.keys(row);
-        const match = keys.find(k => k.toLowerCase() === key.toLowerCase());
-        return match ? String(row[match] || '').trim() : '';
-    };
-    return {
-        Team: getValue('Team').replace(/\s+Regular$/i, ''),
-        Name: getValue('Name'),
-        Position: getValue('Position'),
-        Phone: getValue('Phone'),
-        Email: getValue('Email')
-    };
-}
-
-async function uploadAllRostersByAdmin() {
-    if (!isAdminLoggedIn()) {
-        divisionManagerStatus.textContent = 'Admin access required to upload all rosters.';
-        return;
-    }
-
-    const file = adminRosterFile?.files?.[0];
-    if (!file) {
-        divisionManagerStatus.textContent = 'Choose an Excel/CSV roster file first.';
-        return;
-    }
-
-    const confirmUpload = confirm('Uploading this roster will populate rosters for ALL teams in the spreadsheet. Existing rosters will be merged. Continue?');
-    if (!confirmUpload) {
-        divisionManagerStatus.textContent = 'All rosters upload canceled.';
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = async () => {
-        try {
-            const workbook = XLSX.read(reader.result, { type: 'array' });
-            const sheetName = workbook.SheetNames[0];
-            const sheet = workbook.Sheets[sheetName];
-            const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-            if (!rows.length) {
-                divisionManagerStatus.textContent = 'Roster file appears empty.';
-                return;
-            }
-
-            const headers = ['Team', 'Name', 'Position', 'Phone', 'Email'];
-            const store = readJson(ROSTER_KEY, {});
-            const teamGroups = {};
-
-            rows.forEach(rawRow => {
-                const normalized = normalizeRosterRow(rawRow);
-                if (!normalized.Name || !normalized.Team) return;
-                const teamName = normalized.Team;
-                if (!teamGroups[teamName]) {
-                    teamGroups[teamName] = [];
-                }
-                teamGroups[teamName].push(normalized);
-            });
-
-            let totalAdded = 0;
-            let teamsUpdated = 0;
-
-            Object.entries(teamGroups).forEach(([teamName, teamRows]) => {
-                const existing = store[teamName] || { headers, rows: [] };
-                const existingRows = Array.isArray(existing.rows) ? existing.rows : [];
-                const seen = new Set(existingRows.map(row => {
-                    const normalized = normalizeRosterRow(row);
-                    return `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
-                }));
-
-                const combinedRows = [...existingRows];
-                teamRows.forEach(row => {
-                    const rowKey = `${row.Team}|${row.Name}|${row.Position}|${row.Email}|${row.Phone}`.toLowerCase();
-                    if (!seen.has(rowKey)) {
-                        seen.add(rowKey);
-                        combinedRows.push(row);
-                        totalAdded += 1;
-                    }
-                });
-
-                if (combinedRows.length > existingRows.length) {
-                    store[teamName] = {
-                        headers,
-                        rows: combinedRows,
-                        uploadedAt: new Date().toLocaleString()
-                    };
-                    teamsUpdated += 1;
-
-                    const currentPlayers = Array.isArray(getTeamPlayersForTeam(teamName).players) ? [...getTeamPlayersForTeam(teamName).players] : [];
-                    const existingPlayerKeys = new Set(currentPlayers.map(getPlayerKey));
-                    const incomingPlayers = normalizePlayersFromRows(combinedRows);
-                    incomingPlayers.forEach(player => {
-                        const playerKey = getPlayerKey(player);
-                        if (!existingPlayerKeys.has(playerKey)) {
-                            existingPlayerKeys.add(playerKey);
-                            currentPlayers.push(player);
-                        }
-                    });
-                    if (currentPlayers.length) {
-                        setTeamPlayersForTeam(teamName, { players: currentPlayers, updatedAt: new Date().toLocaleString() });
-                    }
-                }
-            });
-
-            writeJson(ROSTER_KEY, store);
-            const teamPlayers = readJson(TEAM_PLAYERS_KEY, {});
-            try {
-                await ensureBackendSessionToken();
-                const response = await fetch(apiUrl('/api/rosters'), {
-                    method: 'POST',
-                    headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
-                    body: JSON.stringify({ rosters: store, teamPlayers })
-                });
-                const result = await response.json().catch(() => ({}));
-                if (!response.ok || result.success === false) throw new Error(result.error || `HTTP ${response.status}`);
-                divisionManagerStatus.textContent = `All rosters uploaded to backend. ${teamsUpdated} team(s) updated, ${totalAdded} new player(s) added across all teams.`;
-            } catch (error) {
-                divisionManagerStatus.textContent = `Rosters saved locally, but backend roster save failed: ${error.message}`;
-            }
-        } catch (error) {
-            divisionManagerStatus.textContent = `All rosters upload failed: ${error.message}`;
-        }
-    };
-    reader.onerror = () => {
-        divisionManagerStatus.textContent = 'Unable to read roster file.';
-    };
-    reader.readAsArrayBuffer(file);
-}
-
 function renderDivisionManager(selectedDivision = '') {
     fillDivisionSelect(manageDivisionSelect, selectedDivision || (manageDivisionSelect ? manageDivisionSelect.value : ''));
     renderDivisionTeamList();
-    populateAssignTeamSelect(selectedDivision || (manageDivisionSelect ? manageDivisionSelect.value : ''));
-    populateAssignManagerSelect();
-    renderTeamManagerAssignments();
     if (!isAdminLoggedIn()) {
         divisionManagerStatus.textContent = 'Sign in as admin to manage divisions and teams.';
     }
@@ -1371,7 +1152,6 @@ function setDivisionManagerEnabled(enabled) {
             button.disabled = !enabled;
         });
     }
-    setAssignmentControlsEnabled(enabled);
 }
 
 function renderDivisionTeamList() {
@@ -1985,17 +1765,9 @@ createAdminButton.addEventListener('click', () => {
 if (manageDivisionSelect) {
     manageDivisionSelect.addEventListener('change', () => {
         renderDivisionTeamList();
-        populateAssignTeamSelect();
     });
 }
 
-if (assignManagerButton) {
-    assignManagerButton.addEventListener('click', assignTeamManagerToTeam);
-}
-
-if (uploadAllRostersAdminBtn) {
-    uploadAllRostersAdminBtn.addEventListener('click', uploadAllRostersByAdmin);
-}
 
 if (addDivisionButton) {
     addDivisionButton.addEventListener('click', () => {

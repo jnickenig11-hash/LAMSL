@@ -1189,7 +1189,6 @@ const PRACTICE_KEY = 'lamslPracticeScheduleV1';
 const ROSTER_KEY = 'lamslTeamRostersV1';
 const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
 const TEAM_CHECKIN_KEY = 'lamslTeamGameCheckinsV1';
-const TEAM_MANAGER_ASSIGNMENTS_KEY = 'lamslTeamManagerAssignmentsV1';
 
 // Populate rosters from spreadsheet data
 (function() {
@@ -1429,20 +1428,6 @@ function writeJson(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
 }
 
-function getTeamManagerAssignments() {
-    return readJson(TEAM_MANAGER_ASSIGNMENTS_KEY, {});
-}
-
-function isTeamManagerAssignedToTeam(teamName) {
-    const session = readJson(SESSION_KEY, null);
-    if (!session || session.role !== 'team-manager' || !teamName) {
-        return false;
-    }
-    const assignments = getTeamManagerAssignments();
-    const assignedTeams = Array.isArray(assignments[session.username]) ? assignments[session.username] : [];
-    return assignedTeams.includes(teamName);
-}
-
 function isAdminLoggedIn() {
     const session = readJson(SESSION_KEY, null);
     return !!(session && session.role === 'admin');
@@ -1454,13 +1439,7 @@ function hasRole(...roles) {
 }
 
 function canManageTeamContent() {
-    if (isAdminLoggedIn()) {
-        return true;
-    }
-    if (!hasRole('team-manager')) {
-        return false;
-    }
-    return isTeamManagerAssignedToTeam(team);
+    return !!team && hasRole('admin', 'team-manager');
 }
 
 function canCheckInPlayers() {
@@ -2108,19 +2087,14 @@ function normalizePlayerDataFromRoster(rows) {
 function applyRosterUploadAccess() {
     const allowed = canManageTeamContent();
     const isAdmin = hasRole('admin');
-    const session = readJson(SESSION_KEY, null);
-    const managerAssigned = session && session.role === 'team-manager' && isTeamManagerAssignedToTeam(team);
+    const isManager = hasRole('team-manager');
 
     if (!team) {
         setRosterStatus('Select a team to manage roster and player profiles.');
     } else if (isAdmin) {
         setRosterStatus('Admin access confirmed. Upload roster Excel/CSV file for this team.');
-    } else if (managerAssigned) {
-        setRosterStatus('Team Manager access confirmed for this team. Upload roster Excel/CSV file.');
-    } else if (session && session.role === 'team-manager') {
-        const assignments = getTeamManagerAssignments();
-        const assignedTeams = Array.isArray(assignments[session.username]) ? assignments[session.username] : [];
-        setRosterStatus(`Team Manager access granted, but not assigned to ${team}. Assigned teams: ${assignedTeams.length ? assignedTeams.join(', ') : 'none'}.`, true);
+    } else if (isManager) {
+        setRosterStatus('Team Manager access confirmed. Upload roster Excel/CSV file.');
     } else {
         setRosterStatus('Sign in as team manager or admin to upload roster spreadsheets.', true);
     }

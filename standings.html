@@ -388,7 +388,7 @@ async function loadTab(src) {
     }
     contentPanel.innerHTML = '<div class="tab-loading">Loading&hellip;</div>';
     try {
-        const response = await fetch(new URL(src, window.location.href).href);
+        const response = await fetch(new URL(src, window.location.href).href + '?v=' + Date.now(), { cache: 'no-store' });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const html = await response.text();
         const doc  = new DOMParser().parseFromString(html, 'text/html');

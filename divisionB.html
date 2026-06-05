@@ -282,7 +282,27 @@ function readJson(key, fallback){try{const raw=localStorage.getItem(key);return 
 function getTeamDivision(team){for(const [d,teams] of Object.entries(DEFAULT_TEAMS_BY_DIVISION)){if((teams||[]).includes(team)) return d;}return 'All';}
 function buildStandings(games){const out={};Object.entries(DEFAULT_TEAMS_BY_DIVISION).forEach(([d,teams])=>{out[d]={};teams.forEach(t=>out[d][t]={w:0,l:0,t:0,rf:0,ra:0,gp:0});});(games||[]).forEach(g=>{if(g.score1===''||g.score2===''||g.score1==null||g.score2==null)return;const s1=Number(g.score1),s2=Number(g.score2);if(!Number.isFinite(s1)||!Number.isFinite(s2))return;[[g.team1,s1,s2],[g.team2,s2,s1]].forEach(([team,rf,ra])=>{const d=getTeamDivision(team);out[d]=out[d]||{};out[d][team]=out[d][team]||{w:0,l:0,t:0,rf:0,ra:0,gp:0};const r=out[d][team];r.gp++;r.rf+=rf;r.ra+=ra;if(rf>ra)r.w++;else if(rf<ra)r.l++;else r.t++;});});return out;}
 async function getStandings(){try{const res=await fetch(window.apiUrl('/api/content'));if(res.ok){const data=await res.json();const standings=data.standings || buildStandings(data.gameSchedules||[]);localStorage.setItem(STANDINGS_KEY,JSON.stringify(standings));return standings;}}catch(e){}return readJson(STANDINGS_KEY,{});}
-async function updateStandingsTable(){const standings=await getStandings();const division='B';const divStandings=standings[division]||{};document.querySelectorAll('table tr').forEach((row,index)=>{if(index===0)return;const tds=row.querySelectorAll('td');if(tds.length<4)return;const teamLink=tds[0].querySelector('a');if(!teamLink)return;const teamName=teamLink.textContent.trim();const s=divStandings[teamName]||{w:0,l:0,t:0};tds[1].textContent=s.w;tds[2].textContent=s.l;tds[3].textContent=s.t;tds[4].textContent='-';});}
+async function updateStandingsTable(){
+    const standings=await getStandings();
+    const division='B';
+    const divStandings=standings[division]||{};
+    const hasBackendResults=Object.values(divStandings).some(s=>Number(s.gp||0)>0 || Number(s.w||0)>0 || Number(s.l||0)>0 || Number(s.t||0)>0);
+    if(!hasBackendResults) return;
+    document.querySelectorAll('table tr').forEach((row,index)=>{
+        if(index===0)return;
+        const tds=row.querySelectorAll('td');
+        if(tds.length<4)return;
+        const teamLink=tds[0].querySelector('a');
+        if(!teamLink)return;
+        const teamName=teamLink.textContent.trim();
+        const s=divStandings[teamName];
+        if(!s) return;
+        tds[1].textContent=s.w||0;
+        tds[2].textContent=s.l||0;
+        tds[3].textContent=s.t||0;
+        if(tds[4]) tds[4].textContent='-';
+    });
+}
 updateStandingsTable();
 </script>
 

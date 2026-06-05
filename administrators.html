@@ -443,7 +443,7 @@ footer {
                 <div class="admin-panel"><h3>Content Summary</h3><p id="dashboard-summary">Loading content counts...</p><p class="admin-status">Schedules, practices, scores, announcements, teams, rosters, divisions, payment info, and homepage slideshow media are managed in their dedicated dashboard sections.</p></div>
                 <div class="admin-panel"><h3>One-Time Data Migration</h3><p class="admin-status" id="migration-status">Copies existing browser-saved schedule and announcement data to the Render backend without deleting local data.</p><div class="score-actions"><button type="button" id="migrate-local-content-btn">Migrate Local Schedule & Announcements</button><button type="button" id="preview-local-content-btn">Preview Local Data</button></div></div>
                 <div class="admin-panel"><h3>Zelle / Payment Info</h3><textarea id="zelle" rows="5" placeholder="Zelle JSON"></textarea><button type="button" id="saveZelleBtn" class="admin-form-btn">Save Zelle Info</button></div>
-                <div class="admin-panel"><h3>Image Uploads</h3><p class="admin-status" id="slideshow-upload-status">Choose whether this image belongs on the homepage slideshow or the Events &amp; Fundraisers page.</p><label for="admin-image-destination"><strong>Image Destination</strong></label><select id="admin-image-destination"><option value="homepage">Homepage slideshow</option><option value="events">Events / Fundraisers</option></select><input id="admin-slideshow-file" type="file" accept="image/*"><input id="admin-slideshow-caption" type="text" placeholder="Optional caption"><div class="score-actions"><button type="button" id="upload-slideshow-btn">Upload Image</button><button type="button" id="refresh-slideshow-btn">Refresh Image Lists</button></div><ul id="admin-slideshow-list" class="admin-list"></ul></div>
+                <div class="admin-panel"><h3>Image Uploads</h3><p class="admin-status" id="slideshow-upload-status">Choose where to save the image. Existing uploaded images can be deleted below; delete removes the content record and the storage file.</p><label for="admin-image-destination"><strong>Image Destination</strong></label><select id="admin-image-destination"><option value="homepage">Homepage slideshow</option><option value="events">Events / Fundraisers</option></select><input id="admin-slideshow-file" type="file" accept="image/*"><input id="admin-slideshow-caption" type="text" placeholder="Optional caption"><div class="score-actions"><button type="button" id="upload-slideshow-btn">Upload Image</button><button type="button" id="refresh-slideshow-btn">Refresh Image Lists</button></div><ul id="admin-slideshow-list" class="admin-list"></ul></div>
               </div>
             </div>
 
@@ -1787,28 +1787,43 @@ async function loadAdminContentDashboard() {
     }
 }
 
+
+function escapeAdminHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>'"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[ch]));
+}
+function getImageFileName(item) {
+    const raw = item?.filename || item?.name || item?.url || item?.src || item?.path || '';
+    return String(raw).split('/').pop();
+}
+function renderManagedImageItem(item, destination, index) {
+    const url = item.url || item.src || item.path || '';
+    const filename = getImageFileName(item);
+    const caption = item.caption || item.originalName || filename || (destination === 'events' ? 'Event/fundraiser image' : 'Homepage slideshow image');
+    const previewSrc = url ? apiUrl(url) : '';
+    return `<li class="managed-image-row">
+        ${previewSrc ? `<img src="${escapeAdminHtml(previewSrc)}" alt="${escapeAdminHtml(caption)}" style="width:72px;height:48px;object-fit:cover;border-radius:6px;margin-right:10px;vertical-align:middle;">` : ''}
+        <span><strong>${index + 1}. ${escapeAdminHtml(caption)}</strong>${url ? `<br><small>${escapeAdminHtml(url)}</small>` : ''}</span>
+        <button type="button" class="delete-managed-image-btn" data-destination="${escapeAdminHtml(destination)}" data-filename="${escapeAdminHtml(filename)}" style="margin-left:10px;">Delete</button>
+    </li>`;
+}
+
 function renderAdminSlideshowList() {
     if (!adminSlideshowList) return;
     const homepageItems = (scheduleContent && Array.isArray(scheduleContent.slideshow)) ? scheduleContent.slideshow : [];
     const eventItems = (scheduleContent && Array.isArray(scheduleContent.eventFundraiserImages)) ? scheduleContent.eventFundraiserImages : [];
     const lines = [];
     lines.push(`<li><strong>Homepage slideshow:</strong> ${homepageItems.length} image(s)</li>`);
-    homepageItems.slice(0, 10).forEach((item, index) => {
-        const url = item.url || item.src || item.path || '';
-        const caption = item.caption || item.originalName || item.filename || 'Homepage slideshow image';
-        lines.push(`<li>&nbsp;&nbsp;${index + 1}. ${caption} ${url ? `<br><small>${url}</small>` : ''}</li>`);
-    });
+    homepageItems.forEach((item, index) => lines.push(renderManagedImageItem(item, 'homepage', index)));
     lines.push(`<li><strong>Events / Fundraisers:</strong> ${eventItems.length} image(s)</li>`);
-    eventItems.slice(0, 10).forEach((item, index) => {
-        const url = item.url || item.src || item.path || '';
-        const caption = item.caption || item.originalName || item.filename || 'Event/fundraiser image';
-        lines.push(`<li>&nbsp;&nbsp;${index + 1}. ${caption} ${url ? `<br><small>${url}</small>` : ''}</li>`);
-    });
+    eventItems.forEach((item, index) => lines.push(renderManagedImageItem(item, 'events', index)));
     if (!homepageItems.length && !eventItems.length) {
         adminSlideshowList.innerHTML = '<li>No uploaded images are currently saved.</li>';
-        return;
+    } else {
+        adminSlideshowList.innerHTML = lines.join('');
     }
-    adminSlideshowList.innerHTML = lines.join('');
+    adminSlideshowList.querySelectorAll('.delete-managed-image-btn').forEach(button => {
+        button.addEventListener('click', () => deleteManagedImage(button.dataset.destination, button.dataset.filename));
+    });
 }
 
 async function uploadAdminSlideshowImage() {
@@ -1841,6 +1856,37 @@ async function uploadAdminSlideshowImage() {
         if (slideshowUploadStatus) slideshowUploadStatus.textContent = (destination === 'events' ? 'Event/fundraiser image uploaded to EFimages.' : 'Homepage slideshow image uploaded and saved.');
     } catch (error) {
         if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Image upload failed: ' + error.message;
+    }
+}
+
+async function deleteManagedImage(destination, filename) {
+    if (!isAdminLoggedIn()) {
+        if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Admin access required to delete uploaded images.';
+        return;
+    }
+    if (!filename) {
+        if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Delete failed: missing image filename.';
+        return;
+    }
+    const label = destination === 'events' ? 'event/fundraiser image' : 'homepage slideshow image';
+    if (!confirm(`Delete this ${label}? This removes the backend content record and the uploaded file from storage.`)) return;
+    try {
+        if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Deleting image...';
+        await ensureBackendSessionToken();
+        const response = await fetch(apiUrl('/api/delete-image'), {
+            method: 'POST',
+            headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ destination, filename })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.success === false) throw new Error(result.error || result.message || `HTTP ${response.status}`);
+        scheduleContent = Object.assign(getDefaultBackendContent(), scheduleContent || {}, result.content || {});
+        if (typeof content === 'object' && content) content = Object.assign({}, content, scheduleContent);
+        renderAdminSlideshowList();
+        updateDashboardSummary?.();
+        if (slideshowUploadStatus) slideshowUploadStatus.textContent = `Deleted ${filename}.`;
+    } catch (error) {
+        if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Image delete failed: ' + error.message;
     }
 }
 

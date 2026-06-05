@@ -3021,4 +3021,399 @@ initializeAdminScheduleDashboard();
 })();
 </script>
 
+
+<script>
+// ===== AUTHORITATIVE ADMIN TEAM/GAME SELECT SOURCE FIX =====
+// This independent script runs after the older administrator scripts. It uses teams.html
+// and division standings pages as the source for Schedule, Scores & Practices selectors.
+(function(){
+  const FALLBACK_TEAMS = {
+    A: ['La Tribu','Nasty Boyz','Toxic','Titans','White Sox','Legends'],
+    B: ['Cubs','Primos','Dodgers','Diablos','Charros','Doom Squad'],
+    C: ['Demons','Naranjeros','Caballeros','Salvajes','Coyotes','Bandits','Orioles','Goodfellas'],
+    D: ['Strokes','Dirt Bags','Camaradas','Wild Hogz','Los Pericos','Xolos','Desvelados'],
+    E: ['Tigers','Warriors','Falcons','Rangers','Phoenix','Mustangs'],
+    W1: ['Titans','La Tribu','Legends','LAMSL OG\'s','Charros','Goodfellas'],
+    W2: ['Wild Hogz','Showtime','Diablos','Balls Out','Peloteros','Hitmen','Bastards','Coyotes']
+  };
+  const DIVISION_PAGES = {
+    A: 'divisionA.html', B: 'divisionB.html', C: 'divisionC.html', D: 'divisionD.html', E: 'divisionE.html', W1: 'winter1.html', W2: 'winter2.html'
+  };
+  const BACKEND = (window.BACKEND_BASE || 'https://lamsl-backend.onrender.com').replace(/\/$/, '');
+  let lastTeamMap = JSON.parse(JSON.stringify(FALLBACK_TEAMS));
+  let lastGames = [];
+
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function uniq(a){return [...new Set((a||[]).map(x=>String(x||'').trim()).filter(Boolean))].sort((x,y)=>x.localeCompare(y));}
+  function normDiv(v){
+    const raw=String(v||'').trim(); const up=raw.toUpperCase().replace(/^DIVISION\s+/, '');
+    if(up==='WINTER DIV 1'||up==='WINTER DIVISION 1'||up==='WINTER1') return 'W1';
+    if(up==='WINTER DIV 2'||up==='WINTER DIVISION 2'||up==='WINTER2') return 'W2';
+    if(up==='ALL'||up==='ALL DIVISIONS'||!up) return 'ALL';
+    return /^[A-E]$/.test(up)?up:up;
+  }
+  function mergeTeam(map, div, team){
+    const d=normDiv(div); const name=String(team||'').trim(); if(!name) return;
+    const key=(d && d!=='ALL')?d:(Object.keys(map).find(k=>(map[k]||[]).some(t=>t.toLowerCase()===name.toLowerCase())) || 'E');
+    map[key]=map[key]||[]; if(!map[key].some(t=>t.toLowerCase()===name.toLowerCase())) map[key].push(name);
+  }
+  function stableId(game, idx){
+    if(game && game.id) return String(game.id);
+    return ['game',game?.date||'date',game?.time||'time',game?.park||'park',game?.team1||'team1',game?.team2||'team2',idx].join('-').replace(/[^a-zA-Z0-9_-]+/g,'-');
+  }
+  async function fetchJson(url){try{const r=await fetch(url,{cache:'no-store'}); return r.ok?await r.json():null;}catch(e){return null;}}
+  async function fetchText(url){try{const r=await fetch(url,{cache:'no-store'}); return r.ok?await r.text():'';}catch(e){return '';}}
+  function parseTeamsJsObject(html){
+    const out={}; const m=html.match(/const\s+TEAMS_BY_DIVISION\s*=\s*({[\s\S]*?});/); if(!m) return out;
+    try{
+      const obj = Function('return ('+m[1]+');')();
+      Object.entries(obj||{}).forEach(([div,teams]) => { out[normDiv(div)] = uniq(teams); });
+    } catch(e) { console.warn('Could not parse TEAMS_BY_DIVISION from teams.html', e); }
+    return out;
+  }
+  function parseStandingTeams(html){
+    const names=[];
+    const doc=new DOMParser().parseFromString(html,'text/html');
+    doc.querySelectorAll('tbody tr').forEach(tr=>{
+      const first=tr.querySelector('td,th');
+      const txt=(first?.textContent||'').trim();
+      if(txt && !/^team$/i.test(txt) && !/standings/i.test(txt)) names.push(txt);
+    });
+    return uniq(names);
+  }
+  function localSchedules(){try{return JSON.parse(localStorage.getItem('lamslWeeklyScheduleV3')||'[]');}catch(e){return[];}}
+  function localPractice(){try{return JSON.parse(localStorage.getItem('lamslPracticeScheduleV1')||'[]');}catch(e){return[];}}
+
+  async function buildAuthoritativeData(){
+    const map=JSON.parse(JSON.stringify(FALLBACK_TEAMS));
+    const content=await fetchJson(BACKEND+'/api/content') || {};
+    if(content.divisions && typeof content.divisions==='object') Object.entries(content.divisions).forEach(([d,teams])=>(teams||[]).forEach(t=>mergeTeam(map,d,t)));
+    if(Array.isArray(content.teams)) content.teams.forEach(t=> typeof t==='string'?mergeTeam(map,'',t):mergeTeam(map,t.division||t.div||t.group,t.name||t.teamName));
+    const teamsHtml=await fetchText('teams.html');
+    const teamsFromPage=parseTeamsJsObject(teamsHtml);
+    Object.entries(teamsFromPage).forEach(([d,teams]) => teams.forEach(t=>mergeTeam(map,d,t)));
+    await Promise.all(Object.entries(DIVISION_PAGES).map(async ([d,page])=>{
+      const html=await fetchText(page); parseStandingTeams(html).forEach(t=>mergeTeam(map,d,t));
+    }));
+    const games=(Array.isArray(content.gameSchedules)&&content.gameSchedules.length?content.gameSchedules:localSchedules()).map((g,i)=>Object.assign({},g,{id:stableId(g,i)}));
+    const practices=(Array.isArray(content.practiceSchedules)?content.practiceSchedules:localPractice()).map((g,i)=>Object.assign({},g,{id:g.id||`practice-${i}-${Date.now()}`}));
+    games.forEach(g=>{mergeTeam(map,g.division,g.team1); mergeTeam(map,g.division,g.team2);});
+    practices.forEach(g=>{mergeTeam(map,g.div1||g.division1||g.division,g.team1); mergeTeam(map,g.div2||g.division2||g.division,g.team2);});
+    Object.keys(map).forEach(k=>map[k]=uniq(map[k]));
+    lastTeamMap=map; lastGames=games;
+    window.teamsByDivision=map; window.scheduleContent=Object.assign({},content,{gameSchedules:games,practiceSchedules:practices,divisions:map});
+    try{ teamsByDivision=map; scheduleContent=window.scheduleContent; }catch(e){}
+    try{localStorage.setItem('lamslDivisionsV1',JSON.stringify(map)); localStorage.setItem('lamslWeeklyScheduleV3',JSON.stringify(games)); localStorage.setItem('lamslPracticeScheduleV1',JSON.stringify(practices));}catch(e){}
+    return {map,games,practices};
+  }
+  function teamsFor(div){const d=normDiv(div); return d==='ALL'||!d?uniq(Object.values(lastTeamMap).flat()):uniq(lastTeamMap[d]||[]);}
+  function fillSelect(id,label,items,previous){
+    const sel=document.getElementById(id); if(!sel) return;
+    const keep=previous ?? sel.value;
+    sel.disabled=false;
+    sel.innerHTML=`<option value="">${esc(label)}</option>`+items.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+    if(keep && items.includes(keep)) sel.value=keep;
+  }
+  function renderScheduleSelectors(){
+    const divEl=document.getElementById('game-division'); if(divEl && !divEl.value) divEl.value='ALL';
+    const teams=teamsFor(divEl?.value||'ALL');
+    fillSelect('game-team1','Select Team 1',teams);
+    fillSelect('game-team2','Select Team 2',teams);
+    const status=document.getElementById('admin-status'); if(status) status.textContent=teams.length?`Loaded ${teams.length} teams from teams.html/division standings.`:'No teams found from teams.html or standings pages.';
+  }
+  function renderPracticeSelectors(){
+    const d1=document.getElementById('practice-div1'); if(d1 && !d1.value) d1.value='ALL';
+    const d2=document.getElementById('practice-div2'); if(d2 && !d2.value) d2.value='ALL';
+    fillSelect('practice-team1','Select Team 1',teamsFor(d1?.value||'ALL'));
+    fillSelect('practice-team2','Select Team 2',teamsFor(d2?.value||'ALL'));
+  }
+  function renderGameSelect(){
+    const sel=document.getElementById('scheduled-game-select'); if(!sel) return;
+    const prev=sel.value; sel.disabled=false;
+    sel.innerHTML='<option value="">Select Scheduled Game</option>'+lastGames.filter(g=>g.date&&g.team1&&g.team2).map((g,i)=>{
+      const id=stableId(g,i); g.id=id;
+      return `<option value="${esc(id)}">${esc(`${g.date||'TBD'} ${g.time||''} | ${g.park||'TBD'} | ${g.team1||'TBD'} vs ${g.team2||'TBD'}`)}</option>`;
+    }).join('');
+    if(prev && [...sel.options].some(o=>o.value===prev)) sel.value=prev;
+    const btn=document.getElementById('delete-scheduled-game-btn'); if(btn) btn.disabled=!sel.value;
+    const st=document.getElementById('score-admin-status'); if(st) st.textContent=lastGames.length?`Loaded ${lastGames.length} scheduled games.`:'No scheduled games found in backend/local fallback.';
+  }
+  function bind(){
+    document.getElementById('game-division')?.addEventListener('change',renderScheduleSelectors);
+    document.getElementById('practice-div1')?.addEventListener('change',renderPracticeSelectors);
+    document.getElementById('practice-div2')?.addEventListener('change',renderPracticeSelectors);
+    document.getElementById('scheduled-game-select')?.addEventListener('change',e=>{
+      const btn=document.getElementById('delete-scheduled-game-btn'); if(btn) btn.disabled=!e.target.value;
+      const g=lastGames.find(x=>String(x.id)===String(e.target.value));
+      if(g){ const s1=document.getElementById('score-team1'), s2=document.getElementById('score-team2'); if(s1)s1.placeholder=`${g.team1} Score`; if(s2)s2.placeholder=`${g.team2} Score`; }
+    });
+    document.getElementById('refresh-admin-access')?.addEventListener('click',boot);
+    document.getElementById('practice-refresh-admin')?.addEventListener('click',boot);
+  }
+  async function boot(){
+    // render fallback immediately, then replace with authoritative source
+    renderScheduleSelectors(); renderPracticeSelectors(); renderGameSelect();
+    await buildAuthoritativeData();
+    renderScheduleSelectors(); renderPracticeSelectors(); renderGameSelect();
+  }
+  window.lamslRepairAdminScheduleSelectors=boot;
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>{bind(); boot(); setTimeout(boot,1000); setTimeout(boot,3000);});
+  else {bind(); boot(); setTimeout(boot,1000); setTimeout(boot,3000);}
+})();
+</script>
+
+
+<script>
+// ===== LAMSL ADMIN BACKEND-PRIMARY CONSOLIDATION PATCH =====
+// Backend is authoritative for schedules, scores, practices, teams, and season settings.
+// localStorage is only a secondary fallback/cache.
+(function(){
+  'use strict';
+  const BACKEND = ((window.BACKEND_BASE || window.LAMSL_BACKEND_URL || localStorage.getItem('LAMSL_BACKEND') || 'https://lamsl-backend.onrender.com') + '').replace(/\/$/, '');
+  const LS = {
+    schedule: 'lamslWeeklyScheduleV3', practice: 'lamslPracticeScheduleV1', divisions: 'lamslDivisionsV1', season: 'lamslSeasonV1'
+  };
+  const DIVISION_PAGES = { A:'divisionA.html', B:'divisionB.html', C:'divisionC.html', D:'divisionD.html', E:'divisionE.html', W1:'winter1.html', W2:'winter2.html' };
+  const FALLBACK_TEAMS = {
+    A:['Titans','La Tribu','Nasty Boyz','Toxic','White Sox','Legends'],
+    B:['Cubs','Primos','Dodgers','Diablos','Charros','Doom Squad'],
+    C:['Demons','Naranjeros','Caballeros','Salvajes','Coyotes','Bandits','Orioles','Goodfellas'],
+    D:['Strokes','Dirt Bags','Camaradas','Wild Hogz','Los Pericos','Xolos','Desvelados'],
+    E:['Tigers','Warriors','Falcons','Rangers','Phoenix','Mustangs'],
+    W1:['Titans','La Tribu','Legends',"LAMSL OG's",'Charros','Goodfellas'],
+    W2:['Wild Hogz','Showtime','Diablos','Balls Out','Peloteros','Hitmen','Bastards','Coyotes']
+  };
+  let state = { content:{}, teams: JSON.parse(JSON.stringify(FALLBACK_TEAMS)), games:[], practices:[] };
+
+  function $(id){ return document.getElementById(id); }
+  function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function uniq(arr){ return [...new Set((arr || []).map(v => String(v || '').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
+  function readJson(key, fallback){ try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch(e){ return fallback; } }
+  function writeJson(key, value){ try { localStorage.setItem(key, JSON.stringify(value)); } catch(e){} }
+  function headers(extra){
+    if (typeof window.apiHeaders === 'function') return window.apiHeaders(extra || {});
+    const h = Object.assign({}, extra || {});
+    const token = localStorage.getItem('LAMSL_BACKEND_TOKEN');
+    const key = localStorage.getItem('LAMSL_ADMIN_KEY') || window.ADMIN_API_KEY;
+    if (token) h['x-lamsl-token'] = token;
+    if (key) h['x-api-key'] = key;
+    const session = readJson('lamslSessionV1', null);
+    if (session && (session.role === 'admin' || session.role === 'umpire')) { h['x-lamsl-role'] = session.role; h['x-lamsl-session'] = 'active'; }
+    return h;
+  }
+  async function fetchJson(url){ try { const r = await fetch(url, { cache:'no-store' }); return r.ok ? await r.json() : null; } catch(e){ return null; } }
+  async function fetchText(url){ try { const r = await fetch(url, { cache:'no-store' }); return r.ok ? await r.text() : ''; } catch(e){ return ''; } }
+  function normDiv(v){
+    const raw = String(v || '').trim();
+    const up = raw.toUpperCase().replace(/^DIVISION\s+/, '').replace(/^DIV\s+/, '');
+    if (!up || up === 'ALL' || up === 'ALL DIVISIONS') return 'ALL';
+    if (['WINTER DIV 1','WINTER DIVISION 1','WINTER1','WINTER 1','W1'].includes(up)) return 'W1';
+    if (['WINTER DIV 2','WINTER DIVISION 2','WINTER2','WINTER 2','W2'].includes(up)) return 'W2';
+    return /^[A-E]$/.test(up) ? up : raw;
+  }
+  function mergeTeam(map, div, team){
+    const name = String(team || '').replace(/\s+/g,' ').trim();
+    if (!name || /^team$/i.test(name) || /^wins?$/i.test(name) || /^loss/i.test(name)) return;
+    let d = normDiv(div);
+    if (d === 'ALL') d = Object.keys(map).find(k => (map[k] || []).some(t => t.toLowerCase() === name.toLowerCase())) || 'E';
+    map[d] = map[d] || [];
+    if (!map[d].some(t => t.toLowerCase() === name.toLowerCase())) map[d].push(name);
+  }
+  function stableId(g, i){
+    if (g && g.id) return String(g.id);
+    return ['game', g?.date || 'date', g?.time || 'time', g?.park || 'park', g?.team1 || 'team1', g?.team2 || 'team2', i].join('-').replace(/[^a-zA-Z0-9_-]+/g, '-');
+  }
+  function parseTeamsHtml(html){
+    const out = {};
+    const patterns = [/TEAMS_BY_DIVISION\s*=\s*({[\s\S]*?});/, /teamsByDivision\s*=\s*({[\s\S]*?});/i];
+    for (const re of patterns) {
+      const m = html.match(re);
+      if (!m) continue;
+      try { const obj = Function('return (' + m[1] + ');')(); Object.entries(obj || {}).forEach(([d, teams]) => (teams || []).forEach(t => mergeTeam(out, d, t))); } catch(e){}
+    }
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    doc.querySelectorAll('[data-division], .division-card, .team-card, li, td').forEach(el => {
+      const txt = (el.textContent || '').replace(/\s+/g,' ').trim();
+      const div = el.getAttribute('data-division') || el.closest('[data-division]')?.getAttribute('data-division') || '';
+      if (txt && txt.length <= 40 && !/division|standings|schedule|manager|wins|losses|team\s*name/i.test(txt)) mergeTeam(out, div, txt);
+    });
+    return out;
+  }
+  function parseStandingsPage(html, div){
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const names = [];
+    doc.querySelectorAll('tbody tr').forEach(tr => {
+      const cells = [...tr.querySelectorAll('td,th')].map(c => (c.textContent || '').replace(/\s+/g,' ').trim()).filter(Boolean);
+      const candidate = cells.find(c => !/^\d+$/.test(c) && !/^(w|l|t|gp|rf|ra|pct|team)$/i.test(c));
+      if (candidate && candidate.length <= 40) names.push(candidate);
+    });
+    names.forEach(n => mergeTeam(state.teams, div, n));
+  }
+  async function loadAuthoritativeContent(){
+    const backend = await fetchJson(BACKEND + '/api/content') || {};
+    const content = Object.assign({}, backend);
+    const map = JSON.parse(JSON.stringify(FALLBACK_TEAMS));
+    const localDivisions = readJson(LS.divisions, {});
+    [localDivisions, content.divisions].forEach(src => {
+      if (src && typeof src === 'object') Object.entries(src).forEach(([d, teams]) => (Array.isArray(teams) ? teams : []).forEach(t => mergeTeam(map, d, t)));
+    });
+    if (Array.isArray(content.teams)) content.teams.forEach(t => typeof t === 'string' ? mergeTeam(map, '', t) : mergeTeam(map, t.division || t.div || t.group, t.name || t.teamName || t.team));
+    if (content.teams && !Array.isArray(content.teams) && typeof content.teams === 'object') Object.entries(content.teams).forEach(([d, teams]) => (Array.isArray(teams) ? teams : []).forEach(t => mergeTeam(map, d, t)));
+    if (content.standings && typeof content.standings === 'object') Object.entries(content.standings).forEach(([d, rows]) => Object.keys(rows || {}).forEach(team => mergeTeam(map, d, team)));
+    state.teams = map;
+    const teamsPage = await fetchText('teams.html');
+    const pageTeams = parseTeamsHtml(teamsPage);
+    Object.entries(pageTeams).forEach(([d, teams]) => teams.forEach(t => mergeTeam(state.teams, d, t)));
+    await Promise.all(Object.entries(DIVISION_PAGES).map(async ([d, page]) => parseStandingsPage(await fetchText(page), d)));
+    const localGames = readJson(LS.schedule, []);
+    const localPractices = readJson(LS.practice, []);
+    const games = (Array.isArray(content.gameSchedules) && content.gameSchedules.length ? content.gameSchedules : localGames).map((g,i) => Object.assign({}, g, { id: stableId(g, i) }));
+    const practices = (Array.isArray(content.practiceSchedules) && content.practiceSchedules.length ? content.practiceSchedules : localPractices).map((g,i) => Object.assign({}, g, { id: g.id || ('practice-' + i + '-' + Date.now()) }));
+    games.forEach(g => { mergeTeam(state.teams, g.division, g.team1); mergeTeam(state.teams, g.division, g.team2); });
+    practices.forEach(g => { mergeTeam(state.teams, g.div1 || g.division1 || g.division, g.team1); mergeTeam(state.teams, g.div2 || g.division2 || g.division, g.team2); });
+    Object.keys(state.teams).forEach(k => state.teams[k] = uniq(state.teams[k]));
+    state.content = Object.assign({}, content, { divisions: state.teams, gameSchedules: games, practiceSchedules: practices });
+    state.games = games;
+    state.practices = practices;
+    window.scheduleContent = state.content;
+    window.teamsByDivision = state.teams;
+    try { scheduleContent = state.content; teamsByDivision = state.teams; } catch(e) {}
+    writeJson(LS.divisions, state.teams); writeJson(LS.schedule, games); writeJson(LS.practice, practices);
+    return state;
+  }
+  function teamsFor(div){ const d = normDiv(div); return d === 'ALL' ? uniq(Object.values(state.teams).flat()) : uniq(state.teams[d] || []); }
+  function fillSelect(id, label, items){
+    const el = $(id); if (!el) return;
+    const old = el.value;
+    el.disabled = false;
+    el.innerHTML = '<option value="">' + esc(label) + '</option>' + (items || []).map(v => '<option value="' + esc(v) + '">' + esc(v) + '</option>').join('');
+    if (old && (items || []).includes(old)) el.value = old;
+  }
+  function renderSelects(){
+    const gameDiv = $('game-division');
+    if (gameDiv && !gameDiv.value) gameDiv.value = 'ALL';
+    const gameTeams = teamsFor(gameDiv?.value || 'ALL');
+    fillSelect('game-team1', 'Select Team 1', gameTeams);
+    fillSelect('game-team2', 'Select Team 2', gameTeams);
+    const p1 = $('practice-div1'); if (p1 && !p1.value) p1.value = 'ALL';
+    const p2 = $('practice-div2'); if (p2 && !p2.value) p2.value = 'ALL';
+    fillSelect('practice-team1', 'Select Team 1', teamsFor(p1?.value || 'ALL'));
+    fillSelect('practice-team2', 'Select Team 2', teamsFor(p2?.value || 'ALL'));
+    const gs = $('scheduled-game-select');
+    if (gs) {
+      const old = gs.value;
+      gs.disabled = false;
+      gs.innerHTML = '<option value="">Select Scheduled Game</option>' + state.games.filter(g => g && g.team1 && g.team2).map((g,i) => {
+        const id = stableId(g, i); g.id = id;
+        return '<option value="' + esc(id) + '">' + esc(`${g.date || 'TBD'} ${g.time || ''} | ${g.park || 'TBD'} | ${g.team1 || 'TBD'} vs ${g.team2 || 'TBD'}`) + '</option>';
+      }).join('');
+      if (old && [...gs.options].some(o => o.value === old)) gs.value = old;
+    }
+    const del = $('delete-scheduled-game-btn'); if (del && gs) del.disabled = !gs.value;
+    const adminStatus = $('admin-status'); if (adminStatus && gameTeams.length) adminStatus.textContent = `Loaded ${gameTeams.length} teams. Backend is primary; local storage is fallback only.`;
+    const scoreStatus = $('score-admin-status'); if (scoreStatus && state.games.length) scoreStatus.textContent = `Loaded ${state.games.length} existing scheduled games.`;
+  }
+  function rebuildStandings(games){
+    const standings = {};
+    Object.entries(state.teams).forEach(([d, teams]) => { standings[d] = {}; (teams || []).forEach(t => standings[d][t] = {w:0,l:0,t:0,rf:0,ra:0,gp:0}); });
+    (games || []).forEach(g => {
+      if (g.score1 === '' || g.score2 === '' || g.score1 == null || g.score2 == null) return;
+      const s1 = Number(g.score1), s2 = Number(g.score2); if (!Number.isFinite(s1) || !Number.isFinite(s2)) return;
+      [[g.team1, s1, s2], [g.team2, s2, s1]].forEach(([team, rf, ra]) => {
+        const d = Object.keys(state.teams).find(k => (state.teams[k] || []).includes(team)) || g.division || 'E';
+        standings[d] = standings[d] || {}; const r = standings[d][team] = standings[d][team] || {w:0,l:0,t:0,rf:0,ra:0,gp:0};
+        r.gp++; r.rf += rf; r.ra += ra; if (rf > ra) r.w++; else if (rf < ra) r.l++; else r.t++;
+      });
+    });
+    return standings;
+  }
+  async function persist(patch){
+    const next = Object.assign({}, state.content || {}, patch || {});
+    next.divisions = state.teams;
+    next.gameScores = (next.gameSchedules || []).filter(g => g.score1 !== '' && g.score2 !== '' && g.score1 != null && g.score2 != null);
+    next.standings = rebuildStandings(next.gameSchedules || []);
+    const res = await fetch(BACKEND + '/api/update', { method:'POST', headers: headers({'Content-Type':'application/json'}), body: JSON.stringify(next) });
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok || result.success === false) throw new Error(result.error || `HTTP ${res.status}`);
+    state.content = Object.assign({}, next, result.content || {});
+    state.games = (state.content.gameSchedules || []).map((g,i) => Object.assign({}, g, { id: stableId(g,i) }));
+    state.practices = (state.content.practiceSchedules || []).map((g,i) => Object.assign({}, g, { id: g.id || ('practice-' + i) }));
+    writeJson(LS.schedule, state.games); writeJson(LS.practice, state.practices); writeJson(LS.divisions, state.teams); writeJson(LS.season, state.content.season || state.content.activeSeason || state.content.seasonSettings || {});
+    window.scheduleContent = state.content;
+    return state.content;
+  }
+  function bindAuthoritativeHandlers(){
+    ['game-division','practice-div1','practice-div2'].forEach(id => $(id)?.addEventListener('change', renderSelects));
+    $('scheduled-game-select')?.addEventListener('change', () => {
+      const id = $('scheduled-game-select')?.value;
+      const g = state.games.find(x => String(x.id) === String(id));
+      const del = $('delete-scheduled-game-btn'); if (del) del.disabled = !id;
+      if (g) { if ($('score-team1')) $('score-team1').placeholder = `${g.team1} Score`; if ($('score-team2')) $('score-team2').placeholder = `${g.team2} Score`; }
+    });
+    $('schedule-form')?.addEventListener('submit', async ev => {
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      const game = { id: 'game-' + Date.now(), date:$('game-date')?.value, time:$('game-time')?.value, park:$('game-park')?.value, division:$('game-division')?.value || 'ALL', team1:$('game-team1')?.value, team2:$('game-team2')?.value, status:$('game-status')?.value || 'scheduled', score1:'', score2:'' };
+      if (!game.date || !game.time || !game.park || !game.team1 || !game.team2) { if ($('admin-status')) $('admin-status').textContent = 'Complete date, time, park, and both teams.'; return; }
+      if (game.team1 === game.team2) { if ($('admin-status')) $('admin-status').textContent = 'Select two different teams.'; return; }
+      try { await persist({ gameSchedules: state.games.concat(game) }); await loadAuthoritativeContent(); renderSelects(); $('schedule-form')?.reset(); if ($('admin-status')) $('admin-status').textContent = 'Scheduled game saved to Render backend.'; }
+      catch(e){ writeJson(LS.schedule, state.games.concat(game)); if ($('admin-status')) $('admin-status').textContent = 'Backend save failed; local fallback saved only: ' + e.message; }
+    }, true);
+    $('score-form')?.addEventListener('submit', async ev => {
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      const id = $('scheduled-game-select')?.value; const g = state.games.find(x => String(x.id) === String(id));
+      if (!g) { if ($('score-admin-status')) $('score-admin-status').textContent = 'Select a scheduled game.'; return; }
+      g.score1 = $('score-team1')?.value; g.score2 = $('score-team2')?.value;
+      try { await persist({ gameSchedules: state.games }); await loadAuthoritativeContent(); renderSelects(); $('score-form')?.reset(); if ($('score-admin-status')) $('score-admin-status').textContent = 'Score saved to Render backend and standings recalculated.'; }
+      catch(e){ writeJson(LS.schedule, state.games); if ($('score-admin-status')) $('score-admin-status').textContent = 'Backend save failed; local fallback saved only: ' + e.message; }
+    }, true);
+    $('delete-scheduled-game-btn')?.addEventListener('click', async ev => {
+      ev.preventDefault(); ev.stopImmediatePropagation(); const id = $('scheduled-game-select')?.value; if (!id) return;
+      if (!confirm('Delete this scheduled game?')) return;
+      try { await persist({ gameSchedules: state.games.filter(g => String(g.id) !== String(id)) }); await loadAuthoritativeContent(); renderSelects(); if ($('admin-status')) $('admin-status').textContent = 'Scheduled game deleted from Render backend.'; }
+      catch(e){ if ($('admin-status')) $('admin-status').textContent = 'Backend delete failed: ' + e.message; }
+    }, true);
+    $('practice-form')?.addEventListener('submit', async ev => {
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      const game = { id:'practice-' + Date.now(), date:$('practice-date')?.value, time:$('practice-time')?.value, park:$('practice-park')?.value, div1:$('practice-div1')?.value || 'ALL', team1:$('practice-team1')?.value, div2:$('practice-div2')?.value || 'ALL', team2:$('practice-team2')?.value, status:$('practice-status')?.value || 'scheduled' };
+      if (!game.date || !game.time || !game.park || !game.team1 || !game.team2) { if ($('practice-admin-status')) $('practice-admin-status').textContent = 'Complete date, time, park, and both teams.'; return; }
+      try { await persist({ practiceSchedules: state.practices.concat(game) }); await loadAuthoritativeContent(); renderSelects(); $('practice-form')?.reset(); if ($('practice-admin-status')) $('practice-admin-status').textContent = 'Practice/scrimmage saved to Render backend.'; }
+      catch(e){ writeJson(LS.practice, state.practices.concat(game)); if ($('practice-admin-status')) $('practice-admin-status').textContent = 'Backend save failed; local fallback saved only: ' + e.message; }
+    }, true);
+    $('season-form')?.addEventListener('submit', async ev => {
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      const season = { name:$('season-name')?.value, year:Number($('season-year')?.value), start:$('season-start')?.value, end:$('season-end')?.value, updatedAt:new Date().toISOString() };
+      if (!season.name || !season.year || !season.start || !season.end) { if ($('auth-status')) $('auth-status').textContent = 'Complete all season fields.'; return; }
+      try { await persist({ season, activeSeason:season, seasonSettings:season }); writeJson(LS.season, season); if ($('auth-status')) $('auth-status').textContent = `${season.name} ${season.year} season saved to Render backend.`; renderSeasonDisplay(season); }
+      catch(e){ writeJson(LS.season, season); if ($('auth-status')) $('auth-status').textContent = 'Backend season save failed; local fallback saved only: ' + e.message; }
+    }, true);
+    $('refresh-admin-access')?.addEventListener('click', boot);
+    $('practice-refresh-admin')?.addEventListener('click', boot);
+  }
+  function renderSeasonDisplay(season){
+    season = season || state.content.season || state.content.activeSeason || state.content.seasonSettings || readJson(LS.season, null);
+    const box = $('season-current-display'); if (!box || !season) return;
+    box.style.display = 'block';
+    box.innerHTML = `<strong>${esc(season.name || 'Season')} ${esc(season.year || '')}</strong><span class="season-badge">Active</span><br><span style="font-size:13px;color:#555;">${esc(season.start || '')} - ${esc(season.end || '')}</span>`;
+    if ($('season-name')) $('season-name').value = season.name || '';
+    if ($('season-year')) $('season-year').value = season.year || '';
+    if ($('season-start')) $('season-start').value = season.start || '';
+    if ($('season-end')) $('season-end').value = season.end || '';
+  }
+  async function boot(){
+    try {
+      renderSelects();
+      await loadAuthoritativeContent();
+      renderSelects();
+      renderSeasonDisplay();
+    } catch(e) {
+      console.warn('LAMSL admin backend-primary boot failed', e);
+      renderSelects();
+    }
+  }
+  window.lamslAdminBackendPrimaryBoot = boot;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { bindAuthoritativeHandlers(); boot(); setTimeout(boot, 1000); setTimeout(boot, 3000); });
+  else { bindAuthoritativeHandlers(); boot(); setTimeout(boot, 1000); setTimeout(boot, 3000); }
+})();
+</script>
+
 </html>

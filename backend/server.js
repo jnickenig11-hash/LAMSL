@@ -9,6 +9,15 @@ import crypto from 'crypto';
 const app = express();
 app.use(express.json());
 app.use(cors());
+// LAMSL no-store: dynamic API/file listing responses must not be cached by browsers/CDNs.
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/') || req.path === '/slideshow-images' || req.path === '/ef-images') {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+  next();
+});
 
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY || null;
 const SESSION_SECRET = process.env.LAMSL_SESSION_SECRET || ADMIN_API_KEY || 'lamsl-dev-session-secret';
@@ -184,18 +193,7 @@ app.use('/SlideshowImages', express.static(slideshowDir));
 app.get('/slideshow-images', (req, res) => {
   try {
     const content = readContent();
-    const contentImages = Array.isArray(content.slideshow) ? content.slideshow : [];
-    const diskImages = fs.readdirSync(slideshowDir)
-      .filter(name => /\.(png|jpe?g|gif|webp|svg)$/i.test(name))
-      .map(name => ({ name, filename: name, url: '/SlideshowImages/' + name, path: '/SlideshowImages/' + name, caption: '' }));
-    const seen = new Set();
-    const images = [...contentImages, ...diskImages].filter(img => {
-      const key = img.url || img.path || img.filename || img.name;
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-    res.json({ success: true, images });
+    res.json({ success: true, images: getMergedHomepageSlideshow(content) });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -330,9 +328,32 @@ app.get('/api/storage-status', (req, res) => {
   });
 });
 
+function getMergedHomepageSlideshow(content) {
+  const contentImages = Array.isArray(content.slideshow) ? content.slideshow : [];
+  let diskImages = [];
+  try {
+    diskImages = fs.readdirSync(slideshowDir)
+      .filter(name => /\.(png|jpe?g|gif|webp|svg)$/i.test(name))
+      .map(name => ({ name, filename: name, url: '/SlideshowImages/' + name, path: '/SlideshowImages/' + name, caption: '' }));
+  } catch (error) {
+    diskImages = [];
+  }
+  const seen = new Set();
+  return [...contentImages, ...diskImages].filter(img => {
+    const key = img && (img.url || img.path || img.filename || img.name);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 app.get('/api/content', (req, res) => {
   const content = readContent();
-  res.json(content);
+  res.json({
+    ...content,
+    slideshow: getMergedHomepageSlideshow(content),
+    deploymentVersion: '2026.06.05-stability-single-source-v1'
+  });
 });
 
 app.post('/api/update', requireAdminKey, (req, res) => {

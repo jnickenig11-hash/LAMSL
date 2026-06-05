@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta name="lamsl-version" content="2026.06.05-stability-single-source-v1">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
@@ -764,7 +765,7 @@ function apiUrl(path) {
     return BACKEND_URL.replace(/\/$/, '') + (path.startsWith('/') ? path : '/' + path);
 }
 
-emailSignupForm.addEventListener('submit', async (e) => {
+if (emailSignupForm) emailSignupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const email = emailInput.value.trim();
@@ -1358,6 +1359,174 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.warn('LAMSL homepage is using local fallback content because backend content did not load.');
   }
 });
+</script>
+
+
+<script>
+/* ===== LAMSL STABILITY BOOTSTRAP: backend is source of truth; localStorage is fallback only ===== */
+(function () {
+  const VERSION = '2026.06.05-stability-single-source-v1';
+  const BACKEND = (window.BACKEND_BASE || 'https://lamsl-backend.onrender.com').replace(/\/$/, '');
+  const SCHEDULE_KEY = 'lamslWeeklyScheduleV3';
+  const ANN_KEY = 'lamslAnnouncementsV1';
+
+  function safeJson(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); }
+    catch (_) { return fallback; }
+  }
+
+  function cacheJson(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
+  }
+
+  function htmlEscape(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
+  function absoluteAsset(path) {
+    const raw = String(path || '').trim();
+    if (!raw) return '';
+    if (/^(https?:|data:)/i.test(raw)) return raw;
+    if (raw.startsWith('/')) return BACKEND + raw;
+    if (raw.startsWith('SlideshowImages/') || raw.startsWith('EFimages/')) return BACKEND + '/' + raw;
+    return raw;
+  }
+
+  function pickArray(data, names) {
+    for (const name of names) {
+      if (Array.isArray(data?.[name])) return data[name];
+    }
+    return [];
+  }
+
+  function activeAnnouncements(data) {
+    const backend = pickArray(data, ['announcements', 'activeAnnouncements', 'homepageAnnouncements', 'siteAnnouncements']);
+    const items = backend.length ? backend : safeJson(ANN_KEY, []);
+    return items
+      .filter(item => item && item.archived !== true && item.active !== false)
+      .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+  }
+
+  function renderHomeAnnouncements(items) {
+    const el = document.getElementById('announcements-list');
+    if (!el) return;
+    el.innerHTML = '';
+    if (!items.length) {
+      el.innerHTML = '<div class="card">No active announcements posted.</div>';
+      return;
+    }
+    items.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'card announcement-card';
+      card.innerHTML = `<h3>${htmlEscape(item.title || 'League Announcement')}</h3><p><strong>${htmlEscape(item.date || '')}</strong></p><p>${htmlEscape(item.message || item.body || item.text || '')}</p>`;
+      el.appendChild(card);
+    });
+  }
+
+  function renderHomeScores(scores) {
+    const el = document.getElementById('gameScores');
+    if (!el) return;
+    if (!Array.isArray(scores) || !scores.length) {
+      el.innerHTML = '<em>No recent scores posted.</em>';
+      return;
+    }
+    el.innerHTML = scores.slice(0, 6).map(g => `<div class="score-item"><p>${htmlEscape(g.teamA || g.team1 || '')} ${htmlEscape(g.scoreA ?? g.score1 ?? '')} - ${htmlEscape(g.scoreB ?? g.score2 ?? '')} ${htmlEscape(g.teamB || g.team2 || '')}</p><small>${htmlEscape(g.date || '')}</small></div>`).join('');
+  }
+
+  function renderHomeSlideshow(images) {
+    const slides = document.querySelector('.slides');
+    const indicators = document.querySelector('.indicators');
+    if (!slides || !indicators) return false;
+    const normalized = (Array.isArray(images) ? images : [])
+      .map(img => {
+        if (typeof img === 'string') return { src: absoluteAsset('/SlideshowImages/' + img), caption: '' };
+        return { src: absoluteAsset(img.url || img.path || img.src || img.imageUrl || (img.filename ? '/SlideshowImages/' + img.filename : '')), caption: img.caption || img.originalName || '' };
+      })
+      .filter(img => img.src);
+    if (!normalized.length) {
+      slides.innerHTML = '<div class="slide active"><div style="height:100%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">No slideshow images uploaded.</div></div>';
+      indicators.innerHTML = '<span class="indicator active" data-slide="0"></span>';
+      return false;
+    }
+    slides.innerHTML = '';
+    indicators.innerHTML = '';
+    normalized.forEach((img, index) => {
+      const slide = document.createElement('div');
+      slide.className = 'slide' + (index === 0 ? ' active' : '');
+      slide.innerHTML = `<img src="${htmlEscape(img.src)}" alt="LAMSL slideshow image">${img.caption ? `<div class="slide-caption">${htmlEscape(img.caption)}</div>` : ''}`;
+      slides.appendChild(slide);
+      const dot = document.createElement('span');
+      dot.className = 'indicator' + (index === 0 ? ' active' : '');
+      dot.dataset.slide = String(index);
+      indicators.appendChild(dot);
+    });
+    if (typeof window.showSlide === 'function') window.showSlide(0);
+    return true;
+  }
+
+  async function fetchContent() {
+    const res = await fetch(`${BACKEND}/api/content?_=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`Backend content failed: ${res.status}`);
+    return res.json();
+  }
+
+  async function fetchSlideshowFolder() {
+    const res = await fetch(`${BACKEND}/slideshow-images?_=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data.images) ? data.images : [];
+  }
+
+  async function boot() {
+    console.log('LAMSL homepage stability boot', VERSION);
+    const mini = document.getElementById('mini-schedule-content');
+    const ann = document.getElementById('announcements-list');
+    if (mini) mini.innerHTML = '<p class="mini-schedule-empty">Loading upcoming games...</p>';
+    if (ann) ann.innerHTML = '<div class="card">Loading announcements...</div>';
+
+    let data = null;
+    try {
+      data = await fetchContent();
+      window.lamslContent = data;
+      window.lamslData = {
+        announcements: activeAnnouncements(data),
+        schedules: pickArray(data, ['gameSchedules', 'schedule', 'games', 'scheduledGames']),
+        slideshow: pickArray(data, ['slideshow', 'homepageSlideshow', 'homepageImages']),
+        scores: pickArray(data, ['gameScores', 'scores'])
+      };
+      if (window.lamslData.schedules.length) cacheJson(SCHEDULE_KEY, window.lamslData.schedules);
+      if (window.lamslData.announcements.length) cacheJson(ANN_KEY, window.lamslData.announcements);
+    } catch (err) {
+      console.error('LAMSL backend boot failed; using local fallback only.', err);
+      window.lamslData = {
+        announcements: activeAnnouncements({ announcements: safeJson(ANN_KEY, []) }),
+        schedules: safeJson(SCHEDULE_KEY, []),
+        slideshow: [],
+        scores: []
+      };
+    }
+
+    renderHomeAnnouncements(window.lamslData.announcements);
+    renderHomeScores(window.lamslData.scores);
+
+    if (typeof renderMiniSchedule === 'function') {
+      renderMiniSchedule(window.lamslData.schedules);
+    }
+
+    let slidesShown = renderHomeSlideshow(window.lamslData.slideshow);
+    if (!slidesShown) {
+      const folderImages = await fetchSlideshowFolder();
+      renderHomeSlideshow(folderImages);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+  window.refreshLAMSLHomepage = boot;
+})();
 </script>
 
 </body>

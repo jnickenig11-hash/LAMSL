@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -887,6 +887,44 @@ footer {
             <p>Game schedules, park assignments, and scores are managed from the administrator dashboard.</p>
         </section>
 
+        <section id="schedule-admin-stubs" style="display:none" aria-hidden="true">
+            <p id="admin-status"></p>
+            <p id="score-admin-status"></p>
+            <button id="refresh-admin-access" type="button"></button>
+            <form id="schedule-form">
+                <input id="game-date" type="date">
+                <select id="game-time"><option value=""></option></select>
+                <select id="game-park"><option value=""></option></select>
+                <select id="game-division"><option value=""></option></select>
+                <select id="game-team1"></select>
+                <select id="game-team2"></select>
+                <select id="game-status"><option value="scheduled">On Schedule</option></select>
+                <button id="save-schedule-btn" type="submit"></button>
+            </form>
+            <form id="score-form">
+                <select id="scheduled-game-select"><option value=""></option></select>
+                <input id="score-team1" type="number">
+                <input id="score-team2" type="number">
+                <button id="delete-scheduled-game-btn" type="button"></button>
+                <button id="save-score-btn" type="submit"></button>
+            </form>
+            <ul id="scores-list"></ul>
+            <p id="practice-admin-status"></p>
+            <button id="practice-refresh-admin" type="button"></button>
+            <form id="practice-form">
+                <input id="practice-date" type="date">
+                <input id="practice-time" type="time">
+                <select id="practice-park"><option value=""></option></select>
+                <select id="practice-div1"><option value=""></option></select>
+                <select id="practice-team1"></select>
+                <select id="practice-div2"><option value=""></option></select>
+                <select id="practice-team2"></select>
+                <select id="practice-status"><option value="scheduled">On Schedule</option></select>
+                <button id="save-practice-btn" type="submit"></button>
+            </form>
+            <ul id="practice-games-list"></ul>
+        </section>
+
     </main>
 </div>
 
@@ -925,15 +963,28 @@ const deleteScheduledGameButton = document.getElementById('delete-scheduled-game
 const saveScoreButton = document.getElementById('save-score-btn');
 const scoresList = document.getElementById('scores-list');
 
-let selectedDate = new Date();
-let currentWeekStart = getWeekStart(new Date());
+let selectedDate = getInitialScheduleDate();
+let currentWeekStart = getWeekStart(selectedDate);
 let editingGameId = null;
 let isAdminUnlocked = false;
 let activeDivisionFilter = 'ALL';
 let parkViewPeriod = 'week';
-let parkViewDate = getNextAllowedGameDate(new Date());
+let parkViewDate = getInitialScheduleDate ? getInitialScheduleDate() : getNextAllowedGameDate(new Date());
 
 
+
+
+function getInitialScheduleDate() {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const sunday = getNextAllowedGameDate(today);
+    const games = getSchedule();
+    const upcoming = games
+        .map(game => parseDateKey(game.date))
+        .filter(date => date >= today)
+        .sort((a,b) => a - b)[0];
+    return upcoming || sunday;
+}
 
 function refreshDivisionSelectOptions(selectElement, placeholder, includeAll = false) {
     if (!selectElement) return;
@@ -1774,8 +1825,11 @@ if (practiceRefreshAdmin) {
 }
 
 async function initializeSchedulePage() {
-    await loadBackendSchedule();
     ensureDefaults();
+    await loadBackendSchedule();
+    selectedDate = getInitialScheduleDate();
+    currentWeekStart = getWeekStart(selectedDate);
+    parkViewDate = selectedDate;
     refreshDivisionDependentUI();
     applyAdminPermissions();
     applyPracticeAdminAccess();

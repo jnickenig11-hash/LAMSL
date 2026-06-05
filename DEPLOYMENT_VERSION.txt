@@ -1,0 +1,2 @@
+LAMSL backend cleanup final fixes - 2026-06-04
+Fixes: backend uploads append slideshow content; public upload/payment controls removed; admin media dashboard; roster backend endpoint; persistent storage env support.

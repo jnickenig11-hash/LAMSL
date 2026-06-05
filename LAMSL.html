@@ -667,7 +667,6 @@ header {
                 <input id="pay-googlepay" type="url" placeholder="https://pay.google.com/..."></input>
                 <label>Venmo</label>
                 <input id="pay-venmo" type="url" placeholder="https://venmo.com/..."></input>
-                <button class="payment-save-btn" onclick="savePaymentLinks()">Save Payment Links</button>
             </div>
         </section>
 
@@ -711,14 +710,6 @@ header {
         </div>
         <button class="prev">&lt;</button>
         <button class="next">&gt;</button>
-        <div class="upload-form">
-            <h3>Upload New Photo</h3>
-            <form id="image-upload-form" enctype="multipart/form-data">
-              <input type="file" id="image-input" accept="image/*" required />
-              <button type="submit">Upload Image</button>
-              <div id="image-upload-message"></div>
-            </form>
-        </div>
     </section>
 
 </div>
@@ -1074,6 +1065,7 @@ uploadForm.addEventListener("submit", async (e) => {
     try {
       const res = await fetch(BACKEND_URL + "/api/upload-image", {
         method: "POST",
+        headers: (typeof window.apiHeaders === 'function' ? window.apiHeaders() : {}),
         body: formData
       });
 

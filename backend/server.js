@@ -18,20 +18,22 @@ function requireAdminKey(req, res, next) {
   const roleAllowed = sessionActive && ['admin', 'umpire'].includes(role);
 
   if (ADMIN_API_KEY && token === ADMIN_API_KEY) return next();
-  if (roleAllowed) return next();
+  // Development fallback only. In production set ADMIN_API_KEY so role headers alone cannot authorize writes.
   if (!ADMIN_API_KEY && roleAllowed) return next();
 
-  return res.status(403).json({ success: false, error: 'Forbidden: admin login or admin API key required' });
+  return res.status(403).json({ success: false, error: 'Forbidden: valid admin API key required' });
 }
 
 // Ensure required directories exist
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..');
-const uploadDir = path.join(__dirname, 'uploads');
-const logsDir = path.join(projectRoot, 'logs');
-const efDir = path.join(projectRoot, 'EF_Images');
-const dataDir = path.join(projectRoot, 'data');
-const teamProfileDir = path.join(projectRoot, 'teamProfile images');
+const persistentRoot = process.env.LAMSL_STORAGE_DIR || process.env.RENDER_DISK_MOUNT || projectRoot;
+const uploadDir = path.join(persistentRoot, 'uploads');
+const logsDir = path.join(persistentRoot, 'logs');
+const efDir = path.join(persistentRoot, 'EF_Images');
+const dataDir = path.join(persistentRoot, 'data');
+const teamProfileDir = path.join(persistentRoot, 'teamProfile images');
+const bundledDataDir = path.join(projectRoot, 'data');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -74,22 +76,38 @@ app.post('/api/subscribe', (req, res) => {
 });
 
 // Image upload endpoint
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage: multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname || '') || '';
+    const safeBase = path.basename(file.originalname || 'image', ext).replace(/[^a-z0-9_-]+/gi, '-').slice(0, 40) || 'image';
+    cb(null, `${Date.now()}-${safeBase}${ext}`);
+  }
+})});
 
 app.post('/api/upload-image', requireAdminKey, upload.single('image'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({
-      success: false,
-      message: 'No file uploaded'
-    });
+  try {
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+    const url = '/uploads/' + req.file.filename;
+    const content = readContent();
+    const imageRecord = {
+      url,
+      src: url,
+      path: url,
+      filename: req.file.filename,
+      originalName: req.file.originalname || '',
+      caption: String(req.body.caption || '').trim(),
+      uploadedAt: new Date().toISOString()
+    };
+    content.slideshow = Array.isArray(content.slideshow) ? content.slideshow : [];
+    content.slideshow.unshift(imageRecord);
+    content.updatedAt = new Date().toISOString();
+    writeContent(content);
+    res.json({ success: true, url, image: imageRecord, content });
+  } catch (error) {
+    console.error('Image upload failed:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
-
-  const url = '/uploads/' + req.file.filename;
-
-  res.json({
-    success: true,
-    url
-  });
 });
 
 // Serve uploaded images
@@ -181,7 +199,15 @@ function normalizeContent(raw) {
 const contentFile = path.join(dataDir, 'content.json');
 function readContent() {
   try {
-    if (!fs.existsSync(contentFile)) return normalizeContent({});
+    if (!fs.existsSync(contentFile)) {
+      const bundledContent = path.join(bundledDataDir, 'content.json');
+      if (fs.existsSync(bundledContent)) {
+        const seeded = normalizeContent(JSON.parse(fs.readFileSync(bundledContent, 'utf8')));
+        fs.writeFileSync(contentFile, JSON.stringify(seeded, null, 2));
+        return seeded;
+      }
+      return normalizeContent({});
+    }
     return normalizeContent(JSON.parse(fs.readFileSync(contentFile, 'utf8')));
   } catch (e) {
     return normalizeContent({});
@@ -351,6 +377,25 @@ app.post('/api/team-metadata', requireAdminKey, (req, res) => {
   try {
     writeTeamMeta(req.body || {});
     res.json({ success: true });
+  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+});
+
+
+// ===== Roster data =====
+app.get('/api/rosters', (req, res) => {
+  const content = readContent();
+  res.json({ success: true, rosters: content.rosters || {}, teamPlayers: content.teamPlayers || {} });
+});
+
+app.post('/api/rosters', requireAdminKey, (req, res) => {
+  try {
+    const content = readContent();
+    const incoming = req.body || {};
+    content.rosters = incoming.rosters && typeof incoming.rosters === 'object' ? incoming.rosters : (content.rosters || {});
+    content.teamPlayers = incoming.teamPlayers && typeof incoming.teamPlayers === 'object' ? incoming.teamPlayers : (content.teamPlayers || {});
+    content.updatedAt = new Date().toISOString();
+    writeContent(content);
+    res.json({ success: true, rosters: content.rosters, teamPlayers: content.teamPlayers });
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 

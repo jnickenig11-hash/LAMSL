@@ -440,8 +440,9 @@ footer {
               </div>
               <div class="management-grid">
                 <div class="admin-panel"><h3>Backend Connection</h3><p class="admin-status" id="backend-dashboard-status">Logged-in admin users save directly to the backend. Manual API key entry is optional.</p><input id="backend-base-input" type="text" placeholder="Backend URL"><input id="admin-api-key-input" type="password" placeholder="Optional fallback API key"><div class="score-actions"><button type="button" id="save-admin-settings-btn">Save Settings</button><button type="button" id="check-backend-btn">Check Backend</button></div></div>
-                <div class="admin-panel"><h3>Content Summary</h3><p id="dashboard-summary">Loading content counts...</p><p class="admin-status">Schedules, practices, scores, announcements, teams, rosters, and divisions are managed in their dedicated dashboard sections below. Homepage message and slideshow image editors were removed from Site Content to prevent duplicate processes.</p></div>
+                <div class="admin-panel"><h3>Content Summary</h3><p id="dashboard-summary">Loading content counts...</p><p class="admin-status">Schedules, practices, scores, announcements, teams, rosters, divisions, payment info, and homepage slideshow media are managed in their dedicated dashboard sections.</p></div>
                 <div class="admin-panel"><h3>Zelle / Payment Info</h3><textarea id="zelle" rows="5" placeholder="Zelle JSON"></textarea><button type="button" id="saveZelleBtn" class="admin-form-btn">Save Zelle Info</button></div>
+                <div class="admin-panel"><h3>Homepage Slideshow Media</h3><p class="admin-status" id="slideshow-upload-status">Upload homepage slideshow photos here. Uploaded images are written to backend content.</p><input id="admin-slideshow-file" type="file" accept="image/*"><input id="admin-slideshow-caption" type="text" placeholder="Optional caption"><div class="score-actions"><button type="button" id="upload-slideshow-btn">Upload Slideshow Image</button><button type="button" id="refresh-slideshow-btn">Refresh Slideshow List</button></div><ul id="admin-slideshow-list" class="admin-list"></ul></div>
               </div>
             </div>
 
@@ -759,7 +760,7 @@ const ALLOWED_GAME_DAYS = [0];
 let teamsByDivision = JSON.parse(JSON.stringify(DEFAULT_TEAMS_BY_DIVISION));
 
 function getDefaultBackendContent() {
-    return { homepageMessage:'', zelle:{}, gameSchedules:[], gameScores:[], practiceSchedules:[], standings:{}, slideshow:[] };
+    return { homepageMessage:'', zelle:{}, gameSchedules:[], gameScores:[], practiceSchedules:[], standings:{}, slideshow:[], rosters:{}, teamPlayers:{} };
 }
 
 function formatDateKey(date) {
@@ -812,6 +813,7 @@ async function loadBackendSchedule() {
         writeJson(STANDINGS_KEY, scheduleContent.standings || buildStandingsFromGames(scheduleContent.gameSchedules || []));
         if (typeof content === 'object' && content) content = Object.assign({}, content, scheduleContent);
         updateDashboardSummary?.();
+        renderAdminSlideshowList?.();
     } catch(e) { console.warn('Backend schedule load failed', e); scheduleContent = null; }
 }
 
@@ -829,6 +831,7 @@ async function persistBackendContent() {
         writeJson(PRACTICE_KEY, scheduleContent.practiceSchedules || []);
         writeJson(STANDINGS_KEY, scheduleContent.standings || buildStandingsFromGames(scheduleContent.gameSchedules || []));
         updateDashboardSummary?.();
+        renderAdminSlideshowList?.();
         return true;
     } catch(e) {
         console.warn('Backend persist failed', e);
@@ -874,6 +877,12 @@ const adminRosterFile = document.getElementById('admin-roster-file');
 const uploadAllRostersAdminBtn = document.getElementById('upload-all-rosters-admin-btn');
 // Site Content Management elements
 const zelle = document.getElementById('zelle');
+const adminSlideshowFile = document.getElementById('admin-slideshow-file');
+const adminSlideshowCaption = document.getElementById('admin-slideshow-caption');
+const uploadSlideshowBtn = document.getElementById('upload-slideshow-btn');
+const refreshSlideshowBtn = document.getElementById('refresh-slideshow-btn');
+const adminSlideshowList = document.getElementById('admin-slideshow-list');
+const slideshowUploadStatus = document.getElementById('slideshow-upload-status');
 
 function readJson(key, fallback) {
     try {
@@ -1167,7 +1176,7 @@ function normalizeRosterRow(row) {
     };
 }
 
-function uploadAllRostersByAdmin() {
+async function uploadAllRostersByAdmin() {
     if (!isAdminLoggedIn()) {
         divisionManagerStatus.textContent = 'Admin access required to upload all rosters.';
         return;
@@ -1186,7 +1195,7 @@ function uploadAllRostersByAdmin() {
     }
 
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
         try {
             const workbook = XLSX.read(reader.result, { type: 'array' });
             const sheetName = workbook.SheetNames[0];
@@ -1257,7 +1266,19 @@ function uploadAllRostersByAdmin() {
             });
 
             writeJson(ROSTER_KEY, store);
-            divisionManagerStatus.textContent = `All rosters uploaded. ${teamsUpdated} team(s) updated, ${totalAdded} new player(s) added across all teams.`;
+            const teamPlayers = readJson(TEAM_PLAYERS_KEY, {});
+            try {
+                const response = await fetch(apiUrl('/api/rosters'), {
+                    method: 'POST',
+                    headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
+                    body: JSON.stringify({ rosters: store, teamPlayers })
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok || result.success === false) throw new Error(result.error || `HTTP ${response.status}`);
+                divisionManagerStatus.textContent = `All rosters uploaded to backend. ${teamsUpdated} team(s) updated, ${totalAdded} new player(s) added across all teams.`;
+            } catch (error) {
+                divisionManagerStatus.textContent = `Rosters saved locally, but backend roster save failed: ${error.message}`;
+            }
         } catch (error) {
             divisionManagerStatus.textContent = `All rosters upload failed: ${error.message}`;
         }
@@ -1602,6 +1623,51 @@ async function loadAdminContentDashboard() {
         console.warn('Failed to load site content from backend:', err);
     }
 }
+
+function renderAdminSlideshowList() {
+    if (!adminSlideshowList) return;
+    const items = (scheduleContent && Array.isArray(scheduleContent.slideshow)) ? scheduleContent.slideshow : [];
+    if (!items.length) {
+        adminSlideshowList.innerHTML = '<li>No slideshow images are currently saved.</li>';
+        return;
+    }
+    adminSlideshowList.innerHTML = items.map((item, index) => {
+        const url = item.url || item.src || item.path || '';
+        const caption = item.caption || item.originalName || item.filename || 'Slideshow image';
+        return `<li><strong>${index + 1}.</strong> ${caption} ${url ? `<br><small>${url}</small>` : ''}</li>`;
+    }).join('');
+}
+
+async function uploadAdminSlideshowImage() {
+    if (!isAdminLoggedIn()) {
+        if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Admin access required to upload slideshow images.';
+        return;
+    }
+    const file = adminSlideshowFile?.files?.[0];
+    if (!file) {
+        if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Choose an image file first.';
+        return;
+    }
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('caption', adminSlideshowCaption?.value || '');
+    try {
+        if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Uploading slideshow image...';
+        const response = await fetch(apiUrl('/api/upload-image'), { method: 'POST', headers: window.apiHeaders(), body: formData });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.success === false) throw new Error(result.error || result.message || `HTTP ${response.status}`);
+        scheduleContent = Object.assign(getDefaultBackendContent(), result.content || scheduleContent || {}, { slideshow: (result.content && result.content.slideshow) || [result.image].concat((scheduleContent && scheduleContent.slideshow) || []) });
+        if (typeof content === 'object' && content) content = Object.assign({}, content, scheduleContent);
+        if (adminSlideshowFile) adminSlideshowFile.value = '';
+        if (adminSlideshowCaption) adminSlideshowCaption.value = '';
+        renderAdminSlideshowList();
+        updateDashboardSummary?.();
+        if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Slideshow image uploaded and saved to backend content.';
+    } catch (error) {
+        if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Slideshow upload failed: ' + error.message;
+    }
+}
+
 async function saveDashboardContent(fields) {
     try {
         const current = Object.assign(getDefaultBackendContent(), content || {}, scheduleContent || {});
@@ -1625,6 +1691,10 @@ async function saveDashboardContent(fields) {
 }
 loadAdminContentDashboard();
 document.getElementById('saveZelleBtn')?.addEventListener('click', () => saveDashboardContent(['zelle']));
+
+uploadSlideshowBtn?.addEventListener('click', uploadAdminSlideshowImage);
+refreshSlideshowBtn?.addEventListener('click', async () => { await loadBackendSchedule(); renderAdminSlideshowList(); if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Slideshow list refreshed.'; });
+
 document.getElementById('backend-base-input') && (document.getElementById('backend-base-input').value = window.BACKEND_BASE || '');
 document.getElementById('admin-api-key-input') && (document.getElementById('admin-api-key-input').value = localStorage.getItem('LAMSL_ADMIN_KEY') || '');
 document.getElementById('save-admin-settings-btn')?.addEventListener('click', () => { const base = document.getElementById('backend-base-input')?.value.trim(); const key = document.getElementById('admin-api-key-input')?.value.trim(); if (base) { localStorage.setItem('LAMSL_BACKEND', base); window.BACKEND_BASE = base; } if (key) { localStorage.setItem('LAMSL_ADMIN_KEY', key); window.ADMIN_API_KEY = key; } document.getElementById('backend-dashboard-status').textContent = 'Settings saved. Logged-in admin users will also authenticate backend saves automatically.'; });

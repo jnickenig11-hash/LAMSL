@@ -4,26 +4,67 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
+import crypto from 'crypto';
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY || null;
+const SESSION_SECRET = process.env.LAMSL_SESSION_SECRET || ADMIN_API_KEY || 'lamsl-dev-session-secret';
 console.log('ADMIN_API_KEY loaded:', !!ADMIN_API_KEY);
-function requireAdminKey(req, res, next) {
-  const token = req.headers['x-admin-key'] || (req.headers.authorization || '').split(' ')[1];
+
+function getBearerToken(req) {
+  const auth = String(req.headers.authorization || '');
+  if (auth.toLowerCase().startsWith('bearer ')) return auth.slice(7).trim();
+  return '';
+}
+
+function createSessionToken(payload) {
+  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const sig = crypto.createHmac('sha256', SESSION_SECRET).update(body).digest('base64url');
+  return `${body}.${sig}`;
+}
+
+function verifySessionToken(token) {
+  if (!token || !token.includes('.')) return null;
+  const [body, sig] = token.split('.');
+  const expected = crypto.createHmac('sha256', SESSION_SECRET).update(body).digest('base64url');
+  if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return null;
+  const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'));
+  if (!payload.exp || Date.now() > payload.exp) return null;
+  if (!['admin', 'umpire'].includes(String(payload.role || '').toLowerCase())) return null;
+  return payload;
+}
+
+function getStaticSession(req) {
   const role = String(req.headers['x-lamsl-role'] || '').toLowerCase();
   const sessionActive = req.headers['x-lamsl-session'] === 'active';
-  const roleAllowed = sessionActive && ['admin', 'umpire'].includes(role);
-
-  if (ADMIN_API_KEY && token === ADMIN_API_KEY) return next();
-  // LAMSL site sessions are created by the static admin login. This allows logged-in admin/umpire users
-  // to use dashboard upload/save buttons without manually entering the backend API key in the browser.
-  if (roleAllowed) return next();
-
-  return res.status(403).json({ success: false, error: 'Forbidden: admin login or valid API key required' });
+  const username = String(req.headers['x-lamsl-username'] || 'admin');
+  if (sessionActive && ['admin', 'umpire'].includes(role)) return { username, role };
+  return null;
 }
+
+function requireAdminKey(req, res, next) {
+  const token = req.headers['x-admin-key'] || getBearerToken(req);
+  if (ADMIN_API_KEY && token === ADMIN_API_KEY) return next();
+  if (verifySessionToken(token)) return next();
+  if (getStaticSession(req)) return next();
+  return res.status(403).json({ success: false, error: 'Forbidden: admin login/session token or valid API key required' });
+}
+
+app.post('/api/admin-session', express.json(), (req, res) => {
+  const staticSession = getStaticSession(req);
+  const key = req.headers['x-admin-key'] || getBearerToken(req);
+  const apiKeyValid = !!(ADMIN_API_KEY && key === ADMIN_API_KEY);
+  if (!staticSession && !apiKeyValid) {
+    return res.status(403).json({ success: false, error: 'Forbidden: sign in as admin/umpire before requesting backend session.' });
+  }
+  const role = staticSession?.role || 'admin';
+  const username = staticSession?.username || 'admin';
+  const token = createSessionToken({ username, role, iat: Date.now(), exp: Date.now() + 12 * 60 * 60 * 1000 });
+  return res.json({ success: true, token, role, username, expiresInHours: 12 });
+});
 
 // Ensure required directories exist
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

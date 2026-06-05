@@ -11,6 +11,7 @@
 /* ===== GLOBAL ===== */
 body {
     margin: 0;
+    font-size: 18.667px;
     font-family: 'Barlow Condensed', 'Trebuchet MS', sans-serif;
     background-color: #eef4ea;
     background-image: linear-gradient(rgba(233, 244, 231, 0.88), rgba(233, 244, 231, 0.88)), url("Images/LAMSLLogo.jpg");
@@ -1129,6 +1130,30 @@ loadSlidesFromFolder();
 setInterval(nextSlide, 20000);
 
 // ===== MINI SCHEDULE =====
+function formatMiniScheduleTime(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+
+    const normalized = raw
+        .replace(/\s+/g, ' ')
+        .replace(/\s*([AaPp][Mm])$/, ' $1')
+        .trim();
+
+    const match = normalized.match(/^(\d{1,2})(?::(\d{2}))?\s*([AaPp][Mm])?$/);
+    if (!match) return raw.replace(/\s*([AaPp][Mm])\s*([AaPp][Mm])$/i, ' $1');
+
+    let hour = parseInt(match[1], 10);
+    const minute = match[2] || '00';
+    let suffix = match[3] ? match[3].toUpperCase() : '';
+
+    if (!suffix) {
+        suffix = hour >= 12 ? 'PM' : 'AM';
+    }
+
+    hour = hour % 12 || 12;
+    return `${hour}:${minute} ${suffix}`;
+}
+
 function renderMiniSchedule() {
     const SCHEDULE_KEY = 'lamslWeeklyScheduleV3';
     const CHECKINS_KEY = 'lamslGameCheckinsV1';
@@ -1196,11 +1221,7 @@ function renderMiniSchedule() {
         parkGames.forEach(game => {
             const row = document.createElement('div');
             row.className = 'mini-game-row';
-            const [h, m] = game.time.split(':');
-            const hr = parseInt(h, 10);
-            const ampm = hr >= 12 ? 'PM' : 'AM';
-            const hr12 = hr % 12 || 12;
-            const timeStr = `${hr12}:${m} ${ampm}`;
+            const timeStr = formatMiniScheduleTime(game.time);
             const statusBit = game.status === 'postponed'
                 ? ' <span style="font-size:9px;color:#C86A2F;font-weight:700;">PPD</span>' : '';
             const checkinBit = checkins[game.id]

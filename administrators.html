@@ -734,7 +734,9 @@ function apiUrl(path) {
 if (typeof window.apiHeaders !== 'function') {
     window.apiHeaders = function(additionalHeaders) {
         const headers = Object.assign({}, additionalHeaders || {});
+        const backendToken = localStorage.getItem('LAMSL_BACKEND_TOKEN');
         const key = localStorage.getItem('LAMSL_ADMIN_KEY');
+        if (backendToken) headers.Authorization = 'Bearer ' + backendToken;
         if (key) headers['x-admin-key'] = key;
         try {
             const session = JSON.parse(localStorage.getItem('lamslSessionV1') || 'null');
@@ -746,6 +748,30 @@ if (typeof window.apiHeaders !== 'function') {
         } catch (e) {}
         return headers;
     };
+}
+
+async function ensureBackendSessionToken() {
+    if (!isAdminLoggedIn()) return null;
+    const existing = localStorage.getItem('LAMSL_BACKEND_TOKEN');
+    if (existing) return existing;
+    try {
+        const response = await fetch(apiUrl('/api/admin-session'), {
+            method: 'POST',
+            headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ source: 'administrators.html' })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.success === false || !result.token) throw new Error(result.error || `HTTP ${response.status}`);
+        localStorage.setItem('LAMSL_BACKEND_TOKEN', result.token);
+        return result.token;
+    } catch (error) {
+        console.warn('Backend session token request failed:', error);
+        return null;
+    }
+}
+
+function clearBackendSessionToken() {
+    localStorage.removeItem('LAMSL_BACKEND_TOKEN');
 }
 
 const DEFAULT_TEAMS_BY_DIVISION = {
@@ -1272,6 +1298,7 @@ async function uploadAllRostersByAdmin() {
             writeJson(ROSTER_KEY, store);
             const teamPlayers = readJson(TEAM_PLAYERS_KEY, {});
             try {
+                await ensureBackendSessionToken();
                 const response = await fetch(apiUrl('/api/rosters'), {
                     method: 'POST',
                     headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
@@ -1524,6 +1551,7 @@ function renderAuthState() {
 
     if (loggedIn && isAdmin) {
         initializeAdminKeyFromStorage();
+        ensureBackendSessionToken();
     }
 
     if (loggedIn) {
@@ -1566,12 +1594,16 @@ loginButton.addEventListener('click', () => {
     }
 
     renderAuthState();
+    ensureBackendSessionToken().then(() => {
+        if (authStatus && user.role === 'admin') authStatus.textContent += ' Backend session ready.';
+    });
     renderAnnouncements();
 });
 
 logoutButton.addEventListener('click', () => {
     localStorage.removeItem(SESSION_KEY);
     localStorage.removeItem('lamslAdminAuthV1');
+    clearBackendSessionToken();
     renderAuthState();
 });
 
@@ -1698,6 +1730,7 @@ async function migrateLocalContentToBackend() {
             gameScores: mergedSchedules.filter(g => g.score1 !== '' && g.score2 !== '' && g.score1 != null && g.score2 != null),
             standings: buildStandingsFromGames(mergedSchedules)
         });
+        await ensureBackendSessionToken();
         const updateRes = await fetch(apiUrl('/api/update'), {
             method: 'POST',
             headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
@@ -1782,6 +1815,7 @@ async function uploadAdminSlideshowImage() {
     formData.append('caption', adminSlideshowCaption?.value || '');
     try {
         if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Uploading slideshow image...';
+        await ensureBackendSessionToken();
         const response = await fetch(apiUrl('/api/upload-image'), { method: 'POST', headers: window.apiHeaders(), body: formData });
         const result = await response.json().catch(() => ({}));
         if (!response.ok || result.success === false) throw new Error(result.error || result.message || `HTTP ${response.status}`);

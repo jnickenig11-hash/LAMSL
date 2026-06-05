@@ -1644,6 +1644,17 @@ async function readJsonResponse(response) {
     }
 }
 
+function resolveBackendAssetUrl(value) {
+    if (!value) return '';
+    const raw = String(value).trim();
+    if (!raw) return '';
+    if (/^https?:\/\//i.test(raw) || raw.startsWith('data:')) return raw;
+    const backendBase = (window.BACKEND_BASE || 'https://lamsl-backend.onrender.com').replace(/\/$/, '');
+    const normalized = raw.startsWith('/') ? raw : '/' + raw;
+    return backendBase + normalized.replace(/ /g, '%20');
+}
+
+
 function renderHeader() {
     if (!team) {
         teamTitle.textContent = 'Team Profile';
@@ -1658,8 +1669,9 @@ function renderHeader() {
 }
 
 function renderTeamPhoto(photo) {
-    if (photo && photo.path) {
-        teamPhoto.src = `${photo.path}?t=${Date.now()}`;
+    const photoUrl = photo ? resolveBackendAssetUrl(photo.url || photo.path) : '';
+    if (photoUrl) {
+        teamPhoto.src = `${photoUrl}${photoUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
         teamPhoto.alt = `${team || 'Team'} profile photo`;
         teamPhoto.style.display = 'block';
         teamPhotoPlaceholder.style.display = 'none';
@@ -1679,7 +1691,7 @@ async function loadTeamPhoto() {
     }
 
     try {
-        const response = await fetch(apiUrl(`team-profile-photo?team=${encodeURIComponent(team)}&division=${encodeURIComponent(division)}`));
+        const response = await fetch(apiUrl(`/api/team-profile-photo?team=${encodeURIComponent(team)}&division=${encodeURIComponent(division)}`));
         const result = await readJsonResponse(response);
         if (!response.ok || !result.success) {
             throw new Error(result.error || 'Unable to load team photo.');
@@ -2362,20 +2374,20 @@ uploadTeamPhotoBtn.addEventListener('click', async () => {
     }
 
     const formData = new FormData();
-    formData.append('photo', file);
     formData.append('team', team);
     formData.append('division', division);
+    formData.append('photo', file);
     teamPhotoStatus.textContent = `Uploading profile photo for ${team}...`;
 
     try {
-        const response = await fetch(apiUrl('upload-team-photo'), {
+        const response = await fetch(apiUrl(`/api/upload-team-photo?team=${encodeURIComponent(team)}&division=${encodeURIComponent(division)}`), {
             method: 'POST',
             headers: window.apiHeaders(),
             body: formData
         });
         const result = await readJsonResponse(response);
         if (!response.ok || !result.success) {
-            throw new Error(result.error || 'Upload failed.');
+            throw new Error(result.error || `Upload failed with HTTP ${response.status}.`);
         }
 
         teamPhotoFileInput.value = '';

@@ -534,6 +534,7 @@ button:hover,
                 <div class="admin-panel"><h3>Zelle / Payment Info</h3><textarea id="zelle" rows="5" placeholder="Zelle JSON"></textarea><button type="button" id="saveZelleBtn" class="admin-form-btn">Save Zelle Info</button></div>
                 <div class="admin-panel image-management-panel"><h3>Image Uploads</h3><p class="admin-status" id="slideshow-upload-status">Choose where to save the image. Homepage images display in the homepage slideshow. Event/fundraiser images save to EFimages.</p><label for="admin-image-destination"><strong>Image Destination</strong></label><select id="admin-image-destination"><option value="homepage">Homepage slideshow</option><option value="events">Events / Fundraisers</option></select><input id="admin-slideshow-file" type="file" accept="image/*"><input id="admin-slideshow-caption" type="text" placeholder="Optional caption"><div class="score-actions"><button type="button" id="upload-slideshow-btn">Upload Image</button><button type="button" id="refresh-slideshow-btn">Refresh Image Lists</button></div></div>
                 <div class="admin-panel image-management-panel"><h3>Uploaded Image Management</h3><p class="admin-status">Delete uploaded homepage slideshow or event/fundraiser files here. Deleting removes the storage file and the backend content reference.</p><div class="score-actions"><button type="button" id="refresh-image-management-btn">Reload Uploaded Images</button></div><ul id="admin-slideshow-list" class="admin-list uploaded-image-management-list"></ul></div>
+                <div class="admin-panel" id="schedule-notification-panel"><h3>Email Schedule Notifications</h3><p class="admin-status" id="notification-status">Send schedule update emails to users who subscribed through the homepage email subscription region.</p><div class="dashboard-grid"><div class="dashboard-tile"><strong>Subscribers</strong><span id="notification-subscriber-count">--</span></div><div class="dashboard-tile"><strong>Email Service</strong><span id="notification-smtp-status">--</span></div></div><div class="score-actions"><button type="button" id="preview-schedule-notification-btn">Preview Email Snapshot</button><button type="button" id="send-schedule-notification-btn">Send Schedule Update Email</button></div><div id="schedule-notification-preview" class="admin-status" style="margin-top:10px;max-height:260px;overflow:auto;background:#fff;border:1px solid #d8e0e8;border-radius:8px;padding:10px;"></div></div>
               </div>
             </div>
 
@@ -984,6 +985,12 @@ const slideshowUploadStatus = document.getElementById('slideshow-upload-status')
 const migrateLocalContentBtn = document.getElementById('migrate-local-content-btn');
 const previewLocalContentBtn = document.getElementById('preview-local-content-btn');
 const migrationStatus = document.getElementById('migration-status');
+const notificationStatus = document.getElementById('notification-status');
+const notificationSubscriberCount = document.getElementById('notification-subscriber-count');
+const notificationSmtpStatus = document.getElementById('notification-smtp-status');
+const notificationPreview = document.getElementById('schedule-notification-preview');
+const previewScheduleNotificationBtn = document.getElementById('preview-schedule-notification-btn');
+const sendScheduleNotificationBtn = document.getElementById('send-schedule-notification-btn');
 
 function readJson(key, fallback) {
     try {
@@ -1693,6 +1700,74 @@ async function deleteManagedImage(destination, filename) {
     }
 }
 
+
+async function loadNotificationStatus() {
+    if (!notificationStatus && !notificationSubscriberCount && !notificationSmtpStatus) return;
+    try {
+        await ensureBackendSessionToken();
+        const response = await fetch(apiUrl('/api/notifications/schedule-preview'), { headers: window.apiHeaders(), cache: 'no-store' });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.success === false) throw new Error(result.error || result.message || `HTTP ${response.status}`);
+        if (notificationSubscriberCount) notificationSubscriberCount.textContent = result.subscriberCount ?? 0;
+        if (notificationSmtpStatus) notificationSmtpStatus.textContent = result.smtpConfigured ? 'Ready' : 'Setup Needed';
+        if (notificationStatus) notificationStatus.textContent = result.smtpConfigured ? 'Schedule notification email service is ready.' : 'SMTP is not configured on Render. Preview works, but sending requires SMTP environment variables.';
+    } catch (error) {
+        if (notificationStatus) notificationStatus.textContent = 'Notification status failed: ' + error.message;
+    }
+}
+
+function renderNotificationPreview(preview, subscriberCount, smtpConfigured) {
+    if (!notificationPreview) return;
+    const games = Array.isArray(preview?.games) ? preview.games : [];
+    const rows = games.map(game => `<li>${escapeAdminHtml(game.date || 'TBD')} ${escapeAdminHtml(game.time || '')} — ${escapeAdminHtml(game.team1 || 'TBD')} vs ${escapeAdminHtml(game.team2 || 'TBD')} @ ${escapeAdminHtml(game.park || 'TBD')}</li>`).join('');
+    notificationPreview.innerHTML = `<strong>${escapeAdminHtml(preview?.subject || 'LAMSL Schedule Update')}</strong><br><small>Subscribers: ${subscriberCount || 0} | SMTP: ${smtpConfigured ? 'Ready' : 'Setup needed'}</small><ul>${rows || '<li>No upcoming games found.</li>'}</ul>`;
+}
+
+async function previewScheduleNotification() {
+    if (!isAdminLoggedIn()) {
+        if (notificationStatus) notificationStatus.textContent = 'Sign in as admin to preview notifications.';
+        return;
+    }
+    try {
+        if (notificationStatus) notificationStatus.textContent = 'Loading notification preview...';
+        await ensureBackendSessionToken();
+        const response = await fetch(apiUrl('/api/notifications/schedule-preview'), { headers: window.apiHeaders(), cache: 'no-store' });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.success === false) throw new Error(result.error || result.message || `HTTP ${response.status}`);
+        if (notificationSubscriberCount) notificationSubscriberCount.textContent = result.subscriberCount ?? 0;
+        if (notificationSmtpStatus) notificationSmtpStatus.textContent = result.smtpConfigured ? 'Ready' : 'Setup Needed';
+        renderNotificationPreview(result.preview, result.subscriberCount, result.smtpConfigured);
+        if (notificationStatus) notificationStatus.textContent = 'Preview loaded. No email was sent.';
+    } catch (error) {
+        if (notificationStatus) notificationStatus.textContent = 'Preview failed: ' + error.message;
+    }
+}
+
+async function sendScheduleNotification() {
+    if (!isAdminLoggedIn()) {
+        if (notificationStatus) notificationStatus.textContent = 'Sign in as admin to send notifications.';
+        return;
+    }
+    if (!confirm('Send the schedule update email to all subscribers?')) return;
+    try {
+        if (notificationStatus) notificationStatus.textContent = 'Sending schedule update email...';
+        await ensureBackendSessionToken();
+        const response = await fetch(apiUrl('/api/notifications/send-schedule-update'), {
+            method: 'POST',
+            headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ reason: 'manual-admin-dashboard-send' })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.success === false) throw new Error(result.error || result.message || `HTTP ${response.status}`);
+        if (notificationSubscriberCount) notificationSubscriberCount.textContent = result.subscriberCount ?? 0;
+        if (notificationSmtpStatus) notificationSmtpStatus.textContent = result.configured ? 'Ready' : 'Setup Needed';
+        renderNotificationPreview(result.preview, result.subscriberCount, result.configured);
+        if (notificationStatus) notificationStatus.textContent = `Schedule update sent. Sent: ${result.sent || 0}. Failed: ${result.failed || 0}.`;
+    } catch (error) {
+        if (notificationStatus) notificationStatus.textContent = 'Send failed: ' + error.message;
+    }
+}
+
 async function saveDashboardContent(fields) {
     try {
         const current = Object.assign(getDefaultBackendContent(), content || {}, scheduleContent || {});
@@ -1722,6 +1797,9 @@ migrateLocalContentBtn?.addEventListener('click', migrateLocalContentToBackend);
 uploadSlideshowBtn?.addEventListener('click', uploadAdminSlideshowImage);
 refreshSlideshowBtn?.addEventListener('click', async () => { await loadBackendSchedule(); renderAdminSlideshowList(); if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Image lists refreshed.'; });
 refreshImageManagementBtn?.addEventListener('click', async () => { await loadBackendSchedule(); renderAdminSlideshowList(); if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Uploaded image management refreshed.'; });
+previewScheduleNotificationBtn?.addEventListener('click', previewScheduleNotification);
+sendScheduleNotificationBtn?.addEventListener('click', sendScheduleNotification);
+loadNotificationStatus?.();
 
 document.getElementById('backend-base-input') && (document.getElementById('backend-base-input').value = window.BACKEND_BASE || '');
 document.getElementById('admin-api-key-input') && (document.getElementById('admin-api-key-input').value = localStorage.getItem('LAMSL_ADMIN_KEY') || '');

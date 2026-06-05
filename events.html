@@ -619,7 +619,7 @@ async function notifyEventAnnouncement(title, date, message) {
     try {
         const response = await fetch(apiUrl('/notify-announcement'), {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: (typeof window.apiHeaders === 'function' ? window.apiHeaders({ 'Content-Type': 'application/json' }) : { 'Content-Type': 'application/json' }),
             body: JSON.stringify({ title, date, message })
         });
         const result = await response.json();
@@ -820,7 +820,7 @@ function buildEFSlides(images) {
 
 async function loadEFImages() {
     try {
-        const response = await fetch('/ef-images');
+        const response = await fetch(apiUrl('/ef-images'), { cache: 'no-store' });
         const result = await response.json();
         if (!response.ok || !result.success || !Array.isArray(result.images)) return;
         buildEFSlides(result.images);
@@ -868,9 +868,9 @@ efRemoveBtn.addEventListener('click', async () => {
     efUploadStatus.textContent = `Removing ${current.name}...`;
 
     try {
-        const response = await fetch('/remove-ef-photo', {
+        const response = await fetch(apiUrl('/remove-ef-photo'), {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: (typeof window.apiHeaders === 'function' ? window.apiHeaders({ 'Content-Type': 'application/json' }) : { 'Content-Type': 'application/json' }),
             body: JSON.stringify({ filename: current.name })
         });
         const result = await response.json();
@@ -914,6 +914,7 @@ efUploadForm.addEventListener('submit', async (event) => {
     try {
         const response = await fetch(apiUrl('/upload-ef'), {
             method: 'POST',
+            headers: (typeof window.apiHeaders === 'function' ? window.apiHeaders() : {}),
             body: formData
         });
         const result = await response.json();
@@ -922,7 +923,7 @@ efUploadForm.addEventListener('submit', async (event) => {
         }
         addEFSlide({
             name: result.filename,
-            path: `${result.path}?t=${Date.now()}`,
+            path: `${result.path || result.url}?t=${Date.now()}`,
             caption: result.caption || ''
         });
         efUploadForm.reset();

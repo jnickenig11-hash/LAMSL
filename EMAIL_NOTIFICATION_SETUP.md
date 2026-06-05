@@ -1,38 +1,66 @@
-# LAMSL Email Notification Setup
+# LAMSL Email Schedule Notifications - SMTP Setup
 
-This patch adds schedule-update email notifications for users who subscribe through the homepage email subscription region.
+The notification feature is wired in the backend. It will save website email subscribers and can send a schedule-update email with a mini schedule snapshot.
 
-## Render environment variables
+## Required Render environment variables
 
-Add these variables to the Render backend service:
+Add these to the **LAMSL backend** Render service, then redeploy:
 
 ```text
-SMTP_HOST=your.smtp.host
+SMTP_HOST=smtp.gmail.com
 SMTP_PORT=465
 SMTP_SECURE=true
-SMTP_USER=your-smtp-username
-SMTP_PASS=your-smtp-password
-MAIL_FROM=LAMSL <notifications@yourdomain.com>
-LAMSL_AUTO_NOTIFY_SCHEDULE_UPDATES=true
+SMTP_USER=your-sending-email@gmail.com
+SMTP_PASS=your-app-password
+MAIL_FROM=LAMSL Schedule Updates <your-sending-email@gmail.com>
+SMTP_EHLO_DOMAIN=lamsl.com
 ```
 
-`LAMSL_AUTO_NOTIFY_SCHEDULE_UPDATES=false` disables automatic emails when the backend schedule changes. Manual sending from the Administrator Dashboard still works.
+For Gmail, use an App Password, not your normal Gmail password.
 
-## Administrator dashboard
+Alternative for SendGrid/Mailgun/etc.:
 
-Open `administrators.html`, sign in as admin, then use Site Content Dashboard > Email Schedule Notifications.
+```text
+SMTP_HOST=<provider smtp host>
+SMTP_PORT=465 or 587
+SMTP_SECURE=true for 465, false for 587
+SMTP_USER=<smtp username>
+SMTP_PASS=<smtp password>
+MAIL_FROM=LAMSL Schedule Updates <no-reply@lamsl.com>
+SMTP_EHLO_DOMAIN=lamsl.com
+```
 
-- Preview Email Snapshot: shows the next games snapshot and subscriber count.
-- Send Schedule Update Email: sends the schedule update email to all subscribers.
+## Storage variables
 
-## Backend endpoints
+These should already exist:
 
-- `GET /api/notifications/schedule-preview`
-- `POST /api/notifications/send-schedule-update`
-- `GET /api/subscribers`
+```text
+ADMIN_API_KEY=<your admin key>
+LAMSL_STORAGE_DIR=/var/data
+```
 
-All endpoints require admin authentication.
+## Verify after redeploy
 
-## Subscriber storage
+Open:
 
-Subscribers are now stored under the configured persistent storage data folder: `LAMSL_STORAGE_DIR/data/email_subscribers.json`. Legacy `email_subscribers.json` entries are still read and merged.
+```text
+https://lamsl-backend.onrender.com/api/notifications/status
+```
+
+Expected when configured:
+
+```json
+{
+  "success": true,
+  "smtpConfigured": true
+}
+```
+
+## Admin testing
+
+In `administrators.html`, use the notification controls:
+
+1. Preview Schedule Email
+2. Send Schedule Update Email
+
+Automatic emails are queued when `/api/update` receives schedule changes.

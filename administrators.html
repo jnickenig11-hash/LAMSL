@@ -2744,6 +2744,270 @@ initializeAdminScheduleDashboard();
 })();
 
 
+
+// ===== FINAL FIX: ADMIN SELECTS + SEASON SETTINGS =====
+// Keeps schedule, score, practice/scrimmage, and season settings independent of older duplicated handlers.
+(function () {
+    const BACKEND = (window.BACKEND_BASE || 'https://lamsl-backend.onrender.com').replace(/\/$/, '');
+    const DEFAULT_TEAM_MAP = {
+        A: ['Titans','La Tribu','Nasty Boyz','Toxic','White Sox','Legends'],
+        B: ['Cubs','Primos','Dodgers','Diablos','Charros','Doom Squad'],
+        C: ['Demons','Naranjeros','Caballeros','Salvajes','Coyotes','Bandits','Orioles','Goodfellas'],
+        D: ['Strokes','Dirt Bags','Camaradas','Wild Hogz','Los Pericos','Xolos','Desvelados'],
+        E: ['Tigers']
+    };
+
+    function esc(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+    }
+
+    function readLS(key, fallback) {
+        try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch (e) { return fallback; }
+    }
+
+    function writeLS(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+    }
+
+    function normalizeDivision(value) {
+        const raw = String(value || '').trim();
+        if (!raw) return '';
+        const upper = raw.toUpperCase().replace(/^DIVISION\s+/, '');
+        if (upper === 'ALL' || upper === 'ALL DIVISIONS' || raw === 'All') return 'ALL';
+        return /^[A-E]$/.test(upper) ? upper : upper;
+    }
+
+    function stableGameId(game, index) {
+        if (game && game.id) return String(game.id);
+        return ['game', game?.date || 'date', game?.time || 'time', game?.park || 'park', game?.team1 || 'team1', game?.team2 || 'team2', index]
+            .join('-').replace(/[^a-zA-Z0-9_-]+/g, '-');
+    }
+
+    async function fetchWithTimeout(url, ms = 6000) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), ms);
+        try {
+            const response = await fetch(url, { cache: 'no-store', signal: controller.signal });
+            if (!response.ok) return null;
+            return await response.json();
+        } catch (e) {
+            return null;
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
+    function getCurrentEditorContent() {
+        const existing = window.scheduleContent || (typeof scheduleContent !== 'undefined' ? scheduleContent : null) || {};
+        const localSchedule = readLS('lamslWeeklyScheduleV3', []);
+        const localPractice = readLS('lamslPracticeScheduleV1', []);
+        const content = Object.assign({}, existing);
+        if (!Array.isArray(content.gameSchedules) || !content.gameSchedules.length) content.gameSchedules = localSchedule;
+        if (!Array.isArray(content.practiceSchedules)) content.practiceSchedules = localPractice;
+        content.gameSchedules = (content.gameSchedules || []).map((game, index) => Object.assign({}, game, { id: stableGameId(game, index) }));
+        content.practiceSchedules = (content.practiceSchedules || []).map((game, index) => Object.assign({}, game, { id: game.id || `practice-${index}-${Date.now()}` }));
+        return content;
+    }
+
+    async function loadEditorContentFinal() {
+        let content = getCurrentEditorContent();
+        const backend = await fetchWithTimeout(BACKEND + '/api/content');
+        if (backend && (Array.isArray(backend.gameSchedules) || backend.divisions || Array.isArray(backend.teams))) {
+            content = Object.assign({}, backend, {
+                gameSchedules: Array.isArray(backend.gameSchedules) && backend.gameSchedules.length ? backend.gameSchedules : content.gameSchedules,
+                practiceSchedules: Array.isArray(backend.practiceSchedules) ? backend.practiceSchedules : content.practiceSchedules
+            });
+        }
+        content.gameSchedules = (content.gameSchedules || []).map((game, index) => Object.assign({}, game, { id: stableGameId(game, index) }));
+        content.practiceSchedules = (content.practiceSchedules || []).map((game, index) => Object.assign({}, game, { id: game.id || `practice-${index}-${Date.now()}` }));
+        window.scheduleContent = content;
+        try { scheduleContent = content; } catch (e) {}
+        writeLS('lamslWeeklyScheduleV3', content.gameSchedules);
+        writeLS('lamslPracticeScheduleV1', content.practiceSchedules);
+        return content;
+    }
+
+    function buildTeamMap(content) {
+        const map = JSON.parse(JSON.stringify(DEFAULT_TEAM_MAP));
+        const add = (division, team) => {
+            const name = String(team || '').trim();
+            if (!name) return;
+            let div = normalizeDivision(division);
+            if (!div || div === 'ALL') {
+                div = Object.keys(map).find(key => (map[key] || []).some(t => String(t).toLowerCase() === name.toLowerCase())) || 'E';
+            }
+            if (!map[div]) map[div] = [];
+            if (!map[div].some(t => String(t).toLowerCase() === name.toLowerCase())) map[div].push(name);
+        };
+        const localDivisions = readLS('lamslDivisionsV1', null);
+        if (localDivisions && typeof localDivisions === 'object') {
+            Object.entries(localDivisions).forEach(([division, teams]) => (teams || []).forEach(team => add(division, team)));
+        }
+        if (content.divisions && typeof content.divisions === 'object') {
+            Object.entries(content.divisions).forEach(([division, teams]) => (teams || []).forEach(team => add(division, team)));
+        }
+        if (Array.isArray(content.teams)) {
+            content.teams.forEach(team => typeof team === 'string' ? add('', team) : add(team.division || team.div || team.group, team.name || team.teamName));
+        }
+        (content.gameSchedules || []).forEach(game => { add(game.division, game.team1); add(game.division, game.team2); });
+        (content.practiceSchedules || []).forEach(game => {
+            add(game.div1 || game.division1 || game.division, game.team1);
+            add(game.div2 || game.division2 || game.division, game.team2);
+        });
+        Object.keys(map).forEach(key => map[key] = [...new Set(map[key].filter(Boolean))].sort((a,b) => a.localeCompare(b)));
+        window.teamsByDivision = map;
+        try { teamsByDivision = map; } catch (e) {}
+        writeLS('lamslDivisionsV1', map);
+        return map;
+    }
+
+    function teamsForDivision(division, map) {
+        const div = normalizeDivision(division || 'ALL');
+        if (!div || div === 'ALL') return [...new Set(Object.values(map).flat())].filter(Boolean).sort((a,b) => a.localeCompare(b));
+        return (map[div] || []).slice().sort((a,b) => a.localeCompare(b));
+    }
+
+    function setOptions(select, placeholder, options, selected) {
+        if (!select) return;
+        select.disabled = false;
+        select.innerHTML = `<option value="">${esc(placeholder)}</option>` + options.map(option => `<option value="${esc(option)}">${esc(option)}</option>`).join('');
+        if (selected && options.includes(selected)) select.value = selected;
+    }
+
+    function populateTeamSelectsFinal(content) {
+        const map = buildTeamMap(content || getCurrentEditorContent());
+        const divisionEl = document.getElementById('game-division');
+        if (divisionEl && !divisionEl.value) divisionEl.value = 'ALL';
+        const teams = teamsForDivision(divisionEl?.value || 'ALL', map);
+        setOptions(document.getElementById('game-team1'), 'Select Team 1', teams, document.getElementById('game-team1')?.value);
+        setOptions(document.getElementById('game-team2'), 'Select Team 2', teams, document.getElementById('game-team2')?.value);
+        const status = document.getElementById('admin-status');
+        if (status) status.textContent = teams.length ? `Loaded ${teams.length} team option(s).` : 'No teams found. Add teams in Division & Team Management.';
+    }
+
+    function populateScheduledGamesFinal(content) {
+        const select = document.getElementById('scheduled-game-select');
+        if (!select) return;
+        const previous = select.value;
+        const games = (content || getCurrentEditorContent()).gameSchedules || [];
+        select.disabled = false;
+        select.innerHTML = '<option value="">Select Scheduled Game</option>' + games
+            .filter(game => game && game.date && game.team1 && game.team2)
+            .map((game, index) => {
+                const id = stableGameId(game, index);
+                game.id = id;
+                const label = `${game.date || 'TBD'} ${game.time || ''} | ${game.park || 'TBD'} | ${game.team1 || 'TBD'} vs ${game.team2 || 'TBD'}`;
+                return `<option value="${esc(id)}">${esc(label)}</option>`;
+            }).join('');
+        if (previous && [...select.options].some(opt => opt.value === previous)) select.value = previous;
+        const btn = document.getElementById('delete-scheduled-game-btn');
+        if (btn) btn.disabled = !select.value;
+        const scoreStatus = document.getElementById('score-admin-status');
+        if (scoreStatus) scoreStatus.textContent = games.length ? `Loaded ${games.length} scheduled game option(s).` : 'No scheduled games found.';
+    }
+
+    function populatePracticeSelectsFinal(content) {
+        const map = buildTeamMap(content || getCurrentEditorContent());
+        [['practice-div1','practice-team1','Select Team 1'], ['practice-div2','practice-team2','Select Team 2']].forEach(([divId, teamId, label]) => {
+            const divEl = document.getElementById(divId);
+            if (divEl && !divEl.value) divEl.value = 'ALL';
+            setOptions(document.getElementById(teamId), label, teamsForDivision(divEl?.value || 'ALL', map), document.getElementById(teamId)?.value);
+        });
+    }
+
+    async function refreshAdminEditorDropdownsFinal() {
+        // Immediate local/default render first so the controls are never empty while Render wakes up.
+        const immediate = getCurrentEditorContent();
+        populateTeamSelectsFinal(immediate);
+        populateScheduledGamesFinal(immediate);
+        populatePracticeSelectsFinal(immediate);
+
+        const loaded = await loadEditorContentFinal();
+        populateTeamSelectsFinal(loaded);
+        populateScheduledGamesFinal(loaded);
+        populatePracticeSelectsFinal(loaded);
+    }
+
+    function bindFinalDropdownEvents() {
+        document.getElementById('game-division')?.addEventListener('change', () => populateTeamSelectsFinal(getCurrentEditorContent()));
+        document.getElementById('practice-div1')?.addEventListener('change', () => populatePracticeSelectsFinal(getCurrentEditorContent()));
+        document.getElementById('practice-div2')?.addEventListener('change', () => populatePracticeSelectsFinal(getCurrentEditorContent()));
+        document.getElementById('scheduled-game-select')?.addEventListener('change', event => {
+            const btn = document.getElementById('delete-scheduled-game-btn');
+            if (btn) btn.disabled = !event.target.value;
+            const game = getCurrentEditorContent().gameSchedules.find(item => stableGameId(item, 0) === event.target.value || item.id === event.target.value);
+            if (game) {
+                const s1 = document.getElementById('score-team1');
+                const s2 = document.getElementById('score-team2');
+                if (s1) s1.placeholder = `${game.team1} Score`;
+                if (s2) s2.placeholder = `${game.team2} Score`;
+            }
+        });
+        document.getElementById('refresh-admin-access')?.addEventListener('click', refreshAdminEditorDropdownsFinal);
+        document.getElementById('practice-refresh-admin')?.addEventListener('click', refreshAdminEditorDropdownsFinal);
+    }
+
+    async function saveSeasonFinal(event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+        }
+        const season = {
+            name: document.getElementById('season-name')?.value || '',
+            year: Number(document.getElementById('season-year')?.value || new Date().getFullYear()),
+            start: document.getElementById('season-start')?.value || '',
+            end: document.getElementById('season-end')?.value || '',
+            updatedAt: new Date().toISOString()
+        };
+        const status = document.getElementById('auth-status') || document.getElementById('admin-status');
+        if (!season.name || !season.year || !season.start || !season.end) {
+            if (status) status.textContent = 'Complete all league season fields.';
+            return false;
+        }
+        writeLS('lamslSeasonV1', season);
+        let ok = false;
+        try {
+            const current = await fetchWithTimeout(BACKEND + '/api/content') || {};
+            const response = await fetch(BACKEND + '/api/update', {
+                method: 'POST',
+                headers: (typeof window.apiHeaders === 'function' ? window.apiHeaders({ 'Content-Type':'application/json' }) : { 'Content-Type':'application/json' }),
+                body: JSON.stringify(Object.assign({}, current, { season, leagueSeason: season }))
+            });
+            ok = response.ok;
+        } catch (e) {
+            ok = false;
+        }
+        const display = document.getElementById('season-current-display');
+        if (display) {
+            display.style.display = 'block';
+            display.innerHTML = `<strong>${esc(season.name)} ${esc(season.year)}</strong><span class="season-badge">Active</span><br><span style="font-size:13px;color:#555;">${esc(season.start)} - ${esc(season.end)}</span>`;
+        }
+        if (status) status.textContent = ok ? 'League season saved to backend.' : 'League season saved locally. Backend save failed; verify admin login/API key.';
+        return ok;
+    }
+
+    function bindSeasonFinal() {
+        const form = document.getElementById('season-form');
+        if (!form || form.dataset.finalSeasonFix === '1') return;
+        form.dataset.finalSeasonFix = '1';
+        form.addEventListener('submit', saveSeasonFinal, true);
+    }
+
+    function bootFinalAdminFix() {
+        bindFinalDropdownEvents();
+        bindSeasonFinal();
+        refreshAdminEditorDropdownsFinal();
+        setTimeout(refreshAdminEditorDropdownsFinal, 800);
+        setTimeout(refreshAdminEditorDropdownsFinal, 2500);
+    }
+
+    window.refreshAdminEditorDropdownsFinal = refreshAdminEditorDropdownsFinal;
+    window.saveSeasonFinal = saveSeasonFinal;
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootFinalAdminFix);
+    else bootFinalAdminFix();
+})();
+
 // ===== SEASON BANNER =====
 (function () {
     try {

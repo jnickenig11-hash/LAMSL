@@ -2538,6 +2538,212 @@ bindSeasonBackendSavePatch();
 
 initializeAdminScheduleDashboard();
 
+
+
+// ===== HARD FIX: ADMIN EDITOR SELECT POPULATION =====
+// This block is intentionally last so it wins over older duplicated handlers.
+(function () {
+    const HARD_DEFAULT_TEAMS = {
+        A: ['Titans','La Tribu','Nasty Boyz','Toxic','White Sox','Legends'],
+        B: ['Cubs','Primos','Dodgers','Diablos','Charros','Doom Squad'],
+        C: ['Demons','Naranjeros','Caballeros','Salvajes','Coyotes','Bandits','Orioles','Goodfellas'],
+        D: ['Strokes','Dirt Bags','Camaradas','Wild Hogz','Los Pericos','Xolos','Desvelados'],
+        E: ['Tigers']
+    };
+
+    function normalizeDivision(value) {
+        const raw = String(value || '').trim();
+        const upper = raw.toUpperCase();
+        if (upper === 'ALL' || raw === 'All') return 'ALL';
+        const match = upper.match(/DIVISION\s*([A-E])|^([A-E])$/);
+        return match ? (match[1] || match[2]) : '';
+    }
+
+    function esc(value) {
+        return String(value == null ? '' : value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    }
+
+    function stableGameId(game, index) {
+        if (game && game.id) return String(game.id);
+        return ['game', game?.date || 'date', game?.time || 'time', game?.park || 'park', game?.team1 || 'team1', game?.team2 || 'team2', index].join('-').replace(/[^a-zA-Z0-9_-]+/g, '-');
+    }
+
+    async function fetchJsonNoStore(url) {
+        try {
+            const res = await fetch(url, { cache: 'no-store' });
+            if (!res.ok) return null;
+            return await res.json();
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function loadAdminEditorSource() {
+        const sources = [];
+        if (typeof apiUrl === 'function') sources.push(apiUrl('/api/content'));
+        sources.push('/data/content.json', 'data/content.json');
+
+        let selected = null;
+        for (const url of sources) {
+            const data = await fetchJsonNoStore(url);
+            if (data && (Array.isArray(data.gameSchedules) || data.divisions || Array.isArray(data.teams))) {
+                selected = data;
+                if (Array.isArray(data.gameSchedules) && data.gameSchedules.length) break;
+            }
+        }
+
+        const localSchedules = (() => {
+            try { return JSON.parse(localStorage.getItem('lamslWeeklyScheduleV3') || '[]'); } catch (e) { return []; }
+        })();
+        const localPractice = (() => {
+            try { return JSON.parse(localStorage.getItem('lamslPracticeScheduleV1') || '[]'); } catch (e) { return []; }
+        })();
+
+        const contentObj = Object.assign({}, selected || {});
+        if (!Array.isArray(contentObj.gameSchedules) || !contentObj.gameSchedules.length) contentObj.gameSchedules = localSchedules;
+        if (!Array.isArray(contentObj.practiceSchedules)) contentObj.practiceSchedules = localPractice;
+
+        contentObj.gameSchedules = (contentObj.gameSchedules || []).map((game, index) => Object.assign({}, game, { id: stableGameId(game, index) }));
+        contentObj.practiceSchedules = (contentObj.practiceSchedules || []).map((game, index) => Object.assign({}, game, { id: game.id || `practice-${index}-${Date.now()}` }));
+
+        try { localStorage.setItem('lamslWeeklyScheduleV3', JSON.stringify(contentObj.gameSchedules)); } catch (e) {}
+        try { localStorage.setItem('lamslPracticeScheduleV1', JSON.stringify(contentObj.practiceSchedules)); } catch (e) {}
+
+        window.scheduleContent = contentObj;
+        if (typeof scheduleContent !== 'undefined') scheduleContent = contentObj;
+        if (typeof content !== 'undefined' && content) content = Object.assign({}, content, contentObj);
+        return contentObj;
+    }
+
+    function buildEditorTeamMap(source) {
+        const map = JSON.parse(JSON.stringify(HARD_DEFAULT_TEAMS));
+        const add = (division, team) => {
+            const name = String(team || '').trim();
+            if (!name) return;
+            let div = normalizeDivision(division);
+            if (!div || div === 'ALL') {
+                div = Object.keys(map).find(key => (map[key] || []).includes(name)) || 'E';
+            }
+            map[div] = map[div] || [];
+            if (!map[div].includes(name)) map[div].push(name);
+        };
+
+        const sourceObj = source || window.scheduleContent || {};
+        if (sourceObj.divisions && typeof sourceObj.divisions === 'object') {
+            Object.entries(sourceObj.divisions).forEach(([division, teams]) => (teams || []).forEach(team => add(division, team)));
+        }
+        if (Array.isArray(sourceObj.teams)) {
+            sourceObj.teams.forEach(team => typeof team === 'string' ? add('', team) : add(team.division || team.div || team.group, team.name || team.teamName));
+        }
+        (sourceObj.gameSchedules || []).forEach(game => {
+            add(game.division, game.team1);
+            add(game.division, game.team2);
+        });
+        (sourceObj.practiceSchedules || []).forEach(game => {
+            add(game.div1 || game.division1 || game.division, game.team1);
+            add(game.div2 || game.division2 || game.division, game.team2);
+        });
+
+        Object.keys(map).forEach(key => map[key] = [...new Set(map[key].filter(Boolean))].sort((a,b) => a.localeCompare(b)));
+        window.teamsByDivision = map;
+        if (typeof teamsByDivision !== 'undefined') teamsByDivision = map;
+        try { localStorage.setItem('lamslDivisionsV1', JSON.stringify(map)); } catch (e) {}
+        return map;
+    }
+
+    function getTeamsForDivisionHard(division, map) {
+        const div = normalizeDivision(division);
+        const source = map || window.teamsByDivision || HARD_DEFAULT_TEAMS;
+        if (div === 'ALL' || !div) return [...new Set(Object.values(source).flat())].filter(Boolean).sort((a,b) => a.localeCompare(b));
+        return (source[div] || []).slice().sort((a,b) => a.localeCompare(b));
+    }
+
+    function setSelectOptions(select, placeholder, values, selectedValue) {
+        if (!select) return;
+        select.disabled = false;
+        select.innerHTML = `<option value="">${esc(placeholder)}</option>` + values.map(value => `<option value="${esc(value)}">${esc(value)}</option>`).join('');
+        if (selectedValue && values.includes(selectedValue)) select.value = selectedValue;
+    }
+
+    function populateScheduleTeamSelectsHard() {
+        const divisionEl = document.getElementById('game-division');
+        const division = divisionEl?.value || 'ALL';
+        const map = buildEditorTeamMap(window.scheduleContent || {});
+        const teams = getTeamsForDivisionHard(division, map);
+        setSelectOptions(document.getElementById('game-team1'), 'Select Team 1', teams, document.getElementById('game-team1')?.value);
+        setSelectOptions(document.getElementById('game-team2'), 'Select Team 2', teams, document.getElementById('game-team2')?.value);
+        const status = document.getElementById('admin-status');
+        if (status && teams.length) status.textContent = `Loaded ${teams.length} team option(s) for ${division === 'ALL' ? 'all divisions' : 'Division ' + division}.`;
+    }
+
+    function populatePracticeTeamSelectsHard() {
+        const map = buildEditorTeamMap(window.scheduleContent || {});
+        [['practice-div1','practice-team1','Select Team 1'], ['practice-div2','practice-team2','Select Team 2']].forEach(([divId, teamId, label]) => {
+            const div = document.getElementById(divId)?.value || 'ALL';
+            const teams = getTeamsForDivisionHard(div, map);
+            setSelectOptions(document.getElementById(teamId), label, teams, document.getElementById(teamId)?.value);
+        });
+    }
+
+    function populateScheduledGameSelectHard() {
+        const select = document.getElementById('scheduled-game-select');
+        if (!select) return;
+        const previous = select.value;
+        const source = window.scheduleContent || {};
+        const games = (source.gameSchedules || []).filter(game => game && game.date && game.team1 && game.team2);
+        select.disabled = false;
+        select.innerHTML = '<option value="">Select Scheduled Game</option>' + games.map((game, index) => {
+            const id = stableGameId(game, index);
+            game.id = id;
+            const label = `${game.date || 'TBD'} ${game.time || ''} | ${game.park || 'TBD'} | ${game.team1 || 'TBD'} vs ${game.team2 || 'TBD'}`;
+            return `<option value="${esc(id)}">${esc(label)}</option>`;
+        }).join('');
+        if (previous && games.some(game => String(game.id) === previous)) select.value = previous;
+        const del = document.getElementById('delete-scheduled-game-btn');
+        if (del) del.disabled = !select.value;
+        const status = document.getElementById('score-admin-status');
+        if (status) status.textContent = games.length ? `Loaded ${games.length} scheduled game option(s).` : 'No scheduled games found in backend or local fallback.';
+    }
+
+    function bindHardSelectHandlers() {
+        const division = document.getElementById('game-division');
+        if (division && division.dataset.hardSelectFix !== '1') {
+            division.dataset.hardSelectFix = '1';
+            division.addEventListener('change', populateScheduleTeamSelectsHard);
+        }
+        const practiceDiv1 = document.getElementById('practice-div1');
+        const practiceDiv2 = document.getElementById('practice-div2');
+        if (practiceDiv1 && practiceDiv1.dataset.hardSelectFix !== '1') {
+            practiceDiv1.dataset.hardSelectFix = '1';
+            practiceDiv1.addEventListener('change', populatePracticeTeamSelectsHard);
+        }
+        if (practiceDiv2 && practiceDiv2.dataset.hardSelectFix !== '1') {
+            practiceDiv2.dataset.hardSelectFix = '1';
+            practiceDiv2.addEventListener('change', populatePracticeTeamSelectsHard);
+        }
+    }
+
+    async function runHardAdminEditorSelectFix() {
+        const source = await loadAdminEditorSource();
+        buildEditorTeamMap(source);
+        const gameDivision = document.getElementById('game-division');
+        if (gameDivision && !gameDivision.value) gameDivision.value = 'ALL';
+        populateScheduleTeamSelectsHard();
+        populatePracticeTeamSelectsHard();
+        populateScheduledGameSelectHard();
+        bindHardSelectHandlers();
+    }
+
+    window.runHardAdminEditorSelectFix = runHardAdminEditorSelectFix;
+    document.addEventListener('DOMContentLoaded', () => {
+        runHardAdminEditorSelectFix();
+        setTimeout(runHardAdminEditorSelectFix, 500);
+        setTimeout(runHardAdminEditorSelectFix, 1500);
+    });
+    if (document.readyState !== 'loading') runHardAdminEditorSelectFix();
+})();
+
+
 // ===== SEASON BANNER =====
 (function () {
     try {

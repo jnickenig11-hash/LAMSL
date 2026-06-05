@@ -416,40 +416,16 @@ footer {
               <!-- Homepage message, Zelle info, schedules, scores, slideshow -->
              <!-- Site Content Management -->
             <div class="admin-only" id="content-tools" style="display:none;">
-              <h3>Homepage Message</h3>
-              <form class="admin-form">
-                <textarea id="homepageMessage" rows="2" placeholder="Welcome message..."></textarea>
-              </form>
-            
-              <h3>Zelle / Payment Info</h3>
-              <form class="admin-form">
-                <textarea id="zelle" rows="5" placeholder="Zelle name, email, QR image URL..."></textarea>
-              </form>
-            
-              <h3>Game Schedules</h3>
-              <form class="admin-form">
-                <textarea id="gameSchedules" rows="8" placeholder="[{team, opponent, date, time, location}]"></textarea>
-              </form>
-            
-              <h3>Game Scores</h3>
-              <form class="admin-form">
-                <textarea id="gameScores" rows="8" placeholder="[{teamA, teamB, scoreA, scoreB, date}]"></textarea>
-              </form>
-            
-              <h3>Slideshow Images</h3>
-              <form class="admin-form">
-                <textarea id="slideshow" rows="8" placeholder="[{imageUrl, caption}]"></textarea>
-                <input type="file" id="slideUpload" accept="image/*">
-                <button type="button" id="uploadBtn">Upload Slide</button>
-                <div id="uploadMessage"></div>
-              </form>
-            
-              <button type="button" id="saveContentBtn" class="admin-form-btn">Save All Changes</button>
-           
+              <h3>Administrator Dashboard</h3>
+              <div class="management-grid">
+                <div class="admin-panel"><h3>Backend Connection</h3><p class="admin-status" id="backend-dashboard-status">Backend status not checked.</p><input id="backend-base-input" type="text" placeholder="Backend URL"><input id="admin-api-key-input" type="password" placeholder="Admin API key for uploads/saves"><div class="score-actions"><button type="button" id="save-admin-settings-btn">Save Settings</button><button type="button" id="check-backend-btn">Check Backend</button></div></div>
+                <div class="admin-panel"><h3>Content Summary</h3><p id="dashboard-summary">Loading content counts...</p><p class="admin-status">Schedules, practices, and scores are managed below. Raw JSON schedule and score editors were removed to prevent duplicate processes.</p></div>
+                <div class="admin-panel"><h3>Homepage Message</h3><textarea id="homepageMessage" rows="4" placeholder="Welcome message..."></textarea><button type="button" id="saveHomepageBtn" class="admin-form-btn">Save Homepage Message</button></div>
+                <div class="admin-panel"><h3>Zelle / Payment Info</h3><textarea id="zelle" rows="5" placeholder="Zelle JSON"></textarea><button type="button" id="saveZelleBtn" class="admin-form-btn">Save Zelle Info</button></div>
+                <div class="admin-panel"><h3>Slideshow Images</h3><textarea id="slideshow" rows="6" placeholder="[{imageUrl, caption}]"></textarea><input type="file" id="slideUpload" accept="image/*"><button type="button" id="uploadBtn">Upload Slide</button><button type="button" id="saveContentBtn" class="admin-form-btn">Save Slideshow/Homepage/Zelle</button><div id="uploadMessage"></div></div>
+              </div>
             </div>
-                    
-          
-            
+
             <div class="admin-inline" id="login-row">
                 <input id="login-username" type="text" placeholder="Username" value="">
                 <input id="login-password" type="password" placeholder="Password" value="">
@@ -1516,59 +1492,19 @@ logoutButton.addEventListener('click', () => {
 announcementForm.addEventListener('submit', event => {
     event.preventDefault();
 
-// === Step 8: Site Content Management Logic ===
+// === Step 8: Administrator Dashboard / Site Content Management Logic ===
 let content = {};
-
-// Load existing content (use local backend when running locally)
-fetch(apiUrl('/api/content'))
-    .then(res => res.json())
-    .then(data => {
-        content = data || {};
-        document.getElementById('homepageMessage').value = data.homepageMessage || '';
-        document.getElementById('zelle').value = JSON.stringify(data.zelle || {}, null, 2);
-        document.getElementById('gameSchedules').value = JSON.stringify(data.gameSchedules || [], null, 2);
-        document.getElementById('gameScores').value = JSON.stringify(data.gameScores || [], null, 2);
-        document.getElementById('slideshow').value = JSON.stringify(data.slideshow || [], null, 2);
-    }).catch(err => {
-        console.warn('Failed to load site content from backend:', err);
-    });
-
-// Save all content
-document.getElementById('saveContentBtn').addEventListener('click', () => {
-    try {
-        content.homepageMessage = document.getElementById('homepageMessage').value;
-        try {
-            content.zelle = JSON.parse(document.getElementById('zelle').value || '{}');
-        } catch (e) { throw new Error('Zelle JSON invalid: ' + e.message); }
-        try {
-            content.gameSchedules = JSON.parse(document.getElementById('gameSchedules').value || '[]');
-        } catch (e) { throw new Error('Game schedules JSON invalid: ' + e.message); }
-        try {
-            content.gameScores = JSON.parse(document.getElementById('gameScores').value || '[]');
-        } catch (e) { throw new Error('Game scores JSON invalid: ' + e.message); }
-        try {
-            content.slideshow = JSON.parse(document.getElementById('slideshow').value || '[]');
-        } catch (e) { throw new Error('Slideshow JSON invalid: ' + e.message); }
-    } catch (err) {
-        alert('Unable to save content: ' + err.message);
-        return;
-    }
-
-    fetch(apiUrl('/api/update'), {
-        method: 'POST',
-        headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(content)
-    })
-    .then(res => res.json())
-    .then(() => {
-        alert('Content updated successfully!');
-        logAdminAction('update_site_content', { by: getSession()?.username || 'unknown' });
-    })
-    .catch(err => {
-        console.error('Error saving content', err);
-        alert('Error saving content. See console for details.');
-    });
-});
+function updateDashboardSummary() { const summary = document.getElementById('dashboard-summary'); if (summary) summary.textContent = `Games: ${(content.gameSchedules || []).length} | Completed scores: ${(content.gameScores || []).length} | Practices: ${(content.practiceSchedules || []).length} | Slides: ${(content.slideshow || []).length}`; }
+async function loadAdminContentDashboard() { try { const res = await fetch(apiUrl('/api/content')); const data = res.ok ? await res.json() : {}; content = data || {}; const homepageEl = document.getElementById('homepageMessage'); const zelleEl = document.getElementById('zelle'); const slideshowEl = document.getElementById('slideshow'); if (homepageEl) homepageEl.value = content.homepageMessage || ''; if (zelleEl) zelleEl.value = JSON.stringify(content.zelle || {}, null, 2); if (slideshowEl) slideshowEl.value = JSON.stringify(content.slideshow || [], null, 2); updateDashboardSummary(); } catch (err) { console.warn('Failed to load site content from backend:', err); } }
+async function saveDashboardContent(fields) { try { const current = Object.assign({}, content); if (fields.includes('homepage')) current.homepageMessage = document.getElementById('homepageMessage')?.value || ''; if (fields.includes('zelle')) current.zelle = JSON.parse(document.getElementById('zelle')?.value || '{}'); if (fields.includes('slideshow')) current.slideshow = JSON.parse(document.getElementById('slideshow')?.value || '[]'); content = current; await fetch(apiUrl('/api/update'), { method: 'POST', headers: window.apiHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(content) }); updateDashboardSummary(); alert('Content updated successfully.'); logAdminAction('update_site_content', { fields, by: getSession()?.username || 'unknown' }); } catch (err) { alert('Unable to save content: ' + err.message); } }
+loadAdminContentDashboard();
+document.getElementById('saveContentBtn')?.addEventListener('click', () => saveDashboardContent(['homepage', 'zelle', 'slideshow']));
+document.getElementById('saveHomepageBtn')?.addEventListener('click', () => saveDashboardContent(['homepage']));
+document.getElementById('saveZelleBtn')?.addEventListener('click', () => saveDashboardContent(['zelle']));
+document.getElementById('backend-base-input') && (document.getElementById('backend-base-input').value = window.BACKEND_BASE || '');
+document.getElementById('admin-api-key-input') && (document.getElementById('admin-api-key-input').value = localStorage.getItem('LAMSL_ADMIN_KEY') || '');
+document.getElementById('save-admin-settings-btn')?.addEventListener('click', () => { const base = document.getElementById('backend-base-input')?.value.trim(); const key = document.getElementById('admin-api-key-input')?.value.trim(); if (base) { localStorage.setItem('LAMSL_BACKEND', base); window.BACKEND_BASE = base; } if (key) { localStorage.setItem('LAMSL_ADMIN_KEY', key); window.ADMIN_API_KEY = key; } document.getElementById('backend-dashboard-status').textContent = 'Settings saved. Uploads and protected saves will use the stored backend key.'; });
+document.getElementById('check-backend-btn')?.addEventListener('click', async () => { const status = document.getElementById('backend-dashboard-status'); try { const res = await fetch(apiUrl('/health')); status.textContent = res.ok ? 'Backend reachable.' : `Backend returned HTTP ${res.status}.`; } catch (err) { status.textContent = 'Backend check failed: ' + err.message; } });
 
 // Upload slideshow image
 document.getElementById('uploadBtn').addEventListener('click', () => {
@@ -1589,7 +1525,7 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
             content.slideshow = content.slideshow || [];
             content.slideshow.push({
                 id: Date.now(),
-                imageUrl: data.url || data.path || data.filepath || '',
+                imageUrl: apiUrl(data.url || data.path || data.filepath || ''),
                 caption: "New Slide"
             });
             document.getElementById('slideshow').value = JSON.stringify(content.slideshow, null, 2);

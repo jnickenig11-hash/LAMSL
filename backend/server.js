@@ -12,12 +12,16 @@ app.use(cors());
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY || null;
 console.log('ADMIN_API_KEY loaded:', !!ADMIN_API_KEY);
 function requireAdminKey(req, res, next) {
-  if (!ADMIN_API_KEY) return next();
   const token = req.headers['x-admin-key'] || (req.headers.authorization || '').split(' ')[1];
-  if (token !== ADMIN_API_KEY) {
-    return res.status(403).json({ error: 'Forbidden' });
-  }
-  next();
+  const role = String(req.headers['x-lamsl-role'] || '').toLowerCase();
+  const sessionActive = req.headers['x-lamsl-session'] === 'active';
+  const roleAllowed = sessionActive && ['admin', 'umpire'].includes(role);
+
+  if (ADMIN_API_KEY && token === ADMIN_API_KEY) return next();
+  if (roleAllowed) return next();
+  if (!ADMIN_API_KEY && roleAllowed) return next();
+
+  return res.status(403).json({ success: false, error: 'Forbidden: admin login or admin API key required' });
 }
 
 // Ensure required directories exist
@@ -184,6 +188,16 @@ function readContent() {
   }
 }
 
+function writeContent(content) {
+  const normalized = normalizeContent(content || {});
+  fs.writeFileSync(contentFile, JSON.stringify(normalized, null, 2));
+  return normalized;
+}
+
+// Backward-compatible aliases used by older route code.
+const loadContent = readContent;
+const saveContent = writeContent;
+
 app.get('/api/content', (req, res) => {
   const content = readContent();
   res.json(content);
@@ -191,12 +205,30 @@ app.get('/api/content', (req, res) => {
 
 app.post('/api/update', requireAdminKey, (req, res) => {
   try {
-    const body = req.body || {};
-    const normalized = normalizeContent(body);
-    fs.writeFileSync(contentFile, JSON.stringify(normalized, null, 2));
-    res.json({ success: true });
-  } catch (e) {
-    res.status(500).json({ success: false, error: e.message });
+    const current = loadContent();
+    const incoming = req.body && typeof req.body === 'object' ? req.body : {};
+    const next = {
+      ...current,
+      ...incoming,
+      gameSchedules: Array.isArray(incoming.gameSchedules) ? incoming.gameSchedules : (current.gameSchedules || []),
+      practiceSchedules: Array.isArray(incoming.practiceSchedules) ? incoming.practiceSchedules : (current.practiceSchedules || []),
+      slideshow: Array.isArray(incoming.slideshow) ? incoming.slideshow : (current.slideshow || []),
+      announcements: Array.isArray(incoming.announcements) ? incoming.announcements : (current.announcements || []),
+      zelle: incoming.zelle && typeof incoming.zelle === 'object' ? incoming.zelle : (current.zelle || {}),
+      homepageMessage: Object.prototype.hasOwnProperty.call(incoming, 'homepageMessage') ? incoming.homepageMessage : (current.homepageMessage || '')
+    };
+
+    next.gameScores = Array.isArray(next.gameSchedules)
+      ? next.gameSchedules.filter(game => game.score1 !== '' && game.score2 !== '' && game.score1 != null && game.score2 != null)
+      : [];
+    next.standings = buildStandingsFromGamesBackend(next.gameSchedules || []);
+    next.updatedAt = new Date().toISOString();
+
+    saveContent(next);
+    res.json({ success: true, content: next });
+  } catch (error) {
+    console.error('Content update failed:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

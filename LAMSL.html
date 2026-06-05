@@ -1224,6 +1224,7 @@ function renderMiniSchedule() {
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
   ensureDefaults();
+  if (typeof loadBackendSchedule === 'function') { try { await loadBackendSchedule(); } catch (e) {} }
 
   const miniScheduleContainer = document.getElementById('mini-schedule-content');
   if (miniScheduleContainer) {
@@ -1231,7 +1232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    const res = await fetch('https://lamsl-backend.onrender.com/api/content');
+    const res = await fetch((window.apiUrl ? window.apiUrl('/api/content') : 'https://lamsl-backend.onrender.com/api/content'), { cache: 'no-store' });
     if (!res.ok) throw new Error(`Backend content fetch failed ${res.status}`);
     const data = await res.json();
 

@@ -356,20 +356,27 @@ function writeBackendCache() {
 }
 
 async function persistBackendContent() {
-    if (!scheduleContent) return;
+    if (!scheduleContent) return false;
 
     try {
+        scheduleContent.gameScores = (scheduleContent.gameSchedules || []).filter(game => game.score1 !== '' && game.score2 !== '' && game.score1 != null && game.score2 != null);
+        scheduleContent.standings = buildStandingsFromGames(scheduleContent.gameSchedules || []);
         const response = await fetch(apiUrl('/api/update'), {
             method: 'POST',
             headers: (window.apiHeaders || (() => ({})))({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(scheduleContent)
         });
-        const result = await response.json();
-        if (!response.ok || !result.success) {
-            console.warn('Backend schedule persist failed', result.error || result);
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.success === false) {
+            throw new Error(result.error || `HTTP ${response.status}`);
         }
+        if (result.content) scheduleContent = Object.assign(getDefaultBackendContent(), result.content);
+        writeBackendCache();
+        updateStoredStandings(scheduleContent.gameSchedules || []);
+        return true;
     } catch (error) {
         console.warn('Backend schedule persist error', error);
+        return false;
     }
 }
 
@@ -459,7 +466,8 @@ function validateSchedulingConstraints({ date, time, park, team1, team2, existin
 
 async function loadBackendSchedule() {
     try {
-        const response = await fetch(apiUrl('/api/content'));
+        ensureDefaults();
+        const response = await fetch(apiUrl('/api/content'), { cache: 'no-store' });
         if (!response.ok) throw new Error(`Backend content fetch failed ${response.status}`);
         const data = await response.json();
         const localSchedules = readJson(SCHEDULE_KEY, []);

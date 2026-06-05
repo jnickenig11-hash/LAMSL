@@ -416,7 +416,7 @@ footer {
         <section class="card dashboard-hero">
             <div>
                 <h2>Administrator Dashboard</h2>
-                <p>Manage schedules, scores, announcements, slideshow images, teams, rosters, and league content from one dashboard.</p>
+                <p>Manage schedules, scores, announcements, teams, rosters, divisions, and league content from one dashboard.</p>
                 <div class="quick-actions">
                     <a href="#schedule-dashboard">Schedules & Scores</a>
                     <a href="#content-tools">Site Content</a>
@@ -430,22 +430,18 @@ footer {
             <h2>User Administration</h2>
             <p class="admin-status" id="auth-status">Not signed in.</p>
             <div id="content-admin">
-              <!-- Homepage message, Zelle info, schedules, scores, slideshow -->
-             <!-- Site Content Management -->
+              <!-- Site Content Management -->
             <div class="admin-only" id="content-tools" style="display:none;">
               <div class="admin-section-title"><h3>Site Content Dashboard</h3></div>
               <div class="dashboard-grid">
                 <div class="dashboard-tile"><strong>Backend</strong><span id="dash-backend-count">Live</span></div>
                 <div class="dashboard-tile"><strong>Schedules</strong><span id="dash-schedule-count">--</span></div>
                 <div class="dashboard-tile"><strong>Scores</strong><span id="dash-score-count">--</span></div>
-                <div class="dashboard-tile"><strong>Slides</strong><span id="dash-slide-count">--</span></div>
               </div>
               <div class="management-grid">
-                <div class="admin-panel"><h3>Backend Connection</h3><p class="admin-status" id="backend-dashboard-status">Backend status not checked.</p><input id="backend-base-input" type="text" placeholder="Backend URL"><input id="admin-api-key-input" type="password" placeholder="Admin API key for uploads/saves"><div class="score-actions"><button type="button" id="save-admin-settings-btn">Save Settings</button><button type="button" id="check-backend-btn">Check Backend</button></div></div>
-                <div class="admin-panel"><h3>Content Summary</h3><p id="dashboard-summary">Loading content counts...</p><p class="admin-status">Schedules, practices, and scores are managed below. Raw JSON schedule and score editors were removed to prevent duplicate processes.</p></div>
-                <div class="admin-panel"><h3>Homepage Message</h3><textarea id="homepageMessage" rows="4" placeholder="Welcome message..."></textarea><button type="button" id="saveHomepageBtn" class="admin-form-btn">Save Homepage Message</button></div>
+                <div class="admin-panel"><h3>Backend Connection</h3><p class="admin-status" id="backend-dashboard-status">Logged-in admin users save directly to the backend. Manual API key entry is optional.</p><input id="backend-base-input" type="text" placeholder="Backend URL"><input id="admin-api-key-input" type="password" placeholder="Optional fallback API key"><div class="score-actions"><button type="button" id="save-admin-settings-btn">Save Settings</button><button type="button" id="check-backend-btn">Check Backend</button></div></div>
+                <div class="admin-panel"><h3>Content Summary</h3><p id="dashboard-summary">Loading content counts...</p><p class="admin-status">Schedules, practices, scores, announcements, teams, rosters, and divisions are managed in their dedicated dashboard sections below. Homepage message and slideshow image editors were removed from Site Content to prevent duplicate processes.</p></div>
                 <div class="admin-panel"><h3>Zelle / Payment Info</h3><textarea id="zelle" rows="5" placeholder="Zelle JSON"></textarea><button type="button" id="saveZelleBtn" class="admin-form-btn">Save Zelle Info</button></div>
-                <div class="admin-panel"><h3>Slideshow Images</h3><textarea id="slideshow" rows="6" placeholder="[{imageUrl, caption}]"></textarea><input type="file" id="slideUpload" accept="image/*"><button type="button" id="uploadBtn">Upload Slide</button><button type="button" id="saveContentBtn" class="admin-form-btn">Save Slideshow/Homepage/Zelle</button><div id="uploadMessage"></div></div>
               </div>
             </div>
 
@@ -726,12 +722,28 @@ const TEAM_MANAGER_ASSIGNMENTS_KEY = 'lamslTeamManagerAssignmentsV1';
 const STANDINGS_KEY = 'lamslStandingsV1';
 
 // Backend base URL: always use Render-hosted backend for development
-const backendBase = window.BACKEND_BASE || 'https://lamsl-backend.onrender.com';
-
 function apiUrl(path) {
-    if (!path) return backendBase;
+    const base = window.BACKEND_BASE || 'https://lamsl-backend.onrender.com';
+    if (!path) return base;
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    return backendBase.replace(/\/$/, '') + (path.startsWith('/') ? path : '/' + path);
+    return base.replace(/\/$/, '') + (path.startsWith('/') ? path : '/' + path);
+}
+
+if (typeof window.apiHeaders !== 'function') {
+    window.apiHeaders = function(additionalHeaders) {
+        const headers = Object.assign({}, additionalHeaders || {});
+        const key = localStorage.getItem('LAMSL_ADMIN_KEY');
+        if (key) headers['x-admin-key'] = key;
+        try {
+            const session = JSON.parse(localStorage.getItem('lamslSessionV1') || 'null');
+            if (session && session.username && session.role) {
+                headers['x-lamsl-username'] = session.username;
+                headers['x-lamsl-role'] = session.role;
+                headers['x-lamsl-session'] = 'active';
+            }
+        } catch (e) {}
+        return headers;
+    };
 }
 
 const DEFAULT_TEAMS_BY_DIVISION = {
@@ -780,25 +792,50 @@ function validateSchedulingConstraints({ date, time, park, team1, team2, existin
 
 async function loadBackendSchedule() {
     try {
-        const res = await fetch(apiUrl('/api/content'));
+        ensureDefaults();
+        const res = await fetch(apiUrl('/api/content'), { cache: 'no-store' });
         const data = res.ok ? await res.json() : {};
         const localSchedules = readJson(SCHEDULE_KEY, []);
         const localPracticeSchedules = readJson(PRACTICE_KEY, []);
+        const backendSchedules = Array.isArray(data.gameSchedules) ? data.gameSchedules : [];
+        const backendPractice = Array.isArray(data.practiceSchedules) ? data.practiceSchedules : [];
+        const selectedSchedules = backendSchedules.length ? backendSchedules : localSchedules;
+        const selectedPractice = backendPractice.length ? backendPractice : localPracticeSchedules;
         scheduleContent = Object.assign(getDefaultBackendContent(), data, {
-            gameSchedules: Array.isArray(data.gameSchedules) && data.gameSchedules.length ? data.gameSchedules : localSchedules,
-            practiceSchedules: Array.isArray(data.practiceSchedules) && data.practiceSchedules.length ? data.practiceSchedules : localPracticeSchedules,
-            gameScores: Array.isArray(data.gameScores) ? data.gameScores : [],
-            standings: data.standings || {}
+            gameSchedules: selectedSchedules,
+            practiceSchedules: selectedPractice,
+            gameScores: Array.isArray(data.gameScores) ? data.gameScores : selectedSchedules.filter(g => g.score1 !== '' && g.score2 !== ''),
+            standings: data.standings || buildStandingsFromGames(selectedSchedules)
         });
         writeJson(SCHEDULE_KEY, scheduleContent.gameSchedules || []);
         writeJson(PRACTICE_KEY, scheduleContent.practiceSchedules || []);
         writeJson(STANDINGS_KEY, scheduleContent.standings || buildStandingsFromGames(scheduleContent.gameSchedules || []));
-    } catch(e) { scheduleContent = null; }
+        if (typeof content === 'object' && content) content = Object.assign({}, content, scheduleContent);
+        updateDashboardSummary?.();
+    } catch(e) { console.warn('Backend schedule load failed', e); scheduleContent = null; }
 }
 
 async function persistBackendContent() {
-    if (!scheduleContent) return;
-    try { await fetch(apiUrl('/api/update'), { method:'POST', headers: window.apiHeaders({ 'Content-Type':'application/json' }), body: JSON.stringify(scheduleContent) }); } catch(e) { console.warn('Backend persist failed', e); }
+    if (!scheduleContent) return false;
+    try {
+        scheduleContent.gameScores = (scheduleContent.gameSchedules || []).filter(g => g.score1 !== '' && g.score2 !== '' && g.score1 != null && g.score2 != null);
+        scheduleContent.standings = buildStandingsFromGames(scheduleContent.gameSchedules || []);
+        const response = await fetch(apiUrl('/api/update'), { method:'POST', headers: window.apiHeaders({ 'Content-Type':'application/json' }), body: JSON.stringify(scheduleContent) });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.success === false) throw new Error(result.error || `HTTP ${response.status}`);
+        if (result.content) scheduleContent = Object.assign(getDefaultBackendContent(), result.content);
+        if (typeof content === 'object' && content) content = Object.assign({}, content, scheduleContent);
+        writeJson(SCHEDULE_KEY, scheduleContent.gameSchedules || []);
+        writeJson(PRACTICE_KEY, scheduleContent.practiceSchedules || []);
+        writeJson(STANDINGS_KEY, scheduleContent.standings || buildStandingsFromGames(scheduleContent.gameSchedules || []));
+        updateDashboardSummary?.();
+        return true;
+    } catch(e) {
+        console.warn('Backend persist failed', e);
+        const status = document.getElementById('backend-dashboard-status') || document.getElementById('admin-status') || document.getElementById('score-admin-status');
+        if (status) status.textContent = 'Backend save failed: ' + e.message;
+        return false;
+    }
 }
 
 const authStatus = document.getElementById('auth-status');
@@ -836,15 +873,7 @@ const teamManagerAssignmentsList = document.getElementById('team-manager-assignm
 const adminRosterFile = document.getElementById('admin-roster-file');
 const uploadAllRostersAdminBtn = document.getElementById('upload-all-rosters-admin-btn');
 // Site Content Management elements
-const homepageMessage = document.getElementById('homepageMessage');
 const zelle = document.getElementById('zelle');
-const gameSchedules = document.getElementById('gameSchedules');
-const gameScores = document.getElementById('gameScores');
-const slideshow = document.getElementById('slideshow');
-const slideUpload = document.getElementById('slideUpload');
-const uploadBtn = document.getElementById('uploadBtn');
-const uploadMessage = document.getElementById('uploadMessage');
-const saveContentBtn = document.getElementById('saveContentBtn');
 
 function readJson(key, fallback) {
     try {
@@ -952,24 +981,29 @@ function getSchedule() {
     const games = scheduleContent && Array.isArray(scheduleContent.gameSchedules) ? scheduleContent.gameSchedules : readJson(SCHEDULE_KEY, []);
     return [...games].sort((a,b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
 }
-function saveSchedule(games) {
-    writeJson(SCHEDULE_KEY, games);
-    const standings = buildStandingsFromGames(games);
+async function saveSchedule(games) {
+    const normalized = Array.isArray(games) ? games : [];
+    writeJson(SCHEDULE_KEY, normalized);
+    const standings = buildStandingsFromGames(normalized);
     writeJson(STANDINGS_KEY, standings);
-    if (scheduleContent) {
-        scheduleContent.gameSchedules = games;
-        scheduleContent.gameScores = games.filter(g => g.score1 !== '' && g.score2 !== '');
-        scheduleContent.standings = standings;
-        persistBackendContent();
-    }
+    scheduleContent = Object.assign(getDefaultBackendContent(), content || {}, scheduleContent || {}, {
+        gameSchedules: normalized,
+        gameScores: normalized.filter(g => g.score1 !== '' && g.score2 !== '' && g.score1 != null && g.score2 != null),
+        standings
+    });
+    content = Object.assign({}, content || {}, scheduleContent);
+    return await persistBackendContent();
 }
 function getPracticeSchedule() {
     const games = scheduleContent && Array.isArray(scheduleContent.practiceSchedules) ? scheduleContent.practiceSchedules : readJson(PRACTICE_KEY, []);
     return [...games].sort((a,b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
 }
-function savePracticeSchedule(games) {
-    writeJson(PRACTICE_KEY, games);
-    if (scheduleContent) { scheduleContent.practiceSchedules = games; persistBackendContent(); }
+async function savePracticeSchedule(games) {
+    const normalized = Array.isArray(games) ? games : [];
+    writeJson(PRACTICE_KEY, normalized);
+    scheduleContent = Object.assign(getDefaultBackendContent(), content || {}, scheduleContent || {}, { practiceSchedules: normalized });
+    content = Object.assign({}, content || {}, scheduleContent);
+    return await persistBackendContent();
 }
 
 function getTeamManagerAssignments() {
@@ -1464,7 +1498,7 @@ function renderAuthState() {
     }
 
     if (loggedIn) {
-        authStatus.textContent = `Signed in as ${session.username} (${session.role || 'user'}). ${isAdmin ? 'Admin tools unlocked, including Site Content Management.' : 'Admin tools locked.'}`;
+        authStatus.textContent = `Signed in as ${session.username} (${session.role || 'user'}). ${isAdmin ? 'Admin dashboard unlocked. Backend saves use this admin session automatically.' : 'Admin tools locked.'}`;
     } else {
         authStatus.textContent = 'Not signed in.';
     }
@@ -1515,66 +1549,6 @@ logoutButton.addEventListener('click', () => {
 announcementForm.addEventListener('submit', event => {
     event.preventDefault();
 
-// === Step 8: Administrator Dashboard / Site Content Management Logic ===
-let content = {};
-function updateDashboardSummary() {
-    const games = (content.gameSchedules || []).length;
-    const scores = (content.gameScores || []).length;
-    const practices = (content.practiceSchedules || []).length;
-    const slides = (content.slideshow || []).length;
-    const summary = document.getElementById('dashboard-summary');
-    if (summary) summary.textContent = `Games: ${games} | Completed scores: ${scores} | Practices: ${practices} | Slides: ${slides}`;
-    const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
-    setText('dash-schedule-count', games);
-    setText('dash-score-count', scores);
-    setText('dash-slide-count', slides);
-}
-async function loadAdminContentDashboard() { try { const res = await fetch(apiUrl('/api/content')); const data = res.ok ? await res.json() : {}; content = data || {}; const homepageEl = document.getElementById('homepageMessage'); const zelleEl = document.getElementById('zelle'); const slideshowEl = document.getElementById('slideshow'); if (homepageEl) homepageEl.value = content.homepageMessage || ''; if (zelleEl) zelleEl.value = JSON.stringify(content.zelle || {}, null, 2); if (slideshowEl) slideshowEl.value = JSON.stringify(content.slideshow || [], null, 2); updateDashboardSummary(); } catch (err) { console.warn('Failed to load site content from backend:', err); } }
-async function saveDashboardContent(fields) { try { const current = Object.assign({}, content); if (fields.includes('homepage')) current.homepageMessage = document.getElementById('homepageMessage')?.value || ''; if (fields.includes('zelle')) current.zelle = JSON.parse(document.getElementById('zelle')?.value || '{}'); if (fields.includes('slideshow')) current.slideshow = JSON.parse(document.getElementById('slideshow')?.value || '[]'); content = current; await fetch(apiUrl('/api/update'), { method: 'POST', headers: window.apiHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(content) }); updateDashboardSummary(); alert('Content updated successfully.'); logAdminAction('update_site_content', { fields, by: getSession()?.username || 'unknown' }); } catch (err) { alert('Unable to save content: ' + err.message); } }
-loadAdminContentDashboard();
-document.getElementById('saveContentBtn')?.addEventListener('click', () => saveDashboardContent(['homepage', 'zelle', 'slideshow']));
-document.getElementById('saveHomepageBtn')?.addEventListener('click', () => saveDashboardContent(['homepage']));
-document.getElementById('saveZelleBtn')?.addEventListener('click', () => saveDashboardContent(['zelle']));
-document.getElementById('backend-base-input') && (document.getElementById('backend-base-input').value = window.BACKEND_BASE || '');
-document.getElementById('admin-api-key-input') && (document.getElementById('admin-api-key-input').value = localStorage.getItem('LAMSL_ADMIN_KEY') || '');
-document.getElementById('save-admin-settings-btn')?.addEventListener('click', () => { const base = document.getElementById('backend-base-input')?.value.trim(); const key = document.getElementById('admin-api-key-input')?.value.trim(); if (base) { localStorage.setItem('LAMSL_BACKEND', base); window.BACKEND_BASE = base; } if (key) { localStorage.setItem('LAMSL_ADMIN_KEY', key); window.ADMIN_API_KEY = key; } document.getElementById('backend-dashboard-status').textContent = 'Settings saved. Uploads and protected saves will use the stored backend key.'; });
-document.getElementById('check-backend-btn')?.addEventListener('click', async () => { const status = document.getElementById('backend-dashboard-status'); try { const res = await fetch(apiUrl('/health')); status.textContent = res.ok ? 'Backend reachable.' : `Backend returned HTTP ${res.status}.`; } catch (err) { status.textContent = 'Backend check failed: ' + err.message; } });
-
-// Upload slideshow image
-document.getElementById('uploadBtn').addEventListener('click', () => {
-    const file = document.getElementById('slideUpload').files[0];
-    if (!file) return alert('Please select an image first.');
-
-    const formData = new FormData();
-    formData.append('image', file);
-
-    fetch(apiUrl('/api/upload-image'), {
-        method: 'POST',
-        headers: window.apiHeaders(),
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data && data.success) {
-            content.slideshow = content.slideshow || [];
-            content.slideshow.push({
-                id: Date.now(),
-                imageUrl: apiUrl(data.url || data.path || data.filepath || ''),
-                caption: "New Slide"
-            });
-            document.getElementById('slideshow').value = JSON.stringify(content.slideshow, null, 2);
-            document.getElementById('uploadMessage').innerText = "Uploaded!";
-            logAdminAction('upload_slide', { filename: data.url || data.path });
-        } else {
-            throw new Error(data && data.error ? data.error : 'Upload failed');
-        }
-    })
-    .catch(err => {
-        console.error('Upload error', err);
-        document.getElementById('uploadMessage').innerText = 'Upload failed.';
-        alert('Upload failed: ' + err.message);
-    });
-});
 
 
     
@@ -1603,6 +1577,59 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
     renderAnnouncements();
     authStatus.textContent = 'Announcement published.';
 });
+
+// === Step 8: Administrator Dashboard / Site Content Management Logic ===
+let content = {};
+function updateDashboardSummary() {
+    const games = (content.gameSchedules || []).length;
+    const scores = (content.gameScores || []).length;
+    const practices = (content.practiceSchedules || []).length;
+    const summary = document.getElementById('dashboard-summary');
+    if (summary) summary.textContent = `Games: ${games} | Completed scores: ${scores} | Practices: ${practices}`;
+    const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+    setText('dash-schedule-count', games);
+    setText('dash-score-count', scores);
+}
+async function loadAdminContentDashboard() {
+    try {
+        const res = await fetch(apiUrl('/api/content'));
+        const data = res.ok ? await res.json() : {};
+        content = data || {};
+        const zelleEl = document.getElementById('zelle');
+        if (zelleEl) zelleEl.value = JSON.stringify(content.zelle || {}, null, 2);
+        updateDashboardSummary();
+    } catch (err) {
+        console.warn('Failed to load site content from backend:', err);
+    }
+}
+async function saveDashboardContent(fields) {
+    try {
+        const current = Object.assign(getDefaultBackendContent(), content || {}, scheduleContent || {});
+        if (fields.includes('zelle')) current.zelle = JSON.parse(document.getElementById('zelle')?.value || '{}');
+        current.gameScores = (current.gameSchedules || []).filter(g => g.score1 !== '' && g.score2 !== '' && g.score1 != null && g.score2 != null);
+        current.standings = buildStandingsFromGames(current.gameSchedules || []);
+        const response = await fetch(apiUrl('/api/update'), { method: 'POST', headers: window.apiHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(current) });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.success === false) throw new Error(result.error || `HTTP ${response.status}`);
+        content = Object.assign({}, current, result.content || {});
+        scheduleContent = Object.assign(getDefaultBackendContent(), content);
+        writeJson(SCHEDULE_KEY, scheduleContent.gameSchedules || []);
+        writeJson(PRACTICE_KEY, scheduleContent.practiceSchedules || []);
+        writeJson(STANDINGS_KEY, scheduleContent.standings || {});
+        updateDashboardSummary();
+        alert('Content saved to backend successfully.');
+        logAdminAction('update_site_content', { fields, by: getSession()?.username || 'unknown' });
+    } catch (err) {
+        alert('Unable to save content to backend: ' + err.message);
+    }
+}
+loadAdminContentDashboard();
+document.getElementById('saveZelleBtn')?.addEventListener('click', () => saveDashboardContent(['zelle']));
+document.getElementById('backend-base-input') && (document.getElementById('backend-base-input').value = window.BACKEND_BASE || '');
+document.getElementById('admin-api-key-input') && (document.getElementById('admin-api-key-input').value = localStorage.getItem('LAMSL_ADMIN_KEY') || '');
+document.getElementById('save-admin-settings-btn')?.addEventListener('click', () => { const base = document.getElementById('backend-base-input')?.value.trim(); const key = document.getElementById('admin-api-key-input')?.value.trim(); if (base) { localStorage.setItem('LAMSL_BACKEND', base); window.BACKEND_BASE = base; } if (key) { localStorage.setItem('LAMSL_ADMIN_KEY', key); window.ADMIN_API_KEY = key; } document.getElementById('backend-dashboard-status').textContent = 'Settings saved. Logged-in admin users will also authenticate backend saves automatically.'; });
+document.getElementById('check-backend-btn')?.addEventListener('click', async () => { const status = document.getElementById('backend-dashboard-status'); try { const res = await fetch(apiUrl('/health')); status.textContent = res.ok ? 'Backend reachable.' : `Backend returned HTTP ${res.status}.`; } catch (err) { status.textContent = 'Backend check failed: ' + err.message; } });
+
 
 createAdminButton.addEventListener('click', () => {
     if (!isAdminLoggedIn()) {
@@ -1949,9 +1976,11 @@ function adminRenderPracticeGames() {
     if (!list) return;
     const games = getPracticeSchedule();
     list.innerHTML = games.length ? games.map(g => `<li>${g.date} ${g.time} | ${g.park} | ${g.team1} vs ${g.team2} (${g.status || 'scheduled'}) <button type="button" data-del-practice="${g.id}">Delete</button></li>`).join('') : '<li>No practice games scheduled yet.</li>';
-    list.querySelectorAll('[data-del-practice]').forEach(btn => btn.addEventListener('click', () => {
-        savePracticeSchedule(getPracticeSchedule().filter(g => g.id !== btn.dataset.delPractice));
+    list.querySelectorAll('[data-del-practice]').forEach(btn => btn.addEventListener('click', async () => {
+        const ok = await savePracticeSchedule(getPracticeSchedule().filter(g => g.id !== btn.dataset.delPractice));
         adminRenderPracticeGames();
+        const status = document.getElementById('practice-admin-status');
+        if (status) status.textContent = ok ? 'Practice game deleted from backend.' : 'Practice game deleted locally, but backend save failed.';
     }));
 }
 
@@ -1964,7 +1993,7 @@ async function initializeAdminScheduleDashboard() {
     document.getElementById('practice-div1')?.addEventListener('change', () => adminPopulatePracticeTeams('practice-div1','practice-team1'));
     document.getElementById('practice-div2')?.addEventListener('change', () => adminPopulatePracticeTeams('practice-div2','practice-team2'));
 
-    document.getElementById('schedule-form')?.addEventListener('submit', e => {
+    document.getElementById('schedule-form')?.addEventListener('submit', async e => {
         e.preventDefault();
         if (!isAdminLoggedIn()) { document.getElementById('admin-status').textContent = 'Sign in as admin first.'; return; }
         const game = {
@@ -1983,10 +2012,10 @@ async function initializeAdminScheduleDashboard() {
         if (!game.date || !game.time || !game.park || !game.division || !game.team1 || !game.team2) { document.getElementById('admin-status').textContent = 'Complete all fields.'; return; }
         if (game.team1 === game.team2) { document.getElementById('admin-status').textContent = 'Teams must be different.'; return; }
         if (err) { document.getElementById('admin-status').textContent = err; return; }
-        games.push(game); saveSchedule(games); document.getElementById('schedule-form').reset(); adminPopulateTeamSelects(); adminRenderScheduledGameOptions(); document.getElementById('admin-status').textContent = 'Scheduled game saved.';
+        games.push(game); const ok = await saveSchedule(games); document.getElementById('schedule-form').reset(); adminPopulateTeamSelects(); adminRenderScheduledGameOptions(); document.getElementById('admin-status').textContent = ok ? 'Scheduled game saved to backend.' : 'Scheduled game saved locally, but backend save failed.';
     });
 
-    document.getElementById('score-form')?.addEventListener('submit', e => {
+    document.getElementById('score-form')?.addEventListener('submit', async e => {
         e.preventDefault();
         if (!canManageScores()) { document.getElementById('score-admin-status').textContent = 'Sign in as admin or umpire first.'; return; }
         const id = document.getElementById('scheduled-game-select').value;
@@ -1995,23 +2024,37 @@ async function initializeAdminScheduleDashboard() {
         if (!game) { document.getElementById('score-admin-status').textContent = 'Select a scheduled game.'; return; }
         game.score1 = document.getElementById('score-team1').value;
         game.score2 = document.getElementById('score-team2').value;
-        saveSchedule(games); adminRenderScheduledGameOptions(); document.getElementById('score-form').reset(); document.getElementById('score-admin-status').textContent = 'Score saved. Standings updated.';
+        const ok = await saveSchedule(games); adminRenderScheduledGameOptions(); document.getElementById('score-form').reset(); document.getElementById('score-admin-status').textContent = ok ? 'Score saved to backend. Standings updated.' : 'Score saved locally, but backend standings save failed.';
     });
 
-    document.getElementById('delete-scheduled-game-btn')?.addEventListener('click', () => {
+    document.getElementById('delete-scheduled-game-btn')?.addEventListener('click', async () => {
         const id = document.getElementById('scheduled-game-select').value;
         if (!id || !isAdminLoggedIn()) return;
         if (!confirm('Delete this scheduled game?')) return;
-        saveSchedule(getSchedule().filter(g => g.id !== id)); adminRenderScheduledGameOptions();
+        const ok = await saveSchedule(getSchedule().filter(g => g.id !== id)); adminRenderScheduledGameOptions(); document.getElementById('admin-status').textContent = ok ? 'Scheduled game deleted from backend.' : 'Scheduled game deleted locally, but backend save failed.';
     });
     document.getElementById('scheduled-game-select')?.addEventListener('change', e => { document.getElementById('delete-scheduled-game-btn').disabled = !e.target.value; });
 
-    document.getElementById('practice-form')?.addEventListener('submit', e => {
+    document.getElementById('practice-form')?.addEventListener('submit', async e => {
         e.preventDefault();
         if (!isAdminLoggedIn()) { document.getElementById('practice-admin-status').textContent = 'Sign in as admin first.'; return; }
         const games = getPracticeSchedule();
         games.push({ id:`practice-${Date.now()}`, date:document.getElementById('practice-date').value, time:document.getElementById('practice-time').value, park:document.getElementById('practice-park').value, div1:document.getElementById('practice-div1').value, team1:document.getElementById('practice-team1').value, div2:document.getElementById('practice-div2').value, team2:document.getElementById('practice-team2').value, status:document.getElementById('practice-status').value || 'scheduled' });
-        savePracticeSchedule(games); document.getElementById('practice-form').reset(); adminRenderPracticeGames(); document.getElementById('practice-admin-status').textContent = 'Practice game saved.';
+        const ok = await savePracticeSchedule(games); document.getElementById('practice-form').reset(); adminRenderPracticeGames(); document.getElementById('practice-admin-status').textContent = ok ? 'Practice game saved to backend.' : 'Practice game saved locally, but backend save failed.';
+    });
+    document.getElementById('refresh-admin-access')?.addEventListener('click', async () => {
+        renderAuthState();
+        await loadBackendSchedule();
+        adminRenderScheduledGameOptions();
+        const status = document.getElementById('admin-status');
+        if (status) status.textContent = isAdminLoggedIn() ? 'Admin access refreshed. Backend schedule reloaded.' : 'Sign in as admin first.';
+    });
+    document.getElementById('practice-refresh-admin')?.addEventListener('click', async () => {
+        renderAuthState();
+        await loadBackendSchedule();
+        adminRenderPracticeGames();
+        const status = document.getElementById('practice-admin-status');
+        if (status) status.textContent = isAdminLoggedIn() ? 'Admin access refreshed. Backend practice schedule reloaded.' : 'Sign in as admin first.';
     });
     adminRenderScheduledGameOptions(); adminRenderPracticeGames();
 }

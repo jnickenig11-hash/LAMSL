@@ -377,6 +377,15 @@ footer {
 .dashboard-hero h2{margin:0 0 6px;color:#fff}.dashboard-hero p{margin:0;color:#dfeaf1;font-size:18px}.dashboard-badge{justify-self:end;background:#F1D27A;color:#12324A;border-radius:999px;padding:10px 16px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
 .dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:16px 0}.dashboard-tile{background:#fff;border:1px solid #d8e0e8;border-top:4px solid #C86A2F;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(18,50,74,.08)}.dashboard-tile strong{display:block;color:#12324A;font-family:'Oswald','Barlow Condensed',sans-serif;text-transform:uppercase;font-size:16px}.dashboard-tile span{display:block;margin-top:6px;font-size:26px;font-weight:700;color:#C86A2F}.admin-section-title{display:flex;align-items:center;gap:10px;margin:18px 0 12px}.admin-section-title:before{content:"";width:10px;height:28px;background:#C86A2F;border-radius:999px}.admin-panel{border-top:4px solid #12324A}.admin-panel h3{color:#12324A}.admin-panel button,.admin-controls button,#practice-refresh-admin{background:#12324A!important;color:white!important;border:none!important;border-radius:8px!important;padding:10px 14px!important;cursor:pointer!important}.admin-panel button:hover,.admin-controls button:hover,#practice-refresh-admin:hover{background:#C86A2F!important}.quick-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.quick-actions a{background:#fff;color:#12324A;border:1px solid #d8e0e8;border-radius:8px;padding:10px 14px;text-decoration:none;font-weight:700}.quick-actions a:hover{border-color:#C86A2F;color:#C86A2F}@media(max-width:700px){.dashboard-hero{grid-template-columns:1fr}.dashboard-badge{justify-self:start}}
 
+
+.uploaded-image-management-list { list-style: none; padding-left: 0; }
+.uploaded-image-management-list li { margin: 8px 0; }
+.managed-image-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px; border: 1px solid rgba(255,255,255,.25); border-radius: 8px; background: rgba(255,255,255,.08); }
+.managed-image-meta { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.managed-image-meta span { overflow-wrap: anywhere; }
+.delete-managed-image-btn { background: #9b1c1c; color: #fff; border: 0; border-radius: 6px; padding: 8px 12px; cursor: pointer; }
+.delete-managed-image-btn:hover { filter: brightness(1.1); }
+
 </style>
 </head>
 
@@ -443,7 +452,8 @@ footer {
                 <div class="admin-panel"><h3>Content Summary</h3><p id="dashboard-summary">Loading content counts...</p><p class="admin-status">Schedules, practices, scores, announcements, teams, rosters, divisions, payment info, and homepage slideshow media are managed in their dedicated dashboard sections.</p></div>
                 <div class="admin-panel"><h3>One-Time Data Migration</h3><p class="admin-status" id="migration-status">Copies existing browser-saved schedule and announcement data to the Render backend without deleting local data.</p><div class="score-actions"><button type="button" id="migrate-local-content-btn">Migrate Local Schedule & Announcements</button><button type="button" id="preview-local-content-btn">Preview Local Data</button></div></div>
                 <div class="admin-panel"><h3>Zelle / Payment Info</h3><textarea id="zelle" rows="5" placeholder="Zelle JSON"></textarea><button type="button" id="saveZelleBtn" class="admin-form-btn">Save Zelle Info</button></div>
-                <div class="admin-panel"><h3>Image Uploads</h3><p class="admin-status" id="slideshow-upload-status">Choose where to save the image. Existing uploaded images can be deleted below; delete removes the content record and the storage file.</p><label for="admin-image-destination"><strong>Image Destination</strong></label><select id="admin-image-destination"><option value="homepage">Homepage slideshow</option><option value="events">Events / Fundraisers</option></select><input id="admin-slideshow-file" type="file" accept="image/*"><input id="admin-slideshow-caption" type="text" placeholder="Optional caption"><div class="score-actions"><button type="button" id="upload-slideshow-btn">Upload Image</button><button type="button" id="refresh-slideshow-btn">Refresh Image Lists</button></div><ul id="admin-slideshow-list" class="admin-list"></ul></div>
+                <div class="admin-panel image-management-panel"><h3>Image Uploads</h3><p class="admin-status" id="slideshow-upload-status">Choose where to save the image. Homepage images display in the homepage slideshow. Event/fundraiser images save to EFimages.</p><label for="admin-image-destination"><strong>Image Destination</strong></label><select id="admin-image-destination"><option value="homepage">Homepage slideshow</option><option value="events">Events / Fundraisers</option></select><input id="admin-slideshow-file" type="file" accept="image/*"><input id="admin-slideshow-caption" type="text" placeholder="Optional caption"><div class="score-actions"><button type="button" id="upload-slideshow-btn">Upload Image</button><button type="button" id="refresh-slideshow-btn">Refresh Image Lists</button></div></div>
+                <div class="admin-panel image-management-panel"><h3>Uploaded Image Management</h3><p class="admin-status">Delete uploaded homepage slideshow or event/fundraiser files here. Deleting removes the storage file and the backend content reference.</p><div class="score-actions"><button type="button" id="refresh-image-management-btn">Reload Uploaded Images</button></div><ul id="admin-slideshow-list" class="admin-list uploaded-image-management-list"></ul></div>
               </div>
             </div>
 
@@ -909,6 +919,7 @@ const adminSlideshowCaption = document.getElementById('admin-slideshow-caption')
 const adminImageDestination = document.getElementById('admin-image-destination');
 const uploadSlideshowBtn = document.getElementById('upload-slideshow-btn');
 const refreshSlideshowBtn = document.getElementById('refresh-slideshow-btn');
+const refreshImageManagementBtn = document.getElementById('refresh-image-management-btn');
 const adminSlideshowList = document.getElementById('admin-slideshow-list');
 const slideshowUploadStatus = document.getElementById('slideshow-upload-status');
 const migrateLocalContentBtn = document.getElementById('migrate-local-content-btn');
@@ -1801,9 +1812,11 @@ function renderManagedImageItem(item, destination, index) {
     const caption = item.caption || item.originalName || filename || (destination === 'events' ? 'Event/fundraiser image' : 'Homepage slideshow image');
     const previewSrc = url ? apiUrl(url) : '';
     return `<li class="managed-image-row">
-        ${previewSrc ? `<img src="${escapeAdminHtml(previewSrc)}" alt="${escapeAdminHtml(caption)}" style="width:72px;height:48px;object-fit:cover;border-radius:6px;margin-right:10px;vertical-align:middle;">` : ''}
-        <span><strong>${index + 1}. ${escapeAdminHtml(caption)}</strong>${url ? `<br><small>${escapeAdminHtml(url)}</small>` : ''}</span>
-        <button type="button" class="delete-managed-image-btn" data-destination="${escapeAdminHtml(destination)}" data-filename="${escapeAdminHtml(filename)}" style="margin-left:10px;">Delete</button>
+        <div class="managed-image-meta">
+            ${previewSrc ? `<img src="${escapeAdminHtml(previewSrc)}" alt="${escapeAdminHtml(caption)}" style="width:72px;height:48px;object-fit:cover;border-radius:6px;">` : ''}
+            <span><strong>${index + 1}. ${escapeAdminHtml(caption)}</strong>${url ? `<br><small>${escapeAdminHtml(url)}</small>` : ''}</span>
+        </div>
+        <button type="button" class="delete-managed-image-btn" data-destination="${escapeAdminHtml(destination)}" data-filename="${escapeAdminHtml(filename)}">Delete</button>
     </li>`;
 }
 
@@ -1918,6 +1931,7 @@ migrateLocalContentBtn?.addEventListener('click', migrateLocalContentToBackend);
 
 uploadSlideshowBtn?.addEventListener('click', uploadAdminSlideshowImage);
 refreshSlideshowBtn?.addEventListener('click', async () => { await loadBackendSchedule(); renderAdminSlideshowList(); if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Image lists refreshed.'; });
+refreshImageManagementBtn?.addEventListener('click', async () => { await loadBackendSchedule(); renderAdminSlideshowList(); if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Uploaded image management refreshed.'; });
 
 document.getElementById('backend-base-input') && (document.getElementById('backend-base-input').value = window.BACKEND_BASE || '');
 document.getElementById('admin-api-key-input') && (document.getElementById('admin-api-key-input').value = localStorage.getItem('LAMSL_ADMIN_KEY') || '');

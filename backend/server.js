@@ -217,7 +217,7 @@ function sameManagedImage(item, info) {
   return candidates.includes(info.filename);
 }
 
-app.post('/api/delete-image', requireAdminKey, express.json(), (req, res) => {
+function deleteManagedImageHandler(req, res) {
   try {
     const info = getManagedImageInfo(req.body || {});
     if (!info) return res.status(400).json({ success: false, error: 'Missing valid image filename/url.' });
@@ -256,7 +256,11 @@ app.post('/api/delete-image', requireAdminKey, express.json(), (req, res) => {
     console.error('Image delete failed:', error);
     res.status(500).json({ success: false, error: error.message });
   }
-});
+}
+
+app.post('/api/delete-image', requireAdminKey, express.json(), deleteManagedImageHandler);
+app.post('/api/images/delete', requireAdminKey, express.json(), deleteManagedImageHandler);
+app.post('/api/uploaded-images/delete', requireAdminKey, express.json(), deleteManagedImageHandler);
 
 // Serve uploaded images
 app.use('/uploads', express.static(uploadDir));

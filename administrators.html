@@ -1886,13 +1886,23 @@ async function deleteManagedImage(destination, filename) {
     try {
         if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Deleting image...';
         await ensureBackendSessionToken();
-        const response = await fetch(apiUrl('/api/delete-image'), {
-            method: 'POST',
-            headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify({ destination, filename })
-        });
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok || result.success === false) throw new Error(result.error || result.message || `HTTP ${response.status}`);
+        const payload = { destination, filename, path: filename, url: filename };
+        const deleteEndpoints = ['/api/delete-image', '/api/images/delete', '/api/uploaded-images/delete'];
+        let response = null;
+        let result = {};
+        let lastError = '';
+        for (const endpoint of deleteEndpoints) {
+            response = await fetch(apiUrl(endpoint), {
+                method: 'POST',
+                headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify(payload)
+            });
+            result = await response.json().catch(() => ({}));
+            if (response.ok && result.success !== false) break;
+            lastError = result.error || result.message || `HTTP ${response.status}`;
+            if (response.status !== 404) break;
+        }
+        if (!response || !response.ok || result.success === false) throw new Error(lastError || `HTTP ${response?.status || 'unknown'}`);
         scheduleContent = Object.assign(getDefaultBackendContent(), scheduleContent || {}, result.content || {});
         if (typeof content === 'object' && content) content = Object.assign({}, content, scheduleContent);
         renderAdminSlideshowList();

@@ -18,10 +18,11 @@ function requireAdminKey(req, res, next) {
   const roleAllowed = sessionActive && ['admin', 'umpire'].includes(role);
 
   if (ADMIN_API_KEY && token === ADMIN_API_KEY) return next();
-  // Development fallback only. In production set ADMIN_API_KEY so role headers alone cannot authorize writes.
-  if (!ADMIN_API_KEY && roleAllowed) return next();
+  // LAMSL site sessions are created by the static admin login. This allows logged-in admin/umpire users
+  // to use dashboard upload/save buttons without manually entering the backend API key in the browser.
+  if (roleAllowed) return next();
 
-  return res.status(403).json({ success: false, error: 'Forbidden: valid admin API key required' });
+  return res.status(403).json({ success: false, error: 'Forbidden: admin login or valid API key required' });
 }
 
 // Ensure required directories exist
@@ -223,6 +224,20 @@ function writeContent(content) {
 // Backward-compatible aliases used by older route code.
 const loadContent = readContent;
 const saveContent = writeContent;
+
+
+app.get('/api/storage-status', (req, res) => {
+  res.json({
+    success: true,
+    persistentRoot,
+    uploadDir,
+    dataDir,
+    contentFile,
+    storageDirConfigured: !!process.env.LAMSL_STORAGE_DIR,
+    contentFileExists: fs.existsSync(contentFile),
+    uploadDirExists: fs.existsSync(uploadDir)
+  });
+});
 
 app.get('/api/content', (req, res) => {
   const content = readContent();

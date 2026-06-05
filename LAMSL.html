@@ -882,8 +882,19 @@ function applyPaymentSection() {
     paymentEditForm.style.display = isAdminLoggedIn() ? 'grid' : 'none';
 }
 
-function renderAnnouncements() {
-    const announcements = readJson(ANNOUNCEMENTS_KEY, []);
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<">']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+
+function normalizeAnnouncements(items) {
+    return (Array.isArray(items) ? items : [])
+        .filter(item => item && item.archived !== true && item.active !== false)
+        .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+}
+
+function renderAnnouncements(sourceItems) {
+    if (!announcementsList) return;
+    const announcements = normalizeAnnouncements(Array.isArray(sourceItems) ? sourceItems : readJson(ANNOUNCEMENTS_KEY, []));
     announcementsList.innerHTML = '';
 
     if (!announcements.length) {
@@ -896,8 +907,8 @@ function renderAnnouncements() {
 
     announcements.forEach(item => {
         const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `<h3>${item.title}</h3><p><strong>${item.date}</strong></p><p>${item.message}</p>`;
+        card.className = 'card announcement-card';
+        card.innerHTML = `<h3>${escapeHtml(item.title || 'League Announcement')}</h3><p><strong>${escapeHtml(item.date || '')}</strong></p><p>${escapeHtml(item.message || item.body || '')}</p>`;
         announcementsList.appendChild(card);
     });
 }
@@ -923,8 +934,10 @@ function createSlideElement(image) {
 
 function applyUploadPermissions() {
     const isAdmin = isAdminLoggedIn();
+    if (!imageInput || !uploadForm || !uploadMessage) return;
     imageInput.disabled = !isAdmin;
-    uploadForm.querySelector('button[type="submit"]').disabled = !isAdmin;
+    const submitButton = uploadForm.querySelector('button[type="submit"]');
+    if (submitButton) submitButton.disabled = !isAdmin;
     uploadMessage.style.display = isAdmin ? 'block' : 'none';
 }
 
@@ -1035,10 +1048,10 @@ function addSlide(image) {
     showSlide(newIndex);
 }
 
-homeSlideshowNext.addEventListener('click', nextSlide);
-homeSlideshowPrev.addEventListener('click', prevSlide);
+if (homeSlideshowNext) homeSlideshowNext.addEventListener('click', nextSlide);
+if (homeSlideshowPrev) homeSlideshowPrev.addEventListener('click', prevSlide);
 
-indicatorsContainer.addEventListener('click', (event) => {
+if (indicatorsContainer) indicatorsContainer.addEventListener('click', (event) => {
     if (!event.target.classList.contains('indicator')) {
         return;
     }
@@ -1048,7 +1061,7 @@ indicatorsContainer.addEventListener('click', (event) => {
     }
 });
 
-uploadForm.addEventListener("submit", async (e) => {
+if (uploadForm) uploadForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const file = imageInput.files[0];
@@ -1247,16 +1260,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
 
-    // Announcements
-    const announcementsList = document.getElementById('announcements-list');
-    if (announcementsList && Array.isArray(data.announcements)) {
-      announcementsList.innerHTML = data.announcements.map(a => `
-        <div class="announcement">
-          <h4>${a.title || ''}</h4>
-          <p>${a.message || ''}</p>
-          <small>${a.date || ''}</small>
-        </div>
-      `).join('');
+    // Announcements: backend first, localStorage fallback second.
+    if (Array.isArray(data.announcements)) {
+      writeJson(ANNOUNCEMENTS_KEY, data.announcements);
+      renderAnnouncements(data.announcements);
+    } else {
+      renderAnnouncements();
     }
 
     // Zelle info
@@ -1274,7 +1283,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (slideshow && Array.isArray(data.slideshow) && data.slideshow.length > 0) {
       slideshow.innerHTML = data.slideshow.map((s, i) => `
         <div class="slide ${i === 0 ? 'active' : ''}">
-          <img src="${s.imageUrl || s.url || ''}" alt="${s.caption || ''}">
+          <img src="${((s.imageUrl || s.url || s.src || s.path || '').startsWith('/')) ? apiUrl(s.imageUrl || s.url || s.src || s.path) : (s.imageUrl || s.url || s.src || s.path || '')}" alt="${escapeHtml(s.caption || '')}">
           <p>${s.caption || ''}</p>
         </div>
       `).join('');

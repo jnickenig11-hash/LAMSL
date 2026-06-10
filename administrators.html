@@ -3517,5 +3517,58 @@ document.addEventListener('DOMContentLoaded', ()=> setTimeout(syncUsersFromBacke
 </script>
 
 
+
+<script>
+// ===== LEAGUE SEASON SETTINGS VISIBILITY FIX =====
+(function(){
+  function adminSessionActive(){
+    try {
+      const s = JSON.parse(localStorage.getItem('lamslSessionV1') || 'null');
+      if (s && s.role === 'admin') return true;
+    } catch(e) {}
+    return !!(localStorage.getItem('LAMSL_BACKEND_TOKEN') || localStorage.getItem('LAMSL_ADMIN_KEY'));
+  }
+  function readSeason(){
+    try {
+      const local = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
+      if (local) return local;
+    } catch(e) {}
+    return null;
+  }
+  function showLeagueSeasonEditor(){
+    const note = document.getElementById('season-auth-note');
+    const form = document.getElementById('season-form');
+    const display = document.getElementById('season-current-display');
+    const active = adminSessionActive();
+    if (note) {
+      note.style.display = active ? 'none' : 'block';
+      note.textContent = 'Sign in as admin to configure the active season.';
+    }
+    if (form) form.style.display = active ? 'grid' : 'none';
+    const season = readSeason();
+    if (active && season) {
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+      set('season-name', season.name);
+      set('season-year', season.year);
+      set('season-start', season.start);
+      set('season-end', season.end);
+      if (display) {
+        display.style.display = 'block';
+        display.innerHTML = `<strong>${season.name || 'Season'} ${season.year || ''}</strong><span class="season-badge">Active</span><br><span style="font-size:13px;color:#555;">${season.start || ''} - ${season.end || ''}</span>`;
+      }
+    } else if (active && display) {
+      display.style.display = 'block';
+      display.innerHTML = '<em style="color:#888;font-size:13px;">No season configured yet.</em>';
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    showLeagueSeasonEditor();
+    setTimeout(showLeagueSeasonEditor, 500);
+    setTimeout(showLeagueSeasonEditor, 1500);
+  });
+  window.addEventListener('storage', showLeagueSeasonEditor);
+})();
+</script>
+
 </body>
 </html>

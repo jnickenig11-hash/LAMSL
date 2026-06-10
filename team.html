@@ -2018,8 +2018,13 @@ async function savePlayer() {
     }
 
     const name = playerNameInput.value.trim();
+    const position = playerPositionInput.value.trim();
     if (!name) {
-        rosterAdminStatus.textContent = 'Enter a player name before saving.';
+        rosterAdminStatus.textContent = 'Enter the player first and last name before saving.';
+        return;
+    }
+    if (!position) {
+        rosterAdminStatus.textContent = 'Select the player position before saving.';
         return;
     }
 
@@ -2032,7 +2037,7 @@ async function savePlayer() {
     const playerRecord = {
         id,
         name,
-        position: playerPositionInput.value.trim(),
+        position,
         phone: playerPhoneInput.value.trim(),
         email: playerEmailInput.value.trim(),
         gamesPlayed: existingIndex >= 0 ? (players[existingIndex].gamesPlayed || 0) : 0,
@@ -2048,10 +2053,18 @@ async function savePlayer() {
     }
 
     setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
-    saveBackendTeamData().catch(error => console.warn('Roster backend save failed', error));
+    try {
+        await saveBackendTeamData();
+        rosterAdminStatus.textContent = existingIndex >= 0 ? `${name} profile updated and saved to backend.` : `${name} added to the roster and saved to backend.`;
+    } catch (error) {
+        console.warn('Roster backend save failed', error);
+        rosterAdminStatus.textContent = `${name} saved locally, but backend save failed: ${error.message}`;
+    }
     renderRoster();
     renderPlayerProfiles();
+    populateCheckinPlayerSelect(getCheckinPlayers());
     clearPlayerForm();
+    playerModal.style.display = 'none';
 }
 
 function editPlayer(id) {
@@ -2103,7 +2116,7 @@ function setRosterStatus(message, isError = false, isSuccess = false) {
     rosterAdminStatus.style.color = isError ? '#d32f2f' : isSuccess ? '#2e7d32' : '';
 }
 
-function removePlayer(id) {
+async function removePlayer(id) {
     if (!canManageTeamContent()) {
         rosterAdminStatus.textContent = 'Sign in as team manager or admin to remove players.';
         return;
@@ -2112,10 +2125,16 @@ function removePlayer(id) {
     const store = getTeamPlayers();
     const players = (store.players || []).filter(item => item.id !== id);
     setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
-    saveBackendTeamData().catch(error => console.warn('Roster backend save failed', error));
+    try {
+        await saveBackendTeamData();
+        rosterAdminStatus.textContent = 'Player removed from roster and backend.';
+    } catch (error) {
+        console.warn('Roster backend save failed', error);
+        rosterAdminStatus.textContent = 'Player removed locally, but backend save failed: ' + error.message;
+    }
     renderRoster();
     renderPlayerProfiles();
-    rosterAdminStatus.textContent = 'Player removed from roster.';
+    populateCheckinPlayerSelect(getCheckinPlayers());
 }
 
 function normalizePlayerDataFromRoster(rows) {
@@ -2250,6 +2269,44 @@ function applyScheduleFilters(allGames) {
         });
     }
     renderScheduleTable(rows);
+}
+
+
+// ===== TEAM PLAYER STORE FIX =====
+function getTeamPlayerBucketKey() {
+    const divKey = String(division || '').trim() || 'Unassigned';
+    const teamKey = String(team || '').trim();
+    return teamKey ? `${divKey}::${teamKey}` : '';
+}
+
+function getTeamPlayers() {
+    const key = getTeamPlayerBucketKey();
+    const backendStore = (lamslTeamBackend && lamslTeamBackend.teamPlayers && typeof lamslTeamBackend.teamPlayers === 'object')
+        ? lamslTeamBackend.teamPlayers
+        : {};
+    const localStore = readJson(TEAM_PLAYERS_KEY, {});
+    const record = (key && backendStore[key]) || (team && backendStore[team]) || (key && localStore[key]) || (team && localStore[team]) || { players: [], updatedAt: '' };
+    return {
+        players: Array.isArray(record.players) ? record.players : [],
+        updatedAt: record.updatedAt || ''
+    };
+}
+
+function setTeamPlayers(record) {
+    const key = getTeamPlayerBucketKey();
+    if (!key) return;
+    const safeRecord = {
+        players: Array.isArray(record && record.players) ? record.players : [],
+        updatedAt: (record && record.updatedAt) || new Date().toLocaleString()
+    };
+    const localStore = readJson(TEAM_PLAYERS_KEY, {});
+    localStore[key] = safeRecord;
+    // Keep legacy team-name key for older pages already deployed.
+    if (team) localStore[team] = safeRecord;
+    writeJson(TEAM_PLAYERS_KEY, localStore);
+    if (!lamslTeamBackend.teamPlayers || typeof lamslTeamBackend.teamPlayers !== 'object') lamslTeamBackend.teamPlayers = {};
+    lamslTeamBackend.teamPlayers[key] = safeRecord;
+    if (team) lamslTeamBackend.teamPlayers[team] = safeRecord;
 }
 
 function setupEventListeners() {

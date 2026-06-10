@@ -451,6 +451,106 @@ footer {
 
 </style>
 <script src="js/backend-config.js"></script>
+
+
+<style id="lamsl-theme-button-overrides">
+:root{--lamsl-navy:#06364f;--lamsl-navy-dark:#042c40;--lamsl-orange:#c86a2f;--lamsl-danger:#b93535;--lamsl-light:#f8fbfd;--lamsl-border:#d8e0e8;}
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.button,
+.btn,
+.admin-form-btn,
+.view-toggle-btn,
+.filter-btn,
+.park-filter-btn,
+.archive-btn,
+.remove-btn,
+.delete-managed-image-btn,
+.roster-remove-btn,
+.checkin-game-btn,
+.check-in-game-btn,
+input[type="file"]::file-selector-button{
+    background:var(--lamsl-navy) !important;
+    color:#fff !important;
+    border:1px solid var(--lamsl-navy) !important;
+    border-radius:8px !important;
+    font-family:inherit !important;
+    font-weight:700 !important;
+    cursor:pointer !important;
+}
+button:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+.button:hover,
+.btn:hover,
+.admin-form-btn:hover,
+.view-toggle-btn:hover,
+.filter-btn:hover,
+.park-filter-btn:hover,
+.archive-btn:hover,
+.remove-btn:hover,
+.delete-managed-image-btn:hover,
+.roster-remove-btn:hover,
+.checkin-game-btn:hover,
+.check-in-game-btn:hover,
+input[type="file"]::file-selector-button:hover{
+    background:var(--lamsl-navy-dark) !important;
+    border-color:var(--lamsl-navy-dark) !important;
+}
+button.active,
+.view-toggle-btn.active,
+.filter-btn.active,
+.park-filter-btn.active{
+    background:var(--lamsl-orange) !important;
+    border-color:var(--lamsl-orange) !important;
+    color:#fff !important;
+}
+button.danger,
+.danger-btn,
+button[class*="danger"],
+button[data-action="remove"],
+.roster-remove-btn,
+.delete-managed-image-btn,
+.remove-btn{
+    background:var(--lamsl-danger) !important;
+    border-color:var(--lamsl-danger) !important;
+    color:#fff !important;
+}
+button.secondary,
+.player-form-actions button.secondary,
+#cancel-player-btn,
+#clear-checkin-btn{
+    background:var(--lamsl-orange) !important;
+    border-color:var(--lamsl-orange) !important;
+    color:#fff !important;
+}
+button:disabled,
+input[type="button"]:disabled,
+input[type="submit"]:disabled{
+    background:#5c7890 !important;
+    border-color:#5c7890 !important;
+    color:#fff !important;
+    opacity:.65 !important;
+    cursor:not-allowed !important;
+}
+.card,
+.content-panel,
+.admin-panel,
+.practice-body,
+.division-manager,
+.season-current,
+.admin-only,
+.team-manager-panel,
+.team-schedule-panel,
+.team-roster-panel,
+.roster-card{
+    border-color:var(--lamsl-border) !important;
+}
+</style>
+
 </head>
 
 <body>

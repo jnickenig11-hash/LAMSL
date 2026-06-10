@@ -467,6 +467,106 @@ button:hover,
 }
 
 </style>
+
+
+<style id="lamsl-theme-button-overrides">
+:root{--lamsl-navy:#06364f;--lamsl-navy-dark:#042c40;--lamsl-orange:#c86a2f;--lamsl-danger:#b93535;--lamsl-light:#f8fbfd;--lamsl-border:#d8e0e8;}
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.button,
+.btn,
+.admin-form-btn,
+.view-toggle-btn,
+.filter-btn,
+.park-filter-btn,
+.archive-btn,
+.remove-btn,
+.delete-managed-image-btn,
+.roster-remove-btn,
+.checkin-game-btn,
+.check-in-game-btn,
+input[type="file"]::file-selector-button{
+    background:var(--lamsl-navy) !important;
+    color:#fff !important;
+    border:1px solid var(--lamsl-navy) !important;
+    border-radius:8px !important;
+    font-family:inherit !important;
+    font-weight:700 !important;
+    cursor:pointer !important;
+}
+button:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+.button:hover,
+.btn:hover,
+.admin-form-btn:hover,
+.view-toggle-btn:hover,
+.filter-btn:hover,
+.park-filter-btn:hover,
+.archive-btn:hover,
+.remove-btn:hover,
+.delete-managed-image-btn:hover,
+.roster-remove-btn:hover,
+.checkin-game-btn:hover,
+.check-in-game-btn:hover,
+input[type="file"]::file-selector-button:hover{
+    background:var(--lamsl-navy-dark) !important;
+    border-color:var(--lamsl-navy-dark) !important;
+}
+button.active,
+.view-toggle-btn.active,
+.filter-btn.active,
+.park-filter-btn.active{
+    background:var(--lamsl-orange) !important;
+    border-color:var(--lamsl-orange) !important;
+    color:#fff !important;
+}
+button.danger,
+.danger-btn,
+button[class*="danger"],
+button[data-action="remove"],
+.roster-remove-btn,
+.delete-managed-image-btn,
+.remove-btn{
+    background:var(--lamsl-danger) !important;
+    border-color:var(--lamsl-danger) !important;
+    color:#fff !important;
+}
+button.secondary,
+.player-form-actions button.secondary,
+#cancel-player-btn,
+#clear-checkin-btn{
+    background:var(--lamsl-orange) !important;
+    border-color:var(--lamsl-orange) !important;
+    color:#fff !important;
+}
+button:disabled,
+input[type="button"]:disabled,
+input[type="submit"]:disabled{
+    background:#5c7890 !important;
+    border-color:#5c7890 !important;
+    color:#fff !important;
+    opacity:.65 !important;
+    cursor:not-allowed !important;
+}
+.card,
+.content-panel,
+.admin-panel,
+.practice-body,
+.division-manager,
+.season-current,
+.admin-only,
+.team-manager-panel,
+.team-schedule-panel,
+.team-roster-panel,
+.roster-card{
+    border-color:var(--lamsl-border) !important;
+}
+</style>
+
 </head>
 
 <body>
@@ -732,7 +832,7 @@ button:hover,
             </div>
         </section>
 
-        <section class="card" id="season-card">
+        <section class="card admin-role-only" id="season-card">
             <h2>League Season Settings</h2>
             <p class="admin-status" id="season-auth-note">Sign in as admin to configure the active season.</p>
             <div id="season-current-display" class="season-current" style="display:none;"></div>
@@ -3650,5 +3750,65 @@ document.addEventListener('DOMContentLoaded', ()=> setTimeout(syncUsersFromBacke
   }, true);
 })();
 </script>
+
+
+<script id="admin-role-season-and-theme-fix">
+(function(){
+  function readSession(){try{return JSON.parse(localStorage.getItem('lamslSessionV1')||'null')||{};}catch(e){return {};}}
+  function norm(v){return String(v||'').trim().toLowerCase().replace('_','-');}
+  function isAdmin(){return norm(readSession().role)==='admin';}
+  function enforceAdminOnlyRegions(){
+    document.querySelectorAll('.admin-role-only,#season-card').forEach(el=>{ el.style.display = isAdmin() ? '' : 'none'; });
+    const note=document.getElementById('season-auth-note');
+    const form=document.getElementById('season-form');
+    const display=document.getElementById('season-current-display');
+    if(!isAdmin()){
+      if(note){note.style.display='block'; note.textContent='Administrator access required.';}
+      if(form) form.style.display='none';
+      if(display) display.style.display='none';
+      return;
+    }
+    if(note) note.style.display='none';
+    if(form) form.style.display='grid';
+  }
+  function populateManagerAssignmentFields(){
+    const role=document.getElementById('new-admin-role');
+    const div=document.getElementById('manager-division-select');
+    const team=document.getElementById('manager-team-select');
+    if(!role||!div||!team) return;
+    const show=norm(role.value)==='team-manager';
+    div.style.display=show?'':'none'; team.style.display=show?'':'none';
+    if(!show) return;
+    const divisions={};
+    try{
+      const content=window.lamslContentCache||{};
+      (content.gameSchedules||[]).forEach(g=>{ if(g.division){ const d=String(g.division).replace('Division','').trim().toUpperCase(); divisions[d]=divisions[d]||new Set(); if(g.team1) divisions[d].add(g.team1); if(g.team2) divisions[d].add(g.team2); }});
+    }catch(e){}
+    try{
+      const standings=JSON.parse(localStorage.getItem('lamslStandingsV1')||'{}');
+      Object.keys(standings||{}).forEach(d=>{divisions[d]=divisions[d]||new Set(); (standings[d]||[]).forEach(t=>divisions[d].add(t.team||t.name||t.Team));});
+    }catch(e){}
+    const fallback={A:['La Tribu','Nasty Boyz','Toxic','Titans','White Sox','Legends'],B:[],C:[],D:[],E:[]};
+    Object.keys(fallback).forEach(d=>{divisions[d]=divisions[d]||new Set(); fallback[d].forEach(t=>divisions[d].add(t));});
+    const currentDiv=div.value;
+    div.innerHTML='<option value="">Select division</option>'+Object.keys(divisions).sort().map(d=>`<option value="${d}">Division ${d}</option>`).join('');
+    if(currentDiv && [...div.options].some(o=>o.value===currentDiv)) div.value=currentDiv;
+    const d=div.value || Object.keys(divisions).sort()[0] || '';
+    if(d && !div.value) div.value=d;
+    const teams=[...(divisions[div.value]||[])].filter(Boolean).sort();
+    const currentTeam=team.value;
+    team.innerHTML='<option value="">Assign manager to team</option>'+teams.map(t=>`<option value="${String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}">${t}</option>`).join('');
+    if(currentTeam && [...team.options].some(o=>o.value===currentTeam)) team.value=currentTeam;
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    enforceAdminOnlyRegions(); populateManagerAssignmentFields();
+    setTimeout(enforceAdminOnlyRegions,500); setTimeout(enforceAdminOnlyRegions,1500);
+    document.getElementById('new-admin-role')?.addEventListener('change', populateManagerAssignmentFields);
+    document.getElementById('manager-division-select')?.addEventListener('change', populateManagerAssignmentFields);
+  });
+  window.addEventListener('storage', enforceAdminOnlyRegions);
+})();
+</script>
+
 </body>
 </html>

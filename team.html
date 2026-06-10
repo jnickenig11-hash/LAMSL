@@ -1079,7 +1079,7 @@ footer {
                 <div class="team-hero">
                     <div>
                         <h2 id="team-title">Team Profile</h2>
-                        <p class="muted" id="team-subtitle">Select a team from a division standings page.</p>
+                        <p class="muted" id="team-subtitle" style="display:none;"></p>
                         <div class="team-chip" id="team-division-chip">Division -</div>
                     </div>
                     <div class="team-photo-panel">
@@ -1103,8 +1103,6 @@ footer {
                 <h3>Latest Results</h3>
                 <ul class="info-list" id="latest-results"></ul>
             </div>
-        </section>
-
         </section>
 
         <div class="small-manager-panel">
@@ -1637,13 +1635,15 @@ function resolveBackendAssetUrl(value) {
 function renderHeader() {
     if (!team) {
         teamTitle.textContent = 'Team Profile';
-        teamSubtitle.textContent = 'Select a team by clicking its name on a division standings page.';
+        teamSubtitle.textContent = '';
+        teamSubtitle.style.display = 'none';
         teamDivisionChip.textContent = 'Division -';
         return;
     }
 
     teamTitle.textContent = team;
-    teamSubtitle.textContent = `Detailed team page: schedule, standings, and roster management.`;
+    teamSubtitle.textContent = '';
+    teamSubtitle.style.display = 'none';
     teamDivisionChip.textContent = division ? (divisionLabelMap[division] || `Division ${division}`) : 'Division N/A';
 }
 
@@ -1858,6 +1858,44 @@ function normalizePlayersFromRows(rows) {
     })).filter(player => player.name);
 }
 
+
+function escapeHtml(value) {
+    return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function renderRoster() {
+    if (!rosterGridWrap) return;
+    const data = getTeamPlayers();
+    const players = Array.isArray(data.players) ? data.players : [];
+
+    if (!team) {
+        rosterGridWrap.innerHTML = '<p class="muted">Select a team to view roster.</p>';
+        return;
+    }
+
+    if (!players.length) {
+        rosterGridWrap.innerHTML = '<p class="muted">No players added to this roster yet.</p>';
+        return;
+    }
+
+    const canManage = canManageTeamContent();
+    rosterGridWrap.innerHTML = players.map(player => `
+        <div class="roster-card" data-player-id="${escapeHtml(player.id)}">
+            <h4>${escapeHtml(player.name)}</h4>
+            <p><strong>Position:</strong> ${escapeHtml(player.position || 'TBA')}</p>
+            <p><strong>Phone:</strong> ${escapeHtml(player.phone || 'N/A')}</p>
+            <p><strong>Email:</strong> ${escapeHtml(player.email || 'N/A')}</p>
+            <p class="checkin-count"><strong>Games Played:</strong> ${Number(player.gamesPlayed || 0)}</p>
+            ${canManage ? `<button type="button" class="danger roster-remove-btn" data-player-id="${escapeHtml(player.id)}">Remove</button>` : ''}
+        </div>
+    `).join('');
+}
+
 function renderPlayerProfiles(filterPlayers = null) {
     const data = getTeamPlayers();
     const allPlayers = Array.isArray(data.players) ? data.players : [];
@@ -1916,8 +1954,6 @@ function clearPlayerForm() {
     playerPhoneInput.value = '';
     playerEmailInput.value = '';
     playerPhotoInput.value = '';
-    playerFormSection.style.display = 'none';
-    playerModal.style.display = 'none';
 }
 
 function populatePlayerForm(player) {
@@ -1970,7 +2006,9 @@ async function savePlayer() {
             const name = players[existingIndex].name;
             players.splice(existingIndex, 1);
             setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
+            saveBackendTeamData().catch(error => console.warn('Roster backend save failed', error));
             rosterAdminStatus.textContent = `${name} removed from the roster.`;
+            renderRoster();
             renderPlayerProfiles();
             clearPlayerForm();
         } else {
@@ -2010,6 +2048,8 @@ async function savePlayer() {
     }
 
     setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
+    saveBackendTeamData().catch(error => console.warn('Roster backend save failed', error));
+    renderRoster();
     renderPlayerProfiles();
     clearPlayerForm();
 }
@@ -2072,6 +2112,8 @@ function removePlayer(id) {
     const store = getTeamPlayers();
     const players = (store.players || []).filter(item => item.id !== id);
     setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
+    saveBackendTeamData().catch(error => console.warn('Roster backend save failed', error));
+    renderRoster();
     renderPlayerProfiles();
     rosterAdminStatus.textContent = 'Player removed from roster.';
 }
@@ -2121,9 +2163,11 @@ function applyRosterUploadAccess() {
 function getAllTeamGames() {
     const contentGames = lamslTeamBackend.content && Array.isArray(lamslTeamBackend.content.gameSchedules) ? lamslTeamBackend.content.gameSchedules : [];
     const scoreGames = lamslTeamBackend.content && Array.isArray(lamslTeamBackend.content.gameScores) ? lamslTeamBackend.content.gameScores : [];
+    const practiceGames = lamslTeamBackend.content && Array.isArray(lamslTeamBackend.content.practiceSchedules) ? lamslTeamBackend.content.practiceSchedules : [];
     const localGames = readJson('lamslWeeklyScheduleV3', []);
+    const localPracticeGames = readJson(PRACTICE_KEY, []);
     const byId = new Map();
-    [...contentGames, ...scoreGames, ...localGames].forEach(game => {
+    [...contentGames, ...scoreGames, ...practiceGames, ...localGames, ...localPracticeGames].forEach(game => {
         if (!game || (!game.team1 && !game.team2)) return;
         byId.set(getGameId(game), game);
     });
@@ -2165,22 +2209,25 @@ function getUpcomingGames() {
 
 function renderScheduleTable(games) {
     if (!teamScheduleWrap) return;
-    const rows = (games || []).filter(game => !isScoredGame(game));
+    const rows = [...(games || [])].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || String(b.time || '').localeCompare(String(a.time || '')));
     if (!rows.length) {
         teamScheduleWrap.innerHTML = '<p class="muted">No scheduled games found for this team.</p>';
         return;
     }
     teamScheduleWrap.innerHTML = `
         <table class="team-schedule-table">
-            <thead><tr><th>Date</th><th>Time</th><th>Park</th><th>Opponent</th><th>Status</th><th>Check-In</th></tr></thead>
+            <thead><tr><th>Date</th><th>Time</th><th>Park</th><th>Opponent</th><th>Result / Status</th><th>Check-In</th></tr></thead>
             <tbody>${rows.map(game => {
                 const opponent = game.team1 === team ? game.team2 : game.team1;
-                return `<tr>
+                const result = isScoredGame(game)
+                    ? `${game.team1} ${game.score1} - ${game.score2} ${game.team2}`
+                    : toStatusLabel(game.status || 'scheduled');
+                return `<tr data-game-id="${getGameId(game)}">
                     <td>${game.date || ''}</td>
                     <td>${game.time || ''}</td>
                     <td>${game.park || ''}</td>
                     <td>${opponent || ''}</td>
-                    <td>${game.status || 'scheduled'}</td>
+                    <td>${result}</td>
                     <td><button type="button" class="checkin-game-btn" data-game-id="${getGameId(game)}">Check In Players</button></td>
                 </tr>`;
             }).join('')}</tbody>
@@ -2192,7 +2239,7 @@ function applyScheduleFilters(allGames) {
     const period = schedulePeriodFilter ? schedulePeriodFilter.value : '';
     const season = scheduleSeasonFilter ? scheduleSeasonFilter.value : '';
     const anchor = scheduleAnchorDate && scheduleAnchorDate.value ? parseDateKey(scheduleAnchorDate.value) : null;
-    if (season) rows = rows.filter(game => getSeasonType(game) === season);
+    if (season && season !== 'all') rows = rows.filter(game => getSeasonType(game) === season);
     if (period === 'upcoming') rows = rows.filter(game => String(game.date || '') >= formatDateKey(new Date()));
     if (period === 'past') rows = rows.filter(game => String(game.date || '') < formatDateKey(new Date()));
     if (period === 'week' && anchor) {
@@ -2302,21 +2349,22 @@ function setupEventListeners() {
 });
 
 addPlayerBtn.addEventListener('click', () => {
+    clearPlayerForm();
     modalTitle.textContent = 'Add Player';
+    formInstruction.textContent = 'Enter the player information below.';
+    savePlayerBtn.textContent = 'Save Player';
     playerFormSection.style.display = 'block';
     playerProfilesSection.style.display = 'none';
-    clearPlayerForm();
-    renderPlayerProfiles();
     playerModal.style.display = 'flex';
 });
 
 removePlayerBtn.addEventListener('click', () => {
+    clearPlayerForm();
     modalTitle.textContent = 'Remove Player';
+    formInstruction.textContent = 'Select a player from the roster list below, then confirm removal.';
+    savePlayerBtn.textContent = 'Remove Player';
     playerFormSection.style.display = 'block';
     playerProfilesSection.style.display = 'block';
-    formInstruction.textContent = 'Select a player from the roster to remove.';
-    savePlayerBtn.textContent = 'Remove Player';
-    clearPlayerForm();
     renderPlayerProfiles();
     playerModal.style.display = 'flex';
 });
@@ -2350,6 +2398,15 @@ playerList.addEventListener('click', event => {
     }
 });
 
+
+if (rosterGridWrap) {
+    rosterGridWrap.addEventListener('click', event => {
+        const removeButton = event.target.closest('.roster-remove-btn');
+        if (!removeButton) return;
+        removePlayer(removeButton.dataset.playerId);
+    });
+}
+
 teamScheduleWrap.addEventListener('click', event => {
     const checkinButton = event.target.closest('.checkin-game-btn');
     if (checkinButton) {
@@ -2381,6 +2438,15 @@ upcomingGameSelect.addEventListener('change', event => {
         showCheckinPanel(selected);
     }
 });
+
+
+if (rosterGridWrap) {
+    rosterGridWrap.addEventListener('click', event => {
+        const removeButton = event.target.closest('.roster-remove-btn');
+        if (!removeButton) return;
+        removePlayer(removeButton.dataset.playerId);
+    });
+}
 
 teamScheduleWrap.addEventListener('click', event => {
     const checkinButton = event.target.closest('.checkin-game-btn');

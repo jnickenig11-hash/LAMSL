@@ -1049,8 +1049,8 @@ function logAdminAction(action, details) {
 function ensureDefaults() {
     const users = readJson(USERS_KEY, []);
     if (!users.some(user => user.username === 'admin')) {
-        users.push({ username: 'admin', password: 'admin', role: 'admin' });
-        writeJson(USERS_KEY, users);
+        users.push({ username: 'admin', password: '', role: 'admin' });
+        writeJson(USERS_KEY, users); saveUserToBackend(users[users.length-1]);
     }
 
     const announcements = readJson(ANNOUNCEMENTS_KEY, null);
@@ -1262,7 +1262,7 @@ function renderUserAccounts() {
         li.style.justifyContent = 'space-between';
         li.style.alignItems = 'center';
         li.style.gap = '12px';
-        li.innerHTML = `<span>${user.username} � <strong>${user.role}</strong></span>`;
+        li.innerHTML = `<span>${user.username} • <strong>${user.role}</strong> • Password: ********</span>`;
 
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
@@ -3417,3 +3417,27 @@ initializeAdminScheduleDashboard();
 </script>
 
 </html>
+
+async function syncUsersFromBackend(){
+  try {
+    const response = await fetch(`${window.API_BASE || ''}/api/users`, { headers: window.apiHeaders ? window.apiHeaders() : {} });
+    const data = await response.json();
+    if(data.users){
+      writeJson(USERS_KEY, data.users.map(u=>({...u,password:''})));
+      renderUserAccounts();
+    }
+  } catch(e){}
+}
+
+async function saveUserToBackend(user){
+  try {
+    await fetch(`${window.API_BASE || ''}/api/users`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json', ...(window.apiHeaders ? window.apiHeaders() : {})},
+      body: JSON.stringify(user)
+    });
+    syncUsersFromBackend();
+  } catch(e){ console.error(e); }
+}
+
+document.addEventListener('DOMContentLoaded', ()=> setTimeout(syncUsersFromBackend,1000));

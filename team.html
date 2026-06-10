@@ -2484,3 +2484,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
+function renderLatestResultsEnhanced(schedule, selectedTeam){
+  const target=document.getElementById('latest-results');
+  if(!target) return;
+  const games=(schedule||[]).filter(g=> (g.team1===selectedTeam || g.team2===selectedTeam) && g.score1!==undefined && g.score1!=='' && g.score2!==undefined && g.score2!=='').slice(-10).reverse();
+  if(!games.length){ target.innerHTML='<li>No recent results.</li>'; return; }
+  target.innerHTML=games.map(g=>{
+    const isHome=g.team1===selectedTeam;
+    const teamScore=isHome?g.score1:g.score2;
+    const opp=isHome?g.team2:g.team1;
+    const oppScore=isHome?g.score2:g.score1;
+    return `<li>${selectedTeam} ${teamScore} - ${oppScore} ${opp}</li>`;
+  }).join('');
+}
+
+function renderDivisionScores(schedule, division){
+  const wrap=document.getElementById('division-scores-wrap');
+  if(!wrap) return;
+  const games=(schedule||[]).filter(g=> String(g.division||'').includes(division) && g.score1!=='' && g.score2!=='');
+  wrap.innerHTML=games.map(g=>`<div class="score-row">${g.team1} ${g.score1} - ${g.score2} ${g.team2}</div>`).join('');
+}

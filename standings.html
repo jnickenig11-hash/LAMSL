@@ -293,6 +293,15 @@ footer {
     }
 }
 
+
+.division-scores-card { margin-top: 24px; padding: 18px; background: #fff; border: 1px solid #d6e3ed; border-radius: 10px; box-shadow: 0 4px 14px rgba(18,50,74,.08); }
+.division-scores-card h3 { color: #12324A; margin-top: 0; }
+.division-scores-table { width: 100%; border-collapse: collapse; background: #fff; }
+.division-scores-table th { background: #f1f7fb; color: #12324A; text-align: left; padding: 10px; border-bottom: 1px solid #cfe0ec; text-transform: uppercase; }
+.division-scores-table td { padding: 10px; border-bottom: 1px solid #d6e3ed; }
+.division-scores-table tbody tr:nth-child(odd) { background: #f8fbfd; }
+.score-winner { font-weight: 700; color: #12324A; }
+
 </style>
 </head>
 
@@ -359,6 +368,55 @@ const tabButtons   = document.querySelectorAll('.tab-btn');
 const contentPanel = document.getElementById('tab-content-panel');
 const cache        = {};
 
+function getActiveDivisionLabel() {
+    const active = document.querySelector('.tab-btn.active');
+    return active ? active.textContent.trim() : 'Division A';
+}
+function getDisplayedTeams() {
+    return Array.from(contentPanel.querySelectorAll('table tr td:first-child')).map(td => td.textContent.trim()).filter(Boolean);
+}
+function isScored(game) {
+    return game && game.score1 !== '' && game.score2 !== '' && game.score1 != null && game.score2 != null;
+}
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function scoreIdentity(game) {
+    return String(game.id || [game.date, game.time, game.park, game.team1, game.team2].join('|'));
+}
+async function loadLeagueScores() {
+    try {
+        const api = window.apiUrl ? window.apiUrl('/api/content') : ((window.BACKEND_BASE || 'https://lamsl-backend.onrender.com').replace(/\/$/, '') + '/api/content');
+        const response = await fetch(api, { cache: 'no-store' });
+        const data = await response.json();
+        const content = data.content || data || {};
+        const merged = [...(content.gameScores || []), ...(content.gameSchedules || []).filter(isScored)];
+        const byGame = new Map();
+        merged.filter(isScored).forEach(game => byGame.set(scoreIdentity(game), game));
+        return [...byGame.values()];
+    } catch (error) {
+        try { return JSON.parse(localStorage.getItem('lamslWeeklyScheduleV3') || '[]').filter(isScored); } catch (e) { return []; }
+    }
+}
+async function renderActiveDivisionScores() {
+    const wrap = document.getElementById('division-scores-wrap');
+    if (!wrap) return;
+    const teams = new Set(getDisplayedTeams());
+    const label = getActiveDivisionLabel();
+    const scores = (await loadLeagueScores())
+        .filter(game => teams.has(game.team1) || teams.has(game.team2))
+        .sort((a,b) => String(b.date || '').localeCompare(String(a.date || '')) || String(b.time || '').localeCompare(String(a.time || '')));
+    if (!scores.length) {
+        wrap.innerHTML = `<section class="division-scores-card"><h3>${label} Scores</h3><p>Regular Season - Teams on Left are Home</p><p>No scored games entered for this division.</p></section>`;
+        return;
+    }
+    wrap.innerHTML = `<section class="division-scores-card"><h3>${label} Scores</h3><p>Regular Season - Teams on Left are Home</p><table class="division-scores-table"><thead><tr><th>Date</th><th>Home</th><th>Score</th><th>Away</th><th>Park</th></tr></thead><tbody>${scores.map(game => {
+        const s1 = Number(game.score1), s2 = Number(game.score2);
+        return `<tr><td>${escapeHtml(game.date || '')}</td><td class="${s1 > s2 ? 'score-winner' : ''}">${escapeHtml(game.team1 || '')}</td><td>${escapeHtml(game.score1)} - ${escapeHtml(game.score2)}</td><td class="${s2 > s1 ? 'score-winner' : ''}">${escapeHtml(game.team2 || '')}</td><td>${escapeHtml(game.park || '')}</td></tr>`;
+    }).join('')}</tbody></table></section>`;
+}
+
+
 function setActiveTab(activeButton) {
     tabButtons.forEach(button => {
         const isActive = button === activeButton;
@@ -384,6 +442,7 @@ async function loadTab(src) {
     if (cache[src]) {
         contentPanel.innerHTML = cache[src].content;
         runEmbeddedScripts(cache[src].scripts);
+        renderActiveDivisionScores();
         return;
     }
     contentPanel.innerHTML = '<div class="tab-loading">Loading&hellip;</div>';
@@ -398,6 +457,7 @@ async function loadTab(src) {
         cache[src] = { content, scripts };
         contentPanel.innerHTML = content;
         runEmbeddedScripts(scripts);
+        renderActiveDivisionScores();
     } catch (e) {
         contentPanel.innerHTML = `<p style="color:#c00;">Could not load content: ${e.message}</p>`;
     }

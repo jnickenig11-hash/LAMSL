@@ -1,53 +1,55 @@
 # LAMSL Email Schedule Notifications - SMTP Setup
 
-The notification feature is wired in the backend. It will save website email subscribers and can send a schedule-update email with a mini schedule snapshot.
+The notification feature is integrated into the backend. Website visitors can subscribe through the homepage email subscription region, and admins can preview or send schedule-update emails from `administrators.html`.
+
+## Gmail sender account
+
+Use this Gmail account as the sender and reply inbox:
+
+```text
+lamslsupport@gmail.com
+```
+
+Create a Google App Password for the account and use that generated password in Render. Do not use the normal Gmail login password.
 
 ## Required Render environment variables
 
-Add these to the **LAMSL backend** Render service, then redeploy:
+Add these to the LAMSL backend Render service, then redeploy:
 
 ```text
 SMTP_HOST=smtp.gmail.com
-SMTP_PORT=465
-SMTP_SECURE=true
-SMTP_USER=your-sending-email@gmail.com
-SMTP_PASS=your-app-password
-MAIL_FROM=LAMSL Schedule Updates <your-sending-email@gmail.com>
+SMTP_PORT=587
+SMTP_USER=lamslsupport@gmail.com
+SMTP_PASS=<Google App Password with spaces removed>
+MAIL_FROM=LAMSL Support <lamslsupport@gmail.com>
 SMTP_EHLO_DOMAIN=lamsl.com
 ```
 
-For Gmail, use an App Password, not your normal Gmail password.
-
-Alternative for SendGrid/Mailgun/etc.:
+`SMTP_SECURE` is optional. Leave it blank for Gmail port `587`. The backend will connect with STARTTLS automatically. If you use Gmail port `465`, set:
 
 ```text
-SMTP_HOST=<provider smtp host>
-SMTP_PORT=465 or 587
-SMTP_SECURE=true for 465, false for 587
-SMTP_USER=<smtp username>
-SMTP_PASS=<smtp password>
-MAIL_FROM=LAMSL Schedule Updates <no-reply@lamsl.com>
-SMTP_EHLO_DOMAIN=lamsl.com
+SMTP_PORT=465
+SMTP_SECURE=true
 ```
 
 ## Storage variables
 
-These should already exist:
+These should already exist on the backend service:
 
 ```text
 ADMIN_API_KEY=<your admin key>
 LAMSL_STORAGE_DIR=/var/data
 ```
 
-## Verify after redeploy
+## Verification endpoint
 
-Open:
+After redeploy, open:
 
 ```text
 https://lamsl-backend.onrender.com/api/notifications/status
 ```
 
-Expected when configured:
+Expected configured response:
 
 ```json
 {
@@ -58,9 +60,22 @@ Expected when configured:
 
 ## Admin testing
 
-In `administrators.html`, use the notification controls:
+In `administrators.html`:
 
-1. Preview Schedule Email
-2. Send Schedule Update Email
+1. Sign in as admin.
+2. Go to Email Schedule Notifications.
+3. Click Preview Email Snapshot.
+4. Confirm the next games mini schedule displays.
+5. Click Send Schedule Update Email.
 
-Automatic emails are queued when `/api/update` receives schedule changes.
+## Automatic notifications
+
+The backend automatically queues subscriber notifications when `/api/update` receives a schedule change. Score-only updates do not trigger schedule-change notifications.
+
+To disable automatic schedule emails temporarily, set this Render variable:
+
+```text
+LAMSL_AUTO_NOTIFY_SCHEDULE_UPDATES=false
+```
+
+Manual admin sends will still work.

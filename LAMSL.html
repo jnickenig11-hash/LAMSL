@@ -643,13 +643,7 @@ header {
         <div id="mini-schedule-content"></div>
         <a class="mini-schedule-link" href="schedule.html">&#8594; Full Schedule</a>
     </section>
-
-    <section class="card home-region region-scores">
-        <h3>Recent Scores</h3>
-        <div id="gameScores"></div>
-    </section>
-    
-    <section class="card home-region region-announcements">
+<section class="card home-region region-announcements">
         <h2>LAMSL Announcements</h2>
         <p>League updates are managed in the Administrators section.</p>
         <p><a href="Images/Non_Approved_Batlist_2024.pdf" target="_blank" rel="noopener noreferrer">Banned Bat List</a></p>
@@ -1334,16 +1328,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
     }
 
-    const gameScores = document.getElementById('gameScores');
-    if (gameScores && Array.isArray(data.gameScores)) {
-      gameScores.innerHTML = data.gameScores.length ? data.gameScores.map(g => `
-        <div class="score-item">
-          <p>${escapeHtml(g.teamA || g.team1 || '')} ${escapeHtml(g.scoreA || g.score1 || '')} - ${escapeHtml(g.scoreB || g.score2 || '')} ${escapeHtml(g.teamB || g.team2 || '')}</p>
-          <small>${escapeHtml(g.date || '')}</small>
-        </div>
-      `).join('') : '';
-    }
-
     if (!renderHomepageSlideshow(data.slideshow)) {
       await loadSlidesFromFolder();
     }
@@ -1423,16 +1407,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  function renderHomeScores(scores) {
-    const el = document.getElementById('gameScores');
-    if (!el) return;
-    if (!Array.isArray(scores) || !scores.length) {
-      el.innerHTML = '<em>No recent scores posted.</em>';
-      return;
-    }
-    el.innerHTML = scores.slice(0, 6).map(g => `<div class="score-item"><p>${htmlEscape(g.teamA || g.team1 || '')} ${htmlEscape(g.scoreA ?? g.score1 ?? '')} - ${htmlEscape(g.scoreB ?? g.score2 ?? '')} ${htmlEscape(g.teamB || g.team2 || '')}</p><small>${htmlEscape(g.date || '')}</small></div>`).join('');
-  }
-
   function renderHomeSlideshow(images) {
     const slides = document.querySelector('.slides');
     const indicators = document.querySelector('.indicators');
@@ -1491,8 +1465,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.lamslData = {
         announcements: activeAnnouncements(data),
         schedules: pickArray(data, ['gameSchedules', 'schedule', 'games', 'scheduledGames']),
-        slideshow: pickArray(data, ['slideshow', 'homepageSlideshow', 'homepageImages']),
-        scores: pickArray(data, ['gameScores', 'scores'])
+        slideshow: pickArray(data, ['slideshow', 'homepageSlideshow', 'homepageImages'])
       };
       if (window.lamslData.schedules.length) cacheJson(SCHEDULE_KEY, window.lamslData.schedules);
       if (window.lamslData.announcements.length) cacheJson(ANN_KEY, window.lamslData.announcements);
@@ -1501,13 +1474,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.lamslData = {
         announcements: activeAnnouncements({ announcements: safeJson(ANN_KEY, []) }),
         schedules: safeJson(SCHEDULE_KEY, []),
-        slideshow: [],
-        scores: []
+        slideshow: []
       };
     }
 
     renderHomeAnnouncements(window.lamslData.announcements);
-    renderHomeScores(window.lamslData.scores);
 
     if (typeof renderMiniSchedule === 'function') {
       renderMiniSchedule(window.lamslData.schedules);

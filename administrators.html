@@ -1365,11 +1365,31 @@ function renderAuthState() {
     renderSeasonPanel();
 }
 
-loginButton.addEventListener('click', () => {
+loginButton.addEventListener('click', async () => {
     const username = loginUsername.value.trim();
     const password = loginPassword.value;
-    const users = readJson(USERS_KEY, []);
-    const user = users.find(entry => entry.username === username && entry.password === password);
+    let user = null;
+    let backendToken = '';
+
+    try {
+        const response = await fetch(apiUrl('/api/login'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (response.ok && result.success && result.username) {
+            user = { username: result.username, role: result.role || 'user' };
+            backendToken = result.token || '';
+        }
+    } catch (error) {
+        console.warn('Backend login unavailable; using local fallback.', error);
+    }
+
+    if (!user) {
+        const users = readJson(USERS_KEY, []);
+        user = users.find(entry => entry.username === username && entry.password === password);
+    }
 
     if (!user) {
         authStatus.textContent = 'Invalid username or password.';
@@ -1381,21 +1401,21 @@ loginButton.addEventListener('click', () => {
         role: user.role,
         loggedInAt: new Date().toISOString()
     });
+    if (backendToken) localStorage.setItem('LAMSL_BACKEND_TOKEN', backendToken);
 
-    // Log admin login action
     if (user.role === 'admin') {
         logAdminAction('admin_login', { username: user.username });
-    }
-
-    // Set admin auth flag for other pages (like meeting notes)
-    if (user.role === 'admin') {
         localStorage.setItem('lamslAdminAuthV1', 'true');
     }
 
     renderAuthState();
-    ensureBackendSessionToken().then(() => {
-        if (authStatus && user.role === 'admin') authStatus.textContent += ' Backend session ready.';
-    });
+    if (!backendToken) {
+        ensureBackendSessionToken().then(() => {
+            if (authStatus && user.role === 'admin') authStatus.textContent += ' Backend session ready.';
+        });
+    } else if (authStatus && user.role === 'admin') {
+        authStatus.textContent += ' Backend session ready.';
+    }
     renderAnnouncements();
 });
 
@@ -1807,37 +1827,46 @@ document.getElementById('save-admin-settings-btn')?.addEventListener('click', ()
 document.getElementById('check-backend-btn')?.addEventListener('click', async () => { const status = document.getElementById('backend-dashboard-status'); try { const res = await fetch(apiUrl('/health')); status.textContent = res.ok ? 'Backend reachable.' : `Backend returned HTTP ${res.status}.`; } catch (err) { status.textContent = 'Backend check failed: ' + err.message; } });
 
 
-createAdminButton.addEventListener('click', () => {
+createAdminButton.addEventListener('click', async () => {
     if (!isAdminLoggedIn()) {
-        authStatus.textContent = 'Sign in as admin to create users.';
+        authStatus.textContent = 'Sign in as admin to manage users.';
         return;
     }
 
     const username = newAdminUsername.value.trim();
     const password = newAdminPassword.value;
     const role = newUserRole.value;
-    if (!username || !password || !role) {
-        authStatus.textContent = 'Enter a username, password, and role for the new user.';
+    if (!username || !role || (!editingUsername && !password)) {
+        authStatus.textContent = editingUsername ? 'Enter a username and role. Add a password only if changing it.' : 'Enter a username, password, and role for the new user.';
         return;
     }
 
     const users = readJson(USERS_KEY, []);
-    if (users.some(user => user.username.toLowerCase() === username.toLowerCase())) {
+    if (!editingUsername && users.some(user => user.username.toLowerCase() === username.toLowerCase())) {
         authStatus.textContent = 'That username already exists.';
         return;
     }
 
-    users.push({ username, password, role });
-    writeJson(USERS_KEY, users);
-    
-    // Log user creation
-    logAdminAction('user_created', { newUsername: username, role });
-    
+    const wasEditingUser = !!editingUsername;
+    let nextUsers;
+    if (editingUsername) {
+        nextUsers = users.map(user => user.username === editingUsername ? { ...user, username, role, password: password || user.password || '' } : user);
+        logAdminAction('user_updated', { originalUsername: editingUsername, username, role });
+    } else {
+        nextUsers = [...users, { username, password, role }];
+        logAdminAction('user_created', { newUsername: username, role });
+    }
+    writeJson(USERS_KEY, nextUsers);
+    await saveUserToBackend({ username, password, role });
+
     newAdminUsername.value = '';
     newAdminPassword.value = '';
+    newAdminPassword.placeholder = 'New user password';
     newUserRole.value = '';
+    createAdminButton.textContent = 'Create User';
     renderUserAccounts();
-    authStatus.textContent = `User ${username} (${role}) created.`;
+    authStatus.textContent = wasEditingUser ? `User ${username} updated.` : `User ${username} (${role}) created.`;
+    editingUsername = '';
 });
 
 if (manageDivisionSelect) {
@@ -3414,13 +3443,11 @@ initializeAdminScheduleDashboard();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { bindAuthoritativeHandlers(); boot(); setTimeout(boot, 1000); setTimeout(boot, 3000); });
   else { bindAuthoritativeHandlers(); boot(); setTimeout(boot, 1000); setTimeout(boot, 3000); }
 })();
-</script>
 
-</html>
-
+let editingUsername = '';
 async function syncUsersFromBackend(){
   try {
-    const response = await fetch(`${window.API_BASE || ''}/api/users`, { headers: window.apiHeaders ? window.apiHeaders() : {} });
+    const response = await fetch(apiUrl('/api/users'), { headers: window.apiHeaders ? window.apiHeaders() : {} });
     const data = await response.json();
     if(data.users){
       writeJson(USERS_KEY, data.users.map(u=>({...u,password:''})));
@@ -3431,13 +3458,64 @@ async function syncUsersFromBackend(){
 
 async function saveUserToBackend(user){
   try {
-    await fetch(`${window.API_BASE || ''}/api/users`, {
-      method:'POST',
+    const method = editingUsername ? 'PUT' : 'POST';
+    const url = editingUsername ? apiUrl('/api/users/' + encodeURIComponent(editingUsername)) : apiUrl('/api/users');
+    const res = await fetch(url, {
+      method,
       headers:{'Content-Type':'application/json', ...(window.apiHeaders ? window.apiHeaders() : {})},
       body: JSON.stringify(user)
     });
+    if(!res.ok) throw new Error(await res.text());
+    editingUsername = '';
     syncUsersFromBackend();
   } catch(e){ console.error(e); }
 }
 
+async function deleteUserFromBackend(username){
+  try {
+    await fetch(apiUrl('/api/users/' + encodeURIComponent(username)), { method:'DELETE', headers: window.apiHeaders ? window.apiHeaders() : {} });
+    syncUsersFromBackend();
+  } catch(e){ console.error(e); }
+}
+
+function renderUserAccounts() {
+  if (!userAccountsList) return;
+  const users = readJson(USERS_KEY, []);
+  userAccountsList.innerHTML = '';
+  if (!users.length) { userAccountsList.innerHTML = '<li>No users found.</li>'; return; }
+  users.forEach(user => {
+    const li = document.createElement('li');
+    li.style.display = 'flex'; li.style.justifyContent = 'space-between'; li.style.alignItems = 'center'; li.style.gap = '12px';
+    li.innerHTML = `<span><strong>${user.username}</strong> • ${user.role || 'user'} • Password: ********</span>`;
+    const actions = document.createElement('span');
+    const editButton = document.createElement('button'); editButton.type='button'; editButton.textContent='Edit';
+    editButton.addEventListener('click', () => {
+      if (!isAdminLoggedIn()) { authStatus.textContent = 'Sign in as admin to edit users.'; return; }
+      editingUsername = user.username;
+      newAdminUsername.value = user.username;
+      newAdminPassword.value = '';
+      newAdminPassword.placeholder = 'Enter new password to change it';
+      newUserRole.value = user.role || 'user';
+      createAdminButton.textContent = 'Save User';
+      authStatus.textContent = `Editing user ${user.username}. Password remains hidden.`;
+    });
+    const removeButton = document.createElement('button'); removeButton.type='button'; removeButton.className='archive-btn'; removeButton.textContent='Remove';
+    removeButton.addEventListener('click', () => {
+      if (!isAdminLoggedIn()) { authStatus.textContent = 'Sign in as admin to remove users.'; return; }
+      if (user.username === 'admin') { authStatus.textContent = 'Cannot remove the default admin user.'; return; }
+      const remaining = readJson(USERS_KEY, []).filter(item => item.username !== user.username);
+      writeJson(USERS_KEY, remaining); deleteUserFromBackend(user.username); logAdminAction('user_deleted', { deletedUsername: user.username });
+      renderUserAccounts(); authStatus.textContent = `User ${user.username} removed.`;
+    });
+    actions.appendChild(editButton); actions.appendChild(removeButton); li.appendChild(actions); userAccountsList.appendChild(li);
+  });
+  populateAssignManagerSelect();
+}
+
 document.addEventListener('DOMContentLoaded', ()=> setTimeout(syncUsersFromBackend,1000));
+
+</script>
+
+
+</body>
+</html>

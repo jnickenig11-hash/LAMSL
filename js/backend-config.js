@@ -16,6 +16,12 @@
   window.apiHeaders = function(additionalHeaders) {
     const headers = Object.assign({}, additionalHeaders || {});
 
+    // Prefer signed backend session token when available.
+    const backendToken = (typeof localStorage !== 'undefined') ? localStorage.getItem('LAMSL_BACKEND_TOKEN') : null;
+    if (backendToken) {
+      headers.Authorization = 'Bearer ' + backendToken;
+    }
+
     // Prefer explicit deployment key when one was configured locally.
     const storedKey = (typeof localStorage !== 'undefined') ? localStorage.getItem('LAMSL_ADMIN_KEY') : null;
     if (storedKey) {

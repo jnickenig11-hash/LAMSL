@@ -2117,6 +2117,94 @@ function applyRosterUploadAccess() {
     cancelPlayerBtn.disabled = !team;
 }
 
+
+function getAllTeamGames() {
+    const contentGames = lamslTeamBackend.content && Array.isArray(lamslTeamBackend.content.gameSchedules) ? lamslTeamBackend.content.gameSchedules : [];
+    const scoreGames = lamslTeamBackend.content && Array.isArray(lamslTeamBackend.content.gameScores) ? lamslTeamBackend.content.gameScores : [];
+    const localGames = readJson('lamslWeeklyScheduleV3', []);
+    const byId = new Map();
+    [...contentGames, ...scoreGames, ...localGames].forEach(game => {
+        if (!game || (!game.team1 && !game.team2)) return;
+        byId.set(getGameId(game), game);
+    });
+    return Array.from(byId.values());
+}
+
+function getTeamGames() {
+    if (!team) return [];
+    return getAllTeamGames()
+        .filter(game => game.team1 === team || game.team2 === team)
+        .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')) || String(a.time || '').localeCompare(String(b.time || '')));
+}
+
+function isScoredGame(game) {
+    return game && game.score1 !== '' && game.score2 !== '' && game.score1 != null && game.score2 != null;
+}
+
+function formatTeamResult(game) {
+    const homeSide = game.team1 === team;
+    const teamScore = homeSide ? game.score1 : game.score2;
+    const opponent = homeSide ? game.team2 : game.team1;
+    const opponentScore = homeSide ? game.score2 : game.score1;
+    const outcome = Number(teamScore) > Number(opponentScore) ? 'W' : Number(teamScore) < Number(opponentScore) ? 'L' : 'T';
+    return `${game.date || ''} — ${outcome} ${team} ${teamScore} - ${opponentScore} ${opponent}`;
+}
+
+function renderLatestResults(games) {
+    if (!latestResults) return;
+    const scored = (games || []).filter(isScoredGame).slice(-10).reverse();
+    latestResults.innerHTML = scored.length
+        ? scored.map(game => `<li>${formatTeamResult(game)}</li>`).join('')
+        : '<li>No recent results.</li>';
+}
+
+function getUpcomingGames() {
+    const today = formatDateKey(new Date());
+    return getTeamGames().filter(game => String(game.date || '') >= today && !isScoredGame(game));
+}
+
+function renderScheduleTable(games) {
+    if (!teamScheduleWrap) return;
+    const rows = (games || []).filter(game => !isScoredGame(game));
+    if (!rows.length) {
+        teamScheduleWrap.innerHTML = '<p class="muted">No scheduled games found for this team.</p>';
+        return;
+    }
+    teamScheduleWrap.innerHTML = `
+        <table class="team-schedule-table">
+            <thead><tr><th>Date</th><th>Time</th><th>Park</th><th>Opponent</th><th>Status</th><th>Check-In</th></tr></thead>
+            <tbody>${rows.map(game => {
+                const opponent = game.team1 === team ? game.team2 : game.team1;
+                return `<tr>
+                    <td>${game.date || ''}</td>
+                    <td>${game.time || ''}</td>
+                    <td>${game.park || ''}</td>
+                    <td>${opponent || ''}</td>
+                    <td>${game.status || 'scheduled'}</td>
+                    <td><button type="button" class="checkin-game-btn" data-game-id="${getGameId(game)}">Check In Players</button></td>
+                </tr>`;
+            }).join('')}</tbody>
+        </table>`;
+}
+
+function applyScheduleFilters(allGames) {
+    let rows = [...(allGames || [])];
+    const period = schedulePeriodFilter ? schedulePeriodFilter.value : '';
+    const season = scheduleSeasonFilter ? scheduleSeasonFilter.value : '';
+    const anchor = scheduleAnchorDate && scheduleAnchorDate.value ? parseDateKey(scheduleAnchorDate.value) : null;
+    if (season) rows = rows.filter(game => getSeasonType(game) === season);
+    if (period === 'upcoming') rows = rows.filter(game => String(game.date || '') >= formatDateKey(new Date()));
+    if (period === 'past') rows = rows.filter(game => String(game.date || '') < formatDateKey(new Date()));
+    if (period === 'week' && anchor) {
+        const range = getWeekRange(anchor);
+        rows = rows.filter(game => {
+            const d = parseDateKey(game.date || '1900-01-01');
+            return d >= range.start && d <= range.end;
+        });
+    }
+    renderScheduleTable(rows);
+}
+
 function setupEventListeners() {
     uploadRosterBtn.addEventListener('click', async () => {
     if (!canManageTeamContent()) {
@@ -2263,6 +2351,12 @@ playerList.addEventListener('click', event => {
 });
 
 teamScheduleWrap.addEventListener('click', event => {
+    const checkinButton = event.target.closest('.checkin-game-btn');
+    if (checkinButton) {
+        const selected = getTeamGames().find(game => getGameId(game) === checkinButton.dataset.gameId);
+        if (selected) showCheckinPanel(selected);
+        return;
+    }
     const row = event.target.closest('tr[data-game-id]');
     if (!row || !canCheckInPlayers()) {
         return;
@@ -2289,6 +2383,12 @@ upcomingGameSelect.addEventListener('change', event => {
 });
 
 teamScheduleWrap.addEventListener('click', event => {
+    const checkinButton = event.target.closest('.checkin-game-btn');
+    if (checkinButton) {
+        const selected = getTeamGames().find(game => getGameId(game) === checkinButton.dataset.gameId);
+        if (selected) showCheckinPanel(selected);
+        return;
+    }
     const btn = event.target.closest('.check-in-game-btn');
     if (!btn || btn.disabled) return;
     
@@ -2454,11 +2554,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <p class="muted" id="form-instruction">Fill in player details below.</p>
                 <div class="player-form-grid">
                     <input id="player-id" type="hidden">
-                    <label for="player-name">Player Name</label>
-                    <input id="player-name" type="text" placeholder="Full name">
+                    <label for="player-name">First and Last Name</label>
+                    <input id="player-name" type="text" placeholder="First Last" required>
 
-                    <label for="player-position">Position(s)</label>
-                    <input id="player-position" type="text" placeholder="Primary positions">
+                    <label for="player-position">Position Played</label>
+                    <select id="player-position" required>
+                        <option value="">Select position</option>
+                        <option value="OF">OF (Outfield)</option>
+                        <option value="IF">IF (Infield)</option>
+                        <option value="P">P (Pitcher)</option>
+                        <option value="C">C (Catcher)</option>
+                    </select>
 
                     <label for="player-phone">Phone Number</label>
                     <input id="player-phone" type="tel" placeholder="(555) 123-4567">
@@ -2485,23 +2591,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 </body>
 </html>
 
-function renderLatestResultsEnhanced(schedule, selectedTeam){
-  const target=document.getElementById('latest-results');
-  if(!target) return;
-  const games=(schedule||[]).filter(g=> (g.team1===selectedTeam || g.team2===selectedTeam) && g.score1!==undefined && g.score1!=='' && g.score2!==undefined && g.score2!=='').slice(-10).reverse();
-  if(!games.length){ target.innerHTML='<li>No recent results.</li>'; return; }
-  target.innerHTML=games.map(g=>{
-    const isHome=g.team1===selectedTeam;
-    const teamScore=isHome?g.score1:g.score2;
-    const opp=isHome?g.team2:g.team1;
-    const oppScore=isHome?g.score2:g.score1;
-    return `<li>${selectedTeam} ${teamScore} - ${oppScore} ${opp}</li>`;
-  }).join('');
-}
-
-function renderDivisionScores(schedule, division){
-  const wrap=document.getElementById('division-scores-wrap');
-  if(!wrap) return;
-  const games=(schedule||[]).filter(g=> String(g.division||'').includes(division) && g.score1!=='' && g.score2!=='');
-  wrap.innerHTML=games.map(g=>`<div class="score-row">${g.team1} ${g.score1} - ${g.score2} ${g.team2}</div>`).join('');
-}

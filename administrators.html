@@ -700,7 +700,10 @@ button:hover,
                         <option value="">Select role</option>
                         <option value="admin">Admin</option>
                         <option value="umpire">Umpire</option>
+                        <option value="team-manager">Team Manager</option>
                     </select>
+                    <select id="manager-division-select" aria-label="Manager division assignment" style="display:none;"><option value="">Select division</option></select>
+                    <select id="manager-team-select" aria-label="Manager team assignment" style="display:none;"><option value="">Assign manager to team</option></select>
                     <button id="create-admin-btn" type="button">Create User</button>
                 </div>
 
@@ -1262,7 +1265,7 @@ function renderUserAccounts() {
         li.style.justifyContent = 'space-between';
         li.style.alignItems = 'center';
         li.style.gap = '12px';
-        li.innerHTML = `<span>${user.username} • <strong>${user.role}</strong> • Password: ********</span>`;
+        li.innerHTML = `<span>${user.username} • <strong>${user.role}</strong>${user.role === 'team-manager' && user.assignedTeam ? ` • Team: ${user.assignedTeam}${user.assignedDivision ? ' (Division ' + user.assignedDivision + ')' : ''}` : ''} • Password: ********</span>`;
 
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
@@ -1379,7 +1382,7 @@ loginButton.addEventListener('click', async () => {
         });
         const result = await response.json().catch(() => ({}));
         if (response.ok && result.success && result.username) {
-            user = { username: result.username, role: result.role || 'user' };
+            user = { username: result.username, role: result.role || 'user', assignedTeam: result.assignedTeam || '', assignedDivision: result.assignedDivision || '' };
             backendToken = result.token || '';
         }
     } catch (error) {
@@ -1399,6 +1402,8 @@ loginButton.addEventListener('click', async () => {
     writeJson(SESSION_KEY, {
         username: user.username,
         role: user.role,
+        assignedTeam: user.assignedTeam || user.team || '',
+        assignedDivision: user.assignedDivision || user.division || '',
         loggedInAt: new Date().toISOString()
     });
     if (backendToken) localStorage.setItem('LAMSL_BACKEND_TOKEN', backendToken);
@@ -1850,14 +1855,14 @@ createAdminButton.addEventListener('click', async () => {
     const wasEditingUser = !!editingUsername;
     let nextUsers;
     if (editingUsername) {
-        nextUsers = users.map(user => user.username === editingUsername ? { ...user, username, role, password: password || user.password || '' } : user);
+        nextUsers = users.map(user => user.username === editingUsername ? { ...user, username, role, password: password || user.password || '', assignedTeam: (role === 'team-manager' ? (document.getElementById('manager-team-select')?.value || '') : ''), assignedDivision: (role === 'team-manager' ? (document.getElementById('manager-division-select')?.value || '') : '') } : user);
         logAdminAction('user_updated', { originalUsername: editingUsername, username, role });
     } else {
-        nextUsers = [...users, { username, password, role }];
+        nextUsers = [...users, { username, password, role, assignedTeam: (role === 'team-manager' ? (document.getElementById('manager-team-select')?.value || '') : ''), assignedDivision: (role === 'team-manager' ? (document.getElementById('manager-division-select')?.value || '') : '') }];
         logAdminAction('user_created', { newUsername: username, role });
     }
     writeJson(USERS_KEY, nextUsers);
-    await saveUserToBackend({ username, password, role });
+    await saveUserToBackend({ username, password, role, assignedTeam: (role === 'team-manager' ? (document.getElementById('manager-team-select')?.value || '') : ''), assignedDivision: (role === 'team-manager' ? (document.getElementById('manager-division-select')?.value || '') : '') });
 
     newAdminUsername.value = '';
     newAdminPassword.value = '';
@@ -3486,7 +3491,7 @@ function renderUserAccounts() {
   users.forEach(user => {
     const li = document.createElement('li');
     li.style.display = 'flex'; li.style.justifyContent = 'space-between'; li.style.alignItems = 'center'; li.style.gap = '12px';
-    li.innerHTML = `<span><strong>${user.username}</strong> • ${user.role || 'user'} • Password: ********</span>`;
+    li.innerHTML = `<span><strong>${user.username}</strong> • ${user.role || 'user'}${user.role === 'team-manager' && user.assignedTeam ? ` • Team: ${user.assignedTeam}${user.assignedDivision ? ' (Division ' + user.assignedDivision + ')' : ''}` : ''} • Password: ********</span>`;
     const actions = document.createElement('span');
     const editButton = document.createElement('button'); editButton.type='button'; editButton.textContent='Edit';
     editButton.addEventListener('click', () => {
@@ -3496,6 +3501,15 @@ function renderUserAccounts() {
       newAdminPassword.value = '';
       newAdminPassword.placeholder = 'Enter new password to change it';
       newUserRole.value = user.role || 'user';
+      const divSel = document.getElementById('manager-division-select');
+      const teamSel = document.getElementById('manager-team-select');
+      if (divSel && teamSel) {
+        divSel.style.display = user.role === 'team-manager' ? '' : 'none';
+        teamSel.style.display = user.role === 'team-manager' ? '' : 'none';
+        divSel.value = user.assignedDivision || '';
+        divSel.dispatchEvent(new Event('change'));
+        setTimeout(() => { teamSel.value = user.assignedTeam || ''; }, 0);
+      }
       createAdminButton.textContent = 'Save User';
       authStatus.textContent = `Editing user ${user.username}. Password remains hidden.`;
     });
@@ -3570,5 +3584,71 @@ document.addEventListener('DOMContentLoaded', ()=> setTimeout(syncUsersFromBacke
 })();
 </script>
 
+
+<script>
+// ===== TEAM MANAGER ROLE USER ADMIN PATCH =====
+(function(){
+  const USERS_KEY = 'lamslUsersV1';
+  const DIVISIONS_KEY = 'lamslDivisionsV1';
+  function readJson(key, fallback){ try { const raw=localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch(e){ return fallback; } }
+  function writeJson(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+  function teamsByDivision(){
+    const fallback = {A:['Titans','La Tribu','Nasty Boyz','Toxic','White Sox','Legends'],B:['Cubs','Primos','Dodgers','Diablos','Charros','Doom Squad'],C:['Demons','Naranjeros','Caballeros','Salvajes','Coyotes','Bandits','Orioles','Goodfellas'],D:['Strokes','Dirt Bags','Camaradas','Wild Hogz','Los Pericos','Xolos','Desvelados'],E:[]};
+    const saved = readJson(DIVISIONS_KEY, null);
+    return saved && typeof saved === 'object' ? {...fallback, ...saved} : fallback;
+  }
+  function initManagerAssignmentFields(){
+    const role = document.getElementById('new-user-role');
+    const div = document.getElementById('manager-division-select');
+    const team = document.getElementById('manager-team-select');
+    if (!role || !div || !team) return;
+    function fillDivisions(){
+      const data = teamsByDivision();
+      div.innerHTML = '<option value="">Select division</option>' + Object.keys(data).map(k=>`<option value="${k}">Division ${k}</option>`).join('');
+    }
+    function fillTeams(){
+      const data = teamsByDivision();
+      const teams = data[div.value] || [];
+      team.innerHTML = '<option value="">Assign manager to team</option>' + teams.map(t=>`<option value="${String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}">${String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</option>`).join('');
+    }
+    function toggle(){
+      const show = role.value === 'team-manager';
+      div.style.display = show ? '' : 'none';
+      team.style.display = show ? '' : 'none';
+      if (show && div.options.length <= 1) fillDivisions();
+      if (show) fillTeams();
+    }
+    role.addEventListener('change', toggle);
+    div.addEventListener('change', fillTeams);
+    fillDivisions(); toggle();
+  }
+  document.addEventListener('DOMContentLoaded', initManagerAssignmentFields);
+
+  const priorSave = window.saveUserToBackend;
+  window.saveUserToBackend = async function(user){
+    const role = document.getElementById('new-user-role')?.value || user.role;
+    if (role === 'team-manager') {
+      user.assignedDivision = document.getElementById('manager-division-select')?.value || user.assignedDivision || '';
+      user.assignedTeam = document.getElementById('manager-team-select')?.value || user.assignedTeam || '';
+    }
+    if (typeof priorSave === 'function') return priorSave(user);
+  };
+
+  document.addEventListener('click', function(event){
+    const btn = event.target.closest('#create-admin-btn');
+    if (!btn) return;
+    const role = document.getElementById('new-user-role')?.value;
+    if (role !== 'team-manager') return;
+    const assignedTeam = document.getElementById('manager-team-select')?.value || '';
+    const assignedDivision = document.getElementById('manager-division-select')?.value || '';
+    if (!assignedTeam || !assignedDivision) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const auth = document.getElementById('auth-status');
+      if (auth) auth.textContent = 'Select the division and team assignment for the Team Manager user.';
+    }
+  }, true);
+})();
+</script>
 </body>
 </html>

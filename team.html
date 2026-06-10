@@ -1043,6 +1043,7 @@ footer {
     padding: 40px;
 }
 
+.manager-only{display:none;}
 </style>
 <script src="js/backend-config.js"></script>
 </head>
@@ -1087,7 +1088,7 @@ footer {
                             <div class="team-photo-placeholder" id="team-photo-placeholder">No Team Photo</div>
                             <img id="team-photo" alt="Team profile photo" style="display:none;">
                         </div>
-                        <div class="team-photo-controls">
+                        <div class="team-photo-controls manager-only">
                             <p id="team-photo-status" class="muted">Team profile media is visible to all users. Admin sign-in required to upload.</p>
                             <input id="team-photo-file" type="file" accept="image/*">
                             <button id="upload-team-photo-btn" type="button">Upload Team Photo</button>
@@ -1105,7 +1106,7 @@ footer {
             </div>
         </section>
 
-        <div class="small-manager-panel">
+        <div class="small-manager-panel manager-only">
             <div class="content-panel">
                 <h3>Team Manager Panel</h3>
                 <div class="manager-toolbar">
@@ -1162,7 +1163,7 @@ footer {
 
             <div class="content-panel">
                 <h3>Team Roster</h3>
-                <div class="roster-controls">
+                <div class="roster-controls manager-only">
                     <p id="roster-admin-status" class="muted">Admin sign-in required to upload roster spreadsheets.</p>
                     <input id="roster-file" type="file" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
                     <button id="upload-roster-btn" type="button">Upload Roster Spreadsheet</button>
@@ -2711,6 +2712,158 @@ document.addEventListener('DOMContentLoaded', async () => {
     </div>
 </div>
 
+
+<script>
+// ===== TEAM MANAGER ROLE, ROSTER SAVE, AND CHECK-IN PATCH =====
+(function(){
+  const SESSION_KEY='lamslSessionV1';
+  const TEAM_PLAYERS_KEY='lamslTeamPlayersV1';
+  const ROSTER_KEY='lamslTeamRostersV1';
+  const CHECKINS_KEY='lamslGameCheckinsV1';
+  function readJson(k,f){try{const raw=localStorage.getItem(k);return raw?JSON.parse(raw):f;}catch(e){return f;}}
+  function writeJson(k,v){localStorage.setItem(k,JSON.stringify(v));}
+  function norm(v){return String(v||'').trim().toLowerCase();}
+  function session(){return readJson(SESSION_KEY,null)||{};}
+  function role(){return norm(session().role).replace('_','-');}
+  function currentTeam(){return new URLSearchParams(location.search).get('team') || (typeof team !== 'undefined' ? team : '');}
+  function currentDivision(){return (new URLSearchParams(location.search).get('division') || (typeof division !== 'undefined' ? division : '') || '').toUpperCase();}
+  function assignedTeam(){const s=session(); return s.assignedTeam || s.team || s.teamName || '';}
+  function assignedDivision(){const s=session(); return (s.assignedDivision || s.division || '').toUpperCase();}
+  function managerOwnsPage(){
+    if (role()==='admin') return true;
+    if (role()!=='team-manager' && role()!=='manager') return false;
+    return norm(assignedTeam()) === norm(currentTeam()) && (!assignedDivision() || assignedDivision() === currentDivision());
+  }
+  window.canManageTeamContent = managerOwnsPage;
+  window.canCheckInPlayers = managerOwnsPage;
+  window.hasRole = function(){ const roles=[...arguments].map(r=>norm(r).replace('_','-')); return roles.includes(role()); };
+  function applyVisibility(){
+    const allowed = managerOwnsPage();
+    document.querySelectorAll('.manager-only').forEach(el=>{el.style.display = allowed ? '' : 'none';});
+    document.querySelectorAll('.checkin-game-btn,.check-in-game-btn').forEach(btn=>{btn.style.display = allowed ? '' : 'none'; btn.disabled = !allowed;});
+    const status=document.getElementById('roster-admin-status');
+    if(status && allowed) status.textContent = role()==='admin' ? 'Admin access confirmed. Manage this roster.' : 'Team Manager access confirmed. Manage your assigned team roster.';
+    if(status && !allowed) status.textContent = 'Sign in as this team manager or admin to manage this roster.';
+  }
+  function teamKey(){return `${currentDivision() || 'NA'}|${currentTeam()}`;}
+  function getStore(){return readJson(TEAM_PLAYERS_KEY,{});}
+  function getPlayers(){const store=getStore(); const entry=store[teamKey()]||store[currentTeam()]||{}; return Array.isArray(entry.players)?entry.players:[];}
+  function setPlayers(players){
+    const store=getStore();
+    store[teamKey()]={players,updatedAt:new Date().toISOString()};
+    store[currentTeam()]={players,updatedAt:new Date().toISOString()};
+    writeJson(TEAM_PLAYERS_KEY, store);
+    return store;
+  }
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+  async function backendSavePlayers(){
+    const teamPlayers=getStore();
+    const rosters=readJson(ROSTER_KEY,{});
+    const res=await fetch(apiUrl('/api/rosters'),{method:'POST',headers:window.apiHeaders({'Content-Type':'application/json'}),body:JSON.stringify({rosters,teamPlayers})});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok || data.success===false) throw new Error(data.error || `HTTP ${res.status}`);
+    if(data.teamPlayers) writeJson(TEAM_PLAYERS_KEY,data.teamPlayers);
+    return data;
+  }
+  function renderRosterPatch(){
+    const wrap=document.getElementById('roster-grid-wrap'); if(!wrap) return;
+    const players=getPlayers();
+    if(!players.length){wrap.innerHTML='<p class="muted">No players added to this roster yet.</p>'; populateCheckinSelectPatch(); return;}
+    const can=managerOwnsPage();
+    wrap.innerHTML=players.map(p=>`<div class="roster-card" data-player-id="${esc(p.id)}"><h4>${esc(p.name)}</h4><p><strong>Position:</strong> ${esc(p.position||'N/A')}</p><p><strong>Phone:</strong> ${esc(p.phone||'N/A')}</p><p><strong>Email:</strong> ${esc(p.email||'N/A')}</p><p class="checkin-count"><strong>Games Played:</strong> ${Number(p.gamesPlayed||0)}</p>${can?`<button type="button" class="danger roster-remove-btn" data-player-id="${esc(p.id)}">Remove</button>`:''}</div>`).join('');
+    populateCheckinSelectPatch();
+  }
+  function populateCheckinSelectPatch(){
+    const sel=document.getElementById('checkin-player-select'); if(!sel) return;
+    const current=sel.value;
+    sel.innerHTML='<option value="">Choose a player</option>'+getPlayers().map(p=>`<option value="${esc(p.id)}">${esc(p.name)}${p.position?' - '+esc(p.position):''}</option>`).join('');
+    if([...sel.options].some(o=>o.value===current)) sel.value=current;
+  }
+  window.renderRoster = renderRosterPatch;
+  function openAddModal(){
+    if(!managerOwnsPage()) return alert('Sign in as this team manager or admin to add players.');
+    const modal=document.getElementById('player-modal'); if(!modal) return;
+    document.getElementById('modal-title').textContent='Add Player';
+    document.getElementById('player-id').value='';
+    document.getElementById('player-name').value='';
+    document.getElementById('player-position').value='';
+    document.getElementById('player-phone').value='';
+    document.getElementById('player-email').value='';
+    const photo=document.getElementById('player-photo'); if(photo) photo.value='';
+    document.getElementById('save-player-btn').textContent='Save Player';
+    modal.style.display='flex';
+  }
+  async function savePlayerPatch(event){
+    event.preventDefault(); event.stopImmediatePropagation();
+    const status=document.getElementById('roster-admin-status');
+    if(!managerOwnsPage()){ if(status) status.textContent='Sign in as this team manager or admin to save players.'; return; }
+    const name=document.getElementById('player-name')?.value.trim() || '';
+    const position=document.getElementById('player-position')?.value.trim() || '';
+    if(!name){ if(status) status.textContent='Enter the player first and last name before saving.'; return; }
+    if(!position){ if(status) status.textContent='Select the player position before saving.'; return; }
+    const id=document.getElementById('player-id')?.value || `${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+    const players=[...getPlayers()];
+    const ix=players.findIndex(p=>p.id===id);
+    const rec={id,name,position,phone:document.getElementById('player-phone')?.value.trim()||'',email:document.getElementById('player-email')?.value.trim()||'',gamesPlayed:ix>=0?Number(players[ix].gamesPlayed||0):0,photo:ix>=0?(players[ix].photo||''):''};
+    if(ix>=0) players[ix]=rec; else players.push(rec);
+    setPlayers(players); renderRosterPatch();
+    try{await backendSavePlayers(); if(status) status.textContent=`${name} saved to roster and backend.`;}catch(e){if(status) status.textContent=`${name} saved locally, but backend save failed: ${e.message}`;}
+    const modal=document.getElementById('player-modal'); if(modal) modal.style.display='none';
+  }
+  async function removePlayerPatch(id){
+    if(!managerOwnsPage()) return alert('Sign in as this team manager or admin to remove players.');
+    const players=getPlayers(); const target=players.find(p=>p.id===id); if(!target) return;
+    if(!confirm(`Remove ${target.name} from this roster?`)) return;
+    setPlayers(players.filter(p=>p.id!==id)); renderRosterPatch();
+    const status=document.getElementById('roster-admin-status');
+    try{await backendSavePlayers(); if(status) status.textContent=`${target.name} removed from roster and backend.`;}catch(e){if(status) status.textContent=`${target.name} removed locally, but backend save failed: ${e.message}`;}
+  }
+  window.removePlayer = removePlayerPatch;
+  function getVisibleGames(){ return (typeof getTeamGames==='function' ? getTeamGames() : []); }
+  function gameId(g){ return typeof getGameId==='function' ? getGameId(g) : String(g.id || [g.date,g.time,g.team1,g.team2].join('|')); }
+  function showCheckinPatch(game){
+    if(!managerOwnsPage()) return;
+    const panel=document.getElementById('player-checkin-panel'); if(panel) panel.style.display='block';
+    window.selectedGame = game;
+    const label=document.getElementById('checkin-game-label'); if(label) label.textContent=`Check in players for: ${game.date||''} ${game.time||''} — ${(game.team1||'')} vs ${(game.team2||'')}`;
+    populateCheckinSelectPatch();
+    const list=document.getElementById('checkin-selected-players'); if(list) list.innerHTML='';
+  }
+  window.showCheckinPanel = showCheckinPatch;
+  function selectedGameId(){
+    const select=document.getElementById('upcoming-game-select');
+    return (select && select.value) || (window.selectedGame ? gameId(window.selectedGame) : '');
+  }
+  function addCheckinPlayer(){
+    const sel=document.getElementById('checkin-player-select'); const list=document.getElementById('checkin-selected-players'); if(!sel||!list||!sel.value) return;
+    const p=getPlayers().find(x=>x.id===sel.value); if(!p) return;
+    if(list.querySelector(`[data-player-id="${CSS.escape(p.id)}"]`)) return;
+    const row=document.createElement('div'); row.dataset.playerId=p.id; row.textContent=`${p.name}${p.position?' - '+p.position:''}`; list.appendChild(row);
+  }
+  async function saveCheckins(){
+    if(!managerOwnsPage()) return;
+    const status=document.getElementById('checkin-status'); const gid=selectedGameId();
+    if(!gid){ if(status) status.textContent='Select a game first.'; return; }
+    const ids=[...document.querySelectorAll('#checkin-selected-players [data-player-id]')].map(x=>x.dataset.playerId);
+    if(!ids.length){ if(status) status.textContent='Select at least one player.'; return; }
+    const players=getPlayers(); const selected=ids.map(id=>players.find(p=>p.id===id)).filter(Boolean);
+    const checkins=readJson(CHECKINS_KEY,{}); checkins[gid]={team:currentTeam(),division:currentDivision(),players:selected.map(p=>({id:p.id,name:p.name,position:p.position})),updatedAt:new Date().toISOString()}; writeJson(CHECKINS_KEY,checkins);
+    const updated=players.map(p=>ids.includes(p.id)?{...p,gamesPlayed:Number(p.gamesPlayed||0)+1}:p); setPlayers(updated); renderRosterPatch();
+    try{await backendSavePlayers(); if(status) status.textContent='Player check-in saved.';}catch(e){if(status) status.textContent=`Check-in saved locally, but backend save failed: ${e.message}`;}
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    applyVisibility(); setTimeout(applyVisibility,500); setTimeout(renderRosterPatch,700);
+    document.getElementById('add-player-btn')?.addEventListener('click', function(e){e.preventDefault();e.stopImmediatePropagation();openAddModal();}, true);
+    document.getElementById('save-player-btn')?.addEventListener('click', savePlayerPatch, true);
+    document.getElementById('roster-grid-wrap')?.addEventListener('click', function(e){const b=e.target.closest('.roster-remove-btn'); if(b){e.preventDefault();e.stopImmediatePropagation();removePlayerPatch(b.dataset.playerId);}}, true);
+    document.getElementById('team-schedule-wrap')?.addEventListener('click', function(e){const b=e.target.closest('.checkin-game-btn,.check-in-game-btn'); if(b){e.preventDefault();e.stopImmediatePropagation();const g=getVisibleGames().find(x=>gameId(x)===(b.dataset.gameId||'')); if(g) showCheckinPatch(g);}}, true);
+    document.getElementById('upcoming-game-select')?.addEventListener('change', function(e){const g=getVisibleGames().find(x=>gameId(x)===e.target.value); if(g) showCheckinPatch(g);}, true);
+    document.getElementById('add-player-checkin-btn')?.addEventListener('click', function(e){e.preventDefault();e.stopImmediatePropagation();addCheckinPlayer();}, true);
+    document.getElementById('save-checkin-btn')?.addEventListener('click', function(e){e.preventDefault();e.stopImmediatePropagation();saveCheckins();}, true);
+    document.getElementById('clear-checkin-btn')?.addEventListener('click', function(e){e.preventDefault(); const list=document.getElementById('checkin-selected-players'); if(list) list.innerHTML='';}, true);
+  });
+})();
+</script>
 </body>
 </html>
 

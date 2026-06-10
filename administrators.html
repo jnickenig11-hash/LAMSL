@@ -1962,7 +1962,7 @@ createAdminButton.addEventListener('click', async () => {
         logAdminAction('user_created', { newUsername: username, role });
     }
     writeJson(USERS_KEY, nextUsers);
-    await saveUserToBackend({ username, password, role, assignedTeam: (role === 'team-manager' ? (document.getElementById('manager-team-select')?.value || '') : ''), assignedDivision: (role === 'team-manager' ? (document.getElementById('manager-division-select')?.value || '') : '') });
+    const backendSaveResult = await saveUserToBackend({ username, password, role, assignedTeam: (role === 'team-manager' ? (document.getElementById('manager-team-select')?.value || '') : ''), assignedDivision: (role === 'team-manager' ? (document.getElementById('manager-division-select')?.value || '') : '') });
 
     newAdminUsername.value = '';
     newAdminPassword.value = '';
@@ -1970,7 +1970,9 @@ createAdminButton.addEventListener('click', async () => {
     newUserRole.value = '';
     createAdminButton.textContent = 'Create User';
     renderUserAccounts();
-    authStatus.textContent = wasEditingUser ? `User ${username} updated.` : `User ${username} (${role}) created.`;
+    authStatus.textContent = backendSaveResult?.success === false
+        ? `${wasEditingUser ? 'User updated' : 'User created'} locally as backup, but Render backend save failed: ${backendSaveResult.error}`
+        : (wasEditingUser ? `User ${username} updated and saved to Render backend/local backup.` : `User ${username} (${role}) created and saved to Render backend/local backup.`);
     editingUsername = '';
 });
 
@@ -3550,37 +3552,81 @@ initializeAdminScheduleDashboard();
 })();
 
 let editingUsername = '';
+function mergeBackendUsersWithLocalPasswords(backendUsers){
+  const localUsers = readJson(USERS_KEY, []);
+  return (backendUsers || []).map(remoteUser => {
+    const localMatch = localUsers.find(localUser => String(localUser.username || '').toLowerCase() === String(remoteUser.username || '').toLowerCase());
+    const remotePassword = remoteUser.password;
+    const passwordIsMasked = !remotePassword || remotePassword === '********' || remotePassword === '****' || String(remotePassword).includes('*');
+    return {
+      ...remoteUser,
+      password: passwordIsMasked ? (localMatch?.password || '') : remotePassword
+    };
+  });
+}
+
 async function syncUsersFromBackend(){
   try {
     const response = await fetch(apiUrl('/api/users'), { headers: window.apiHeaders ? window.apiHeaders() : {} });
-    const data = await response.json();
+    const data = await response.json().catch(() => ({}));
     if(data.users){
-      writeJson(USERS_KEY, data.users.map(u=>({...u,password:''})));
+      writeJson(USERS_KEY, mergeBackendUsersWithLocalPasswords(data.users));
       renderUserAccounts();
     }
-  } catch(e){}
+  } catch(e){
+    console.warn('User backend sync failed; keeping local user backup.', e);
+  }
 }
 
 async function saveUserToBackend(user){
+  const originalUsername = editingUsername || user.username;
+  const localUsers = readJson(USERS_KEY, []);
+  const normalizedUser = {
+    username: user.username,
+    password: user.password || (localUsers.find(localUser => localUser.username === originalUsername || localUser.username === user.username)?.password || ''),
+    role: user.role || 'user',
+    assignedTeam: user.assignedTeam || '',
+    assignedDivision: user.assignedDivision || ''
+  };
+
+  const localIndex = localUsers.findIndex(localUser => localUser.username === originalUsername || localUser.username === normalizedUser.username);
+  const localBackup = localIndex >= 0 ? localUsers.map((localUser, index) => index === localIndex ? { ...localUser, ...normalizedUser } : localUser) : [...localUsers, normalizedUser];
+  writeJson(USERS_KEY, localBackup);
+
   try {
     const method = editingUsername ? 'PUT' : 'POST';
     const url = editingUsername ? apiUrl('/api/users/' + encodeURIComponent(editingUsername)) : apiUrl('/api/users');
     const res = await fetch(url, {
       method,
       headers:{'Content-Type':'application/json', ...(window.apiHeaders ? window.apiHeaders() : {})},
-      body: JSON.stringify(user)
+      body: JSON.stringify(normalizedUser)
     });
-    if(!res.ok) throw new Error(await res.text());
+    const data = await res.json().catch(async () => ({ error: await res.text().catch(() => '') }));
+    if(!res.ok || data.success === false) throw new Error(data.error || `HTTP ${res.status}`);
+    if (data.users) writeJson(USERS_KEY, mergeBackendUsersWithLocalPasswords(data.users));
     editingUsername = '';
-    syncUsersFromBackend();
-  } catch(e){ console.error(e); }
+    renderUserAccounts();
+    return { success: true };
+  } catch(e){
+    console.error(e);
+    const status = document.getElementById('auth-status');
+    if (status) status.textContent = `User saved locally as backup, but Render backend save failed: ${e.message}`;
+    renderUserAccounts();
+    return { success: false, error: e.message };
+  }
 }
 
 async function deleteUserFromBackend(username){
+  const users = readJson(USERS_KEY, []).filter(user => user.username !== username || user.username === 'admin');
+  writeJson(USERS_KEY, users);
   try {
     await fetch(apiUrl('/api/users/' + encodeURIComponent(username)), { method:'DELETE', headers: window.apiHeaders ? window.apiHeaders() : {} });
     syncUsersFromBackend();
-  } catch(e){ console.error(e); }
+  } catch(e){
+    console.error(e);
+    const status = document.getElementById('auth-status');
+    if (status) status.textContent = `User removed locally, but Render backend delete failed: ${e.message}`;
+  }
 }
 
 function renderUserAccounts() {

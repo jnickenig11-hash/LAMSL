@@ -701,11 +701,18 @@ input[type="submit"]:disabled{
 .roster-card{
     border-color:var(--lamsl-border) !important;
 }
+
+.mobile-site-launch{position:sticky;top:0;z-index:1000;background:#12324A;color:#fff;text-align:center;padding:10px 12px;font-family:'Barlow Condensed','Trebuchet MS',sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.22)}
+.mobile-site-launch a{display:inline-block;background:#C86A2F;color:#12324A;text-decoration:none;font-weight:900;border-radius:999px;padding:8px 16px;text-transform:uppercase;letter-spacing:.4px}
+@media (min-width:800px){.mobile-site-launch{display:none}}
+
 </style>
 
 </head>
 
 <body>
+
+<div class="mobile-site-launch"><a href="mobile.html">Open Mobile Version</a></div>
 
 <!-- BANNER -->
 <div class="banner">

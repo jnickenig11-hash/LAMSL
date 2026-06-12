@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12324A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LAMSL Mobile">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="Images/LAMSLLogo.jpg">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<title>LAMSL Mobile</title>
+<link rel="stylesheet" href="css/mobile.css">
+<script src="js/backend-config.js"></script>
+</head>
+<body>
+<header class="mobile-topbar">
+  <a class="full-site-link" href="LAMSL.html">Full Site</a>
+  <div class="brand">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL logo">
+    <div>
+      <strong>LAMSL Mobile</strong>
+      <span>Schedules • Scores • Standings</span>
+    </div>
+  </div>
+  <button id="installBtn" class="install-btn" type="button" hidden>Install</button>
+</header>
+
+<nav class="quick-tabs" aria-label="Mobile sections">
+  <button class="tab-btn active" data-target="schedulePanel" type="button">Schedule</button>
+  <button class="tab-btn" data-target="scoresPanel" type="button">Scores</button>
+  <button class="tab-btn" data-target="standingsPanel" type="button">Standings</button>
+  <button class="tab-btn" data-target="announcementsPanel" type="button">News</button>
+  <button class="tab-btn" data-target="adminPanel" type="button">Admin</button>
+</nav>
+
+<main class="mobile-shell">
+  <section class="hero-card">
+    <p class="eyebrow">Latino & American Men's Softball League</p>
+    <h1>Park-day mobile dashboard</h1>
+    <p id="lastUpdated">Loading latest league content...</p>
+    <button id="refreshBtn" type="button" class="primary-btn">Refresh</button>
+  </section>
+
+  <section id="schedulePanel" class="panel active-panel">
+    <div class="section-heading">
+      <h2>Game Schedule</h2>
+      <select id="scheduleDivisionFilter" aria-label="Filter schedule by division"></select>
+    </div>
+    <div id="scheduleList" class="card-list"></div>
+  </section>
+
+  <section id="scoresPanel" class="panel">
+    <div class="section-heading">
+      <h2>Team Scores</h2>
+      <span id="scoreCount" class="pill">0 final</span>
+    </div>
+    <div id="scoresList" class="card-list"></div>
+  </section>
+
+  <section id="standingsPanel" class="panel">
+    <div class="section-heading">
+      <h2>Standings</h2>
+      <select id="standingsDivisionFilter" aria-label="Filter standings by division"></select>
+    </div>
+    <div id="standingsList" class="standings-wrap"></div>
+  </section>
+
+  <section id="announcementsPanel" class="panel">
+    <div class="section-heading">
+      <h2>Announcements</h2>
+    </div>
+    <div id="announcementsList" class="card-list"></div>
+  </section>
+
+  <section id="adminPanel" class="panel">
+    <div class="section-heading">
+      <h2>Admin Updates</h2>
+      <span id="adminStatus" class="pill">Signed out</span>
+    </div>
+
+    <form id="loginForm" class="admin-card">
+      <label>Username<input id="adminUsername" autocomplete="username" required></label>
+      <label>Password<input id="adminPassword" type="password" autocomplete="current-password" required></label>
+      <button class="primary-btn" type="submit">Sign In</button>
+      <p class="muted">Use this area for park-side schedule, score, and announcement updates.</p>
+    </form>
+
+    <div id="adminTools" hidden>
+      <div class="admin-card">
+        <h3>Update Game Score</h3>
+        <label>Game<select id="scoreGameSelect"></select></label>
+        <div class="score-grid">
+          <label>Team 1 Score<input id="score1Input" type="number" min="0" inputmode="numeric"></label>
+          <label>Team 2 Score<input id="score2Input" type="number" min="0" inputmode="numeric"></label>
+        </div>
+        <label>Status<select id="gameStatusInput"><option value="scheduled">Scheduled</option><option value="final">Final</option><option value="postponed">Postponed</option><option value="cancelled">Cancelled</option></select></label>
+        <button id="saveScoreBtn" class="primary-btn" type="button">Save Score</button>
+      </div>
+
+      <div class="admin-card">
+        <h3>Add Announcement</h3>
+        <label>Title<input id="announcementTitle" maxlength="80"></label>
+        <label>Message<textarea id="announcementBody" rows="4" maxlength="500"></textarea></label>
+        <button id="saveAnnouncementBtn" class="primary-btn" type="button">Publish Announcement</button>
+      </div>
+
+      <div class="admin-card compact-actions">
+        <a class="secondary-btn" href="administrators.html">Open Full Admin Panel</a>
+        <button id="logoutBtn" class="secondary-btn" type="button">Sign Out</button>
+      </div>
+    </div>
+
+    <p id="adminMessage" class="status-message"></p>
+  </section>
+</main>
+
+<footer class="mobile-footer">
+  <a href="schedule.html">Full Schedule</a>
+  <a href="standings.html">Full Standings</a>
+  <a href="teams.html">Teams</a>
+</footer>
+
+<script src="js/mobile.js"></script>
+</body>
+</html>

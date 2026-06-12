@@ -2926,12 +2926,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   function applyAccess(){
     const allowed = canManage();
-    document.querySelectorAll('.manager-only,.small-manager-panel,.team-photo-controls,.roster-controls').forEach(el => { el.style.display = allowed ? '' : 'none'; });
+    document.querySelectorAll('.manager-only,.small-manager-panel,.team-photo-controls,.roster-controls').forEach(el => { el.style.display = allowed ? 'block' : 'none'; });
     ['team-manager-panel','roster-admin-panel','team-photo-upload-panel'].forEach(id => {
-      const el = document.getElementById(id); if (el) el.style.display = allowed ? '' : 'none';
+      const el = document.getElementById(id); if (el) el.style.display = allowed ? 'block' : 'none';
     });
     document.querySelectorAll('#upload-roster-btn,#upload-team-photo-btn,#add-player-btn,#remove-player-btn,#save-player-btn,#roster-file,#team-photo-file').forEach(el => { el.disabled = !allowed; });
-    document.querySelectorAll('.checkin-game-btn,.check-in-game-btn').forEach(btn => { btn.style.display = allowed ? '' : 'none'; btn.disabled = !allowed; });
+    document.querySelectorAll('.checkin-game-btn,.check-in-game-btn').forEach(btn => { btn.style.display = allowed ? 'inline-block' : 'none'; btn.disabled = !allowed; });
     const photoStatus = document.getElementById('team-photo-status');
     if (photoStatus) photoStatus.textContent = allowed ? 'Upload or replace this team profile photo.' : 'Sign in as an administrator or assigned Team Manager to upload a team photo.';
     setStatus(allowed ? (isAdmin() ? 'Admin access confirmed. Manage this roster.' : 'Team Manager access confirmed. Manage your assigned team roster.') : 'Sign in as this team manager or admin to manage this roster.');
@@ -3138,13 +3138,131 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   function apply(){
     const allowed=canManage();
-    document.querySelectorAll('.manager-only,.small-manager-panel,.team-photo-controls,.roster-controls').forEach(el=>{ el.style.display=allowed ? '' : 'none'; });
+    document.querySelectorAll('.manager-only,.small-manager-panel,.team-photo-controls,.roster-controls').forEach(el=>{ el.style.display=allowed ? 'block' : 'none'; });
     document.querySelectorAll('#add-player-btn,#remove-player-btn,#upload-roster-btn,#upload-team-photo-btn,#roster-file,#team-photo-file,#save-player-btn').forEach(el=>{ if(el) el.disabled=!allowed; });
-    document.querySelectorAll('.checkin-game-btn,.check-in-game-btn').forEach(el=>{ el.style.display=allowed ? '' : 'none'; el.disabled=!allowed; });
+    document.querySelectorAll('.checkin-game-btn,.check-in-game-btn').forEach(el=>{ el.style.display=allowed ? 'block' : 'none'; el.disabled=!allowed; });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply); else apply();
   setTimeout(apply, 300); setTimeout(apply, 1200); setTimeout(apply, 2500);
   window.addEventListener('storage', apply);
+})();
+</script>
+
+
+<script id="team-manager-visible-save-hotfix">
+(function(){
+  const SESSION_KEY='lamslSessionV1';
+  const TEAM_PLAYERS_KEY='lamslTeamPlayersV1';
+  function readJson(k,f){try{const r=localStorage.getItem(k);return r?JSON.parse(r):f;}catch(e){return f;}}
+  function writeJson(k,v){localStorage.setItem(k,JSON.stringify(v));}
+  function norm(v){return String(v||'').trim().toLowerCase().replace(/[_\s]+/g,'-');}
+  function team(){return new URLSearchParams(location.search).get('team') || document.getElementById('team-title')?.textContent?.trim() || '';}
+  function div(){return String(new URLSearchParams(location.search).get('division') || document.getElementById('team-division-chip')?.textContent || '').replace(/^division\s*/i,'').trim().toUpperCase();}
+  function session(){return readJson(SESSION_KEY,{})||{};}
+  function role(){return norm(session().role);}
+  function isAdmin(){return role()==='admin'||role()==='administrator'||localStorage.getItem('lamslAdminAuthV1')==='true';}
+  function canManage(){
+    if(isAdmin()) return true;
+    if(role()!=='team-manager' && role()!=='manager') return false;
+    const s=session();
+    const at=String(s.assignedTeam||s.team||s.teamName||'').trim().toLowerCase();
+    const ad=String(s.assignedDivision||s.division||'').replace(/^division\s*/i,'').trim().toUpperCase();
+    return !!at && at===team().trim().toLowerCase() && (!ad || ad===div());
+  }
+  function api(path){return typeof window.apiUrl==='function'?window.apiUrl(path):path;}
+  function apiHeaders(extra){
+    const h=typeof window.apiHeaders==='function'?window.apiHeaders(extra||{}):Object.assign({},extra||{});
+    const s=session();
+    if(s.assignedTeam) h['x-lamsl-assigned-team']=s.assignedTeam;
+    if(s.assignedDivision) h['x-lamsl-assigned-division']=s.assignedDivision;
+    if(s.role) h['x-lamsl-role']=s.role;
+    if(s.username) h['x-lamsl-username']=s.username;
+    h['x-lamsl-session']='active';
+    return h;
+  }
+  function key(){return `${div()||'NA'}|${team()}`;}
+  function getStore(){return readJson(TEAM_PLAYERS_KEY,{});}
+  function getEntry(){const st=getStore();return st[key()]||st[team()]||st[team().trim().toLowerCase()]||{team:team(),division:div(),players:[]};}
+  function getPlayers(){const e=getEntry();return Array.isArray(e.players)?e.players:[];}
+  function setPlayers(players){
+    const cleaned=players.map((p,i)=>({
+      id:String(p.id||`${Date.now()}-${i}`),name:String(p.name||p.Name||'').trim(),position:String(p.position||p.Position||'').trim(),
+      phone:String(p.phone||p.Phone||'').trim(),email:String(p.email||p.Email||'').trim(),gamesPlayed:Number(p.gamesPlayed||0)||0,photo:String(p.photo||'').trim()
+    })).filter(p=>p.name&&p.position);
+    const entry={team:team(),division:div(),players:cleaned,updatedAt:new Date().toISOString()};
+    const st=getStore(); st[key()]=entry; st[team()]=entry; st[team().trim().toLowerCase()]=entry; writeJson(TEAM_PLAYERS_KEY,st); return cleaned;
+  }
+  async function saveBackend(players){
+    const r=await fetch(api('/api/team-players'),{method:'POST',headers:apiHeaders({'Content-Type':'application/json'}),body:JSON.stringify({teamKey:key(),teamName:team(),division:div(),players})});
+    const data=await r.json().catch(()=>({})); if(!r.ok||data.success===false) throw new Error(data.error||`HTTP ${r.status}`); if(data.teamPlayers) writeJson(TEAM_PLAYERS_KEY,data.teamPlayers); return data;
+  }
+  function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+  function renderRoster(){
+    const wrap=document.getElementById('roster-grid-wrap'); if(!wrap) return;
+    const players=getPlayers();
+    if(!players.length){wrap.innerHTML='<p class="muted">No players added to this roster yet.</p>'; populateCheckin(); return;}
+    wrap.innerHTML=players.map(p=>`<div class="roster-card" data-player-id="${esc(p.id)}"><h4>${esc(p.name)}</h4><p><strong>Position:</strong> ${esc(p.position)}</p><p><strong>Phone:</strong> ${esc(p.phone||'N/A')}</p><p><strong>Email:</strong> ${esc(p.email||'N/A')}</p><p><strong>Games Played:</strong> ${Number(p.gamesPlayed||0)}</p>${canManage()?`<button type="button" class="danger roster-remove-btn" data-player-id="${esc(p.id)}">Remove</button>`:''}</div>`).join('');
+    populateCheckin();
+  }
+  function populateCheckin(){const sel=document.getElementById('checkin-player-select'); if(!sel)return; const v=sel.value; sel.innerHTML='<option value="">Choose a player</option>'+getPlayers().map(p=>`<option value="${esc(p.id)}">${esc(p.name)}${p.position?' - '+esc(p.position):''}</option>`).join(''); sel.value=v;}
+  function showControls(){
+    const allowed=canManage();
+    document.querySelectorAll('.manager-only,.small-manager-panel,.team-photo-controls,.roster-controls').forEach(el=>{el.style.display=allowed?'block':'none';});
+    document.querySelectorAll('#add-player-btn,#remove-player-btn,#upload-roster-btn,#upload-team-photo-btn,#roster-file,#team-photo-file,#save-player-btn').forEach(el=>{if(el)el.disabled=!allowed;});
+    document.querySelectorAll('.checkin-game-btn,.check-in-game-btn').forEach(el=>{el.style.display=allowed?'inline-block':'none';el.disabled=!allowed;});
+    const rs=document.getElementById('roster-admin-status'); if(rs) rs.textContent=allowed?'Access confirmed. Manage this team roster.':'Sign in as Administrator or assigned Team Manager to manage this roster.';
+    const ps=document.getElementById('team-photo-status'); if(ps) ps.textContent=allowed?'Access confirmed. Upload or replace this team photo.':'Sign in as Administrator or assigned Team Manager to upload a team photo.';
+  }
+  function openModal(mode){
+    if(!canManage()){alert('Sign in as Administrator or assigned Team Manager to manage this roster.');return;}
+    const modal=document.getElementById('player-modal'); if(!modal)return;
+    ['player-id','player-name','player-phone','player-email'].forEach(id=>{const el=document.getElementById(id); if(el)el.value='';});
+    const pos=document.getElementById('player-position'); if(pos)pos.value='';
+    const file=document.getElementById('player-photo-file'); if(file)file.value='';
+    const title=document.getElementById('modal-title'); if(title)title.textContent=mode==='remove'?'Remove Player':'Add Player';
+    const form=document.getElementById('player-form-section'); if(form)form.style.display=mode==='remove'?'none':'block';
+    const profiles=document.getElementById('player-profiles-section'); if(profiles)profiles.style.display=mode==='remove'?'block':'none';
+    const list=document.getElementById('player-list'); if(list) list.innerHTML=getPlayers().length?getPlayers().map(p=>`<div class="player-list-row"><span>${esc(p.name)} - ${esc(p.position)}</span><button type="button" class="danger roster-remove-btn" data-player-id="${esc(p.id)}">Remove</button></div>`).join(''):'<p class="muted">No players are currently on this roster.</p>';
+    modal.style.display='flex';
+  }
+  async function savePlayer(e){
+    if(e){e.preventDefault();e.stopImmediatePropagation();}
+    if(!canManage())return;
+    const name=(document.getElementById('player-name')?.value||'').trim();
+    const position=(document.getElementById('player-position')?.value||'').trim();
+    const status=document.getElementById('roster-admin-status');
+    if(!name){if(status)status.textContent='First and Last Name is required.';return;}
+    if(!position){if(status)status.textContent='Position Played is required.';return;}
+    const players=getPlayers();
+    players.push({id:`player-${Date.now()}`,name,position,phone:(document.getElementById('player-phone')?.value||'').trim(),email:(document.getElementById('player-email')?.value||'').trim(),gamesPlayed:0});
+    const saved=setPlayers(players); renderRoster();
+    const modal=document.getElementById('player-modal'); if(modal)modal.style.display='none';
+    try{await saveBackend(saved); if(status)status.textContent='Player saved to roster and backend.';}catch(err){if(status)status.textContent='Player saved locally. Backend save failed: '+err.message;}
+  }
+  async function removePlayer(id){
+    const status=document.getElementById('roster-admin-status');
+    const saved=setPlayers(getPlayers().filter(p=>String(p.id)!==String(id))); renderRoster();
+    try{await saveBackend(saved); if(status)status.textContent='Player removed from roster and backend.';}catch(err){if(status)status.textContent='Player removed locally. Backend save failed: '+err.message;}
+  }
+  async function uploadPhoto(e){
+    if(e){e.preventDefault();e.stopImmediatePropagation();}
+    if(!canManage())return;
+    const input=document.getElementById('team-photo-file'); const status=document.getElementById('team-photo-status');
+    if(!input?.files?.[0]){if(status)status.textContent='Choose a team photo before uploading.';return;}
+    const fd=new FormData(); fd.append('photo',input.files[0]); fd.append('team',team()); fd.append('division',div());
+    try{const r=await fetch(api('/api/upload-team-photo'),{method:'POST',headers:apiHeaders(),body:fd}); const data=await r.json().catch(()=>({})); if(!r.ok||data.success===false)throw new Error(data.error||`HTTP ${r.status}`); const img=document.getElementById('team-photo'); const ph=document.getElementById('team-photo-placeholder'); if(img&&data.url){img.src=api(data.url)+'?v='+Date.now(); img.style.display='block';} if(ph)ph.style.display='none'; if(status)status.textContent='Team profile photo uploaded.';}catch(err){if(status)status.textContent='Team photo upload failed: '+err.message;}
+  }
+  function bind(){
+    showControls(); renderRoster();
+    const add=document.getElementById('add-player-btn'); if(add) add.onclick=e=>{e.preventDefault();openModal('add');};
+    const rem=document.getElementById('remove-player-btn'); if(rem) rem.onclick=e=>{e.preventDefault();openModal('remove');};
+    const save=document.getElementById('save-player-btn'); if(save) save.onclick=savePlayer;
+    const close=document.getElementById('close-modal-btn'); if(close) close.onclick=()=>{const m=document.getElementById('player-modal'); if(m)m.style.display='none';};
+    document.addEventListener('click',e=>{const b=e.target.closest('.roster-remove-btn'); if(b){e.preventDefault();removePlayer(b.dataset.playerId);}},true);
+    const photo=document.getElementById('upload-team-photo-btn'); if(photo) photo.onclick=uploadPhoto;
+    setTimeout(()=>{showControls();renderRoster();},500); setTimeout(()=>{showControls();renderRoster();},1500);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind); else bind();
 })();
 </script>
 

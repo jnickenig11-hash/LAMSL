@@ -38,6 +38,8 @@
         headers['x-lamsl-username'] = session.username;
         headers['x-lamsl-role'] = session.role;
         headers['x-lamsl-session'] = 'active';
+        if (session.assignedTeam) headers['x-lamsl-assigned-team'] = session.assignedTeam;
+        if (session.assignedDivision) headers['x-lamsl-assigned-division'] = session.assignedDivision;
       }
     } catch (e) {}
 

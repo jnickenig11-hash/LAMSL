@@ -28,7 +28,8 @@
 </header>
 
 <nav class="quick-tabs" aria-label="Mobile sections">
-  <button class="tab-btn active" data-target="schedulePanel" type="button">Schedule</button>
+  <button class="tab-btn active" data-target="nextGamesPanel" type="button">Next Games</button>
+  <button class="tab-btn" data-target="schedulePanel" type="button">Schedule</button>
   <button class="tab-btn" data-target="scoresPanel" type="button">Scores</button>
   <button class="tab-btn" data-target="standingsPanel" type="button">Standings</button>
   <button class="tab-btn" data-target="announcementsPanel" type="button">News</button>
@@ -43,7 +44,15 @@
     <button id="refreshBtn" type="button" class="primary-btn">Refresh</button>
   </section>
 
-  <section id="schedulePanel" class="panel active-panel">
+  <section id="nextGamesPanel" class="panel active-panel">
+    <div class="section-heading">
+      <h2>Next Games</h2>
+      <span id="nextGamesDate" class="pill">Loading</span>
+    </div>
+    <div id="nextGamesList" class="card-list"></div>
+  </section>
+
+  <section id="schedulePanel" class="panel">
     <div class="section-heading">
       <h2>Game Schedule</h2>
       <select id="scheduleDivisionFilter" aria-label="Filter schedule by division"></select>

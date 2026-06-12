@@ -20,7 +20,9 @@
   function fullDateLabel(value){ const d = parseDate(value); return d ? d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'}) : 'Date TBD'; }
   function getGameId(game, index){ return String(game.id || `${game.date || 'date'}-${game.time || 'time'}-${game.team1 || 'team1'}-${game.team2 || 'team2'}-${index}`); }
   function teamUrl(team, division){ return `team.html?team=${encodeURIComponent(team || '')}&division=${encodeURIComponent(division || 'All')}`; }
-  function sortedGames(){ return [...(state.content.gameSchedules || [])].sort((a,b) => String(a.date||'').localeCompare(String(b.date||'')) || String(a.time||'').localeCompare(String(b.time||'')) || String(a.park||'').localeCompare(String(b.park||''))); }
+  function sortedGames(){ return sortedGamesAsc(); }
+  function sortedGamesAsc(){ return [...(state.content.gameSchedules || [])].sort((a,b) => String(a.date||'').localeCompare(String(b.date||'')) || String(a.time||'').localeCompare(String(b.time||'')) || String(a.park||'').localeCompare(String(b.park||''))); }
+  function sortedGamesDesc(){ return [...(state.content.gameSchedules || [])].sort((a,b) => String(b.date||'').localeCompare(String(a.date||'')) || String(a.time||'').localeCompare(String(b.time||'')) || String(a.park||'').localeCompare(String(b.park||''))); }
   function gameHasScore(game){ return game && game.score1 !== '' && game.score2 !== '' && game.score1 != null && game.score2 != null; }
 
   function populateFilters(){
@@ -50,9 +52,25 @@
     </article>`;
   }
 
+
+  function renderNextGames(){
+    const games = sortedGamesAsc().filter(g => g && g.date && g.team1 && g.team2 && String(g.status || 'scheduled').toLowerCase() !== 'cancelled');
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const upcomingDate = games.map(g => g.date).filter(date => {
+      const parsed = parseDate(date);
+      return parsed && parsed >= today;
+    }).sort()[0];
+    const selectedDate = upcomingDate || (games.length ? games[games.length - 1].date : '');
+    const nextGames = selectedDate ? games.filter(g => g.date === selectedDate) : [];
+    const badge = $('nextGamesDate');
+    if (badge) badge.textContent = selectedDate ? dateLabel(selectedDate) : 'No games';
+    $('nextGamesList').innerHTML = nextGames.length ? nextGames.map(gameCard).join('') : '<div class="empty-state">No upcoming games are currently scheduled.</div>';
+  }
+
   function renderSchedule(){
     const division = $('scheduleDivisionFilter').value || 'All';
-    const games = sortedGames().filter(g => division === 'All' || String(g.division || 'All') === division);
+    const games = sortedGamesDesc().filter(g => division === 'All' || String(g.division || 'All') === division);
     $('scheduleList').innerHTML = games.length ? games.map(gameCard).join('') : '<div class="empty-state">No games are currently scheduled for this division.</div>';
   }
 
@@ -142,7 +160,7 @@
 
   function renderAll(){
     populateFilters();
-    renderSchedule(); renderScores(); renderStandings(); renderAnnouncements(); renderAdmin();
+    renderNextGames(); renderSchedule(); renderScores(); renderStandings(); renderAnnouncements(); renderAdmin();
     const updated = state.content.updatedAt ? new Date(state.content.updatedAt).toLocaleString() : 'local content loaded';
     $('lastUpdated').textContent = `Last updated: ${updated}`;
   }

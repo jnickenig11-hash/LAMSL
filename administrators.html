@@ -1344,7 +1344,7 @@ function getSession() {
 
 function isAdminLoggedIn() {
     const session = getSession();
-    return !!(session && session.role === 'admin');
+    return !!(session && ['admin','administrator'].includes(String(session.role || '').toLowerCase().replace('_','-')));
 }
 
 function renderUserAccounts() {
@@ -1444,7 +1444,7 @@ function renderAnnouncements() {
 function renderAuthState() {
     const session = getSession();
     const loggedIn = !!session;
-    const isAdmin = session && session.role === 'admin';
+    const isAdmin = session && ['admin','administrator'].includes(String(session.role || '').toLowerCase().replace('_','-'));
 
     loginRow.style.display = loggedIn ? 'none' : 'flex';
     logoutRow.style.display = loggedIn ? 'flex' : 'none';
@@ -3802,7 +3802,7 @@ document.addEventListener('DOMContentLoaded', ()=> setTimeout(syncUsersFromBacke
 (function(){
   function readSession(){try{return JSON.parse(localStorage.getItem('lamslSessionV1')||'null')||{};}catch(e){return {};}}
   function norm(v){return String(v||'').trim().toLowerCase().replace('_','-');}
-  function isAdmin(){return norm(readSession().role)==='admin';}
+  function isAdmin(){return ['admin','administrator'].includes(norm(readSession().role));}
   function enforceAdminOnlyRegions(){
     document.querySelectorAll('.admin-role-only,#season-card').forEach(el=>{ el.style.display = isAdmin() ? '' : 'none'; });
     const note=document.getElementById('season-auth-note');

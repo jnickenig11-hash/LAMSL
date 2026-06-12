@@ -2813,308 +2813,284 @@ document.addEventListener('DOMContentLoaded', async () => {
 </div>
 
 
-<script>
-// ===== TEAM MANAGER ROLE, ROSTER SAVE, AND CHECK-IN PATCH =====
+<script id="team-manager-roster-photo-access-final">
+// Final Team Manager/Admin roster, check-in, and team photo controls.
 (function(){
-  const SESSION_KEY='lamslSessionV1';
-  const TEAM_PLAYERS_KEY='lamslTeamPlayersV1';
-  const ROSTER_KEY='lamslTeamRostersV1';
-  const CHECKINS_KEY='lamslGameCheckinsV1';
-  function readJson(k,f){try{const raw=localStorage.getItem(k);return raw?JSON.parse(raw):f;}catch(e){return f;}}
-  function writeJson(k,v){localStorage.setItem(k,JSON.stringify(v));}
-  function norm(v){return String(v||'').trim().toLowerCase();}
-  function session(){return readJson(SESSION_KEY,null)||{};}
-  function role(){return norm(session().role).replace('_','-');}
-  function currentTeam(){return new URLSearchParams(location.search).get('team') || (typeof team !== 'undefined' ? team : '');}
-  function currentDivision(){return (new URLSearchParams(location.search).get('division') || (typeof division !== 'undefined' ? division : '') || '').toUpperCase();}
-  function assignedTeam(){const s=session(); return s.assignedTeam || s.team || s.teamName || '';}
-  function assignedDivision(){const s=session(); return (s.assignedDivision || s.division || '').toUpperCase();}
-  function managerOwnsPage(){
-    if (role()==='admin') return true;
-    if (role()!=='team-manager' && role()!=='manager') return false;
-    return norm(assignedTeam()) === norm(currentTeam()) && (!assignedDivision() || assignedDivision() === currentDivision());
-  }
-  window.canManageTeamContent = managerOwnsPage;
-  window.canCheckInPlayers = managerOwnsPage;
-  window.hasRole = function(){ const roles=[...arguments].map(r=>norm(r).replace('_','-')); return roles.includes(role()); };
-  function applyVisibility(){
-    const allowed = managerOwnsPage();
-    document.querySelectorAll('.manager-only').forEach(el=>{el.style.display = allowed ? '' : 'none';});
-    document.querySelectorAll('.checkin-game-btn,.check-in-game-btn').forEach(btn=>{btn.style.display = allowed ? '' : 'none'; btn.disabled = !allowed;});
-    const status=document.getElementById('roster-admin-status');
-    if(status && allowed) status.textContent = role()==='admin' ? 'Admin access confirmed. Manage this roster.' : 'Team Manager access confirmed. Manage your assigned team roster.';
-    if(status && !allowed) status.textContent = 'Sign in as this team manager or admin to manage this roster.';
-  }
-  function teamKey(){return `${currentDivision() || 'NA'}|${currentTeam()}`;}
-  function getStore(){return readJson(TEAM_PLAYERS_KEY,{});}
-  function getPlayers(){const store=getStore(); const entry=store[teamKey()]||store[currentTeam()]||{}; return Array.isArray(entry.players)?entry.players:[];}
-  function setPlayers(players){
-    const store=getStore();
-    store[teamKey()]={players,updatedAt:new Date().toISOString()};
-    store[currentTeam()]={players,updatedAt:new Date().toISOString()};
-    writeJson(TEAM_PLAYERS_KEY, store);
-    return store;
-  }
-  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-  async function backendSavePlayers(){
-    const teamPlayers=getStore();
-    const rosters=readJson(ROSTER_KEY,{});
-    const res=await fetch(apiUrl('/api/rosters'),{method:'POST',headers:window.apiHeaders({'Content-Type':'application/json'}),body:JSON.stringify({rosters,teamPlayers})});
-    const data=await res.json().catch(()=>({}));
-    if(!res.ok || data.success===false) throw new Error(data.error || `HTTP ${res.status}`);
-    if(data.teamPlayers) writeJson(TEAM_PLAYERS_KEY,data.teamPlayers);
-    return data;
-  }
-  function renderRosterPatch(){
-    const wrap=document.getElementById('roster-grid-wrap'); if(!wrap) return;
-    const players=getPlayers();
-    if(!players.length){wrap.innerHTML='<p class="muted">No players added to this roster yet.</p>'; populateCheckinSelectPatch(); return;}
-    const can=managerOwnsPage();
-    wrap.innerHTML=players.map(p=>`<div class="roster-card" data-player-id="${esc(p.id)}"><h4>${esc(p.name)}</h4><p><strong>Position:</strong> ${esc(p.position||'N/A')}</p><p><strong>Phone:</strong> ${esc(p.phone||'N/A')}</p><p><strong>Email:</strong> ${esc(p.email||'N/A')}</p><p class="checkin-count"><strong>Games Played:</strong> ${Number(p.gamesPlayed||0)}</p>${can?`<button type="button" class="danger roster-remove-btn" data-player-id="${esc(p.id)}">Remove</button>`:''}</div>`).join('');
-    populateCheckinSelectPatch();
-  }
-  function populateCheckinSelectPatch(){
-    const sel=document.getElementById('checkin-player-select'); if(!sel) return;
-    const current=sel.value;
-    sel.innerHTML='<option value="">Choose a player</option>'+getPlayers().map(p=>`<option value="${esc(p.id)}">${esc(p.name)}${p.position?' - '+esc(p.position):''}</option>`).join('');
-    if([...sel.options].some(o=>o.value===current)) sel.value=current;
-  }
-  window.renderRoster = renderRosterPatch;
-  function openAddModal(){
-    if(!managerOwnsPage()) return alert('Sign in as this team manager or admin to add players.');
-    const modal=document.getElementById('player-modal'); if(!modal) return;
-    document.getElementById('modal-title').textContent='Add Player';
-    document.getElementById('player-id').value='';
-    document.getElementById('player-name').value='';
-    document.getElementById('player-position').value='';
-    document.getElementById('player-phone').value='';
-    document.getElementById('player-email').value='';
-    const photo=document.getElementById('player-photo'); if(photo) photo.value='';
-    document.getElementById('save-player-btn').textContent='Save Player';
-    modal.style.display='flex';
-  }
-  async function savePlayerPatch(event){
-    event.preventDefault(); event.stopImmediatePropagation();
-    const status=document.getElementById('roster-admin-status');
-    if(!managerOwnsPage()){ if(status) status.textContent='Sign in as this team manager or admin to save players.'; return; }
-    const name=document.getElementById('player-name')?.value.trim() || '';
-    const position=document.getElementById('player-position')?.value.trim() || '';
-    if(!name){ if(status) status.textContent='Enter the player first and last name before saving.'; return; }
-    if(!position){ if(status) status.textContent='Select the player position before saving.'; return; }
-    const id=document.getElementById('player-id')?.value || `${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
-    const players=[...getPlayers()];
-    const ix=players.findIndex(p=>p.id===id);
-    const rec={id,name,position,phone:document.getElementById('player-phone')?.value.trim()||'',email:document.getElementById('player-email')?.value.trim()||'',gamesPlayed:ix>=0?Number(players[ix].gamesPlayed||0):0,photo:ix>=0?(players[ix].photo||''):''};
-    if(ix>=0) players[ix]=rec; else players.push(rec);
-    setPlayers(players); renderRosterPatch();
-    try{await backendSavePlayers(); if(status) status.textContent=`${name} saved to roster and backend.`;}catch(e){if(status) status.textContent=`${name} saved locally, but backend save failed: ${e.message}`;}
-    const modal=document.getElementById('player-modal'); if(modal) modal.style.display='none';
-  }
-  async function removePlayerPatch(id){
-    if(!managerOwnsPage()) return alert('Sign in as this team manager or admin to remove players.');
-    const players=getPlayers(); const target=players.find(p=>p.id===id); if(!target) return;
-    if(!confirm(`Remove ${target.name} from this roster?`)) return;
-    setPlayers(players.filter(p=>p.id!==id)); renderRosterPatch();
-    const status=document.getElementById('roster-admin-status');
-    try{await backendSavePlayers(); if(status) status.textContent=`${target.name} removed from roster and backend.`;}catch(e){if(status) status.textContent=`${target.name} removed locally, but backend save failed: ${e.message}`;}
-  }
-  window.removePlayer = removePlayerPatch;
-  function getVisibleGames(){ return (typeof getTeamGames==='function' ? getTeamGames() : []); }
-  function gameId(g){ return typeof getGameId==='function' ? getGameId(g) : String(g.id || [g.date,g.time,g.team1,g.team2].join('|')); }
-  function showCheckinPatch(game){
-    if(!managerOwnsPage()) return;
-    const panel=document.getElementById('player-checkin-panel'); if(panel) panel.style.display='block';
-    window.selectedGame = game;
-    const label=document.getElementById('checkin-game-label'); if(label) label.textContent=`Check in players for: ${game.date||''} ${game.time||''} — ${(game.team1||'')} vs ${(game.team2||'')}`;
-    populateCheckinSelectPatch();
-    const list=document.getElementById('checkin-selected-players'); if(list) list.innerHTML='';
-  }
-  window.showCheckinPanel = showCheckinPatch;
-  function selectedGameId(){
-    const select=document.getElementById('upcoming-game-select');
-    return (select && select.value) || (window.selectedGame ? gameId(window.selectedGame) : '');
-  }
-  function addCheckinPlayer(){
-    const sel=document.getElementById('checkin-player-select'); const list=document.getElementById('checkin-selected-players'); if(!sel||!list||!sel.value) return;
-    const p=getPlayers().find(x=>x.id===sel.value); if(!p) return;
-    if(list.querySelector(`[data-player-id="${CSS.escape(p.id)}"]`)) return;
-    const row=document.createElement('div'); row.dataset.playerId=p.id; row.textContent=`${p.name}${p.position?' - '+p.position:''}`; list.appendChild(row);
-  }
-  async function saveCheckins(){
-    if(!managerOwnsPage()) return;
-    const status=document.getElementById('checkin-status'); const gid=selectedGameId();
-    if(!gid){ if(status) status.textContent='Select a game first.'; return; }
-    const ids=[...document.querySelectorAll('#checkin-selected-players [data-player-id]')].map(x=>x.dataset.playerId);
-    if(!ids.length){ if(status) status.textContent='Select at least one player.'; return; }
-    const players=getPlayers(); const selected=ids.map(id=>players.find(p=>p.id===id)).filter(Boolean);
-    const checkins=readJson(CHECKINS_KEY,{}); checkins[gid]={team:currentTeam(),division:currentDivision(),players:selected.map(p=>({id:p.id,name:p.name,position:p.position})),updatedAt:new Date().toISOString()}; writeJson(CHECKINS_KEY,checkins);
-    const updated=players.map(p=>ids.includes(p.id)?{...p,gamesPlayed:Number(p.gamesPlayed||0)+1}:p); setPlayers(updated); renderRosterPatch();
-    try{await backendSavePlayers(); if(status) status.textContent='Player check-in saved.';}catch(e){if(status) status.textContent=`Check-in saved locally, but backend save failed: ${e.message}`;}
-  }
-  document.addEventListener('DOMContentLoaded', function(){
-    applyVisibility(); setTimeout(applyVisibility,500); setTimeout(renderRosterPatch,700);
-    document.getElementById('add-player-btn')?.addEventListener('click', function(e){e.preventDefault();e.stopImmediatePropagation();openAddModal();}, true);
-    document.getElementById('save-player-btn')?.addEventListener('click', savePlayerPatch, true);
-    document.getElementById('roster-grid-wrap')?.addEventListener('click', function(e){const b=e.target.closest('.roster-remove-btn'); if(b){e.preventDefault();e.stopImmediatePropagation();removePlayerPatch(b.dataset.playerId);}}, true);
-    document.getElementById('team-schedule-wrap')?.addEventListener('click', function(e){const b=e.target.closest('.checkin-game-btn,.check-in-game-btn'); if(b){e.preventDefault();e.stopImmediatePropagation();const g=getVisibleGames().find(x=>gameId(x)===(b.dataset.gameId||'')); if(g) showCheckinPatch(g);}}, true);
-    document.getElementById('upcoming-game-select')?.addEventListener('change', function(e){const g=getVisibleGames().find(x=>gameId(x)===e.target.value); if(g) showCheckinPatch(g);}, true);
-    document.getElementById('add-player-checkin-btn')?.addEventListener('click', function(e){e.preventDefault();e.stopImmediatePropagation();addCheckinPlayer();}, true);
-    document.getElementById('save-checkin-btn')?.addEventListener('click', function(e){e.preventDefault();e.stopImmediatePropagation();saveCheckins();}, true);
-    document.getElementById('clear-checkin-btn')?.addEventListener('click', function(e){e.preventDefault(); const list=document.getElementById('checkin-selected-players'); if(list) list.innerHTML='';}, true);
-  });
-})();
-</script>
+  const SESSION_KEY = 'lamslSessionV1';
+  const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
+  const CHECKINS_KEY = 'lamslGameCheckinsV1';
 
-
-<script id="team-manager-final-roster-checkin-theme-fix">
-(function(){
-  const SESSION_KEY='lamslSessionV1';
-  const TEAM_PLAYERS_KEY='lamslTeamPlayersV1';
-  const CHECKINS_KEY='lamslGameCheckinsV1';
-  function readJson(k,f){try{const raw=localStorage.getItem(k);return raw?JSON.parse(raw):f;}catch(e){return f;}}
-  function writeJson(k,v){localStorage.setItem(k,JSON.stringify(v));}
-  function norm(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,' ');}
-  function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-  function session(){return readJson(SESSION_KEY,{});} 
-  function role(){return String(session().role||'').trim().toLowerCase().replace('_','-');}
-  function pageTeam(){return new URLSearchParams(location.search).get('team') || (typeof team !== 'undefined' ? team : '');}
-  function pageDivision(){return (new URLSearchParams(location.search).get('division') || (typeof division !== 'undefined' ? division : '') || '').replace('Division','').trim().toUpperCase();}
-  function assignedTeam(){const s=session();return s.assignedTeam||s.team||s.teamName||'';}
-  function assignedDivision(){const s=session();return String(s.assignedDivision||s.division||'').replace('Division','').trim().toUpperCase();}
+  function readJson(key, fallback){
+    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch(e){ return fallback; }
+  }
+  function writeJson(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+  function api(path){ return (typeof window.apiUrl === 'function') ? window.apiUrl(path) : path; }
+  function headers(extra){ return (typeof window.apiHeaders === 'function') ? window.apiHeaders(extra || {}) : (extra || {}); }
+  function norm(v){ return String(v || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+  function cleanDivision(v){ return String(v || '').replace(/^division\s*/i, '').trim().toUpperCase(); }
+  function esc(v){ return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function session(){ return readJson(SESSION_KEY, {}) || {}; }
+  function role(){ return norm(session().role).replace('_','-'); }
+  function isAdmin(){ return ['admin','administrator'].includes(role()) || localStorage.getItem('lamslAdminAuthV1') === 'true'; }
+  function isManager(){ return ['team-manager','manager','team manager'].includes(role()); }
+  function pageTeam(){
+    const qp = new URLSearchParams(location.search);
+    return qp.get('team') || qp.get('teamName') || (typeof team !== 'undefined' ? team : '') || document.getElementById('team-title')?.textContent?.trim() || '';
+  }
+  function pageDivision(){
+    const qp = new URLSearchParams(location.search);
+    return cleanDivision(qp.get('division') || (typeof division !== 'undefined' ? division : '') || document.getElementById('team-division-chip')?.textContent || '');
+  }
+  function assignedTeam(){ const s = session(); return s.assignedTeam || s.team || s.teamName || ''; }
+  function assignedDivision(){ const s = session(); return cleanDivision(s.assignedDivision || s.division || ''); }
   function canManage(){
-    if(role()==='admin') return true;
-    if(role()!=='team-manager' && role()!=='manager') return false;
-    return norm(assignedTeam())===norm(pageTeam()) && (!assignedDivision() || assignedDivision()===pageDivision());
+    if (isAdmin()) return true;
+    if (!isManager()) return false;
+    return norm(assignedTeam()) === norm(pageTeam()) && (!assignedDivision() || assignedDivision() === pageDivision());
   }
-  window.canManageTeamContent=canManage;
-  window.canCheckInPlayers=canManage;
-  function teamKey(){return `${pageDivision()||'NA'}|${pageTeam()}`;}
-  function getStore(){return readJson(TEAM_PLAYERS_KEY,{});} 
-  function getEntry(){const store=getStore();return store[teamKey()] || store[pageTeam()] || {players:[]};}
-  function getPlayers(){const e=getEntry(); return Array.isArray(e.players)?e.players:[];}
+  window.canManageTeamContent = canManage;
+  window.canCheckInPlayers = canManage;
+
+  function teamKey(){ return `${pageDivision() || 'NA'}|${pageTeam()}`; }
+  function getStore(){ return readJson(TEAM_PLAYERS_KEY, {}); }
+  function getEntry(){
+    const store = getStore();
+    return store[teamKey()] || store[pageTeam()] || store[norm(pageTeam())] || { team: pageTeam(), division: pageDivision(), players: [] };
+  }
+  function getPlayers(){
+    const entry = getEntry();
+    return Array.isArray(entry.players) ? entry.players : [];
+  }
   function setPlayers(players){
-    const store=getStore();
-    const entry={team:pageTeam(),division:pageDivision(),players:players.map(p=>({id:String(p.id||Date.now()),name:String(p.name||'').trim(),position:String(p.position||'').trim(),phone:String(p.phone||'').trim(),email:String(p.email||'').trim(),gamesPlayed:Number(p.gamesPlayed||0)||0,photo:String(p.photo||'').trim()})).filter(p=>p.name&&p.position),updatedAt:new Date().toISOString()};
-    store[teamKey()]=entry; store[pageTeam()]=entry; writeJson(TEAM_PLAYERS_KEY,store); return entry.players;
+    const cleaned = players.map((p, i) => ({
+      id: String(p.id || `${Date.now()}-${i}`),
+      name: String(p.name || p.Name || '').trim(),
+      position: String(p.position || p.Position || '').trim(),
+      phone: String(p.phone || p.Phone || '').trim(),
+      email: String(p.email || p.Email || '').trim(),
+      gamesPlayed: Number(p.gamesPlayed || p.GamesPlayed || 0) || 0,
+      photo: String(p.photo || p.Photo || '').trim()
+    })).filter(p => p.name && p.position);
+    const entry = { team: pageTeam(), division: pageDivision(), players: cleaned, updatedAt: new Date().toISOString() };
+    const store = getStore();
+    store[teamKey()] = entry;
+    store[pageTeam()] = entry;
+    store[norm(pageTeam())] = entry;
+    writeJson(TEAM_PLAYERS_KEY, store);
+    return cleaned;
   }
   async function savePlayersBackend(players){
-    const body={teamKey:teamKey(),teamName:pageTeam(),division:pageDivision(),players};
-    const headers=(typeof window.apiHeaders==='function')?window.apiHeaders({'Content-Type':'application/json'}):{'Content-Type':'application/json'};
-    const s=session(); if(s.assignedTeam) headers['x-lamsl-assigned-team']=s.assignedTeam; if(s.assignedDivision) headers['x-lamsl-assigned-division']=s.assignedDivision;
-    const res=await fetch(apiUrl('/api/team-players'),{method:'POST',headers,body:JSON.stringify(body)});
-    const data=await res.json().catch(()=>({}));
-    if(!res.ok || data.success===false) throw new Error(data.error||`HTTP ${res.status}`);
-    if(data.teamPlayers) writeJson(TEAM_PLAYERS_KEY,data.teamPlayers);
+    const s = session();
+    const h = headers({ 'Content-Type': 'application/json' });
+    if (s.assignedTeam) h['x-lamsl-assigned-team'] = s.assignedTeam;
+    if (s.assignedDivision) h['x-lamsl-assigned-division'] = s.assignedDivision;
+    const res = await fetch(api('/api/team-players'), {
+      method: 'POST',
+      headers: h,
+      body: JSON.stringify({ teamKey: teamKey(), teamName: pageTeam(), division: pageDivision(), players })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.error || `HTTP ${res.status}`);
+    if (data.teamPlayers) writeJson(TEAM_PLAYERS_KEY, data.teamPlayers);
     return data;
   }
+
+  function setStatus(text, isError){
+    const el = document.getElementById('roster-admin-status');
+    if (el) { el.textContent = text; el.style.color = isError ? '#ffd1d1' : ''; }
+  }
   function applyAccess(){
-    const allowed=canManage();
-    ['team-manager-panel','roster-admin-panel','team-photo-upload-panel'].forEach(id=>{const el=document.getElementById(id); if(el) el.style.display=allowed?'':'none';});
-    document.querySelectorAll('.manager-only').forEach(el=>el.style.display=allowed?'':'none');
-    document.querySelectorAll('#upload-roster-btn,#upload-team-photo-btn,#add-player-btn,#remove-player-btn').forEach(btn=>{btn.disabled=!allowed;});
-    document.querySelectorAll('.checkin-game-btn,.check-in-game-btn').forEach(btn=>{btn.style.display=allowed?'':'none';btn.disabled=!allowed;});
-    const status=document.getElementById('roster-admin-status');
-    if(status) status.textContent=allowed?(role()==='admin'?'Admin access confirmed. Manage this roster.':'Team Manager access confirmed. Manage your assigned team roster.'):'Sign in as this team manager or admin to manage this roster.';
+    const allowed = canManage();
+    document.querySelectorAll('.manager-only,.team-photo-controls').forEach(el => { el.style.display = allowed ? '' : 'none'; });
+    ['team-manager-panel','roster-admin-panel','team-photo-upload-panel'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.style.display = allowed ? '' : 'none';
+    });
+    document.querySelectorAll('#upload-roster-btn,#upload-team-photo-btn,#add-player-btn,#remove-player-btn,#save-player-btn').forEach(btn => { btn.disabled = !allowed; });
+    document.querySelectorAll('.checkin-game-btn,.check-in-game-btn').forEach(btn => { btn.style.display = allowed ? '' : 'none'; btn.disabled = !allowed; });
+    const photoStatus = document.getElementById('team-photo-status');
+    if (photoStatus) photoStatus.textContent = allowed ? 'Upload or replace this team profile photo.' : 'Sign in as an administrator or assigned Team Manager to upload a team photo.';
+    setStatus(allowed ? (isAdmin() ? 'Admin access confirmed. Manage this roster.' : 'Team Manager access confirmed. Manage your assigned team roster.') : 'Sign in as this team manager or admin to manage this roster.');
   }
+
   function populateCheckinSelect(){
-    const sel=document.getElementById('checkin-player-select'); if(!sel) return;
-    const current=sel.value;
-    sel.innerHTML='<option value="">Choose a player</option>'+getPlayers().map(p=>`<option value="${esc(p.id)}">${esc(p.name)}${p.position?' - '+esc(p.position):''}</option>`).join('');
-    if([...sel.options].some(o=>o.value===current)) sel.value=current;
+    const sel = document.getElementById('checkin-player-select');
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">Choose a player</option>' + getPlayers().map(p => `<option value="${esc(p.id)}">${esc(p.name)}${p.position ? ' - ' + esc(p.position) : ''}</option>`).join('');
+    if ([...sel.options].some(o => o.value === current)) sel.value = current;
   }
-  function renderRosterFinal(){
-    const wrap=document.getElementById('roster-grid-wrap'); if(!wrap) return;
-    const players=getPlayers(); const allowed=canManage();
-    if(!players.length){wrap.innerHTML='<p class="muted">No players added to this roster yet.</p>'; populateCheckinSelect(); return;}
-    wrap.innerHTML=players.map(p=>`<div class="roster-card" data-player-id="${esc(p.id)}"><h4>${esc(p.name)}</h4><p><strong>Position:</strong> ${esc(p.position||'N/A')}</p><p><strong>Phone:</strong> ${esc(p.phone||'N/A')}</p><p><strong>Email:</strong> ${esc(p.email||'N/A')}</p><p class="checkin-count"><strong>Games Played:</strong> ${Number(p.gamesPlayed||0)}</p>${allowed?`<button type="button" class="danger roster-remove-btn" data-player-id="${esc(p.id)}">Remove</button>`:''}</div>`).join('');
-    populateCheckinSelect(); applyAccess();
-  }
-  window.renderRoster=renderRosterFinal;
-  function showModal(mode){
-    if(!canManage()) { alert('Sign in as this team manager or admin to manage players.'); return; }
-    const modal=document.getElementById('player-modal'); if(!modal) return;
-    const form=document.getElementById('player-form-section'); const profiles=document.getElementById('player-profiles-section');
-    document.getElementById('modal-title').textContent=mode==='remove'?'Remove Player':'Add Player';
-    document.getElementById('form-instruction').textContent=mode==='remove'?'Select a player from the roster below, or use each roster card Remove button.':'Enter the player information below. First and Last Name and Position Played are required.';
-    ['player-id','player-name','player-phone','player-email'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
-    const pos=document.getElementById('player-position'); if(pos) pos.value='';
-    const file=document.getElementById('player-photo-file'); if(file) file.value='';
-    document.getElementById('save-player-btn').textContent=mode==='remove'?'Remove Player':'Save Player';
-    if(form) form.style.display=mode==='remove'?'none':'block';
-    if(profiles) profiles.style.display=mode==='remove'?'block':'none';
-    modal.style.display='flex';
-  }
-  async function savePlayerFinal(e){
-    if(e){e.preventDefault();e.stopImmediatePropagation();}
-    const status=document.getElementById('roster-admin-status');
-    if(!canManage()){if(status) status.textContent='Sign in as this team manager or admin to save players.';return;}
-    const name=(document.getElementById('player-name')?.value||'').trim();
-    const position=(document.getElementById('player-position')?.value||'').trim();
-    if(!name){if(status) status.textContent='Enter the player first and last name before saving.';return;}
-    if(!position){if(status) status.textContent='Select the player position before saving.';return;}
-    const id=(document.getElementById('player-id')?.value||'').trim() || `${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
-    const players=[...getPlayers()]; const ix=players.findIndex(p=>String(p.id)===id);
-    const rec={id,name,position,phone:(document.getElementById('player-phone')?.value||'').trim(),email:(document.getElementById('player-email')?.value||'').trim(),gamesPlayed:ix>=0?Number(players[ix].gamesPlayed||0):0,photo:ix>=0?(players[ix].photo||''):''};
-    if(ix>=0) players[ix]=rec; else players.push(rec);
-    const saved=setPlayers(players); renderRosterFinal();
-    try{await savePlayersBackend(saved); if(status) status.textContent=`${name} saved to roster and backend.`;}catch(err){if(status) status.textContent=`${name} saved locally. Backend save failed: ${err.message}`;}
-    const modal=document.getElementById('player-modal'); if(modal) modal.style.display='none';
-  }
-  async function removePlayerFinal(id){
-    if(!canManage()) { alert('Sign in as this team manager or admin to remove players.'); return; }
-    const players=getPlayers(); const player=players.find(p=>String(p.id)===String(id)); if(!player) return;
-    if(!confirm(`Remove ${player.name} from this roster?`)) return;
-    const saved=setPlayers(players.filter(p=>String(p.id)!==String(id))); renderRosterFinal();
-    const status=document.getElementById('roster-admin-status');
-    try{await savePlayersBackend(saved); if(status) status.textContent=`${player.name} removed from roster and backend.`;}catch(err){if(status) status.textContent=`${player.name} removed locally. Backend save failed: ${err.message}`;}
-  }
-  window.removePlayer=removePlayerFinal;
-  function gameId(g){return (typeof getGameId==='function')?getGameId(g):String(g.id||[g.date,g.time,g.team1,g.team2].join('|'));}
-  function allGames(){try{return typeof getTeamGames==='function'?getTeamGames():[];}catch(e){return [];}}
-  function showCheckin(game){
-    if(!canManage()) return;
-    window.selectedGame=game;
-    const panel=document.getElementById('player-checkin-panel'); if(panel) panel.style.display='block';
-    const label=document.getElementById('checkin-game-label'); if(label) label.textContent=`Check in players for: ${game.date||''} ${game.time||''} — ${game.team1||''} vs ${game.team2||''}`;
-    const select=document.getElementById('upcoming-game-select'); if(select) select.value=gameId(game);
-    const list=document.getElementById('checkin-selected-players'); if(list) list.innerHTML='';
+  function renderRoster(){
+    const wrap = document.getElementById('roster-grid-wrap');
+    if (!wrap) return;
+    const players = getPlayers();
+    if (!players.length) {
+      wrap.innerHTML = '<p class="muted">No players added to this roster yet.</p>';
+      populateCheckinSelect();
+      return;
+    }
+    wrap.innerHTML = players.map(p => `<div class="roster-card" data-player-id="${esc(p.id)}">
+      <h4>${esc(p.name)}</h4>
+      <p><strong>Position:</strong> ${esc(p.position || 'N/A')}</p>
+      <p><strong>Phone:</strong> ${esc(p.phone || 'N/A')}</p>
+      <p><strong>Email:</strong> ${esc(p.email || 'N/A')}</p>
+      <p class="checkin-count"><strong>Games Played:</strong> ${Number(p.gamesPlayed || 0)}</p>
+      ${canManage() ? `<button type="button" class="danger roster-remove-btn" data-player-id="${esc(p.id)}">Remove</button>` : ''}
+    </div>`).join('');
     populateCheckinSelect();
   }
-  window.showCheckinPanel=showCheckin;
-  function addCheckinPlayer(){
-    const sel=document.getElementById('checkin-player-select'); const list=document.getElementById('checkin-selected-players'); if(!sel||!list||!sel.value) return;
-    const p=getPlayers().find(x=>String(x.id)===String(sel.value)); if(!p) return;
-    if(list.querySelector(`[data-player-id="${CSS.escape(String(p.id))}"]`)) return;
-    const row=document.createElement('div'); row.dataset.playerId=p.id; row.innerHTML=`${esc(p.name)}${p.position?' - '+esc(p.position):''} <button type="button" class="remove-player-checkin">Remove</button>`; list.appendChild(row);
+  window.renderRoster = renderRoster;
+
+  function clearPlayerForm(){
+    ['player-id','player-name','player-phone','player-email'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    const pos = document.getElementById('player-position'); if (pos) pos.value = '';
+    const file = document.getElementById('player-photo-file'); if (file) file.value = '';
   }
-  async function saveCheckin(){
-    if(!canManage()) return;
-    const status=document.getElementById('checkin-status');
-    const selected=window.selectedGame || allGames().find(g=>gameId(g)===(document.getElementById('upcoming-game-select')?.value||''));
-    if(!selected){if(status) status.textContent='Select a game first.';return;}
-    const ids=[...document.querySelectorAll('#checkin-selected-players [data-player-id]')].map(x=>String(x.dataset.playerId));
-    if(!ids.length){if(status) status.textContent='Select at least one roster player.';return;}
-    const players=getPlayers(); const gid=gameId(selected); const prior=readJson(CHECKINS_KEY,{}); const previousIds=(prior[gid]?.checkedIds||prior[gid]?.players?.map(p=>p.id)||[]).map(String);
-    const updated=players.map(p=>{let gp=Number(p.gamesPlayed||0); const id=String(p.id); if(ids.includes(id)&&!previousIds.includes(id)) gp+=1; if(!ids.includes(id)&&previousIds.includes(id)) gp=Math.max(0,gp-1); return {...p,gamesPlayed:gp};});
-    prior[gid]={gameId:gid,team:pageTeam(),division:pageDivision(),date:selected.date,time:selected.time,team1:selected.team1,team2:selected.team2,checkedIds:ids,players:ids.map(id=>{const p=players.find(x=>String(x.id)===id); return p?{id:p.id,name:p.name,position:p.position}:null;}).filter(Boolean),updatedAt:new Date().toISOString()};
-    writeJson(CHECKINS_KEY,prior); const saved=setPlayers(updated); renderRosterFinal();
-    try{await savePlayersBackend(saved); if(status) status.textContent=`Check-in saved for ${ids.length} player(s).`;}catch(err){if(status) status.textContent=`Check-in saved locally. Backend save failed: ${err.message}`;}
+  function openPlayerModal(mode){
+    if (!canManage()) { alert('Sign in as this team manager or admin to manage players.'); return; }
+    const modal = document.getElementById('player-modal'); if (!modal) return;
+    clearPlayerForm();
+    document.getElementById('modal-title').textContent = mode === 'remove' ? 'Remove Player' : 'Add Player';
+    document.getElementById('form-instruction').textContent = mode === 'remove' ? 'Select a roster card Remove button below, or choose a player profile to remove.' : 'Enter player first and last name and position played. Phone, email, and photo are optional.';
+    document.getElementById('save-player-btn').textContent = 'Save Player';
+    const form = document.getElementById('player-form-section'); if (form) form.style.display = mode === 'remove' ? 'none' : 'block';
+    const profiles = document.getElementById('player-profiles-section'); if (profiles) profiles.style.display = mode === 'remove' ? 'block' : 'none';
+    renderPlayerList();
+    modal.style.display = 'flex';
   }
-  document.addEventListener('DOMContentLoaded',()=>{
-    applyAccess(); renderRosterFinal(); setTimeout(()=>{applyAccess();renderRosterFinal();},600); setTimeout(()=>{applyAccess();renderRosterFinal();},1600);
-    document.getElementById('add-player-btn')?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();showModal('add');},true);
-    document.getElementById('remove-player-btn')?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();showModal('remove');},true);
-    document.getElementById('save-player-btn')?.addEventListener('click',savePlayerFinal,true);
-    document.getElementById('roster-grid-wrap')?.addEventListener('click',e=>{const b=e.target.closest('.roster-remove-btn'); if(b){e.preventDefault();e.stopImmediatePropagation();removePlayerFinal(b.dataset.playerId);}},true);
-    document.getElementById('player-list')?.addEventListener('click',e=>{const b=e.target.closest('button[data-action="remove"]'); if(b){e.preventDefault();e.stopImmediatePropagation();removePlayerFinal(b.dataset.playerId);}},true);
-    document.getElementById('team-schedule-wrap')?.addEventListener('click',e=>{const b=e.target.closest('.checkin-game-btn,.check-in-game-btn'); if(b){e.preventDefault();e.stopImmediatePropagation();const g=allGames().find(x=>gameId(x)===(b.dataset.gameId||'')); if(g) showCheckin(g);}},true);
-    document.getElementById('upcoming-game-select')?.addEventListener('change',e=>{const g=allGames().find(x=>gameId(x)===e.target.value); if(g) showCheckin(g);},true);
-    document.getElementById('add-player-checkin-btn')?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();addCheckinPlayer();},true);
-    document.getElementById('save-checkin-btn')?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();saveCheckin();},true);
-    document.getElementById('clear-checkin-btn')?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();const list=document.getElementById('checkin-selected-players'); if(list) list.innerHTML='';},true);
-    document.getElementById('checkin-selected-players')?.addEventListener('click',e=>{const b=e.target.closest('.remove-player-checkin'); if(b){e.preventDefault();b.closest('[data-player-id]')?.remove();}},true);
-  });
-  window.addEventListener('storage',()=>{applyAccess();renderRosterFinal();});
+  function renderPlayerList(){
+    const list = document.getElementById('player-list'); if (!list) return;
+    const players = getPlayers();
+    list.innerHTML = players.length ? players.map(p => `<div class="player-list-row" data-player-id="${esc(p.id)}"><span>${esc(p.name)} - ${esc(p.position)}</span><button type="button" class="danger" data-action="remove" data-player-id="${esc(p.id)}">Remove</button></div>`).join('') : '<p class="muted">No players are currently on this roster.</p>';
+  }
+  async function savePlayer(event){
+    if (event) { event.preventDefault(); event.stopImmediatePropagation(); }
+    if (!canManage()) { setStatus('Sign in as this team manager or admin to save players.', true); return; }
+    const name = (document.getElementById('player-name')?.value || '').trim();
+    const position = (document.getElementById('player-position')?.value || '').trim();
+    if (!name) { setStatus('Enter the player first and last name before saving.', true); return; }
+    if (!position) { setStatus('Select the player position before saving.', true); return; }
+    const id = (document.getElementById('player-id')?.value || '').trim() || `${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+    const players = [...getPlayers()];
+    const ix = players.findIndex(p => String(p.id) === id);
+    const record = {
+      id, name, position,
+      phone: (document.getElementById('player-phone')?.value || '').trim(),
+      email: (document.getElementById('player-email')?.value || '').trim(),
+      gamesPlayed: ix >= 0 ? Number(players[ix].gamesPlayed || 0) : 0,
+      photo: ix >= 0 ? (players[ix].photo || '') : ''
+    };
+    if (ix >= 0) players[ix] = record; else players.push(record);
+    const saved = setPlayers(players);
+    renderRoster(); renderPlayerList();
+    try { await savePlayersBackend(saved); setStatus(`${name} saved to roster and backend.`); }
+    catch(err) { setStatus(`${name} saved locally. Backend save failed: ${err.message}`, true); }
+    const modal = document.getElementById('player-modal'); if (modal) modal.style.display = 'none';
+  }
+  async function removePlayer(id, skipConfirm){
+    if (!canManage()) { alert('Sign in as this team manager or admin to remove players.'); return; }
+    const players = getPlayers();
+    const target = players.find(p => String(p.id) === String(id));
+    if (!target) return;
+    if (!skipConfirm && !confirm(`Remove ${target.name} from this roster?`)) return;
+    const saved = setPlayers(players.filter(p => String(p.id) !== String(id)));
+    renderRoster(); renderPlayerList();
+    try { await savePlayersBackend(saved); setStatus(`${target.name} removed from roster and backend.`); }
+    catch(err) { setStatus(`${target.name} removed locally. Backend save failed: ${err.message}`, true); }
+  }
+  window.removePlayer = removePlayer;
+
+  function gameId(g){ return typeof window.getGameId === 'function' ? window.getGameId(g) : String(g.id || [g.date,g.time,g.team1,g.team2].join('|')); }
+  function allGames(){ try { return typeof window.getTeamGames === 'function' ? window.getTeamGames() : []; } catch(e) { return []; } }
+  function showCheckin(game){
+    if (!canManage()) return;
+    window.selectedGame = game;
+    const panel = document.getElementById('player-checkin-panel'); if (panel) panel.style.display = 'block';
+    const label = document.getElementById('checkin-game-label'); if (label) label.textContent = `Check in players for: ${game.date || ''} ${game.time || ''} — ${game.team1 || ''} vs ${game.team2 || ''}`;
+    const select = document.getElementById('upcoming-game-select'); if (select) select.value = gameId(game);
+    const list = document.getElementById('checkin-selected-players'); if (list) list.innerHTML = '';
+    populateCheckinSelect();
+  }
+  window.showCheckinPanel = showCheckin;
+  function addCheckinPlayer(event){
+    if (event) { event.preventDefault(); event.stopImmediatePropagation(); }
+    const sel = document.getElementById('checkin-player-select');
+    const list = document.getElementById('checkin-selected-players');
+    if (!sel || !list || !sel.value) return;
+    const player = getPlayers().find(p => String(p.id) === String(sel.value));
+    if (!player) return;
+    if (list.querySelector(`[data-player-id="${CSS.escape(String(player.id))}"]`)) return;
+    const row = document.createElement('div');
+    row.dataset.playerId = player.id;
+    row.innerHTML = `${esc(player.name)}${player.position ? ' - ' + esc(player.position) : ''} <button type="button" class="remove-player-checkin">Remove</button>`;
+    list.appendChild(row);
+  }
+  async function saveCheckin(event){
+    if (event) { event.preventDefault(); event.stopImmediatePropagation(); }
+    if (!canManage()) return;
+    const status = document.getElementById('checkin-status');
+    const selected = window.selectedGame || allGames().find(g => gameId(g) === (document.getElementById('upcoming-game-select')?.value || ''));
+    if (!selected) { if (status) status.textContent = 'Select a game first.'; return; }
+    const ids = [...document.querySelectorAll('#checkin-selected-players [data-player-id]')].map(x => String(x.dataset.playerId));
+    if (!ids.length) { if (status) status.textContent = 'Select at least one roster player.'; return; }
+    const gid = gameId(selected);
+    const checkins = readJson(CHECKINS_KEY, {});
+    const previousIds = (checkins[gid]?.checkedIds || checkins[gid]?.players?.map(p => p.id) || []).map(String);
+    const players = getPlayers().map(p => {
+      const id = String(p.id); let gp = Number(p.gamesPlayed || 0);
+      if (ids.includes(id) && !previousIds.includes(id)) gp += 1;
+      if (!ids.includes(id) && previousIds.includes(id)) gp = Math.max(0, gp - 1);
+      return { ...p, gamesPlayed: gp };
+    });
+    checkins[gid] = { gameId: gid, team: pageTeam(), division: pageDivision(), date: selected.date, time: selected.time, team1: selected.team1, team2: selected.team2, checkedIds: ids, players: ids.map(id => { const p = players.find(x => String(x.id) === id); return p ? { id:p.id, name:p.name, position:p.position } : null; }).filter(Boolean), updatedAt: new Date().toISOString() };
+    writeJson(CHECKINS_KEY, checkins);
+    const saved = setPlayers(players); renderRoster();
+    try { await savePlayersBackend(saved); if (status) status.textContent = `Check-in saved for ${ids.length} player(s).`; }
+    catch(err) { if (status) status.textContent = `Check-in saved locally. Backend save failed: ${err.message}`; }
+  }
+
+  async function uploadTeamPhoto(event){
+    if (event) { event.preventDefault(); event.stopImmediatePropagation(); }
+    if (!canManage()) { alert('Sign in as this team manager or admin to upload a team photo.'); return; }
+    const input = document.getElementById('team-photo-file');
+    const status = document.getElementById('team-photo-status');
+    if (!input || !input.files || !input.files[0]) { if(status) status.textContent = 'Choose a team photo before uploading.'; return; }
+    const formData = new FormData();
+    formData.append('photo', input.files[0]);
+    formData.append('team', pageTeam());
+    formData.append('division', pageDivision());
+    try {
+      const res = await fetch(api(`/api/upload-team-photo?team=${encodeURIComponent(pageTeam())}&division=${encodeURIComponent(pageDivision())}`), { method:'POST', headers: headers(), body: formData });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) throw new Error(data.error || `HTTP ${res.status}`);
+      const img = document.getElementById('team-photo');
+      const placeholder = document.getElementById('team-photo-placeholder');
+      if (img && data.url) { img.src = api(data.url) + '?v=' + Date.now(); img.style.display = ''; }
+      if (placeholder) placeholder.style.display = 'none';
+      if (status) status.textContent = 'Team profile photo uploaded.';
+    } catch(err) { if(status) status.textContent = `Team photo upload failed: ${err.message}`; }
+  }
+
+  function bind(){
+    applyAccess(); renderRoster();
+    const add = document.getElementById('add-player-btn'); if (add) add.onclick = e => { e.preventDefault(); openPlayerModal('add'); };
+    const rem = document.getElementById('remove-player-btn'); if (rem) rem.onclick = e => { e.preventDefault(); openPlayerModal('remove'); };
+    const save = document.getElementById('save-player-btn'); if (save) save.addEventListener('click', savePlayer, true);
+    const cancel = document.getElementById('cancel-player-btn'); if (cancel) cancel.onclick = e => { e.preventDefault(); clearPlayerForm(); };
+    const close = document.getElementById('close-modal-btn'); if (close) close.onclick = () => { const modal = document.getElementById('player-modal'); if (modal) modal.style.display = 'none'; };
+    const roster = document.getElementById('roster-grid-wrap'); if (roster) roster.addEventListener('click', e => { const b = e.target.closest('.roster-remove-btn'); if (b) { e.preventDefault(); e.stopImmediatePropagation(); removePlayer(b.dataset.playerId); } }, true);
+    const list = document.getElementById('player-list'); if (list) list.addEventListener('click', e => { const b = e.target.closest('button[data-action="remove"]'); if (b) { e.preventDefault(); e.stopImmediatePropagation(); removePlayer(b.dataset.playerId); } }, true);
+    const schedule = document.getElementById('team-schedule-wrap'); if (schedule) schedule.addEventListener('click', e => { const b = e.target.closest('.checkin-game-btn,.check-in-game-btn'); if (b) { e.preventDefault(); e.stopImmediatePropagation(); const g = allGames().find(x => gameId(x) === (b.dataset.gameId || '')); if (g) showCheckin(g); } }, true);
+    const gameSelect = document.getElementById('upcoming-game-select'); if (gameSelect) gameSelect.addEventListener('change', e => { const g = allGames().find(x => gameId(x) === e.target.value); if (g) showCheckin(g); }, true);
+    const addCheck = document.getElementById('add-player-checkin-btn'); if (addCheck) addCheck.addEventListener('click', addCheckinPlayer, true);
+    const saveCheck = document.getElementById('save-checkin-btn'); if (saveCheck) saveCheck.addEventListener('click', saveCheckin, true);
+    const clearCheck = document.getElementById('clear-checkin-btn'); if (clearCheck) clearCheck.onclick = e => { e.preventDefault(); const list = document.getElementById('checkin-selected-players'); if (list) list.innerHTML = ''; };
+    const checked = document.getElementById('checkin-selected-players'); if (checked) checked.addEventListener('click', e => { const b = e.target.closest('.remove-player-checkin'); if (b) { e.preventDefault(); b.closest('[data-player-id]')?.remove(); } }, true);
+    const photoBtn = document.getElementById('upload-team-photo-btn'); if (photoBtn) photoBtn.addEventListener('click', uploadTeamPhoto, true);
+    setTimeout(() => { applyAccess(); renderRoster(); }, 750);
+    setTimeout(() => { applyAccess(); renderRoster(); }, 1750);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind); else bind();
+  window.addEventListener('storage', () => { applyAccess(); renderRoster(); });
 })();
 </script>
 

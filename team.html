@@ -1681,9 +1681,32 @@ function initDOMReferences() {
 // Wrap all event listener setup
 
 function apiUrl(path) {
-    if (window.apiUrl) return window.apiUrl(path);
-    const backendBase = window.BACKEND_BASE || 'https://lamsl-backend.onrender.com';
-    return backendBase.replace(/\/$/, '') + (path.startsWith('/') ? path : '/' + path);
+    const backendBase = window.BACKEND_BASE || localStorage.getItem('LAMSL_BACKEND') || 'https://lamsl-backend.onrender.com';
+    if (!path) return backendBase;
+    if (String(path).startsWith('http://') || String(path).startsWith('https://')) return path;
+    return backendBase.replace(/\/$/, '') + (String(path).startsWith('/') ? path : '/' + path);
+}
+window.apiUrl = apiUrl;
+
+if (typeof window.apiHeaders !== 'function') {
+    window.apiHeaders = function(additionalHeaders) {
+        const headers = Object.assign({}, additionalHeaders || {});
+        const backendToken = localStorage.getItem('LAMSL_BACKEND_TOKEN');
+        const key = localStorage.getItem('LAMSL_ADMIN_KEY');
+        if (backendToken) headers.Authorization = 'Bearer ' + backendToken;
+        if (key) headers['x-admin-key'] = key;
+        try {
+            const session = JSON.parse(localStorage.getItem('lamslSessionV1') || 'null');
+            if (session && session.username && session.role) {
+                headers['x-lamsl-username'] = session.username;
+                headers['x-lamsl-role'] = String(session.role || '').toLowerCase().replace(/[_\s]+/g, '-');
+                headers['x-lamsl-session'] = 'active';
+                if (session.assignedTeam || session.team || session.teamName) headers['x-lamsl-assigned-team'] = session.assignedTeam || session.team || session.teamName;
+                if (session.assignedDivision || session.division) headers['x-lamsl-assigned-division'] = session.assignedDivision || session.division;
+            }
+        } catch (e) {}
+        return headers;
+    };
 }
 
 function parseDateKey(dateKey) {
@@ -2830,9 +2853,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   function cleanDivision(v){ return String(v || '').replace(/^division\s*/i, '').trim().toUpperCase(); }
   function esc(v){ return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
   function session(){ return readJson(SESSION_KEY, {}) || {}; }
-  function role(){ return norm(session().role).replace('_','-'); }
+  function role(){ return norm(session().role).replace(/[_\s]+/g,'-'); }
   function isAdmin(){ return ['admin','administrator'].includes(role()) || localStorage.getItem('lamslAdminAuthV1') === 'true'; }
-  function isManager(){ return ['team-manager','manager','team manager'].includes(role()); }
+  function isManager(){ return ['team-manager','manager'].includes(role()); }
   function pageTeam(){
     const qp = new URLSearchParams(location.search);
     return qp.get('team') || qp.get('teamName') || (typeof team !== 'undefined' ? team : '') || document.getElementById('team-title')?.textContent?.trim() || '';
@@ -2846,7 +2869,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   function canManage(){
     if (isAdmin()) return true;
     if (!isManager()) return false;
-    return norm(assignedTeam()) === norm(pageTeam()) && (!assignedDivision() || assignedDivision() === pageDivision());
+    const assigned = norm(assignedTeam());
+    if (!assigned) return false;
+    return assigned === norm(pageTeam()) && (!assignedDivision() || assignedDivision() === pageDivision());
   }
   window.canManageTeamContent = canManage;
   window.canCheckInPlayers = canManage;
@@ -2901,11 +2926,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   function applyAccess(){
     const allowed = canManage();
-    document.querySelectorAll('.manager-only,.team-photo-controls').forEach(el => { el.style.display = allowed ? '' : 'none'; });
+    document.querySelectorAll('.manager-only,.small-manager-panel,.team-photo-controls,.roster-controls').forEach(el => { el.style.display = allowed ? '' : 'none'; });
     ['team-manager-panel','roster-admin-panel','team-photo-upload-panel'].forEach(id => {
       const el = document.getElementById(id); if (el) el.style.display = allowed ? '' : 'none';
     });
-    document.querySelectorAll('#upload-roster-btn,#upload-team-photo-btn,#add-player-btn,#remove-player-btn,#save-player-btn').forEach(btn => { btn.disabled = !allowed; });
+    document.querySelectorAll('#upload-roster-btn,#upload-team-photo-btn,#add-player-btn,#remove-player-btn,#save-player-btn,#roster-file,#team-photo-file').forEach(el => { el.disabled = !allowed; });
     document.querySelectorAll('.checkin-game-btn,.check-in-game-btn').forEach(btn => { btn.style.display = allowed ? '' : 'none'; btn.disabled = !allowed; });
     const photoStatus = document.getElementById('team-photo-status');
     if (photoStatus) photoStatus.textContent = allowed ? 'Upload or replace this team profile photo.' : 'Sign in as an administrator or assigned Team Manager to upload a team photo.';
@@ -3091,6 +3116,35 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind); else bind();
   window.addEventListener('storage', () => { applyAccess(); renderRoster(); });
+})();
+</script>
+
+
+<script id="team-manager-access-self-heal">
+(function(){
+  function readSession(){ try { return JSON.parse(localStorage.getItem('lamslSessionV1') || 'null') || {}; } catch(e){ return {}; } }
+  function norm(v){ return String(v || '').trim().toLowerCase().replace(/[_\s]+/g,'-'); }
+  function cleanDiv(v){ return String(v || '').replace(/^division\s*/i,'').trim().toUpperCase(); }
+  function pageTeam(){ const q=new URLSearchParams(location.search); return q.get('team') || document.getElementById('team-title')?.textContent?.trim() || ''; }
+  function pageDivision(){ const q=new URLSearchParams(location.search); return cleanDiv(q.get('division') || document.getElementById('team-division-chip')?.textContent || ''); }
+  function canManage(){
+    const s=readSession(); const role=norm(s.role);
+    if (role === 'admin' || role === 'administrator' || localStorage.getItem('lamslAdminAuthV1') === 'true') return true;
+    if (role !== 'team-manager' && role !== 'manager') return false;
+    const assigned=String(s.assignedTeam || s.team || s.teamName || '').trim().toLowerCase();
+    const target=String(pageTeam() || '').trim().toLowerCase();
+    const assignedDiv=cleanDiv(s.assignedDivision || s.division || '');
+    return !!assigned && assigned === target && (!assignedDiv || assignedDiv === pageDivision());
+  }
+  function apply(){
+    const allowed=canManage();
+    document.querySelectorAll('.manager-only,.small-manager-panel,.team-photo-controls,.roster-controls').forEach(el=>{ el.style.display=allowed ? '' : 'none'; });
+    document.querySelectorAll('#add-player-btn,#remove-player-btn,#upload-roster-btn,#upload-team-photo-btn,#roster-file,#team-photo-file,#save-player-btn').forEach(el=>{ if(el) el.disabled=!allowed; });
+    document.querySelectorAll('.checkin-game-btn,.check-in-game-btn').forEach(el=>{ el.style.display=allowed ? '' : 'none'; el.disabled=!allowed; });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply); else apply();
+  setTimeout(apply, 300); setTimeout(apply, 1200); setTimeout(apply, 2500);
+  window.addEventListener('storage', apply);
 })();
 </script>
 

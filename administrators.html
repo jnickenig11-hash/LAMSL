@@ -701,6 +701,16 @@ input[type="submit"]:disabled{
                 <p class="admin-status" style="margin-top:10px;">
                     Manual scheduling rules: Sundays only, 8:00AM, 9:50AM, 11:45AM, 1:45PM time slots, one game per field/time slot, max 3 games per field/day.
                 </p>
+                <div class="admin-panel" style="margin-top:14px;">
+                    <h3>Schedule Upload & Preview</h3>
+                    <p class="admin-status">Upload an Excel file with columns for Date, Park, Time, and Teams. Teams can be entered as Team 1 vs Team 2.</p>
+                    <input id="schedule-upload-file" type="file" accept=".xlsx,.xls,.csv">
+                    <div class="score-actions">
+                        <button id="preview-uploaded-schedule-btn" type="button">Preview Uploaded Schedule</button>
+                        <button id="save-uploaded-schedule-btn" type="button" disabled>Add Uploaded Schedule</button>
+                    </div>
+                    <div id="uploaded-schedule-preview" class="admin-status" style="margin-top:10px;max-height:280px;overflow:auto;background:#fff;border:1px solid #d8e0e8;border-radius:8px;padding:10px;"></div>
+                </div>
 
             </div>
 
@@ -3307,7 +3317,7 @@ initializeAdminScheduleDashboard();
   'use strict';
   const BACKEND = ((window.BACKEND_BASE || window.LAMSL_BACKEND_URL || localStorage.getItem('LAMSL_BACKEND') || 'https://lamsl-backend.onrender.com') + '').replace(/\/$/, '');
   const LS = {
-    schedule: 'lamslWeeklyScheduleV3', practice: 'lamslPracticeScheduleV1', divisions: 'lamslDivisionsV1', season: 'lamslSeasonV1'
+    schedule: 'lamslWeeklyScheduleV3', practice: 'lamslPracticeScheduleV1', divisions: 'lamslDivisionsV1', season: 'lamslSeasonV1', standings: 'lamslStandingsV1'
   };
   const DIVISION_PAGES = { A:'divisionA.html', B:'divisionB.html', C:'divisionC.html', D:'divisionD.html', E:'divisionE.html', W1:'winter1.html', W2:'winter2.html' };
   const FALLBACK_TEAMS = {
@@ -3463,11 +3473,21 @@ initializeAdminScheduleDashboard();
     });
     return standings;
   }
+  function hasFinalScore(g){ return g && g.score1 !== '' && g.score2 !== '' && g.score1 != null && g.score2 != null && Number.isFinite(Number(g.score1)) && Number.isFinite(Number(g.score2)); }
+  function allScheduledGamesScored(games){
+    const active = (games || []).filter(g => g && g.team1 && g.team2 && String(g.status || 'scheduled').toLowerCase() !== 'cancelled');
+    return active.length > 0 && active.every(hasFinalScore);
+  }
+  function chooseStandingsForPersist(games){
+    if (allScheduledGamesScored(games)) return rebuildStandings(games);
+    const existing = (state.content && state.content.standings) || readJson(LS.standings, {});
+    return existing && Object.keys(existing).length ? existing : rebuildStandings(games);
+  }
   async function persist(patch){
     const next = Object.assign({}, state.content || {}, patch || {});
     next.divisions = state.teams;
     next.gameScores = (next.gameSchedules || []).filter(g => g.score1 !== '' && g.score2 !== '' && g.score1 != null && g.score2 != null);
-    next.standings = rebuildStandings(next.gameSchedules || []);
+    next.standings = chooseStandingsForPersist(next.gameSchedules || []);
     const res = await fetch(BACKEND + '/api/update', { method:'POST', headers: headers({'Content-Type':'application/json'}), body: JSON.stringify(next) });
     const result = await res.json().catch(() => ({}));
     if (!res.ok || result.success === false) throw new Error(result.error || `HTTP ${res.status}`);
@@ -3522,6 +3542,131 @@ initializeAdminScheduleDashboard();
       try { await persist({ season, activeSeason:season, seasonSettings:season }); writeJson(LS.season, season); if ($('auth-status')) $('auth-status').textContent = `${season.name} ${season.year} season saved to Render backend.`; renderSeasonDisplay(season); }
       catch(e){ writeJson(LS.season, season); if ($('auth-status')) $('auth-status').textContent = 'Backend season save failed; local fallback saved only: ' + e.message; }
     }, true);
+    let uploadedScheduleDraft = [];
+    function normalizeUploadedDate(value){
+      if (value == null || value === '') return '';
+      if (typeof value === 'number' && window.XLSX && XLSX.SSF) {
+        const parsed = XLSX.SSF.parse_date_code(value);
+        if (parsed) return `${parsed.y}-${String(parsed.m).padStart(2,'0')}-${String(parsed.d).padStart(2,'0')}`;
+      }
+      const raw = String(value).trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+      const d = new Date(raw);
+      if (!Number.isNaN(d.getTime())) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const m = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+      if (m) { const y = Number(m[3].length === 2 ? '20' + m[3] : m[3]); return `${y}-${String(m[1]).padStart(2,'0')}-${String(m[2]).padStart(2,'0')}`; }
+      return '';
+    }
+    function normalizeUploadedTime(value){
+      if (value == null || value === '') return '';
+      if (typeof value === 'number') {
+        const totalMinutes = Math.round(value * 24 * 60);
+        let hour = Math.floor(totalMinutes / 60) % 24;
+        const minute = totalMinutes % 60;
+        const suffix = hour >= 12 ? 'pm' : 'am';
+        hour = hour % 12 || 12;
+        return `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}${suffix}`;
+      }
+      let raw = String(value).trim().toLowerCase().replace(/\s+/g,'');
+      const m = raw.match(/^(\d{1,2})(?::?(\d{2}))?(am|pm)?$/);
+      if (!m) return raw;
+      let hour = Number(m[1]); const minute = m[2] || '00'; let suffix = m[3] || (hour >= 12 ? 'pm' : 'am');
+      if (!m[3] && hour < 8) suffix = 'pm';
+      if (hour > 12) { suffix = 'pm'; hour -= 12; }
+      return `${String(hour).padStart(2,'0')}:${minute}${suffix}`;
+    }
+    function getCell(row, names){
+      const lowerMap = {}; Object.keys(row || {}).forEach(k => lowerMap[String(k).toLowerCase().trim()] = row[k]);
+      for (const name of names) if (Object.prototype.hasOwnProperty.call(lowerMap, name)) return lowerMap[name];
+      return '';
+    }
+    const LAMSL_PARK_NAME_MAP = {
+      'stevenson': 'Carson - Stevenson Park',
+      'stevenson park': 'Carson - Stevenson Park',
+      'carson stevenson': 'Carson - Stevenson Park',
+      'carson stevenson park': 'Carson - Stevenson Park',
+      'dolphin': 'Carson - Dolphin Park',
+      'dolphin park': 'Carson - Dolphin Park',
+      'carson dolphin': 'Carson - Dolphin Park',
+      'carson dolphin park': 'Carson - Dolphin Park',
+      'calas': 'Carson - Calas Park',
+      'calas park': 'Carson - Calas Park',
+      'carson calas': 'Carson - Calas Park',
+      'carson calas park': 'Carson - Calas Park',
+      'veterans': 'Carson - Veterans Park',
+      'veteran': 'Carson - Veterans Park',
+      'veterans park': 'Carson - Veterans Park',
+      'veteran park': 'Carson - Veterans Park',
+      'carson veterans': 'Carson - Veterans Park',
+      'carson veterans park': 'Carson - Veterans Park',
+      'ford': 'Bell Gardens - Ford Park',
+      'ford park': 'Bell Gardens - Ford Park',
+      'bell gardens ford': 'Bell Gardens - Ford Park',
+      'bell gardens ford park': 'Bell Gardens - Ford Park'
+    };
+    function normalizeUploadedPark(value){
+      const original = String(value || '').trim();
+      if (!original) return '';
+      const key = original.toLowerCase()
+        .replace(/&/g, ' and ')
+        .replace(/[-–—]/g, ' ')
+        .replace(/[^a-z0-9 ]+/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (LAMSL_PARK_NAME_MAP[key]) return LAMSL_PARK_NAME_MAP[key];
+      const looseMatch = Object.keys(LAMSL_PARK_NAME_MAP).find(alias => key === alias || key.includes(alias));
+      return looseMatch ? LAMSL_PARK_NAME_MAP[looseMatch] : original;
+    }
+    function parseScheduleRows(rows){
+      return (rows || []).map((row, idx) => {
+        const teamsRaw = String(getCell(row, ['teams','matchup','game','team matchup','team 1 vs team 2']) || '').trim();
+        let team1 = String(getCell(row, ['team1','team 1','home','home team']) || '').trim();
+        let team2 = String(getCell(row, ['team2','team 2','visitor','visitor team','away','away team']) || '').trim();
+        if ((!team1 || !team2) && teamsRaw) {
+          const parts = teamsRaw.split(/\s+vs\.?\s+|\s+v\.?\s+|\s+versus\s+/i);
+          team1 = team1 || (parts[0] || '').trim(); team2 = team2 || (parts[1] || '').trim();
+        }
+        const game = {
+          id: `game-upload-${Date.now()}-${idx}`,
+          date: normalizeUploadedDate(getCell(row, ['date','game date','scheduled date'])),
+          park: normalizeUploadedPark(getCell(row, ['park','parks','field','location'])),
+          time: normalizeUploadedTime(getCell(row, ['time','game time','start time'])),
+          division: String(getCell(row, ['division','div']) || 'ALL').trim() || 'ALL',
+          team1, team2, score1:'', score2:'', status:'scheduled'
+        };
+        if (game.division.toUpperCase() === 'ALL') game.division = 'ALL';
+        return game;
+      }).filter(g => g.date && g.park && g.time && g.team1 && g.team2);
+    }
+    async function previewUploadedSchedule(){
+      const file = $('schedule-upload-file')?.files?.[0]; const box = $('uploaded-schedule-preview'); const saveBtn = $('save-uploaded-schedule-btn');
+      uploadedScheduleDraft = []; if (saveBtn) saveBtn.disabled = true;
+      if (!file) { if (box) box.textContent = 'Choose an Excel or CSV file first.'; return; }
+      if (!window.XLSX) { if (box) box.textContent = 'Spreadsheet parser did not load. Check internet access for the XLSX script.'; return; }
+      const buffer = await file.arrayBuffer();
+      const wb = XLSX.read(buffer, { type:'array', cellDates:true });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval:'' });
+      uploadedScheduleDraft = parseScheduleRows(rows);
+      if (!uploadedScheduleDraft.length) { if (box) box.textContent = 'No valid schedule rows found. Required columns: Date, Park, Time, Teams or Team 1 and Team 2.'; return; }
+      if (box) box.innerHTML = `<strong>${uploadedScheduleDraft.length} games ready to upload.</strong><table style="width:100%;border-collapse:collapse;margin-top:8px;"><thead><tr><th>Date</th><th>Time</th><th>Park</th><th>Teams</th><th>Division</th></tr></thead><tbody>${uploadedScheduleDraft.map(g => `<tr><td>${esc(g.date)}</td><td>${esc(g.time)}</td><td>${esc(g.park)}</td><td>${esc(g.team1)} vs ${esc(g.team2)}</td><td>${esc(g.division)}</td></tr>`).join('')}</tbody></table>`;
+      if (saveBtn) saveBtn.disabled = false;
+    }
+    async function saveUploadedSchedule(){
+      if (!uploadedScheduleDraft.length) { await previewUploadedSchedule(); if (!uploadedScheduleDraft.length) return; }
+      const existingKeys = new Set((state.games || []).map(g => `${g.date}|${g.time}|${g.park}|${g.team1}|${g.team2}`.toLowerCase()));
+      const additions = uploadedScheduleDraft.filter(g => !existingKeys.has(`${g.date}|${g.time}|${g.park}|${g.team1}|${g.team2}`.toLowerCase()));
+      if (!additions.length) { if ($('uploaded-schedule-preview')) $('uploaded-schedule-preview').textContent = 'All uploaded games already exist in the current schedule.'; return; }
+      try {
+        await persist({ gameSchedules: state.games.concat(additions) });
+        await loadAuthoritativeContent(); renderSelects();
+        if ($('uploaded-schedule-preview')) $('uploaded-schedule-preview').innerHTML = `<strong>${additions.length} uploaded games added to the Render backend.</strong>`;
+        uploadedScheduleDraft = []; if ($('save-uploaded-schedule-btn')) $('save-uploaded-schedule-btn').disabled = true;
+      } catch(e) { if ($('uploaded-schedule-preview')) $('uploaded-schedule-preview').textContent = 'Upload save failed: ' + e.message; }
+    }
+    $('preview-uploaded-schedule-btn')?.addEventListener('click', ev => { ev.preventDefault(); previewUploadedSchedule(); });
+    $('save-uploaded-schedule-btn')?.addEventListener('click', ev => { ev.preventDefault(); saveUploadedSchedule(); });
+    $('schedule-upload-file')?.addEventListener('change', () => { uploadedScheduleDraft = []; if ($('save-uploaded-schedule-btn')) $('save-uploaded-schedule-btn').disabled = true; if ($('uploaded-schedule-preview')) $('uploaded-schedule-preview').textContent = 'File selected. Select Preview Uploaded Schedule to review before saving.'; });
     $('refresh-admin-access')?.addEventListener('click', boot);
     $('practice-refresh-admin')?.addEventListener('click', boot);
   }

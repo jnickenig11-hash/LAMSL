@@ -62,10 +62,39 @@
     $('scoresList').innerHTML = scored.length ? scored.map(gameCard).join('') : '<div class="empty-state">No final scores have been posted yet.</div>';
   }
 
-  function buildStandingsFromGames(){
+  function hasFinalScore(game){ return game && game.score1 !== '' && game.score2 !== '' && game.score1 != null && game.score2 != null && Number.isFinite(Number(game.score1)) && Number.isFinite(Number(game.score2)); }
+  function allScheduledGamesScored(){
+    const games = (state.content.gameSchedules || []).filter(game => game && game.team1 && game.team2 && String(game.status || 'scheduled').toLowerCase() !== 'cancelled');
+    return games.length > 0 && games.every(hasFinalScore);
+  }
+  function divisionForTeam(team){
+    const divisions = state.content.divisions || state.content.teamsByDivision || {};
+    for (const [div, teams] of Object.entries(divisions)) if ((teams || []).includes(team)) return div;
+    const saved = state.content.standings || {};
+    for (const [div, rows] of Object.entries(saved)) if (rows && rows[team]) return div;
+    return 'All';
+  }
+  function calculateStandingsFromScores(){
     const standings = JSON.parse(JSON.stringify(state.content.standings || {}));
-    if (standings && Object.keys(standings).length) return standings;
-    return {};
+    Object.values(standings).forEach(rows => Object.values(rows || {}).forEach(row => { row.w=0; row.l=0; row.t=0; row.rf=0; row.ra=0; row.gp=0; }));
+    (state.content.gameSchedules || []).forEach(game => {
+      if (!hasFinalScore(game)) return;
+      const s1 = Number(game.score1), s2 = Number(game.score2);
+      [[game.team1, s1, s2], [game.team2, s2, s1]].forEach(([team, rf, ra]) => {
+        const div = divisionForTeam(team);
+        standings[div] = standings[div] || {};
+        const row = standings[div][team] = standings[div][team] || {w:0,l:0,t:0,rf:0,ra:0,gp:0};
+        row.gp += 1; row.rf += rf; row.ra += ra;
+        if (rf > ra) row.w += 1; else if (rf < ra) row.l += 1; else row.t += 1;
+      });
+    });
+    return standings;
+  }
+  function buildStandingsFromGames(){
+    const saved = JSON.parse(JSON.stringify(state.content.standings || {}));
+    if (allScheduledGamesScored()) return calculateStandingsFromScores();
+    if (saved && Object.keys(saved).length) return saved;
+    return calculateStandingsFromScores();
   }
 
   function pct(row){ const gp = Number(row.w||0)+Number(row.l||0)+Number(row.t||0); return gp ? ((Number(row.w||0)+(Number(row.t||0)*0.5))/gp).toFixed(3).replace(/^0/,'') : '.000'; }

@@ -275,6 +275,8 @@ class UploadHandler(SimpleHTTPRequestHandler):
             self._handle_upload(EF_IMAGES_DIR, "EF_Images", EF_META_FILE)
         elif route == "/upload-team-photo":
             self._handle_team_photo_upload()
+        elif route == "/api/upload-image":
+            self._handle_api_upload_image(parsed)
         elif route == "/notify-schedule-update":
             self._handle_schedule_notification()
         elif route == "/notify-announcement":
@@ -343,6 +345,57 @@ class UploadHandler(SimpleHTTPRequestHandler):
                 "caption": caption,
             },
         )
+
+
+    def _handle_api_upload_image(self, parsed) -> None:
+        """Compatibility endpoint used by administrators.html.
+        Saves Events/Fundraisers images to EF_Images and homepage images to SlideshowImages.
+        """
+        content_type = self.headers.get("Content-Type", "")
+        content_length = int(self.headers.get("Content-Length", "0"))
+        if "multipart/form-data" not in content_type or content_length <= 0:
+            self._json_response(400, {"success": False, "error": "Invalid upload request"})
+            return
+        body = self.rfile.read(content_length)
+        wrapped = (f"Content-Type: {content_type}\r\nMIME-Version: 1.0\r\n\r\n".encode("utf-8") + body)
+        message = BytesParser(policy=default).parsebytes(wrapped)
+        photo_part = None
+        caption = ""
+        destination_value = "homepage"
+        if message.is_multipart():
+            for part in message.iter_parts():
+                name = part.get_param("name", header="Content-Disposition")
+                if name in {"image", "photo"}:
+                    photo_part = part
+                elif name == "caption":
+                    caption = _sanitize_caption(part.get_content())
+                elif name in {"destination", "target", "imageType"}:
+                    destination_value = str(part.get_content() or "homepage").strip().lower()
+        query_destination = parse_qs(parsed.query).get("destination", [""])[0].strip().lower()
+        if query_destination:
+            destination_value = query_destination
+        is_events = destination_value in {"event", "events", "events/fundraisers", "events / fundraisers", "fundraiser", "fundraisers", "ef", "efimages", "ef_images"}
+        if photo_part is None:
+            self._json_response(400, {"success": False, "error": "No image file uploaded"})
+            return
+        raw_filename = photo_part.get_filename() or "upload.jpg"
+        safe_name = _safe_filename(raw_filename, photo_part.get_content_type())
+        ctype = (photo_part.get_content_type() or "").lower()
+        extension = Path(safe_name).suffix.lower()
+        if not ctype.startswith("image/") or extension not in IMAGE_EXTENSIONS:
+            self._json_response(400, {"success": False, "error": "Invalid image file type."})
+            return
+        target_dir = EF_IMAGES_DIR if is_events else SLIDESHOW_DIR
+        url_prefix = "EF_Images" if is_events else "SlideshowImages"
+        metadata_path = EF_META_FILE if is_events else SLIDESHOW_META_FILE
+        target_dir.mkdir(parents=True, exist_ok=True)
+        destination = _unique_path(target_dir, safe_name)
+        payload = photo_part.get_payload(decode=True) or b""
+        destination.write_bytes(payload)
+        metadata = _read_metadata(metadata_path)
+        metadata[destination.name] = {"caption": caption, "url": f"/{url_prefix}/{destination.name}", "path": f"/{url_prefix}/{destination.name}"}
+        _write_metadata(metadata_path, metadata)
+        self._json_response(200, {"success": True, "destination": "events" if is_events else "homepage", "folder": url_prefix, "filename": destination.name, "url": f"/{url_prefix}/{destination.name}", "path": f"/{url_prefix}/{destination.name}", "caption": caption})
 
     def _handle_remove_photo(self, target_dir: Path, metadata_path: Path) -> None:
         content_length = int(self.headers.get("Content-Length", "0"))

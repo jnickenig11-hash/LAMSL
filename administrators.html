@@ -1778,7 +1778,8 @@ async function uploadAdminSlideshowImage() {
     try {
         if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Uploading image...';
         await ensureBackendSessionToken();
-        const response = await fetch(apiUrl('/api/upload-image'), { method: 'POST', headers: window.apiHeaders(), body: formData });
+        const destinationForUpload = adminImageDestination?.value || 'homepage';
+        const response = await fetch(apiUrl('/api/upload-image?destination=' + encodeURIComponent(destinationForUpload)), { method: 'POST', headers: window.apiHeaders(), body: formData });
         const result = await response.json().catch(() => ({}));
         if (!response.ok || result.success === false) throw new Error(result.error || result.message || `HTTP ${response.status}`);
         scheduleContent = Object.assign(getDefaultBackendContent(), scheduleContent || {}, result.content || {});
@@ -1788,7 +1789,7 @@ async function uploadAdminSlideshowImage() {
         if (adminSlideshowCaption) adminSlideshowCaption.value = '';
         renderAdminSlideshowList();
         updateDashboardSummary?.();
-        if (slideshowUploadStatus) slideshowUploadStatus.textContent = (destination === 'events' ? 'Event/fundraiser image uploaded to EFimages.' : 'Homepage slideshow image uploaded and saved.');
+        if (slideshowUploadStatus) slideshowUploadStatus.textContent = (destination === 'events' ? 'Event/fundraiser image uploaded to the EFimages slideshow folder.' : 'Homepage slideshow image uploaded and saved.');
     } catch (error) {
         if (slideshowUploadStatus) slideshowUploadStatus.textContent = 'Image upload failed: ' + error.message;
     }

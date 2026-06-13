@@ -1489,6 +1489,7 @@ const PRACTICE_KEY = 'lamslPracticeScheduleV1';
 const ROSTER_KEY = 'lamslTeamRostersV1';
 const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
 const TEAM_CHECKIN_KEY = 'lamslTeamGameCheckinsV1';
+const TEAM_EMAIL_SUBSCRIBERS_KEY = 'lamslTeamEmailSubscribersV1';
 
 // Populate rosters from spreadsheet data
 (function() {
@@ -1775,7 +1776,7 @@ let teamTitle, teamSubtitle, teamDivisionChip, teamPhoto, teamPhotoPlaceholder, 
 
 let selectedGame = null;
 let selectedGameCheckins = [];
-let lamslTeamBackend = { content: null, rosters: {}, teamPlayers: {}, loaded: false };
+let lamslTeamBackend = { content: null, rosters: {}, teamPlayers: {}, teamSubscribers: {}, loaded: false };
 
 function hasUsableStandings(divisionRows) {
     if (!divisionRows) return false;
@@ -1794,12 +1795,14 @@ async function loadBackendTeamData() {
             content,
             rosters: rosterPayload.rosters || content.rosters || {},
             teamPlayers: rosterPayload.teamPlayers || content.teamPlayers || {},
+            teamSubscribers: rosterPayload.teamSubscribers || content.teamSubscribers || {},
             loaded: true
         };
         if (Array.isArray(content.gameSchedules)) writeJson(SCHEDULE_KEY, content.gameSchedules);
         if (Array.isArray(content.practiceSchedules)) writeJson(PRACTICE_KEY, content.practiceSchedules);
         if (content.rosters) writeJson(ROSTER_KEY, content.rosters);
         if (content.teamPlayers) writeJson(TEAM_PLAYERS_KEY, content.teamPlayers);
+        if (rosterPayload.teamSubscribers || content.teamSubscribers) writeJson(TEAM_EMAIL_SUBSCRIBERS_KEY, rosterPayload.teamSubscribers || content.teamSubscribers || {});
         return lamslTeamBackend;
     } catch (error) {
         console.warn('Team backend load failed; using local fallback.', error);
@@ -1811,7 +1814,8 @@ async function loadBackendTeamData() {
 async function saveBackendTeamData() {
     const payload = {
         rosters: lamslTeamBackend.rosters || readJson(ROSTER_KEY, {}),
-        teamPlayers: lamslTeamBackend.teamPlayers || readJson(TEAM_PLAYERS_KEY, {})
+        teamPlayers: lamslTeamBackend.teamPlayers || readJson(TEAM_PLAYERS_KEY, {}),
+        teamSubscribers: lamslTeamBackend.teamSubscribers || readJson(TEAM_EMAIL_SUBSCRIBERS_KEY, {})
     };
     const response = await fetch(apiUrl('/api/rosters'), {
         method: 'POST',
@@ -1824,8 +1828,10 @@ async function saveBackendTeamData() {
     }
     lamslTeamBackend.rosters = result.rosters || payload.rosters;
     lamslTeamBackend.teamPlayers = result.teamPlayers || payload.teamPlayers;
+    lamslTeamBackend.teamSubscribers = result.teamSubscribers || payload.teamSubscribers;
     writeJson(ROSTER_KEY, lamslTeamBackend.rosters);
     writeJson(TEAM_PLAYERS_KEY, lamslTeamBackend.teamPlayers);
+    writeJson(TEAM_EMAIL_SUBSCRIBERS_KEY, lamslTeamBackend.teamSubscribers);
     return result;
 }
 
@@ -2378,6 +2384,7 @@ async function savePlayer() {
     }
 
     setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
+    registerTeamEmailSubscribersFromPlayers(players);
     try {
         await saveBackendTeamData();
         rosterAdminStatus.textContent = existingIndex >= 0 ? `${name} profile updated and saved to backend.` : `${name} added to the roster and saved to backend.`;
@@ -2450,6 +2457,7 @@ async function removePlayer(id) {
     const store = getTeamPlayers();
     const players = (store.players || []).filter(item => item.id !== id);
     setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
+    registerTeamEmailSubscribersFromPlayers(players);
     try {
         await saveBackendTeamData();
         rosterAdminStatus.textContent = 'Player removed from roster and backend.';
@@ -2634,6 +2642,47 @@ function setTeamPlayers(record) {
     if (team) lamslTeamBackend.teamPlayers[team] = safeRecord;
 }
 
+
+function getTeamSubscriberKeys() {
+    const divKey = String(division || '').trim() || 'Unassigned';
+    const teamKey = String(team || '').trim();
+    const keys = [];
+    if (teamKey) keys.push(teamKey);
+    if (teamKey && divKey) keys.push(`${divKey}::${teamKey}`);
+    return keys;
+}
+
+function normalizeRosterEmail(value) {
+    const email = String(value || '').trim().toLowerCase();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : '';
+}
+
+function registerTeamEmailSubscribersFromPlayers(players) {
+    const emails = Array.from(new Set((players || []).map(p => normalizeRosterEmail(p.email || p.Email)).filter(Boolean)));
+    if (!emails.length) return 0;
+    const store = readJson(TEAM_EMAIL_SUBSCRIBERS_KEY, {});
+    const keys = getTeamSubscriberKeys();
+    keys.forEach(key => {
+        const existing = Array.isArray(store[key]) ? store[key] : [];
+        store[key] = Array.from(new Set(existing.concat(emails))).sort();
+    });
+    writeJson(TEAM_EMAIL_SUBSCRIBERS_KEY, store);
+    if (!lamslTeamBackend.teamSubscribers || typeof lamslTeamBackend.teamSubscribers !== 'object') lamslTeamBackend.teamSubscribers = {};
+    keys.forEach(key => {
+        const existing = Array.isArray(lamslTeamBackend.teamSubscribers[key]) ? lamslTeamBackend.teamSubscribers[key] : [];
+        lamslTeamBackend.teamSubscribers[key] = Array.from(new Set(existing.concat(emails))).sort();
+    });
+    return emails.length;
+}
+
+async function saveTeamEmailSubscribersToBackend() {
+    try {
+        await saveBackendTeamData();
+    } catch (error) {
+        console.warn('Team email subscriber backend save failed', error);
+    }
+}
+
 function setupEventListeners() {
     uploadRosterBtn.addEventListener('click', async () => {
     if (!canManageTeamContent()) {
@@ -2716,10 +2765,12 @@ function setupEventListeners() {
             setTeamPlayers({ players: currentPlayers, updatedAt: new Date().toLocaleString() });
         }
 
+        const subscribedEmailCount = registerTeamEmailSubscribersFromPlayers(currentPlayers);
+
         if (addedCount > 0) {
-            setRosterStatus(`Roster uploaded for ${team}. ${addedCount} new player(s) added; duplicates ignored.`, false, true);
+            setRosterStatus(`Roster uploaded for ${team}. ${addedCount} new player(s) added; duplicates ignored. ${subscribedEmailCount} email(s) registered for team schedule/score updates.`, false, true);
         } else {
-            setRosterStatus(`Roster uploaded for ${team}. No new players were added; duplicates were ignored.`, false, true);
+            setRosterStatus(`Roster uploaded for ${team}. No new players were added; duplicates were ignored. ${subscribedEmailCount} email(s) registered for team schedule/score updates.`, false, true);
         }
 
         await saveBackendTeamData();

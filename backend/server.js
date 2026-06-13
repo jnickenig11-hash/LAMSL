@@ -107,6 +107,8 @@ const uploadDir = path.join(persistentRoot, 'uploads');
 const slideshowDir = path.join(persistentRoot, 'SlideshowImages');
 const logsDir = path.join(persistentRoot, 'logs');
 const efDir = path.join(persistentRoot, 'EFimages');
+const legacyEfDir = path.join(persistentRoot, 'EF_Images');
+const bundledEfDir = path.join(projectRoot, 'EF_Images');
 const dataDir = path.join(persistentRoot, 'data');
 const teamProfileDir = path.join(persistentRoot, 'TeamProfileImages');
 const legacyTeamProfileDir = path.join(persistentRoot, 'teamProfile images');
@@ -125,6 +127,9 @@ if (!fs.existsSync(dataDir)) {
 }
 if (!fs.existsSync(efDir)) {
   fs.mkdirSync(efDir, { recursive: true });
+}
+if (!fs.existsSync(legacyEfDir)) {
+  fs.mkdirSync(legacyEfDir, { recursive: true });
 }
 if (!fs.existsSync(teamProfileDir)) {
   fs.mkdirSync(teamProfileDir, { recursive: true });
@@ -364,7 +369,11 @@ app.get('/slideshow-images', (req, res) => {
 app.use('/TeamProfileImages', express.static(teamProfileDir));
 app.use('/teamProfile images', express.static(legacyTeamProfileDir));
 app.use('/EFimages', express.static(efDir));
+app.use('/EFimages', express.static(legacyEfDir));
+app.use('/EFimages', express.static(bundledEfDir));
+app.use('/EF_Images', express.static(legacyEfDir));
 app.use('/EF_Images', express.static(efDir));
+app.use('/EF_Images', express.static(bundledEfDir));
 
 // Admin action logging endpoint
 app.post('/api/log-admin-action', requireAdminKey, (req, res) => {
@@ -529,11 +538,41 @@ function getMergedHomepageSlideshow(content) {
   });
 }
 
+
+function getMergedEventFundraiserImages(content) {
+  const contentImages = Array.isArray(content.eventFundraiserImages) ? content.eventFundraiserImages : [];
+  const metaImages = readEfMeta();
+  const diskImages = [];
+  const scanDirs = [
+    { dir: efDir, prefix: '/EFimages/' },
+    { dir: legacyEfDir, prefix: '/EF_Images/' },
+    { dir: bundledEfDir, prefix: '/EF_Images/' },
+    { dir: uploadDir, prefix: '/uploads/' }
+  ];
+  scanDirs.forEach(({ dir, prefix }) => {
+    try {
+      if (!fs.existsSync(dir)) return;
+      fs.readdirSync(dir)
+        .filter(name => /\.(jpe?g|png|gif|webp|bmp|svg|apng|avif|ico|jfif|tiff?|heic|heif)$/i.test(name))
+        .forEach(name => diskImages.push({ filename: name, name, url: prefix + name, path: prefix + name, caption: '' }));
+    } catch (e) {}
+  });
+  const seen = new Set();
+  return [...contentImages, ...metaImages, ...diskImages].filter(img => {
+    const raw = img?.filename || img?.name || img?.url || img?.src || img?.path || '';
+    const key = path.basename(String(raw).replace(/\\/g, '/')).toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 app.get('/api/content', (req, res) => {
   const content = readContent();
   res.json({
     ...content,
     slideshow: getMergedHomepageSlideshow(content),
+    eventFundraiserImages: getMergedEventFundraiserImages(content),
     deploymentVersion: '2026.06.05-stability-single-source-v1'
   });
 });
@@ -577,7 +616,7 @@ app.post('/api/update', requireAdminKey, async (req, res) => {
 });
 
 // ===== EF Images (Events) =====
-const efMetaFile = path.join(projectRoot, 'ef_images_metadata.json');
+const efMetaFile = path.join(dataDir, 'ef_images_metadata.json');
 function readEfMeta() {
   try {
     if (!fs.existsSync(efMetaFile)) return [];
@@ -609,7 +648,11 @@ const uploadEf = multer({ storage: multer.diskStorage({
 })});
 
 app.get('/ef-images', (req, res) => {
-  const images = readEfMeta();
+  const images = getMergedEventFundraiserImages(readContent());
+  res.json({ success: true, images });
+});
+app.get('/api/ef-images', (req, res) => {
+  const images = getMergedEventFundraiserImages(readContent());
   res.json({ success: true, images });
 });
 

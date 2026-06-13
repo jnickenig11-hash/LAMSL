@@ -672,6 +672,8 @@ const efUploadButton     = efUploadForm ? efUploadForm.querySelector('button[typ
 const efPrevBtn          = document.getElementById('ef-prev');
 const efNextBtn          = document.getElementById('ef-next');
 
+const LAMSL_BUNDLED_EF_IMAGES = [{"name": "20130711_194157000_iOS.jpg", "filename": "20130711_194157000_iOS.jpg", "path": "/EF_Images/20130711_194157000_iOS.jpg", "url": "/EF_Images/20130711_194157000_iOS.jpg", "caption": ""}];
+
 // ===== STORAGE HELPERS =====
 function readJson(key, fallback) {
     try {
@@ -798,7 +800,7 @@ efAnnForm.addEventListener('submit', (event) => {
     efAnnForm.reset();
     renderEFAnnouncements();
     setAnnouncementStatus('Announcement published successfully.');
-    notifyEventAnnouncement(title, date, message);
+    notifyEventAnnouncement(efAnnTitle.value.trim(), efAnnDate.value, efAnnMessage.value.trim());
 });
 
 // ===== SLIDESHOW =====
@@ -808,14 +810,15 @@ function getEFSlides() {
 
 function normalizeEFImage(item) {
     if (typeof item === 'string') {
-        const name = item.split('/').pop();
-        return { name, path: item.includes('/') ? item : `EF_Images/${item}`, caption: '' };
+        const raw = item.trim();
+        const name = raw.split('/').pop().split('?')[0];
+        return { name, path: raw, caption: '' };
     }
-    const rawPath = item.url || item.src || item.path || item.filename || item.name || '';
+    const rawPath = item.imageUrl || item.imageURL || item.publicUrl || item.publicURL || item.url || item.src || item.path || item.filePath || item.filename || item.name || '';
     const name = item.filename || item.name || String(rawPath).split('/').pop().split('?')[0] || '';
     return {
         name,
-        path: rawPath,
+        path: rawPath || name,
         caption: item.caption || item.title || item.originalName || ''
     };
 }
@@ -824,7 +827,21 @@ function resolveEFImageSrc(path) {
     const raw = String(path || '').trim();
     if (!raw) return '';
     if (/^(https?:|data:|blob:)/i.test(raw)) return raw;
+
+    // Administrator uploads are stored on the backend.  Do not resolve these
+    // paths against www.lamsl.com, because the uploaded files are served by
+    // the Render backend/static upload endpoint.
     if (raw.startsWith('/')) return apiUrl(raw);
+    if (/^(EF_Images|EFimages|EventImages|SlideshowImages|uploads|uploaded-images|images)\//i.test(raw)) {
+        return apiUrl('/' + raw.replace(/^\/+/, ''));
+    }
+
+    // If the backend content record only saved the filename, treat it as an
+    // Events/Fundraisers gallery image.
+    if (/\.(jpe?g|png|gif|webp|bmp|svg|apng|avif|ico|jfif|tiff?|heic|heif)(\?.*)?$/i.test(raw)) {
+        return apiUrl('/EF_Images/' + raw);
+    }
+
     return raw;
 }
 
@@ -835,6 +852,19 @@ function createEFSlideElement(image) {
     const img = document.createElement('img');
     img.src = resolveEFImageSrc(image.path);
     img.alt = image.caption || image.name || 'Event Photo';
+    img.dataset.fallbackStep = '0';
+    img.addEventListener('error', () => {
+        const step = Number(img.dataset.fallbackStep || '0');
+        const filename = image.name || String(image.path || '').split('/').pop();
+        const candidates = [
+            filename ? apiUrl('/EFimages/' + filename) : '',
+            filename ? apiUrl('/EF_Images/' + filename) : '',
+            String(image.path || '')
+        ].filter(Boolean);
+        const next = candidates[step];
+        img.dataset.fallbackStep = String(step + 1);
+        if (next && img.src !== next) img.src = next;
+    });
     slide.appendChild(img);
 
     if (image.caption) {
@@ -918,27 +948,79 @@ function buildEFSlides(images) {
     efCurrentSlide = 0;
 }
 
-async function loadEFImages() {
-    try {
-        const contentResponse = await fetch(apiUrl('/api/content'), { cache: 'no-store' });
-        const contentResult = await contentResponse.json().catch(() => ({}));
-        const content = contentResult.content || contentResult || {};
-        const images = Array.isArray(content.eventFundraiserImages) ? content.eventFundraiserImages : [];
-        if (contentResponse.ok && images.length) {
-            buildEFSlides(images);
-            return;
-        }
-    } catch (e) {
-        // Fall back to legacy endpoint below.
-    }
+function dedupeEFImages(images) {
+    const seen = new Set();
+    return (images || []).map(normalizeEFImage).filter(image => {
+        const key = String(image.name || image.path || '').split('/').pop().toLowerCase();
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
 
+function extractEFImagesFromPayload(payload) {
+    const result = payload || {};
+    const content = result.content || result.data || result || {};
+    const out = [];
+    const pushArray = arr => { if (Array.isArray(arr)) out.push(...arr); };
+    pushArray(content.eventFundraiserImages);
+    pushArray(content.eventImages);
+    pushArray(content.efImages);
+    pushArray(content.eventPhotos);
+    pushArray(content.eventsPhotos);
+    pushArray(content.galleryImages);
+    pushArray(content.eventsGallery);
+    pushArray(result.images);
+    pushArray(result.eventFundraiserImages);
+    pushArray(result.eventImages);
+    pushArray(result.efImages);
+    if (Array.isArray(content.slideshow)) {
+        out.push(...content.slideshow.filter(item => {
+            const destination = String(item?.destination || item?.target || item?.imageType || '').toLowerCase();
+            const raw = String(item?.url || item?.path || item?.src || item?.filename || item?.name || '').toLowerCase();
+            return destination.includes('event') || destination.includes('fundraiser') || destination === 'ef' || raw.includes('efimage') || raw.includes('event');
+        }));
+    }
+    return out;
+}
+
+async function fetchEFImagesFrom(path, timeoutMs = 3500) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-        const response = await fetch(apiUrl('/ef-images'), { cache: 'no-store' });
-        const result = await response.json();
-        if (!response.ok || !result.success || !Array.isArray(result.images)) return;
-        buildEFSlides(result.images);
-    } catch (e) {
-        // Server may not be running; silently keep placeholder.
+        const response = await fetch(apiUrl(path) + (path.includes('?') ? '&' : '?') + '_=' + Date.now(), {
+            cache: 'no-store',
+            signal: controller.signal
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) return [];
+        return extractEFImagesFromPayload(result);
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
+function getImmediateEFImages() {
+    const localContent = readJson('lamslBackendContentV1', null) || readJson('lamslContentV1', null) || null;
+    let images = [];
+    images = images.concat(extractEFImagesFromPayload(localContent));
+    if (Array.isArray(LAMSL_BUNDLED_EF_IMAGES)) images = images.concat(LAMSL_BUNDLED_EF_IMAGES);
+    return dedupeEFImages(images);
+}
+
+async function loadEFImages() {
+    let collected = getImmediateEFImages();
+    if (collected.length) buildEFSlides(collected);
+
+    const sources = ['/api/ef-images', '/ef-images', '/api/content'];
+    for (const source of sources) {
+        try {
+            const images = await fetchEFImagesFrom(source);
+            if (images.length) {
+                collected = dedupeEFImages(collected.concat(images));
+                buildEFSlides(collected);
+            }
+        } catch (e) {}
     }
 }
 

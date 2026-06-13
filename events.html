@@ -813,11 +813,16 @@ function normalizeEFImage(item) {
         const raw = item.trim();
         const name = raw.split('/').pop().split('?')[0];
         return { name, path: raw, caption: '' };
+        const raw = item.trim();
+        const name = raw.split('/').pop().split('?')[0];
+        return { name, path: raw, caption: '' };
     }
+    const rawPath = item.imageUrl || item.imageURL || item.publicUrl || item.publicURL || item.url || item.src || item.path || item.filePath || item.filename || item.name || '';
     const rawPath = item.imageUrl || item.imageURL || item.publicUrl || item.publicURL || item.url || item.src || item.path || item.filePath || item.filename || item.name || '';
     const name = item.filename || item.name || String(rawPath).split('/').pop().split('?')[0] || '';
     return {
         name,
+        path: rawPath || name,
         path: rawPath || name,
         caption: item.caption || item.title || item.originalName || ''
     };

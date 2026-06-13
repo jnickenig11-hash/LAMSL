@@ -17,6 +17,7 @@ const ALL_PARKS = ['Carson - Stevenson Park','Bell Gardens - Ford Park', 'Carson
 const GAME_TIME_SLOTS = ['08:00am', '09:50am', '11:45am','01:45pm'];
 const ALLOWED_GAME_DAYS = [0]; // Sundays only
 const CHECKINS_KEY = 'lamslGameCheckinsV1';
+const TEAM_EMAIL_SUBSCRIBERS_KEY = 'lamslTeamEmailSubscribersV1';
 
 const STANDINGS_KEY = 'lamslStandingsV1';
 
@@ -92,10 +93,62 @@ function apiUrl(path) {
     return backendBase.replace(/\/$/, '') + (path.startsWith('/') ? path : '/' + path);
 }
 
+function normalizeScheduleEmail(value) {
+    const email = String(value || '').trim().toLowerCase();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : '';
+}
+
+function collectEmailsFromTeamPlayers(teamName, divisionName, teamPlayers) {
+    const emails = [];
+    const keys = [teamName, divisionName && teamName ? `${divisionName}::${teamName}` : ''].filter(Boolean);
+    keys.forEach(key => {
+        const record = teamPlayers && teamPlayers[key];
+        const players = Array.isArray(record) ? record : (record && Array.isArray(record.players) ? record.players : []);
+        players.forEach(player => {
+            const email = normalizeScheduleEmail(player.email || player.Email || player['Email Address']);
+            if (email) emails.push(email);
+        });
+    });
+    return emails;
+}
+
+async function getTeamUpdateRecipients(game) {
+    const team1 = String(game && game.team1 || '').trim();
+    const team2 = String(game && game.team2 || '').trim();
+    const divisionName = String(game && game.division || '').trim();
+    const localSubscribers = readJson(TEAM_EMAIL_SUBSCRIBERS_KEY, {});
+    let backendSubscribers = {};
+    let backendPlayers = {};
+
+    try {
+        const response = await fetch(apiUrl('/api/rosters'), { cache: 'no-store', headers: (window.apiHeaders || (() => ({})))() });
+        if (response.ok) {
+            const result = await response.json().catch(() => ({}));
+            backendSubscribers = result.teamSubscribers || {};
+            backendPlayers = result.teamPlayers || {};
+        }
+    } catch (error) {
+        console.warn('Team subscriber lookup failed; using local fallback.', error);
+    }
+
+    const recipients = [];
+    [team1, team2].filter(Boolean).forEach(teamName => {
+        [teamName, divisionName ? `${divisionName}::${teamName}` : ''].filter(Boolean).forEach(key => {
+            (Array.isArray(localSubscribers[key]) ? localSubscribers[key] : []).forEach(email => recipients.push(normalizeScheduleEmail(email)));
+            (Array.isArray(backendSubscribers[key]) ? backendSubscribers[key] : []).forEach(email => recipients.push(normalizeScheduleEmail(email)));
+        });
+        collectEmailsFromTeamPlayers(teamName, divisionName, backendPlayers).forEach(email => recipients.push(email));
+    });
+
+    return Array.from(new Set(recipients.filter(Boolean)));
+}
+
 async function notifyScheduleUpdate(game, action) {
+    const recipients = await getTeamUpdateRecipients(game || {});
     const payload = {
         action: action || 'updated',
-        game: game || {}
+        game: game || {},
+        recipients
     };
 
     try {

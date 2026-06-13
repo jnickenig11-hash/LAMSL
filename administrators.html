@@ -3347,6 +3347,33 @@ initializeAdminScheduleDashboard();
     if (session && (session.role === 'admin' || session.role === 'umpire')) { h['x-lamsl-role'] = session.role; h['x-lamsl-session'] = 'active'; }
     return h;
   }
+
+  const TEAM_EMAIL_SUBSCRIBERS_KEY = 'lamslTeamEmailSubscribersV1';
+  function normalizeScheduleEmail(value){ const email=String(value||'').trim().toLowerCase(); return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : ''; }
+  function collectPlayerEmails(teamName, divisionName, teamPlayers){
+    const emails=[]; [teamName, divisionName && teamName ? `${divisionName}::${teamName}` : ''].filter(Boolean).forEach(key=>{
+      const rec=teamPlayers && teamPlayers[key]; const players=Array.isArray(rec) ? rec : (rec && Array.isArray(rec.players) ? rec.players : []);
+      players.forEach(p=>{ const e=normalizeScheduleEmail(p.email||p.Email||p['Email Address']); if(e) emails.push(e); });
+    });
+    return emails;
+  }
+  async function getTeamUpdateRecipients(game){
+    const team1=String(game&&game.team1||'').trim(), team2=String(game&&game.team2||'').trim(), div=String(game&&game.division||'').trim();
+    const local=readJson(TEAM_EMAIL_SUBSCRIBERS_KEY, {}); let backendSubs={}, backendPlayers={};
+    try { const r=await fetch(BACKEND + '/api/rosters', { cache:'no-store', headers: headers() }); if(r.ok){ const data=await r.json().catch(()=>({})); backendSubs=data.teamSubscribers||{}; backendPlayers=data.teamPlayers||{}; } } catch(e){ console.warn('Team subscriber lookup failed', e); }
+    const recipients=[]; [team1,team2].filter(Boolean).forEach(t=>{
+      [t, div ? `${div}::${t}` : ''].filter(Boolean).forEach(k=>{ (Array.isArray(local[k])?local[k]:[]).forEach(e=>recipients.push(normalizeScheduleEmail(e))); (Array.isArray(backendSubs[k])?backendSubs[k]:[]).forEach(e=>recipients.push(normalizeScheduleEmail(e))); });
+      collectPlayerEmails(t, div, backendPlayers).forEach(e=>recipients.push(e));
+    });
+    return [...new Set(recipients.filter(Boolean))];
+  }
+  async function notifyTeamScheduleUpdate(game, action){
+    try {
+      const recipients = await getTeamUpdateRecipients(game || {});
+      await fetch(BACKEND + '/notify-schedule-update', { method:'POST', headers: headers({'Content-Type':'application/json'}), body: JSON.stringify({ action: action || 'updated', game: game || {}, recipients }) });
+    } catch(e){ console.warn('Team schedule notification failed', e); }
+  }
+
   async function fetchJson(url){ try { const r = await fetch(url, { cache:'no-store' }); return r.ok ? await r.json() : null; } catch(e){ return null; } }
   async function fetchText(url){ try { const r = await fetch(url, { cache:'no-store' }); return r.ok ? await r.text() : ''; } catch(e){ return ''; } }
   function normDiv(v){
@@ -3511,7 +3538,7 @@ initializeAdminScheduleDashboard();
       const game = { id: 'game-' + Date.now(), date:$('game-date')?.value, time:$('game-time')?.value, park:$('game-park')?.value, division:$('game-division')?.value || 'ALL', team1:$('game-team1')?.value, team2:$('game-team2')?.value, status:$('game-status')?.value || 'scheduled', score1:'', score2:'' };
       if (!game.date || !game.time || !game.park || !game.team1 || !game.team2) { if ($('admin-status')) $('admin-status').textContent = 'Complete date, time, park, and both teams.'; return; }
       if (game.team1 === game.team2) { if ($('admin-status')) $('admin-status').textContent = 'Select two different teams.'; return; }
-      try { await persist({ gameSchedules: state.games.concat(game) }); await loadAuthoritativeContent(); renderSelects(); $('schedule-form')?.reset(); if ($('admin-status')) $('admin-status').textContent = 'Scheduled game saved to Render backend.'; }
+      try { await persist({ gameSchedules: state.games.concat(game) }); await notifyTeamScheduleUpdate(game, 'scheduled'); await loadAuthoritativeContent(); renderSelects(); $('schedule-form')?.reset(); if ($('admin-status')) $('admin-status').textContent = 'Scheduled game saved to Render backend.'; }
       catch(e){ writeJson(LS.schedule, state.games.concat(game)); if ($('admin-status')) $('admin-status').textContent = 'Backend save failed; local fallback saved only: ' + e.message; }
     }, true);
     $('score-form')?.addEventListener('submit', async ev => {
@@ -3519,7 +3546,7 @@ initializeAdminScheduleDashboard();
       const id = $('scheduled-game-select')?.value; const g = state.games.find(x => String(x.id) === String(id));
       if (!g) { if ($('score-admin-status')) $('score-admin-status').textContent = 'Select a scheduled game.'; return; }
       g.score1 = $('score-team1')?.value; g.score2 = $('score-team2')?.value;
-      try { await persist({ gameSchedules: state.games }); await loadAuthoritativeContent(); renderSelects(); $('score-form')?.reset(); if ($('score-admin-status')) $('score-admin-status').textContent = 'Score saved to Render backend and standings recalculated.'; }
+      try { await persist({ gameSchedules: state.games }); await notifyTeamScheduleUpdate(g, 'score updated'); await loadAuthoritativeContent(); renderSelects(); $('score-form')?.reset(); if ($('score-admin-status')) $('score-admin-status').textContent = 'Score saved to Render backend and standings recalculated.'; }
       catch(e){ writeJson(LS.schedule, state.games); if ($('score-admin-status')) $('score-admin-status').textContent = 'Backend save failed; local fallback saved only: ' + e.message; }
     }, true);
     $('delete-scheduled-game-btn')?.addEventListener('click', async ev => {

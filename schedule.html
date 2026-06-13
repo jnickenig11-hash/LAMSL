@@ -1787,6 +1787,7 @@ scoreForm.addEventListener('submit', event => {
     renderScheduledGameOptions();
     renderScoresList();
     scoreAdminStatus.textContent = `Score saved for Team 1: ${game.team1} vs Team 2: ${game.team2}.`;
+    notifyScheduleUpdate(game, 'score updated');
 });
 
 scheduledGameSelect.addEventListener('change', () => {

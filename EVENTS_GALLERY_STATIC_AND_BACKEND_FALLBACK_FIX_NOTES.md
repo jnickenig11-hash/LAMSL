@@ -1,0 +1,1 @@
+Events gallery fix: events.html now loads event/fundraiser photos from same-origin APIs, Render backend APIs, legacy content keys, slideshow records marked as events, bundled EF_Images files, /EFimages, /EF_Images, and /uploads fallbacks. Backend EF metadata now stores under persistent data storage and event image listing scans upload fallback storage.

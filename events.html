@@ -633,16 +633,7 @@ input[type="submit"]:disabled{
                     <button id="ef-prev">&lt;</button>
                     <button id="ef-next">&gt;</button>
                 </div>
-                <div class="upload-form">
-                    <h3>Upload Event Photo</h3>
-                    <form id="ef-upload-form" enctype="multipart/form-data">
-                        <input id="ef-photo-input" type="file" name="photo" accept="image/*" required>
-                        <input id="ef-caption-input" type="text" name="caption" maxlength="180" placeholder="Add photo caption">
-                        <button type="submit">Upload</button>
-                        <button id="ef-remove-btn" type="button">Remove Current Photo</button>
-                    </form>
-                    <p id="ef-upload-status"><em>Admin sign-in required to upload photos.</em></p>
-                </div>
+                <!-- Event photos are uploaded and managed from administrators.html only. -->
             </div>
         </div>
 
@@ -672,12 +663,12 @@ const efAnnDate          = document.getElementById('ef-ann-date');
 const efAnnMessage       = document.getElementById('ef-ann-message');
 const efAnnStatus        = document.getElementById('ef-ann-status');
 const efUploadForm       = document.getElementById('ef-upload-form');
-const efUploadPanel      = efUploadForm.closest('.upload-form');
+const efUploadPanel      = efUploadForm ? efUploadForm.closest('.upload-form') : null;
 const efPhotoInput       = document.getElementById('ef-photo-input');
 const efCaptionInput     = document.getElementById('ef-caption-input');
 const efRemoveBtn        = document.getElementById('ef-remove-btn');
 const efUploadStatus     = document.getElementById('ef-upload-status');
-const efUploadButton     = efUploadForm.querySelector('button[type="submit"]');
+const efUploadButton     = efUploadForm ? efUploadForm.querySelector('button[type="submit"]') : null;
 const efPrevBtn          = document.getElementById('ef-prev');
 const efNextBtn          = document.getElementById('ef-next');
 
@@ -772,14 +763,12 @@ function applyAdminPanel() {
     const isAdmin = isAdminLoggedIn();
     efAdminPanel.style.display = isAdmin ? 'block' : 'none';
 
-    efPhotoInput.disabled = !isAdmin;
-    efCaptionInput.disabled = !isAdmin;
-    efRemoveBtn.disabled = !isAdmin;
-    efUploadButton.disabled = !isAdmin;
-    efUploadPanel.style.display = isAdmin ? 'block' : 'none';
-    efUploadStatus.textContent = isAdmin
-        ? 'Uploads are saved to the EF_Images folder. Add an optional caption before uploading or remove the current photo.'
-        : 'Slideshow is visible to all users. Sign in as admin at administrators.html to upload/remove photos and edit captions.';
+    if (efPhotoInput) efPhotoInput.disabled = true;
+    if (efCaptionInput) efCaptionInput.disabled = true;
+    if (efRemoveBtn) efRemoveBtn.disabled = true;
+    if (efUploadButton) efUploadButton.disabled = true;
+    if (efUploadPanel) efUploadPanel.style.display = 'none';
+    if (efUploadStatus) efUploadStatus.textContent = 'Event photos are managed from the Administrator page.';
 }
 
 window.addEventListener('storage', (event) => {
@@ -819,13 +808,24 @@ function getEFSlides() {
 
 function normalizeEFImage(item) {
     if (typeof item === 'string') {
-        return { name: item, path: `EF_Images/${item}`, caption: '' };
+        const name = item.split('/').pop();
+        return { name, path: item.includes('/') ? item : `EF_Images/${item}`, caption: '' };
     }
+    const rawPath = item.url || item.src || item.path || item.filename || item.name || '';
+    const name = item.filename || item.name || String(rawPath).split('/').pop().split('?')[0] || '';
     return {
-        name: item.name || '',
-        path: item.path || '',
-        caption: item.caption || ''
+        name,
+        path: rawPath,
+        caption: item.caption || item.title || item.originalName || ''
     };
+}
+
+function resolveEFImageSrc(path) {
+    const raw = String(path || '').trim();
+    if (!raw) return '';
+    if (/^(https?:|data:|blob:)/i.test(raw)) return raw;
+    if (raw.startsWith('/')) return apiUrl(raw);
+    return raw;
 }
 
 function createEFSlideElement(image) {
@@ -833,7 +833,7 @@ function createEFSlideElement(image) {
     slide.className = 'slide';
 
     const img = document.createElement('img');
-    img.src = image.path;
+    img.src = resolveEFImageSrc(image.path);
     img.alt = image.caption || image.name || 'Event Photo';
     slide.appendChild(img);
 
@@ -920,6 +920,19 @@ function buildEFSlides(images) {
 
 async function loadEFImages() {
     try {
+        const contentResponse = await fetch(apiUrl('/api/content'), { cache: 'no-store' });
+        const contentResult = await contentResponse.json().catch(() => ({}));
+        const content = contentResult.content || contentResult || {};
+        const images = Array.isArray(content.eventFundraiserImages) ? content.eventFundraiserImages : [];
+        if (contentResponse.ok && images.length) {
+            buildEFSlides(images);
+            return;
+        }
+    } catch (e) {
+        // Fall back to legacy endpoint below.
+    }
+
+    try {
         const response = await fetch(apiUrl('/ef-images'), { cache: 'no-store' });
         const result = await response.json();
         if (!response.ok || !result.success || !Array.isArray(result.images)) return;
@@ -941,7 +954,7 @@ efNextBtn.addEventListener('click', () => {
     showEFSlide((efCurrentSlide + 1) % slides.length);
 });
 
-efRemoveBtn.addEventListener('click', async () => {
+efRemoveBtn?.addEventListener('click', async () => {
     if (!isAdminLoggedIn()) {
         efUploadStatus.textContent = 'Admin sign-in required to remove photos.';
         return;
@@ -995,7 +1008,7 @@ efIndicators.addEventListener('click', (event) => {
     if (!Number.isNaN(index)) showEFSlide(index);
 });
 
-efUploadForm.addEventListener('submit', async (event) => {
+efUploadForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (!isAdminLoggedIn()) {
         efUploadStatus.textContent = 'Admin sign-in required for uploads.';

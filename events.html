@@ -808,14 +808,15 @@ function getEFSlides() {
 
 function normalizeEFImage(item) {
     if (typeof item === 'string') {
-        const name = item.split('/').pop();
-        return { name, path: item.includes('/') ? item : `EF_Images/${item}`, caption: '' };
+        const raw = item.trim();
+        const name = raw.split('/').pop().split('?')[0];
+        return { name, path: raw, caption: '' };
     }
-    const rawPath = item.url || item.src || item.path || item.filename || item.name || '';
+    const rawPath = item.imageUrl || item.imageURL || item.publicUrl || item.publicURL || item.url || item.src || item.path || item.filePath || item.filename || item.name || '';
     const name = item.filename || item.name || String(rawPath).split('/').pop().split('?')[0] || '';
     return {
         name,
-        path: rawPath,
+        path: rawPath || name,
         caption: item.caption || item.title || item.originalName || ''
     };
 }
@@ -824,7 +825,21 @@ function resolveEFImageSrc(path) {
     const raw = String(path || '').trim();
     if (!raw) return '';
     if (/^(https?:|data:|blob:)/i.test(raw)) return raw;
+
+    // Administrator uploads are stored on the backend.  Do not resolve these
+    // paths against www.lamsl.com, because the uploaded files are served by
+    // the Render backend/static upload endpoint.
     if (raw.startsWith('/')) return apiUrl(raw);
+    if (/^(EF_Images|EFimages|EventImages|SlideshowImages|uploads|uploaded-images|images)\//i.test(raw)) {
+        return apiUrl('/' + raw.replace(/^\/+/, ''));
+    }
+
+    // If the backend content record only saved the filename, treat it as an
+    // Events/Fundraisers gallery image.
+    if (/\.(jpe?g|png|gif|webp|bmp|svg|apng|avif|ico|jfif|tiff?|heic|heif)(\?.*)?$/i.test(raw)) {
+        return apiUrl('/EF_Images/' + raw);
+    }
+
     return raw;
 }
 

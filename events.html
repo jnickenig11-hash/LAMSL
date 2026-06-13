@@ -646,35 +646,32 @@ input[type="submit"]:disabled{
 </footer>
 
 <script>
-const USERS_KEY      = 'lamslUsersV1';
-const SESSION_KEY    = 'lamslSessionV1';
-const EF_ANN_KEY     = 'lamslEFAnnouncementsV1';
+const SESSION_KEY = 'lamslSessionV1';
+const EF_ANN_KEY = 'lamslEFAnnouncementsV1';
+const LEGACY_ANN_KEYS = ['lamslAnnouncementsV1', 'lamslEFAnnouncementsV1'];
 
 let efCurrentSlide = 0;
 let efSlideImages = [];
-const efSlidesContainer  = document.getElementById('ef-slides');
-const efIndicators       = document.getElementById('ef-indicators');
-const efPlaceholder      = document.getElementById('ef-placeholder');
-const efAnnList          = document.getElementById('ef-announcements-list');
-const efAdminPanel       = document.getElementById('ef-admin-panel');
-const efAnnForm          = document.getElementById('ef-ann-form');
-const efAnnTitle         = document.getElementById('ef-ann-title');
-const efAnnDate          = document.getElementById('ef-ann-date');
-const efAnnMessage       = document.getElementById('ef-ann-message');
-const efAnnStatus        = document.getElementById('ef-ann-status');
-const efUploadForm       = document.getElementById('ef-upload-form');
-const efUploadPanel      = efUploadForm ? efUploadForm.closest('.upload-form') : null;
-const efPhotoInput       = document.getElementById('ef-photo-input');
-const efCaptionInput     = document.getElementById('ef-caption-input');
-const efRemoveBtn        = document.getElementById('ef-remove-btn');
-const efUploadStatus     = document.getElementById('ef-upload-status');
-const efUploadButton     = efUploadForm ? efUploadForm.querySelector('button[type="submit"]') : null;
-const efPrevBtn          = document.getElementById('ef-prev');
-const efNextBtn          = document.getElementById('ef-next');
+let efAnnouncements = [];
 
-const LAMSL_BUNDLED_EF_IMAGES = [{"name": "20130711_194157000_iOS.jpg", "filename": "20130711_194157000_iOS.jpg", "path": "/EF_Images/20130711_194157000_iOS.jpg", "url": "/EF_Images/20130711_194157000_iOS.jpg", "caption": ""}];
+const efSlidesContainer = document.getElementById('ef-slides');
+const efIndicators = document.getElementById('ef-indicators');
+const efPlaceholder = document.getElementById('ef-placeholder');
+const efAnnList = document.getElementById('ef-announcements-list');
+const efAdminPanel = document.getElementById('ef-admin-panel');
+const efAnnForm = document.getElementById('ef-ann-form');
+const efAnnTitle = document.getElementById('ef-ann-title');
+const efAnnDate = document.getElementById('ef-ann-date');
+const efAnnMessage = document.getElementById('ef-ann-message');
+const efAnnStatus = document.getElementById('ef-ann-status');
+const efPrevBtn = document.getElementById('ef-prev');
+const efNextBtn = document.getElementById('ef-next');
 
-// ===== STORAGE HELPERS =====
+// Static files already deployed with the website. These render immediately so the gallery is not blocked by backend calls.
+const LAMSL_BUNDLED_EF_IMAGES = [
+    { name: '20130711_194157000_iOS.jpg', filename: '20130711_194157000_iOS.jpg', path: 'EF_Images/20130711_194157000_iOS.jpg', url: 'EF_Images/20130711_194157000_iOS.jpg', caption: '' }
+];
+
 function readJson(key, fallback) {
     try {
         const raw = localStorage.getItem(key);
@@ -685,21 +682,162 @@ function readJson(key, fallback) {
 }
 
 function writeJson(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
 }
 
 function isAdminLoggedIn() {
     const session = readJson(SESSION_KEY, null);
-    return !!(session && session.role === 'admin');
+    const role = String(session?.role || '').toLowerCase().replace('_', '-');
+    return !!(session && (role === 'admin' || role === 'administrator'));
+}
+
+function backendBase() {
+    return String(window.BACKEND_BASE || 'https://lamsl-backend.onrender.com').replace(/\/$/, '');
 }
 
 function apiUrl(path) {
     if (window.apiUrl) return window.apiUrl(path);
-    const backendBase = window.BACKEND_BASE || 'https://lamsl-backend.onrender.com';
-    if (window.location.protocol === 'file:' && path.startsWith('/')) {
-        return backendBase.replace(/\/$/, '') + path;
+    return backendBase() + (String(path || '').startsWith('/') ? path : '/' + path);
+}
+
+function sameOriginApiUrl(path) {
+    const origin = window.location.origin && window.location.origin !== 'null' ? window.location.origin.replace(/\/$/, '') : '';
+    return origin ? origin + (String(path || '').startsWith('/') ? path : '/' + path) : '';
+}
+
+function withTimeout(promise, ms = 3500) {
+    return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), ms))
+    ]);
+}
+
+function fetchJsonNoStore(url, ms = 3500) {
+    return withTimeout(fetch(url + (url.includes('?') ? '&' : '?') + '_=' + Date.now(), { cache: 'no-store' }), ms)
+        .then(response => response.json().catch(() => ({})).then(json => ({ response, json })))
+        .then(({ response, json }) => response.ok ? json : {});
+}
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[ch]));
+}
+
+function normalizeDateLabel(value) {
+    if (!value) return '';
+    const raw = String(value).trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+    try {
+        return new Date(raw + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch (e) { return raw; }
+}
+
+function normalizeAnnouncement(item) {
+    if (!item || typeof item !== 'object') return null;
+    const title = item.title || item.heading || item.name || '';
+    const message = item.message || item.body || item.text || item.details || item.description || '';
+    if (!title && !message) return null;
+    return {
+        id: String(item.id || item.createdAt || item.date || `${title}-${message}`).slice(0, 120),
+        title: String(title || 'Announcement'),
+        date: String(item.date || item.eventDate || item.createdAt || ''),
+        message: String(message || '')
+    };
+}
+
+function getLocalAnnouncements() {
+    const all = [];
+    LEGACY_ANN_KEYS.forEach(key => {
+        const arr = readJson(key, []);
+        if (Array.isArray(arr)) all.push(...arr.map(normalizeAnnouncement).filter(Boolean));
+    });
+    return dedupeAnnouncements(all);
+}
+
+function dedupeAnnouncements(items) {
+    const seen = new Set();
+    return (items || []).filter(item => {
+        const key = `${item.id}|${item.title}|${item.date}|${item.message}`.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
+function renderEFAnnouncements(items = efAnnouncements) {
+    if (!efAnnList) return;
+    efAnnouncements = dedupeAnnouncements((items || []).map(normalizeAnnouncement).filter(Boolean));
+    efAnnList.innerHTML = '';
+
+    if (!efAnnouncements.length) {
+        efAnnList.innerHTML = '<p style="color:#888;font-size:14px;">No announcements posted yet.</p>';
+        return;
     }
-    return backendBase.replace(/\/$/, '') + (path.startsWith('/') ? path : '/' + path);
+
+    efAnnouncements.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'announcement-item';
+        div.innerHTML = `
+            <h3>${escapeHtml(item.title)}</h3>
+            <div class="ann-date">${escapeHtml(normalizeDateLabel(item.date))}</div>
+            <p>${escapeHtml(item.message)}</p>
+            ${isAdminLoggedIn() ? `<button class="archive-btn" data-id="${escapeHtml(item.id)}">Archive</button>` : ''}
+        `;
+        efAnnList.appendChild(div);
+    });
+
+    efAnnList.querySelectorAll('.archive-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            if (!isAdminLoggedIn()) return;
+            const id = btn.dataset.id;
+            const remaining = efAnnouncements.filter(item => item.id !== id);
+            writeJson(EF_ANN_KEY, remaining);
+            renderEFAnnouncements(remaining);
+            try {
+                const current = await fetchBackendContent();
+                current.announcements = remaining;
+                await saveBackendContent(current);
+            } catch (e) {}
+        });
+    });
+}
+
+async function fetchBackendContent() {
+    const urls = [];
+    const same = sameOriginApiUrl('/api/content');
+    if (same) urls.push(same);
+    urls.push(apiUrl('/api/content'));
+    for (const url of Array.from(new Set(urls))) {
+        try {
+            const data = await fetchJsonNoStore(url, 3500);
+            const content = data.content || data;
+            if (content && typeof content === 'object') return content;
+        } catch (e) {}
+    }
+    return {};
+}
+
+async function saveBackendContent(content) {
+    const response = await fetch(apiUrl('/api/content'), {
+        method: 'POST',
+        headers: (typeof window.apiHeaders === 'function' ? window.apiHeaders({ 'Content-Type': 'application/json' }) : { 'Content-Type': 'application/json' }),
+        body: JSON.stringify(content || {})
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.success) throw new Error(result.error || 'Unable to save content.');
+    return result.content || content;
+}
+
+async function loadEFAnnouncements() {
+    renderEFAnnouncements(getLocalAnnouncements());
+    try {
+        const content = await fetchBackendContent();
+        const backendAnnouncements = Array.isArray(content.announcements) ? content.announcements : [];
+        const merged = dedupeAnnouncements([...backendAnnouncements.map(normalizeAnnouncement).filter(Boolean), ...getLocalAnnouncements()]);
+        if (merged.length) {
+            writeJson(EF_ANN_KEY, merged);
+            renderEFAnnouncements(merged);
+        }
+    } catch (e) {}
 }
 
 function setAnnouncementStatus(message, isError = false) {
@@ -715,437 +853,243 @@ async function notifyEventAnnouncement(title, date, message) {
             headers: (typeof window.apiHeaders === 'function' ? window.apiHeaders({ 'Content-Type': 'application/json' }) : { 'Content-Type': 'application/json' }),
             body: JSON.stringify({ title, date, message })
         });
-        const result = await response.json();
-        if (!response.ok || !result.success) {
-            throw new Error(result.error || 'Unable to send announcement notifications.');
-        }
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.success) throw new Error(result.error || 'Notification failed.');
         setAnnouncementStatus('Announcement published and notifications sent.');
     } catch (error) {
-        setAnnouncementStatus(error.message || 'Announcement published, but notification failed.', true);
+        setAnnouncementStatus('Announcement published. Notification was not sent.', true);
     }
-}
-
-// ===== ANNOUNCEMENTS =====
-function renderEFAnnouncements() {
-    const announcements = readJson(EF_ANN_KEY, []);
-    efAnnList.innerHTML = '';
-
-    if (!announcements.length) {
-        efAnnList.innerHTML = '<p style="color:#888;font-size:14px;">No announcements posted yet.</p>';
-        return;
-    }
-
-    announcements.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'announcement-item';
-
-        const isAdmin = isAdminLoggedIn();
-        div.innerHTML = `
-            <h3>${item.title}</h3>
-            <div class="ann-date">${item.date}</div>
-            <p>${item.message}</p>
-            ${isAdmin ? `<button class="archive-btn" data-id="${item.id}">Archive</button>` : ''}
-        `;
-        efAnnList.appendChild(div);
-    });
-
-    // Wire up archive buttons
-    efAnnList.querySelectorAll('.archive-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (!isAdminLoggedIn()) return;
-            const id = btn.dataset.id;
-            const remaining = readJson(EF_ANN_KEY, []).filter(a => a.id !== id);
-            writeJson(EF_ANN_KEY, remaining);
-            renderEFAnnouncements();
-        });
-    });
 }
 
 function applyAdminPanel() {
-    const isAdmin = isAdminLoggedIn();
-    efAdminPanel.style.display = isAdmin ? 'block' : 'none';
-
-    if (efPhotoInput) efPhotoInput.disabled = true;
-    if (efCaptionInput) efCaptionInput.disabled = true;
-    if (efRemoveBtn) efRemoveBtn.disabled = true;
-    if (efUploadButton) efUploadButton.disabled = true;
-    if (efUploadPanel) efUploadPanel.style.display = 'none';
-    if (efUploadStatus) efUploadStatus.textContent = 'Event photos are managed from the Administrator page.';
-}
-
-window.addEventListener('storage', (event) => {
-    if (event.key === SESSION_KEY) {
-        applyAdminPanel();
-        renderEFAnnouncements();
-    }
-});
-
-window.addEventListener('focus', () => {
-    applyAdminPanel();
-    renderEFAnnouncements();
-});
-
-efAnnForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    if (!isAdminLoggedIn()) return;
-
-    const announcements = readJson(EF_ANN_KEY, []);
-    announcements.unshift({
-        id: `ef-ann-${Date.now()}`,
-        title: efAnnTitle.value.trim(),
-        date: efAnnDate.value,
-        message: efAnnMessage.value.trim()
-    });
-    writeJson(EF_ANN_KEY, announcements);
-    efAnnForm.reset();
-    renderEFAnnouncements();
-    setAnnouncementStatus('Announcement published successfully.');
-    notifyEventAnnouncement(efAnnTitle.value.trim(), efAnnDate.value, efAnnMessage.value.trim());
-});
-
-// ===== SLIDESHOW =====
-function getEFSlides() {
-    return Array.from(efSlidesContainer.querySelectorAll('.slide'));
+    if (efAdminPanel) efAdminPanel.style.display = isAdminLoggedIn() ? 'block' : 'none';
+    renderEFAnnouncements(efAnnouncements);
 }
 
 function normalizeEFImage(item) {
-    if (typeof item === 'string') {
-        const raw = item.trim();
-        const name = raw.split('/').pop().split('?')[0];
-        return { name, path: raw, caption: '' };
-        const raw = item.trim();
-        const name = raw.split('/').pop().split('?')[0];
-        return { name, path: raw, caption: '' };
-    }
-    const rawPath = item.imageUrl || item.imageURL || item.publicUrl || item.publicURL || item.url || item.src || item.path || item.filePath || item.filename || item.name || '';
-    const rawPath = item.imageUrl || item.imageURL || item.publicUrl || item.publicURL || item.url || item.src || item.path || item.filePath || item.filename || item.name || '';
-    const name = item.filename || item.name || String(rawPath).split('/').pop().split('?')[0] || '';
+    if (!item) return null;
+    if (typeof item === 'string') item = { url: item, path: item, name: item.split('/').pop() };
+    const raw = item.url || item.path || item.imageUrl || item.src || item.href || item.filename || item.name || '';
+    if (!raw) return null;
+    const name = item.filename || item.name || String(raw).split('/').pop().split('?')[0];
     return {
-        name,
-        path: rawPath || name,
-        path: rawPath || name,
-        caption: item.caption || item.title || item.originalName || ''
+        name: decodeURIComponent(String(name || '').trim()),
+        path: String(raw).trim(),
+        url: String(raw).trim(),
+        caption: item.caption || item.title || item.alt || ''
     };
 }
 
-function resolveEFImageSrc(path) {
-    const raw = String(path || '').trim();
+function resolveEFImageSrc(rawPath) {
+    const raw = String(rawPath || '').trim();
     if (!raw) return '';
-    if (/^(https?:|data:|blob:)/i.test(raw)) return raw;
-
-    // Administrator uploads are stored on the backend.  Do not resolve these
-    // paths against www.lamsl.com, because the uploaded files are served by
-    // the Render backend/static upload endpoint.
-    if (/^\/EF_Images\//i.test(raw)) return raw;
-    if (/^\/EFimages\//i.test(raw)) return apiUrl(raw);
-    if (/^\/(uploads|uploaded-images|SlideshowImages|EventImages|images)\//i.test(raw)) return apiUrl(raw);
-    if (raw.startsWith('/')) return raw;
-    if (/^EF_Images\//i.test(raw)) return '/' + raw.replace(/^\/+/, '');
-    if (/^(EFimages|EventImages|SlideshowImages|uploads|uploaded-images|images)\//i.test(raw)) {
-        return apiUrl('/' + raw.replace(/^\/+/, ''));
-    }
-
-    // If only the filename was saved, treat it as an Events/Fundraisers image.
-    if (/\.(jpe?g|png|gif|webp|bmp|svg|apng|avif|ico|jfif|tiff?|heic|heif)(\?.*)?$/i.test(raw)) {
-        return apiUrl('/EFimages/' + raw);
-    }
-
+    if (/^(data:|blob:|https?:\/\/)/i.test(raw)) return raw;
+    if (/^\/?EF_Images\//i.test(raw)) return '/' + raw.replace(/^\/+/, '');
+    if (/^\/?EFimages\//i.test(raw)) return apiUrl('/' + raw.replace(/^\/+/, ''));
+    if (/^\/?(uploads|uploaded-images|EventImages|SlideshowImages)\//i.test(raw)) return apiUrl('/' + raw.replace(/^\/+/, ''));
+    if (/\.(png|jpe?g|gif|webp|svg)$/i.test(raw)) return apiUrl('/EFimages/' + raw.replace(/^.*\//, ''));
     return raw;
 }
 
 function createEFSlideElement(image) {
+    const normalized = normalizeEFImage(image);
     const slide = document.createElement('div');
     slide.className = 'slide';
+    slide.dataset.filename = normalized?.name || '';
 
     const img = document.createElement('img');
-    img.src = resolveEFImageSrc(image.path);
-    img.alt = image.caption || image.name || 'Event Photo';
-    img.dataset.fallbackStep = '0';
-    img.addEventListener('error', () => {
-        const step = Number(img.dataset.fallbackStep || '0');
-        const filename = image.name || String(image.path || '').split('/').pop();
+    img.alt = normalized?.caption || normalized?.name || 'LAMSL event photo';
+    img.loading = 'lazy';
+    img.src = resolveEFImageSrc(normalized?.path || normalized?.url);
+    img.onerror = () => {
+        const filename = normalized?.name || '';
         const candidates = [
             filename ? apiUrl('/EFimages/' + filename) : '',
             filename ? '/EF_Images/' + filename : '',
             filename ? apiUrl('/uploads/' + filename) : '',
-            filename ? '/EFimages/' + filename : '',
-            String(image.path || '')
+            filename ? '/uploads/' + filename : ''
         ].filter(Boolean);
-        const next = candidates[step];
-        img.dataset.fallbackStep = String(step + 1);
-        if (next && img.src !== next) img.src = next;
-    });
+        const index = Number(img.dataset.retryIndex || '0');
+        if (index < candidates.length) {
+            img.dataset.retryIndex = String(index + 1);
+            img.src = candidates[index] + (candidates[index].includes('?') ? '&' : '?') + 'v=' + Date.now();
+        }
+    };
     slide.appendChild(img);
 
-    if (image.caption) {
+    if (normalized?.caption) {
         const caption = document.createElement('div');
         caption.className = 'slide-caption';
-        caption.textContent = image.caption;
+        caption.textContent = normalized.caption;
         slide.appendChild(caption);
     }
-
     return slide;
+}
+
+function getEFSlides() {
+    return Array.from(efSlidesContainer?.querySelectorAll('.slide') || []);
 }
 
 function showEFSlide(index) {
     const slides = getEFSlides();
-    const inds   = Array.from(efIndicators.querySelectorAll('.indicator'));
     if (!slides.length) return;
-
     const safeIndex = ((index % slides.length) + slides.length) % slides.length;
-    slides.forEach(s => s.classList.remove('active'));
-    inds.forEach(i => i.classList.remove('active'));
+    slides.forEach(slide => slide.classList.remove('active'));
     slides[safeIndex].classList.add('active');
-    if (inds[safeIndex]) inds[safeIndex].classList.add('active');
     efCurrentSlide = safeIndex;
-}
-
-function addEFSlide(image) {
-    const normalized = normalizeEFImage(image);
-    efSlideImages.push(normalized);
-
-    // Remove placeholder if present
-    if (efPlaceholder && efPlaceholder.parentNode === efSlidesContainer) {
-        efSlidesContainer.removeChild(efPlaceholder);
+    if (efIndicators) {
+        efIndicators.querySelectorAll('.indicator').forEach((btn, i) => btn.classList.toggle('active', i === safeIndex));
     }
-
-    const slides = getEFSlides();
-    const newIndex = slides.length;
-
-    const slide = createEFSlideElement(normalized);
-    slide.className = 'slide';
-    slide.dataset.filename = normalized.name || '';
-    efSlidesContainer.appendChild(slide);
-
-    const ind = document.createElement('span');
-    ind.className = 'indicator';
-    ind.dataset.slide = String(newIndex);
-    efIndicators.appendChild(ind);
-
-    showEFSlide(newIndex);
-}
-
-function buildEFSlides(images) {
-    // Clear existing slides
-    Array.from(efSlidesContainer.querySelectorAll('.slide')).forEach(s => s.remove());
-    efIndicators.innerHTML = '';
-    efSlideImages = images.map(normalizeEFImage);
-
-    if (!efSlideImages.length) {
-        if (!efSlidesContainer.contains(efPlaceholder)) {
-            efSlidesContainer.appendChild(efPlaceholder);
-        }
-        return;
-    }
-
-    // Ensure placeholder is hidden
-    if (efSlidesContainer.contains(efPlaceholder)) {
-        efSlidesContainer.removeChild(efPlaceholder);
-    }
-
-    efSlideImages.forEach((image, index) => {
-        const slide = createEFSlideElement(image);
-        slide.classList.toggle('active', index === 0);
-        slide.dataset.filename = image.name || '';
-        efSlidesContainer.appendChild(slide);
-
-        const ind = document.createElement('span');
-        ind.className = index === 0 ? 'indicator active' : 'indicator';
-        ind.dataset.slide = String(index);
-        efIndicators.appendChild(ind);
-    });
-
-    efCurrentSlide = 0;
 }
 
 function dedupeEFImages(images) {
     const seen = new Set();
     return (images || []).map(normalizeEFImage).filter(image => {
-        const key = String(image.name || image.path || '').split('/').pop().toLowerCase();
+        if (!image) return false;
+        const key = (image.name || image.path || image.url || '').toLowerCase();
         if (!key || seen.has(key)) return false;
         seen.add(key);
         return true;
     });
 }
 
+function buildEFSlides(images) {
+    if (!efSlidesContainer) return;
+    const normalized = dedupeEFImages(images);
+    efSlideImages = normalized;
+    efSlidesContainer.querySelectorAll('.slide').forEach(slide => slide.remove());
+    if (efIndicators) efIndicators.innerHTML = '';
+
+    if (!normalized.length) {
+        if (efPlaceholder) efPlaceholder.style.display = 'flex';
+        return;
+    }
+    if (efPlaceholder) efPlaceholder.style.display = 'none';
+
+    normalized.forEach((image, index) => {
+        const slide = createEFSlideElement(image);
+        slide.classList.toggle('active', index === 0);
+        efSlidesContainer.appendChild(slide);
+        if (efIndicators) {
+            const dot = document.createElement('button');
+            dot.type = 'button';
+            dot.className = 'indicator' + (index === 0 ? ' active' : '');
+            dot.dataset.slide = String(index);
+            dot.setAttribute('aria-label', `Show photo ${index + 1}`);
+            efIndicators.appendChild(dot);
+        }
+    });
+    efCurrentSlide = 0;
+}
+
 function extractEFImagesFromPayload(payload) {
-    const result = payload || {};
-    const content = result.content || result.data || result || {};
+    const source = payload?.content || payload || {};
     const out = [];
-    const pushArray = arr => { if (Array.isArray(arr)) out.push(...arr); };
-
-    pushArray(content.eventFundraiserImages);
-    pushArray(content.eventImages);
-    pushArray(content.efImages);
-    pushArray(content.eventPhotos);
-    pushArray(content.eventsPhotos);
-    pushArray(content.galleryImages);
-    pushArray(content.eventsGallery);
-    pushArray(result.images);
-    pushArray(result.eventFundraiserImages);
-    pushArray(result.eventImages);
-    pushArray(result.efImages);
-
-    // Some older backend saves put all uploaded images in slideshow and mark destination.
-    if (Array.isArray(content.slideshow)) {
-        out.push(...content.slideshow.filter(item => {
+    const addArray = value => { if (Array.isArray(value)) out.push(...value); };
+    addArray(payload?.images);
+    addArray(payload?.files);
+    addArray(source.eventFundraiserImages);
+    addArray(source.eventImages);
+    addArray(source.efImages);
+    addArray(source.galleryImages);
+    addArray(source.eventsGallery);
+    if (Array.isArray(source.slideshow)) {
+        out.push(...source.slideshow.filter(item => {
             const destination = String(item?.destination || item?.target || item?.imageType || '').toLowerCase();
             const raw = String(item?.url || item?.path || item?.src || item?.filename || item?.name || '').toLowerCase();
             return destination.includes('event') || destination.includes('fundraiser') || destination === 'ef' || raw.includes('efimage') || raw.includes('event');
         }));
     }
-
     return out;
 }
 
-async function fetchEFImagesFromUrl(url) {
-    const response = await fetch(url + (url.includes('?') ? '&' : '?') + '_=' + Date.now(), { cache: 'no-store' });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) return [];
-    return extractEFImagesFromPayload(result);
-}
-
 async function loadEFImages() {
-    const backendBase = (window.BACKEND_BASE || 'https://lamsl-backend.onrender.com').replace(/\/$/, '');
-    const sameOrigin = window.location.origin && window.location.origin !== 'null' ? window.location.origin.replace(/\/$/, '') : '';
-    const paths = ['/api/content', '/ef-images', '/api/ef-images'];
+    // Immediate bundled render first. This fixes the blank gallery when backend/API calls are slow or unavailable.
+    buildEFSlides(LAMSL_BUNDLED_EF_IMAGES);
+
     const urls = [];
-    paths.forEach(path => {
-        if (sameOrigin) urls.push(sameOrigin + path);
-        urls.push(backendBase + path);
+    const samePaths = ['/api/content', '/ef-images', '/api/ef-images'];
+    samePaths.forEach(path => {
+        const same = sameOriginApiUrl(path);
+        if (same) urls.push(same);
+        urls.push(apiUrl(path));
     });
 
-    let collected = [];
-    for (const url of Array.from(new Set(urls))) {
+    let collected = [...LAMSL_BUNDLED_EF_IMAGES];
+    await Promise.allSettled(Array.from(new Set(urls)).map(async url => {
         try {
-            const images = await fetchEFImagesFromUrl(url);
-            if (images.length) collected = collected.concat(images);
+            const data = await fetchJsonNoStore(url, 3500);
+            collected = collected.concat(extractEFImagesFromPayload(data));
         } catch (e) {}
-    }
+    }));
 
     const localContent = readJson('lamslBackendContentV1', null) || readJson('lamslContentV1', null) || null;
     collected = collected.concat(extractEFImagesFromPayload(localContent));
-
-    // Always include bundled EF_Images files from the deployed package so existing static files show even if backend content has no records.
-    if (Array.isArray(LAMSL_BUNDLED_EF_IMAGES)) collected = collected.concat(LAMSL_BUNDLED_EF_IMAGES);
-
-    const images = dedupeEFImages(collected);
-    if (images.length) buildEFSlides(images);
+    buildEFSlides(collected);
 }
 
-efPrevBtn.addEventListener('click', () => {
+efPrevBtn?.addEventListener('click', () => {
     const slides = getEFSlides();
-    if (!slides.length) return;
-    showEFSlide((efCurrentSlide - 1 + slides.length) % slides.length);
+    if (slides.length) showEFSlide(efCurrentSlide - 1);
 });
 
-efNextBtn.addEventListener('click', () => {
+efNextBtn?.addEventListener('click', () => {
     const slides = getEFSlides();
-    if (!slides.length) return;
-    showEFSlide((efCurrentSlide + 1) % slides.length);
+    if (slides.length) showEFSlide(efCurrentSlide + 1);
 });
 
-efRemoveBtn?.addEventListener('click', async () => {
-    if (!isAdminLoggedIn()) {
-        efUploadStatus.textContent = 'Admin sign-in required to remove photos.';
-        return;
-    }
-
-    // Resolve filename from the tracked array first, then fall back to the active DOM slide.
-    let current = efSlideImages[efCurrentSlide];
-    if (!current || !current.name) {
-        const activeSlide = efSlidesContainer.querySelector('.slide.active');
-        const domFilename = activeSlide?.dataset.filename || (() => {
-            const src = activeSlide?.querySelector('img')?.src || '';
-            const raw = src.split('/').pop().split('?')[0];
-            return raw ? decodeURIComponent(raw) : '';
-        })();
-        if (domFilename) current = { name: domFilename };
-    }
-
-    if (!current || !current.name) {
-        efUploadStatus.textContent = 'No photo available to remove.';
-        return;
-    }
-
-    const savedIndex = efCurrentSlide;
-    efUploadStatus.textContent = `Removing ${current.name}...`;
-
-    try {
-        const response = await fetch(apiUrl('/remove-ef-photo'), {
-            method: 'POST',
-            headers: (typeof window.apiHeaders === 'function' ? window.apiHeaders({ 'Content-Type': 'application/json' }) : { 'Content-Type': 'application/json' }),
-            body: JSON.stringify({ filename: current.name })
-        });
-        const result = await response.json();
-        if (!response.ok || !result.success) {
-            throw new Error(result.error || 'Remove failed.');
-        }
-
-        await loadEFImages();
-        // Navigate to the next available slide rather than always jumping to index 0.
-        if (efSlideImages.length > 0) {
-            showEFSlide(Math.min(savedIndex, efSlideImages.length - 1));
-        }
-        efUploadStatus.textContent = `Removed: ${current.name}`;
-    } catch (e) {
-        efUploadStatus.textContent = `Remove failed: ${e.message}`;
-    }
-});
-
-efIndicators.addEventListener('click', (event) => {
+efIndicators?.addEventListener('click', event => {
     if (!event.target.classList.contains('indicator')) return;
     const index = Number(event.target.dataset.slide);
     if (!Number.isNaN(index)) showEFSlide(index);
 });
 
-efUploadForm?.addEventListener('submit', async (event) => {
+efAnnForm?.addEventListener('submit', async event => {
     event.preventDefault();
-    if (!isAdminLoggedIn()) {
-        efUploadStatus.textContent = 'Admin sign-in required for uploads.';
-        return;
-    }
-    if (!efPhotoInput.files || !efPhotoInput.files[0]) {
-        efUploadStatus.textContent = 'Please choose an image file.';
-        return;
-    }
+    if (!isAdminLoggedIn()) return;
+    const title = efAnnTitle.value.trim();
+    const date = efAnnDate.value;
+    const message = efAnnMessage.value.trim();
+    if (!title || !date || !message) return;
 
-    const formData = new FormData();
-    formData.append('photo', efPhotoInput.files[0]);
-    formData.append('caption', efCaptionInput.value.trim());
-    efUploadStatus.textContent = 'Uploading image...';
+    const newItem = { id: 'ef-ann-' + Date.now(), title, date, message };
+    const merged = dedupeAnnouncements([newItem, ...efAnnouncements]);
+    writeJson(EF_ANN_KEY, merged);
+    renderEFAnnouncements(merged);
+    efAnnForm.reset();
+    setAnnouncementStatus('Announcement published.');
 
     try {
-        const response = await fetch(apiUrl('/upload-ef'), {
-            method: 'POST',
-            headers: (typeof window.apiHeaders === 'function' ? window.apiHeaders() : {}),
-            body: formData
-        });
-        const result = await response.json();
-        if (!response.ok || !result.success) {
-            throw new Error(result.error || 'Upload failed.');
-        }
-        addEFSlide({
-            name: result.filename,
-            path: `${result.path || result.url}?t=${Date.now()}`,
-            caption: result.caption || ''
-        });
-        efUploadForm.reset();
-        efUploadStatus.textContent = `Uploaded: ${result.filename}`;
+        const content = await fetchBackendContent();
+        content.announcements = merged;
+        await saveBackendContent(content);
+        notifyEventAnnouncement(title, date, message);
     } catch (e) {
-        efUploadStatus.textContent = `Upload failed: ${e.message}`;
+        setAnnouncementStatus('Announcement saved locally. Backend sync failed.', true);
     }
 });
 
-// ===== INIT =====
-renderEFAnnouncements();
+window.addEventListener('storage', event => {
+    if ([SESSION_KEY, EF_ANN_KEY, 'lamslAnnouncementsV1'].includes(event.key)) {
+        applyAdminPanel();
+        loadEFAnnouncements();
+    }
+});
+
+window.addEventListener('focus', () => {
+    applyAdminPanel();
+    loadEFAnnouncements();
+    loadEFImages();
+});
+
+// INIT
 applyAdminPanel();
+loadEFAnnouncements();
 loadEFImages();
 
-// Autoplay every 20 seconds
 setInterval(() => {
     const slides = getEFSlides();
-    if (slides.length > 1) showEFSlide((efCurrentSlide + 1) % slides.length);
+    if (slides.length > 1) showEFSlide(efCurrentSlide + 1);
 }, 20000);
 
 // ===== SEASON BANNER =====
@@ -1155,7 +1099,7 @@ setInterval(() => {
         const el = document.getElementById('banner-tagline');
         if (s && el) {
             const fd = key => new Date(key + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-            el.textContent = `${s.name} ${s.year} Season  \u2022  ${fd(s.start)} \u2013 ${fd(s.end)}`;
+            el.textContent = `${s.name} ${s.year} Season  •  ${fd(s.start)} – ${fd(s.end)}`;
         }
     } catch (e) {}
 })();

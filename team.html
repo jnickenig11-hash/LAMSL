@@ -3420,6 +3420,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const clearCheck = document.getElementById('clear-checkin-btn'); if (clearCheck) clearCheck.onclick = e => { e.preventDefault(); const list = document.getElementById('checkin-selected-players'); if (list) list.innerHTML = ''; };
     const checked = document.getElementById('checkin-selected-players'); if (checked) checked.addEventListener('click', e => { const b = e.target.closest('.remove-player-checkin'); if (b) { e.preventDefault(); b.closest('[data-player-id]')?.remove(); } }, true);
     const photoBtn = document.getElementById('upload-team-photo-btn'); if (photoBtn) photoBtn.addEventListener('click', uploadTeamPhoto, true);
+    const rosterBtn = document.getElementById('upload-roster-btn'); if (rosterBtn) rosterBtn.addEventListener('click', e => { e.preventDefault(); const input = document.getElementById('roster-file'); if (input) input.click(); }, true);
     setTimeout(() => { applyAccess(); renderRoster(); }, 750);
     setTimeout(() => { applyAccess(); renderRoster(); }, 1750);
   }
@@ -3569,6 +3570,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const close=document.getElementById('close-modal-btn'); if(close) close.onclick=()=>{const m=document.getElementById('player-modal'); if(m)m.style.display='none';};
     document.addEventListener('click',e=>{const b=e.target.closest('.roster-remove-btn'); if(b){e.preventDefault();removePlayer(b.dataset.playerId);}},true);
     const photo=document.getElementById('upload-team-photo-btn'); if(photo) photo.onclick=uploadPhoto;
+    const roster=document.getElementById('upload-roster-btn'); if(roster) roster.onclick=e=>{e.preventDefault(); const input=document.getElementById('roster-file'); if(input) input.click();};
     setTimeout(()=>{showControls();renderRoster();},500); setTimeout(()=>{showControls();renderRoster();},1500);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind); else bind();

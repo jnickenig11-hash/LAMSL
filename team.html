@@ -192,6 +192,12 @@ header {
         gap: 12px;
     }
 
+    #player-profiles-wrap {
+        display: grid;
+        gap: 12px;
+        margin-top: 12px;
+    }
+
     .player-card {
         border: 1px solid #dbe2ea;
         border-radius: 12px;
@@ -2165,6 +2171,7 @@ function saveCheckinSelections() {
 
     renderPlayerProfiles();
     renderRoster();
+    renderTeamPlayerProfiles();
     updateCheckinStatus(`Check-in saved for ${selectedGameCheckins.length} player(s).`);
 }
 
@@ -2278,6 +2285,41 @@ function renderPlayerProfiles(filterPlayers = null) {
     });
 }
 
+function renderTeamPlayerProfiles() {
+    const profilesWrap = document.getElementById('player-profiles-wrap');
+    if (!profilesWrap) return;
+
+    const data = getTeamPlayers();
+    const players = Array.isArray(data.players) ? data.players : [];
+
+    if (!players.length) {
+        profilesWrap.innerHTML = '';
+        return;
+    }
+
+    const canManage = canManageTeamContent();
+    const html = players.map(player => `
+        <div class="player-card" data-player-id="${escapeHtml(player.id)}">
+            <img src="${player.photo || 'Images/LAMSLLogo.jpg'}" alt="${escapeHtml(player.name)}" onerror="this.src='Images/LAMSLLogo.jpg'">
+            <div class="player-card-content">
+                <h4>${escapeHtml(player.name)}</h4>
+                <p><strong>Position:</strong> ${escapeHtml(player.position || 'TBA')}</p>
+                <p><strong>Phone:</strong> ${escapeHtml(player.phone || 'N/A')}</p>
+                <p><strong>Email:</strong> ${escapeHtml(player.email || 'N/A')}</p>
+                <p><strong>Games Played:</strong> ${Number(player.gamesPlayed || 0)}</p>
+            </div>
+            ${canManage ? `
+                <div class="player-card-actions">
+                    <button type="button" data-action="edit" data-player-id="${escapeHtml(player.id)}">Edit</button>
+                    <button type="button" class="danger" data-action="remove" data-player-id="${escapeHtml(player.id)}">Remove</button>
+                </div>
+            ` : ''}
+        </div>
+    `).join('');
+
+    profilesWrap.innerHTML = html;
+}
+
 function clearPlayerForm() {
     playerIdInput.value = '';
     playerNameInput.value = '';
@@ -2341,6 +2383,7 @@ async function savePlayer() {
             rosterAdminStatus.textContent = `${name} removed from the roster.`;
             renderRoster();
             renderPlayerProfiles();
+            renderTeamPlayerProfiles();
             clearPlayerForm();
         } else {
             rosterAdminStatus.textContent = 'Player not found.';
@@ -2394,6 +2437,7 @@ async function savePlayer() {
     }
     renderRoster();
     renderPlayerProfiles();
+    renderTeamPlayerProfiles();
     populateCheckinPlayerSelect(getCheckinPlayers());
     clearPlayerForm();
     playerModal.style.display = 'none';
@@ -2467,6 +2511,7 @@ async function removePlayer(id) {
     }
     renderRoster();
     renderPlayerProfiles();
+    renderTeamPlayerProfiles();
     populateCheckinPlayerSelect(getCheckinPlayers());
 }
 
@@ -2833,6 +2878,7 @@ function setupEventListeners() {
         await saveBackendTeamData();
         renderRoster();
         renderPlayerProfiles();
+        renderTeamPlayerProfiles();
     } catch (error) {
         setRosterStatus(`Roster upload failed: ${error.message}`, true);
     }
@@ -3413,6 +3459,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const close = document.getElementById('close-modal-btn'); if (close) close.onclick = () => { const modal = document.getElementById('player-modal'); if (modal) modal.style.display = 'none'; };
     const roster = document.getElementById('roster-grid-wrap'); if (roster) roster.addEventListener('click', e => { const b = e.target.closest('.roster-remove-btn'); if (b) { e.preventDefault(); e.stopImmediatePropagation(); removePlayer(b.dataset.playerId); } }, true);
     const list = document.getElementById('player-list'); if (list) list.addEventListener('click', e => { const b = e.target.closest('button[data-action="remove"]'); if (b) { e.preventDefault(); e.stopImmediatePropagation(); removePlayer(b.dataset.playerId); } }, true);
+    const profileWrap = document.getElementById('player-profiles-wrap'); if (profileWrap) profileWrap.addEventListener('click', e => { 
+      const editBtn = e.target.closest('button[data-action="edit"]'); 
+      if (editBtn) { e.preventDefault(); e.stopImmediatePropagation(); editPlayer(editBtn.dataset.playerId); playerModal.style.display = 'flex'; return; }
+      const removeBtn = e.target.closest('button[data-action="remove"]'); 
+      if (removeBtn) { e.preventDefault(); e.stopImmediatePropagation(); removePlayer(removeBtn.dataset.playerId); }
+    }, true);
     const schedule = document.getElementById('team-schedule-wrap'); if (schedule) schedule.addEventListener('click', e => { const b = e.target.closest('.checkin-game-btn,.check-in-game-btn'); if (b) { e.preventDefault(); e.stopImmediatePropagation(); const g = allGames().find(x => gameId(x) === (b.dataset.gameId || '')); if (g) showCheckin(g); } }, true);
     const gameSelect = document.getElementById('upcoming-game-select'); if (gameSelect) gameSelect.addEventListener('change', e => { const g = allGames().find(x => gameId(x) === e.target.value); if (g) showCheckin(g); }, true);
     const addCheck = document.getElementById('add-player-checkin-btn'); if (addCheck) addCheck.addEventListener('click', addCheckinPlayer, true);

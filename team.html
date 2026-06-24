@@ -1466,9 +1466,9 @@ input[type="submit"]:disabled{
                 <h3>Team Roster</h3>
                 <div class="roster-controls manager-only">
                     <p id="roster-admin-status" class="muted">Admin sign-in required to upload roster spreadsheets.</p>
-                    <input id="roster-file" type="file" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                    <input id="roster-file" type="file" accept=".xls,.xlsx,.xlsm,.xlsb,.csv,text/csv,application/csv,application/vnd.ms-excel,application/msexcel,application/x-msexcel,application/x-ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12">
                     <button id="upload-roster-btn" type="button">Upload Roster Spreadsheet</button>
-                    <p class="muted">Spreadsheet tip: use column headers like Name, Position, Phone, Email.</p>
+                    <p class="muted">Spreadsheet tip: .xls, .xlsx, .xlsm, .xlsb, and .csv files are supported. Use column headers like Name, Position, Phone, Email.</p>
                 </div>
                 <div id="roster-grid-wrap" class="roster-grid"></div>
                 <div id="player-profiles-wrap"></div>
@@ -2683,6 +2683,55 @@ async function saveTeamEmailSubscribersToBackend() {
     }
 }
 
+
+function getRosterFileExtension(file) {
+    return String((file && file.name) || '').split('.').pop().toLowerCase();
+}
+
+function isSupportedRosterSpreadsheet(file) {
+    const ext = getRosterFileExtension(file);
+    const supportedExtensions = ['xls', 'xlsx', 'xlsm', 'xlsb', 'csv'];
+    const supportedMimes = [
+        'text/csv',
+        'application/csv',
+        'application/vnd.ms-excel',
+        'application/msexcel',
+        'application/x-msexcel',
+        'application/x-ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-excel.sheet.binary.macroenabled.12',
+        'application/vnd.ms-excel.sheet.macroenabled.12'
+    ];
+    const mime = String((file && file.type) || '').toLowerCase();
+    return supportedExtensions.includes(ext) || supportedMimes.includes(mime);
+}
+
+async function readRosterWorkbook(file) {
+    if (!window.XLSX) {
+        throw new Error('Spreadsheet parser did not load. Refresh the page and try again.');
+    }
+    const ext = getRosterFileExtension(file);
+    if (!isSupportedRosterSpreadsheet(file)) {
+        throw new Error('Unsupported roster file type. Upload .xls, .xlsx, .xlsm, .xlsb, or .csv.');
+    }
+    if (ext === 'csv') {
+        const text = await file.text();
+        return XLSX.read(text, { type: 'string', raw: false, cellDates: true });
+    }
+    const buffer = await file.arrayBuffer();
+    try {
+        return XLSX.read(buffer, { type: 'array', raw: false, cellDates: true });
+    } catch (arrayError) {
+        const binary = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = event => resolve(String(event.target.result || ''));
+            reader.onerror = () => reject(reader.error || arrayError);
+            reader.readAsBinaryString(file);
+        });
+        return XLSX.read(binary, { type: 'binary', raw: false, cellDates: true });
+    }
+}
+
 function setupEventListeners() {
     uploadRosterBtn.addEventListener('click', async () => {
     if (!canManageTeamContent()) {
@@ -2708,8 +2757,16 @@ function setupEventListeners() {
     }
 
     try {
-        const data = await file.arrayBuffer();
-        const workbook = XLSX.read(data, { type: 'array' });
+        if (!isSupportedRosterSpreadsheet(file)) {
+            setRosterStatus('Unsupported roster file type. Upload .xls, .xlsx, .xlsm, .xlsb, or .csv.', true);
+            return;
+        }
+
+        const workbook = await readRosterWorkbook(file);
+        if (!workbook.SheetNames || !workbook.SheetNames.length) {
+            setRosterStatus('Roster file does not contain any worksheets.', true);
+            return;
+        }
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });

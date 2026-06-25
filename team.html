@@ -2826,6 +2826,14 @@ async function readRosterWorkbook(file) {
     }
 }
 
+function formatRowNumberList(numbers, maxVisible = 8) {
+    const values = Array.isArray(numbers) ? numbers : [];
+    if (!values.length) return '';
+    const visible = values.slice(0, maxVisible).join(', ');
+    const remaining = values.length - maxVisible;
+    return remaining > 0 ? `${visible}, +${remaining} more` : visible;
+}
+
 function setupEventListeners() {
     const chooseRosterFileBtn = document.getElementById('choose-roster-file-btn');
     if (chooseRosterFileBtn) {
@@ -2895,20 +2903,57 @@ function setupEventListeners() {
         const store = readJson(ROSTER_KEY, {});
         const existing = store[team] || { headers, rows: [] };
         const existingRows = Array.isArray(existing) ? existing : (Array.isArray(existing.rows) ? existing.rows : []);
-        const seen = new Set(existingRows.map(row => {
+        const seenRowKeys = new Set(existingRows.map(row => {
             const normalized = normalizeRosterRow(row);
             return `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
         }));
 
+        const currentPlayers = Array.isArray(getTeamPlayers().players) ? [...getTeamPlayers().players] : [];
+        const existingPlayerKeys = new Set(currentPlayers.map(getPlayerKey));
         const combinedRows = [...existingRows];
-        rows.forEach(rawRow => {
+        const rowStats = {
+            total: rows.length,
+            imported: 0,
+            missingName: [],
+            duplicateRow: [],
+            duplicatePlayer: [],
+            rosterLimit: []
+        };
+
+        rows.forEach((rawRow, index) => {
+            const sheetRowNumber = index + 2;
             const normalized = normalizeRosterRow(rawRow);
-            if (!normalized.Name) return;
-            const rowKey = `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
-            if (!seen.has(rowKey)) {
-                seen.add(rowKey);
-                combinedRows.push(normalized);
+            if (!normalized.Name) {
+                rowStats.missingName.push(sheetRowNumber);
+                return;
             }
+
+            const rowKey = `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
+            if (seenRowKeys.has(rowKey)) {
+                rowStats.duplicateRow.push(sheetRowNumber);
+                return;
+            }
+            seenRowKeys.add(rowKey);
+            combinedRows.push(normalized);
+
+            const candidate = normalizePlayersFromRows([normalized])[0];
+            if (!candidate || !candidate.name) {
+                rowStats.missingName.push(sheetRowNumber);
+                return;
+            }
+
+            const playerKey = getPlayerKey(candidate);
+            if (existingPlayerKeys.has(playerKey)) {
+                rowStats.duplicatePlayer.push(sheetRowNumber);
+                return;
+            }
+            if (currentPlayers.length >= MAX_TEAM_ROSTER_PLAYERS) {
+                rowStats.rosterLimit.push(sheetRowNumber);
+                return;
+            }
+            existingPlayerKeys.add(playerKey);
+            currentPlayers.push(candidate);
+            rowStats.imported += 1;
         });
 
         store[team] = {
@@ -2919,37 +2964,17 @@ function setupEventListeners() {
         writeJson(ROSTER_KEY, store);
         lamslTeamBackend.rosters = store;
 
-        const currentPlayers = Array.isArray(getTeamPlayers().players) ? [...getTeamPlayers().players] : [];
-        const existingPlayerKeys = new Set(currentPlayers.map(getPlayerKey));
-        const incomingPlayers = normalizePlayersFromRows(combinedRows);
-        let addedCount = 0;
-        let skippedForLimit = 0;
-
-        incomingPlayers.forEach(player => {
-            const playerKey = getPlayerKey(player);
-            if (!existingPlayerKeys.has(playerKey)) {
-                if (currentPlayers.length >= MAX_TEAM_ROSTER_PLAYERS) {
-                    skippedForLimit += 1;
-                    return;
-                }
-                existingPlayerKeys.add(playerKey);
-                currentPlayers.push(player);
-                addedCount += 1;
-            }
-        });
-
         setTeamPlayers({ players: currentPlayers, updatedAt: new Date().toLocaleString() });
 
         const subscribedEmailCount = registerTeamEmailSubscribersFromPlayers(currentPlayers);
-        const limitNote = skippedForLimit > 0
-            ? ` ${skippedForLimit} player(s) were not added because the ${MAX_TEAM_ROSTER_PLAYERS}-player roster limit was reached.`
-            : '';
-
-        if (addedCount > 0) {
-            setRosterStatus(`Roster uploaded for ${team}. ${addedCount} new player(s) added; duplicates ignored.${limitNote} ${subscribedEmailCount} email(s) registered for team schedule/score updates.`, false, true);
-        } else {
-            setRosterStatus(`Roster uploaded for ${team}. No new players were added; duplicates were ignored.${limitNote} ${subscribedEmailCount} email(s) registered for team schedule/score updates.`, false, true);
-        }
+        const skippedCount = Math.max(0, rowStats.total - rowStats.imported);
+        const skippedReasonParts = [];
+        if (rowStats.missingName.length) skippedReasonParts.push(`missing player name (rows ${formatRowNumberList(rowStats.missingName)})`);
+        if (rowStats.duplicateRow.length) skippedReasonParts.push(`duplicate spreadsheet row (rows ${formatRowNumberList(rowStats.duplicateRow)})`);
+        if (rowStats.duplicatePlayer.length) skippedReasonParts.push(`player already on roster (rows ${formatRowNumberList(rowStats.duplicatePlayer)})`);
+        if (rowStats.rosterLimit.length) skippedReasonParts.push(`roster limit reached (${MAX_TEAM_ROSTER_PLAYERS}) (rows ${formatRowNumberList(rowStats.rosterLimit)})`);
+        const skippedReasonText = skippedReasonParts.length ? ` Skipped ${skippedCount} row(s): ${skippedReasonParts.join('; ')}.` : '';
+        setRosterStatus(`Roster uploaded for ${team}. Imported ${rowStats.imported} of ${rowStats.total} row(s).${skippedReasonText} ${subscribedEmailCount} email(s) registered for team schedule/score updates.`, false, true);
 
         await saveBackendTeamData();
         renderRoster();

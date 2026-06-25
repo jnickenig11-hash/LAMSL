@@ -3725,17 +3725,31 @@ initializeAdminScheduleDashboard();
 })();
 
 let editingUsername = '';
-function mergeBackendUsersWithLocalPasswords(backendUsers){
-  const localUsers = readJson(USERS_KEY, []);
-  return (backendUsers || []).map(remoteUser => {
-    const localMatch = localUsers.find(localUser => String(localUser.username || '').toLowerCase() === String(remoteUser.username || '').toLowerCase());
+function mergeUsersPreservingLocal(localUsers, backendUsers){
+  const localList = Array.isArray(localUsers) ? localUsers : [];
+  const backendList = Array.isArray(backendUsers) ? backendUsers : [];
+  const mergedByUsername = new Map();
+
+  localList.forEach(localUser => {
+    const key = String(localUser.username || '').toLowerCase();
+    if (!key) return;
+    mergedByUsername.set(key, { ...localUser });
+  });
+
+  backendList.forEach(remoteUser => {
+    const key = String(remoteUser.username || '').toLowerCase();
+    if (!key) return;
+    const localMatch = mergedByUsername.get(key);
     const remotePassword = remoteUser.password;
     const passwordIsMasked = !remotePassword || remotePassword === '********' || remotePassword === '****' || String(remotePassword).includes('*');
-    return {
+    mergedByUsername.set(key, {
+      ...(localMatch || {}),
       ...remoteUser,
       password: passwordIsMasked ? (localMatch?.password || '') : remotePassword
-    };
+    });
   });
+
+  return Array.from(mergedByUsername.values());
 }
 
 async function syncUsersFromBackend(){
@@ -3743,7 +3757,8 @@ async function syncUsersFromBackend(){
     const response = await fetch(apiUrl('/api/users'), { headers: window.apiHeaders ? window.apiHeaders() : {} });
     const data = await response.json().catch(() => ({}));
     if(data.users){
-      writeJson(USERS_KEY, mergeBackendUsersWithLocalPasswords(data.users));
+      const localUsers = readJson(USERS_KEY, []);
+      writeJson(USERS_KEY, mergeUsersPreservingLocal(localUsers, data.users));
       renderUserAccounts();
     }
   } catch(e){
@@ -3776,7 +3791,7 @@ async function saveUserToBackend(user){
     });
     const data = await res.json().catch(async () => ({ error: await res.text().catch(() => '') }));
     if(!res.ok || data.success === false) throw new Error(data.error || `HTTP ${res.status}`);
-    if (data.users) writeJson(USERS_KEY, mergeBackendUsersWithLocalPasswords(data.users));
+    if (data.users) writeJson(USERS_KEY, mergeUsersPreservingLocal(localBackup, data.users));
     editingUsername = '';
     renderUserAccounts();
     return { success: true };

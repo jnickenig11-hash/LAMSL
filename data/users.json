@@ -3,5 +3,61 @@
     "username": "admin",
     "password": "admin",
     "role": "admin"
+  },
+  {
+    "username": "u1",
+    "password": "p1",
+    "role": "umpire",
+    "assignedTeam": "",
+    "assignedDivision": ""
+  },
+  {
+    "username": "u2",
+    "password": "p2",
+    "role": "umpire",
+    "assignedTeam": "",
+    "assignedDivision": ""
+  },
+  {
+    "username": "u3",
+    "password": "p3",
+    "role": "umpire",
+    "assignedTeam": "",
+    "assignedDivision": ""
+  },
+  {
+    "username": "u4",
+    "password": "p4",
+    "role": "umpire",
+    "assignedTeam": "",
+    "assignedDivision": ""
+  },
+  {
+    "username": "u5",
+    "password": "p5",
+    "role": "umpire",
+    "assignedTeam": "",
+    "assignedDivision": ""
+  },
+  {
+    "username": "u6",
+    "password": "p6",
+    "role": "umpire",
+    "assignedTeam": "",
+    "assignedDivision": ""
+  },
+  {
+    "username": "u7",
+    "password": "p7",
+    "role": "umpire",
+    "assignedTeam": "",
+    "assignedDivision": ""
+  },
+  {
+    "username": "u8",
+    "password": "p8",
+    "role": "umpire",
+    "assignedTeam": "",
+    "assignedDivision": ""
   }
 ]

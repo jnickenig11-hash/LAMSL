@@ -1472,9 +1472,11 @@ input[type="submit"]:disabled{
                 <h3>Team Roster</h3>
                 <div class="roster-controls manager-only">
                     <p id="roster-admin-status" class="muted">Admin sign-in required to upload roster spreadsheets.</p>
-                    <input id="roster-file" type="file" accept=".xls,.xlsx,.xlsm,.xlsb,.csv,text/csv,application/csv,application/vnd.ms-excel,application/msexcel,application/x-msexcel,application/x-ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12">
+                    <input id="roster-file" type="file" style="display:none;" accept=".xls,.xlsx,.xlsm,.xlsb,.csv,text/csv,application/csv,application/vnd.ms-excel,application/msexcel,application/x-msexcel,application/x-ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12">
+                    <button id="choose-roster-file-btn" type="button" class="secondary">Choose Roster File</button>
                     <button id="upload-roster-btn" type="button">Upload Roster Spreadsheet</button>
-                    <p class="muted">Spreadsheet tip: .xls, .xlsx, .xlsm, .xlsb, and .csv files are supported. Use column headers like Name, Position, Phone, Email.</p>
+                    <p id="roster-file-name" class="muted">No file selected.</p>
+                    <p class="muted">Spreadsheet tip: .xls, .xlsx, .xlsm, .xlsb, and .csv files are supported. Use column headers like Name, Position, Phone, Email. Team rosters are limited to 16 players.</p>
                 </div>
                 <div id="roster-grid-wrap" class="roster-grid"></div>
                 <div id="player-profiles-wrap"></div>
@@ -1496,6 +1498,7 @@ const ROSTER_KEY = 'lamslTeamRostersV1';
 const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
 const TEAM_CHECKIN_KEY = 'lamslTeamGameCheckinsV1';
 const TEAM_EMAIL_SUBSCRIBERS_KEY = 'lamslTeamEmailSubscribersV1';
+const MAX_TEAM_ROSTER_PLAYERS = 16;
 
 // Populate rosters from spreadsheet data
 (function() {
@@ -2196,6 +2199,11 @@ function normalizePlayersFromRows(rows) {
     })).filter(player => player.name);
 }
 
+function capRosterPlayers(players) {
+    const list = Array.isArray(players) ? players : [];
+    return list.slice(0, MAX_TEAM_ROSTER_PLAYERS);
+}
+
 
 function escapeHtml(value) {
     return String(value == null ? '' : value)
@@ -2422,6 +2430,10 @@ async function savePlayer() {
         players[existingIndex] = playerRecord;
         rosterAdminStatus.textContent = `${name} profile updated.`;
     } else {
+        if (players.length >= MAX_TEAM_ROSTER_PLAYERS) {
+            rosterAdminStatus.textContent = `Rosters are limited to ${MAX_TEAM_ROSTER_PLAYERS} players. Remove a player before adding another.`;
+            return;
+        }
         players.push(playerRecord);
         rosterAdminStatus.textContent = `${name} added to the roster.`;
     }
@@ -2523,6 +2535,24 @@ function normalizePlayerDataFromRoster(rows) {
     return { players, updatedAt: new Date().toLocaleString() };
 }
 
+function getSelectedRosterFile() {
+    return rosterFileInput && rosterFileInput.files ? rosterFileInput.files[0] : null;
+}
+
+function updateRosterFileSelectionUI() {
+    const selectedFile = getSelectedRosterFile();
+    const fileNameLabel = document.getElementById('roster-file-name');
+    if (fileNameLabel) {
+        fileNameLabel.textContent = selectedFile ? `Selected file: ${selectedFile.name}` : 'No file selected.';
+    }
+}
+
+function updateUploadRosterButtonState() {
+    if (!uploadRosterBtn) return;
+    const allowed = canManageTeamContent() && !!team;
+    uploadRosterBtn.disabled = !allowed || !getSelectedRosterFile();
+}
+
 function applyRosterUploadAccess() {
     const allowed = canManageTeamContent();
     const isAdmin = hasRole('admin');
@@ -2539,7 +2569,10 @@ function applyRosterUploadAccess() {
     }
 
     rosterFileInput.disabled = !allowed || !team;
-    uploadRosterBtn.disabled = !allowed || !team;
+    const chooseRosterFileBtn = document.getElementById('choose-roster-file-btn');
+    if (chooseRosterFileBtn) chooseRosterFileBtn.disabled = !allowed || !team;
+    updateRosterFileSelectionUI();
+    updateUploadRosterButtonState();
 
     teamPhotoStatus.textContent = allowed
         ? 'Manager access confirmed. Upload a team profile image.'
@@ -2673,8 +2706,9 @@ function getTeamPlayers() {
 function setTeamPlayers(record) {
     const key = getTeamPlayerBucketKey();
     if (!key) return;
+    const players = capRosterPlayers(Array.isArray(record && record.players) ? record.players : []);
     const safeRecord = {
-        players: Array.isArray(record && record.players) ? record.players : [],
+        players,
         updatedAt: (record && record.updatedAt) || new Date().toLocaleString()
     };
     const localStore = readJson(TEAM_PLAYERS_KEY, {});
@@ -2778,7 +2812,28 @@ async function readRosterWorkbook(file) {
 }
 
 function setupEventListeners() {
-    uploadRosterBtn.addEventListener('click', async () => {
+    const chooseRosterFileBtn = document.getElementById('choose-roster-file-btn');
+    if (chooseRosterFileBtn) {
+        chooseRosterFileBtn.addEventListener('click', () => {
+            if (!rosterFileInput || rosterFileInput.disabled) return;
+            rosterFileInput.click();
+        });
+    }
+    if (rosterFileInput) {
+        rosterFileInput.addEventListener('change', () => {
+            updateRosterFileSelectionUI();
+            updateUploadRosterButtonState();
+        });
+    }
+    uploadRosterBtn.addEventListener('click', event => {
+    const file = getSelectedRosterFile();
+    if (file) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    setRosterStatus('Choose an Excel/CSV roster file first.', true);
+}, true);
+    uploadRosterBtn.addEventListener('click', async (event) => {
+    event.preventDefault();
     if (!canManageTeamContent()) {
         rosterAdminStatus.textContent = 'Sign in as team manager or admin first.';
         return;
@@ -2789,7 +2844,7 @@ function setupEventListeners() {
         return;
     }
 
-    const file = rosterFileInput.files && rosterFileInput.files[0];
+    const file = getSelectedRosterFile();
     if (!file) {
         setRosterStatus('Choose an Excel/CSV roster file first.', true);
         return;
@@ -2853,26 +2908,32 @@ function setupEventListeners() {
         const existingPlayerKeys = new Set(currentPlayers.map(getPlayerKey));
         const incomingPlayers = normalizePlayersFromRows(combinedRows);
         let addedCount = 0;
+        let skippedForLimit = 0;
 
         incomingPlayers.forEach(player => {
             const playerKey = getPlayerKey(player);
             if (!existingPlayerKeys.has(playerKey)) {
+                if (currentPlayers.length >= MAX_TEAM_ROSTER_PLAYERS) {
+                    skippedForLimit += 1;
+                    return;
+                }
                 existingPlayerKeys.add(playerKey);
                 currentPlayers.push(player);
                 addedCount += 1;
             }
         });
 
-        if (currentPlayers.length) {
-            setTeamPlayers({ players: currentPlayers, updatedAt: new Date().toLocaleString() });
-        }
+        setTeamPlayers({ players: currentPlayers, updatedAt: new Date().toLocaleString() });
 
         const subscribedEmailCount = registerTeamEmailSubscribersFromPlayers(currentPlayers);
+        const limitNote = skippedForLimit > 0
+            ? ` ${skippedForLimit} player(s) were not added because the ${MAX_TEAM_ROSTER_PLAYERS}-player roster limit was reached.`
+            : '';
 
         if (addedCount > 0) {
-            setRosterStatus(`Roster uploaded for ${team}. ${addedCount} new player(s) added; duplicates ignored. ${subscribedEmailCount} email(s) registered for team schedule/score updates.`, false, true);
+            setRosterStatus(`Roster uploaded for ${team}. ${addedCount} new player(s) added; duplicates ignored.${limitNote} ${subscribedEmailCount} email(s) registered for team schedule/score updates.`, false, true);
         } else {
-            setRosterStatus(`Roster uploaded for ${team}. No new players were added; duplicates were ignored. ${subscribedEmailCount} email(s) registered for team schedule/score updates.`, false, true);
+            setRosterStatus(`Roster uploaded for ${team}. No new players were added; duplicates were ignored.${limitNote} ${subscribedEmailCount} email(s) registered for team schedule/score updates.`, false, true);
         }
 
         await saveBackendTeamData();
@@ -3197,6 +3258,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const SESSION_KEY = 'lamslSessionV1';
   const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
   const CHECKINS_KEY = 'lamslGameCheckinsV1';
+  const MAX_TEAM_ROSTER_PLAYERS = 16;
 
   function readJson(key, fallback){
     try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch(e){ return fallback; }
@@ -3250,7 +3312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       email: String(p.email || p.Email || '').trim(),
       gamesPlayed: Number(p.gamesPlayed || p.GamesPlayed || 0) || 0,
       photo: String(p.photo || p.Photo || '').trim()
-    })).filter(p => p.name && p.position);
+    })).filter(p => p.name && p.position).slice(0, MAX_TEAM_ROSTER_PLAYERS);
     const entry = { team: pageTeam(), division: pageDivision(), players: cleaned, updatedAt: new Date().toISOString() };
     const store = getStore();
     store[teamKey()] = entry;
@@ -3281,11 +3343,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   function applyAccess(){
     const allowed = canManage();
+    const rosterInput = document.getElementById('roster-file');
+    const hasRosterFile = !!(rosterInput && rosterInput.files && rosterInput.files[0]);
     document.querySelectorAll('.manager-only,.small-manager-panel,.team-photo-controls,.roster-controls').forEach(el => { el.style.display = allowed ? 'block' : 'none'; });
     ['team-manager-panel','roster-admin-panel','team-photo-upload-panel'].forEach(id => {
       const el = document.getElementById(id); if (el) el.style.display = allowed ? 'block' : 'none';
     });
-    document.querySelectorAll('#upload-roster-btn,#upload-team-photo-btn,#add-player-btn,#remove-player-btn,#save-player-btn,#roster-file,#team-photo-file').forEach(el => { el.disabled = !allowed; });
+    document.querySelectorAll('#upload-team-photo-btn,#add-player-btn,#remove-player-btn,#save-player-btn,#roster-file,#team-photo-file,#choose-roster-file-btn').forEach(el => { el.disabled = !allowed; });
+    const uploadRosterBtn = document.getElementById('upload-roster-btn');
+    if (uploadRosterBtn) uploadRosterBtn.disabled = !allowed || !hasRosterFile;
     document.querySelectorAll('.checkin-game-btn,.check-in-game-btn').forEach(btn => { btn.style.display = allowed ? 'inline-block' : 'none'; btn.disabled = !allowed; });
     const photoStatus = document.getElementById('team-photo-status');
     if (photoStatus) photoStatus.textContent = allowed ? 'Upload or replace this team profile photo.' : 'Sign in as an administrator or assigned Team Manager to upload a team photo.';
@@ -3352,6 +3418,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const id = (document.getElementById('player-id')?.value || '').trim() || `${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
     const players = [...getPlayers()];
     const ix = players.findIndex(p => String(p.id) === id);
+    if (ix < 0 && players.length >= MAX_TEAM_ROSTER_PLAYERS) {
+      setStatus(`Rosters are limited to ${MAX_TEAM_ROSTER_PLAYERS} players. Remove a player before adding another.`, true);
+      return;
+    }
     const record = {
       id, name, position,
       phone: (document.getElementById('player-phone')?.value || '').trim(),
@@ -3472,7 +3542,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const clearCheck = document.getElementById('clear-checkin-btn'); if (clearCheck) clearCheck.onclick = e => { e.preventDefault(); const list = document.getElementById('checkin-selected-players'); if (list) list.innerHTML = ''; };
     const checked = document.getElementById('checkin-selected-players'); if (checked) checked.addEventListener('click', e => { const b = e.target.closest('.remove-player-checkin'); if (b) { e.preventDefault(); b.closest('[data-player-id]')?.remove(); } }, true);
     const photoBtn = document.getElementById('upload-team-photo-btn'); if (photoBtn) photoBtn.addEventListener('click', uploadTeamPhoto, true);
-    const rosterBtn = document.getElementById('upload-roster-btn'); if (rosterBtn) rosterBtn.addEventListener('click', e => { e.preventDefault(); const input = document.getElementById('roster-file'); if (input) input.click(); }, true);
+    const chooseRosterBtn = document.getElementById('choose-roster-file-btn'); if (chooseRosterBtn) chooseRosterBtn.addEventListener('click', e => { e.preventDefault(); const input = document.getElementById('roster-file'); if (input && !input.disabled) input.click(); }, true);
+    const rosterFileInput = document.getElementById('roster-file'); if (rosterFileInput) rosterFileInput.addEventListener('change', () => { applyAccess(); }, true);
     setTimeout(() => { applyAccess(); renderRoster(); }, 750);
     setTimeout(() => { applyAccess(); renderRoster(); }, 1750);
   }
@@ -3500,8 +3571,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   function apply(){
     const allowed=canManage();
+    const rosterInput=document.getElementById('roster-file');
+    const hasRosterFile=!!(rosterInput && rosterInput.files && rosterInput.files[0]);
     document.querySelectorAll('.manager-only,.small-manager-panel,.team-photo-controls,.roster-controls').forEach(el=>{ el.style.display=allowed ? 'block' : 'none'; });
-    document.querySelectorAll('#add-player-btn,#remove-player-btn,#upload-roster-btn,#upload-team-photo-btn,#roster-file,#team-photo-file,#save-player-btn').forEach(el=>{ if(el) el.disabled=!allowed; });
+    document.querySelectorAll('#add-player-btn,#remove-player-btn,#upload-team-photo-btn,#roster-file,#team-photo-file,#save-player-btn,#choose-roster-file-btn').forEach(el=>{ if(el) el.disabled=!allowed; });
+    const uploadRosterBtn=document.getElementById('upload-roster-btn'); if(uploadRosterBtn) uploadRosterBtn.disabled=!allowed || !hasRosterFile;
     document.querySelectorAll('.checkin-game-btn,.check-in-game-btn').forEach(el=>{ el.style.display=allowed ? 'block' : 'none'; el.disabled=!allowed; });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply); else apply();
@@ -3515,6 +3589,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 (function(){
   const SESSION_KEY='lamslSessionV1';
   const TEAM_PLAYERS_KEY='lamslTeamPlayersV1';
+  const MAX_TEAM_ROSTER_PLAYERS = 16;
   function readJson(k,f){try{const r=localStorage.getItem(k);return r?JSON.parse(r):f;}catch(e){return f;}}
   function writeJson(k,v){localStorage.setItem(k,JSON.stringify(v));}
   function norm(v){return String(v||'').trim().toLowerCase().replace(/[_\s]+/g,'-');}
@@ -3550,7 +3625,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cleaned=players.map((p,i)=>({
       id:String(p.id||`${Date.now()}-${i}`),name:String(p.name||p.Name||'').trim(),position:String(p.position||p.Position||'').trim(),
       phone:String(p.phone||p.Phone||'').trim(),email:String(p.email||p.Email||'').trim(),gamesPlayed:Number(p.gamesPlayed||0)||0,photo:String(p.photo||'').trim()
-    })).filter(p=>p.name&&p.position);
+    })).filter(p=>p.name&&p.position).slice(0, MAX_TEAM_ROSTER_PLAYERS);
     const entry={team:team(),division:div(),players:cleaned,updatedAt:new Date().toISOString()};
     const st=getStore(); st[key()]=entry; st[team()]=entry; st[team().trim().toLowerCase()]=entry; writeJson(TEAM_PLAYERS_KEY,st); return cleaned;
   }
@@ -3569,8 +3644,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   function populateCheckin(){const sel=document.getElementById('checkin-player-select'); if(!sel)return; const v=sel.value; sel.innerHTML='<option value="">Choose a player</option>'+getPlayers().map(p=>`<option value="${esc(p.id)}">${esc(p.name)}${p.position?' - '+esc(p.position):''}</option>`).join(''); sel.value=v;}
   function showControls(){
     const allowed=canManage();
+    const rosterInput=document.getElementById('roster-file');
+    const hasRosterFile=!!(rosterInput && rosterInput.files && rosterInput.files[0]);
     document.querySelectorAll('.manager-only,.small-manager-panel,.team-photo-controls,.roster-controls').forEach(el=>{el.style.display=allowed?'block':'none';});
-    document.querySelectorAll('#add-player-btn,#remove-player-btn,#upload-roster-btn,#upload-team-photo-btn,#roster-file,#team-photo-file,#save-player-btn').forEach(el=>{if(el)el.disabled=!allowed;});
+    document.querySelectorAll('#add-player-btn,#remove-player-btn,#upload-team-photo-btn,#roster-file,#team-photo-file,#save-player-btn,#choose-roster-file-btn').forEach(el=>{if(el)el.disabled=!allowed;});
+    const uploadRosterBtn=document.getElementById('upload-roster-btn'); if(uploadRosterBtn) uploadRosterBtn.disabled=!allowed || !hasRosterFile;
     document.querySelectorAll('.checkin-game-btn,.check-in-game-btn').forEach(el=>{el.style.display=allowed?'inline-block':'none';el.disabled=!allowed;});
     const rs=document.getElementById('roster-admin-status'); if(rs) rs.textContent=allowed?'Access confirmed. Manage this team roster.':'Sign in as Administrator or assigned Team Manager to manage this roster.';
     const ps=document.getElementById('team-photo-status'); if(ps) ps.textContent=allowed?'Access confirmed. Upload or replace this team photo.':'Sign in as Administrator or assigned Team Manager to upload a team photo.';
@@ -3596,6 +3674,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if(!name){if(status)status.textContent='First and Last Name is required.';return;}
     if(!position){if(status)status.textContent='Position Played is required.';return;}
     const players=getPlayers();
+    if(players.length>=MAX_TEAM_ROSTER_PLAYERS){if(status)status.textContent=`Rosters are limited to ${MAX_TEAM_ROSTER_PLAYERS} players. Remove a player before adding another.`;return;}
     players.push({id:`player-${Date.now()}`,name,position,phone:(document.getElementById('player-phone')?.value||'').trim(),email:(document.getElementById('player-email')?.value||'').trim(),gamesPlayed:0});
     const saved=setPlayers(players); renderRoster();
     const modal=document.getElementById('player-modal'); if(modal)modal.style.display='none';
@@ -3622,7 +3701,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const close=document.getElementById('close-modal-btn'); if(close) close.onclick=()=>{const m=document.getElementById('player-modal'); if(m)m.style.display='none';};
     document.addEventListener('click',e=>{const b=e.target.closest('.roster-remove-btn'); if(b){e.preventDefault();removePlayer(b.dataset.playerId);}},true);
     const photo=document.getElementById('upload-team-photo-btn'); if(photo) photo.onclick=uploadPhoto;
-    const roster=document.getElementById('upload-roster-btn'); if(roster) roster.onclick=e=>{e.preventDefault(); const input=document.getElementById('roster-file'); if(input) input.click();};
+    const chooseRoster=document.getElementById('choose-roster-file-btn'); if(chooseRoster) chooseRoster.onclick=e=>{e.preventDefault(); const input=document.getElementById('roster-file'); if(input && !input.disabled) input.click();};
+    const rosterInput=document.getElementById('roster-file'); if(rosterInput) rosterInput.onchange=()=>{ showControls(); };
     setTimeout(()=>{showControls();renderRoster();},500); setTimeout(()=>{showControls();renderRoster();},1500);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind); else bind();
@@ -3631,4 +3711,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
-

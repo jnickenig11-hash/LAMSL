@@ -192,11 +192,7 @@ header {
         gap: 12px;
     }
 
-    #player-profiles-wrap {
-        display: grid;
-        gap: 12px;
-        margin-top: 12px;
-    }
+    #player-profiles-wrap { display: none !important; }
 
     .player-card {
         border: 1px solid #dbe2ea;
@@ -2078,11 +2074,7 @@ function showCheckinPanel(game) {
         hideCheckinPanel();
         return;
     }
-    if (!canCheckInForGame(game)) {
-        hideCheckinPanel();
-        updateCheckinStatus('Check-in is only available for upcoming games without final scores.', true);
-        return;
-    }
+    if (!canCheckInForGame(game)) { hideCheckinPanel(); return; }
 
     selectedGame = game;
     const gameLabel = `${game.date} ${game.time || ''} — ${game.team1} vs ${game.team2}`;
@@ -2145,10 +2137,7 @@ function saveCheckinSelections() {
         updateCheckinStatus('No game selected for check-in.', true);
         return;
     }
-    if (!canCheckInForGame(selectedGame)) {
-        updateCheckinStatus('Cannot save check-in for past or already scored games.', true);
-        return;
-    }
+    if (!canCheckInForGame(selectedGame)) { updateCheckinStatus('Cannot save check-in for cancelled games.', true); return; }
 
     const gameId = getGameId(selectedGame);
     const allPlayers = getCheckinPlayers();
@@ -2325,36 +2314,8 @@ function renderPlayerProfiles(filterPlayers = null) {
 function renderTeamPlayerProfiles() {
     const profilesWrap = document.getElementById('player-profiles-wrap');
     if (!profilesWrap) return;
-
-    const data = getTeamPlayers();
-    const players = Array.isArray(data.players) ? data.players : [];
-
-    if (!players.length) {
-        profilesWrap.innerHTML = '';
-        return;
-    }
-
-    const canManage = canManageTeamContent();
-    const html = players.map(player => `
-        <div class="player-card" data-player-id="${escapeHtml(player.id)}">
-            <img src="${player.photo || 'Images/LAMSLLogo.jpg'}" alt="${escapeHtml(player.name)}" onerror="this.src='Images/LAMSLLogo.jpg'">
-            <div class="player-card-content">
-                <h4>${escapeHtml(player.name)}</h4>
-                <p><strong>Position:</strong> ${escapeHtml(player.position || 'TBA')}</p>
-                <p><strong>Phone:</strong> ${escapeHtml(player.phone || 'N/A')}</p>
-                <p><strong>Email:</strong> ${escapeHtml(player.email || 'N/A')}</p>
-                <p><strong>Games Played:</strong> ${Number(player.gamesPlayed || 0)}</p>
-            </div>
-            ${canManage ? `
-                <div class="player-card-actions">
-                    <button type="button" data-action="edit" data-player-id="${escapeHtml(player.id)}">Edit</button>
-                    <button type="button" class="danger" data-action="remove" data-player-id="${escapeHtml(player.id)}">Remove</button>
-                </div>
-            ` : ''}
-        </div>
-    `).join('');
-
-    profilesWrap.innerHTML = html;
+    // Keep a single roster representation on the page to avoid duplicate player list versions.
+    profilesWrap.innerHTML = '';
 }
 
 function clearPlayerForm() {
@@ -2661,8 +2622,7 @@ function isScoredGame(game) {
 
 function canCheckInForGame(game) {
     if (!game) return false;
-    if (isScoredGame(game)) return false;
-    return String(game.date || '') >= formatDateKey(new Date());
+    return String(game.status || 'scheduled').toLowerCase() !== 'cancelled';
 }
 
 function formatTeamResult(game) {
@@ -2683,8 +2643,7 @@ function renderLatestResults(games) {
 }
 
 function getUpcomingGames() {
-    const today = formatDateKey(new Date());
-    return getTeamGames().filter(game => String(game.date || '') >= today && !isScoredGame(game));
+    return getTeamGames().filter(canCheckInForGame);
 }
 
 function renderScheduleTable(games) {

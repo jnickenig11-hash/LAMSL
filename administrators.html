@@ -1846,7 +1846,11 @@ async function loadNotificationStatus() {
         if (!response.ok || result.success === false) throw new Error(result.error || result.message || `HTTP ${response.status}`);
         if (notificationSubscriberCount) notificationSubscriberCount.textContent = result.subscriberCount ?? 0;
         if (notificationSmtpStatus) notificationSmtpStatus.textContent = result.smtpConfigured ? 'Ready' : 'Setup Needed';
-        if (notificationStatus) notificationStatus.textContent = result.smtpConfigured ? 'Schedule notification email service is ready.' : 'SMTP is not configured on Render. Preview works, but sending requires SMTP environment variables.';
+        if (notificationStatus) {
+            const baseStatus = result.smtpConfigured ? 'Schedule notification email service is ready.' : 'SMTP is not configured on Render. Preview works, but sending requires SMTP environment variables.';
+            const failureHint = result.lastFailure?.error ? ` Last failure: ${result.lastFailure.error}` : '';
+            notificationStatus.textContent = `${baseStatus}${failureHint}`;
+        }
     } catch (error) {
         if (notificationStatus) notificationStatus.textContent = 'Notification status failed: ' + error.message;
     }
@@ -1873,7 +1877,10 @@ async function previewScheduleNotification() {
         if (notificationSubscriberCount) notificationSubscriberCount.textContent = result.subscriberCount ?? 0;
         if (notificationSmtpStatus) notificationSmtpStatus.textContent = result.smtpConfigured ? 'Ready' : 'Setup Needed';
         renderNotificationPreview(result.preview, result.subscriberCount, result.smtpConfigured);
-        if (notificationStatus) notificationStatus.textContent = 'Preview loaded. No email was sent.';
+        if (notificationStatus) {
+            const failureHint = result.lastFailure?.error ? ` Last failure: ${result.lastFailure.error}` : '';
+            notificationStatus.textContent = `Preview loaded. No email was sent.${failureHint}`;
+        }
     } catch (error) {
         if (notificationStatus) notificationStatus.textContent = 'Preview failed: ' + error.message;
     }
@@ -1898,7 +1905,10 @@ async function sendScheduleNotification() {
         if (notificationSubscriberCount) notificationSubscriberCount.textContent = result.subscriberCount ?? 0;
         if (notificationSmtpStatus) notificationSmtpStatus.textContent = result.configured ? 'Ready' : 'Setup Needed';
         renderNotificationPreview(result.preview, result.subscriberCount, result.configured);
-        if (notificationStatus) notificationStatus.textContent = `Schedule update sent. Sent: ${result.sent || 0}. Failed: ${result.failed || 0}.`;
+        if (notificationStatus) {
+            const failureHint = result.lastError ? ` Last error: ${result.lastError}` : '';
+            notificationStatus.textContent = `Schedule update sent. Sent: ${result.sent || 0}. Failed: ${result.failed || 0}.${failureHint}`;
+        }
     } catch (error) {
         if (notificationStatus) notificationStatus.textContent = 'Send failed: ' + error.message;
     }

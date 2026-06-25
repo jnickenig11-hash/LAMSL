@@ -20,7 +20,7 @@ Add these to the LAMSL backend Render service, then redeploy:
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=lamslsupport@gmail.com
-SMTP_PASS=<Google App Password with spaces removed>
+SMTP_PASS=<Google App Password>
 MAIL_FROM=LAMSL Support <lamslsupport@gmail.com>
 SMTP_EHLO_DOMAIN=lamsl.com
 ```
@@ -31,6 +31,8 @@ SMTP_EHLO_DOMAIN=lamsl.com
 SMTP_PORT=465
 SMTP_SECURE=true
 ```
+
+For Gmail, the backend now strips whitespace from `SMTP_PASS` automatically so copied app passwords with spaces still authenticate.
 
 ## Storage variables
 

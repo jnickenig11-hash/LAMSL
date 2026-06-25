@@ -1476,7 +1476,7 @@ input[type="submit"]:disabled{
                     <button id="choose-roster-file-btn" type="button" class="secondary">Choose Roster File</button>
                     <button id="upload-roster-btn" type="button">Upload Roster Spreadsheet</button>
                     <p id="roster-file-name" class="muted">No file selected.</p>
-                    <p class="muted">Spreadsheet tip: .xls, .xlsx, .xlsm, .xlsb, and .csv files are supported. Use column headers like Name, Position, Phone, Email. Team rosters are limited to 16 players.</p>
+                    <p class="muted">Spreadsheet tip: .xls, .xlsx, .xlsm, .xlsb, and .csv files are supported. Use headers like First Name, Last Name, Cell Number (or Phone Number), Email Address, and Position. Team rosters are limited to 16 players.</p>
                 </div>
                 <div id="roster-grid-wrap" class="roster-grid"></div>
                 <div id="player-profiles-wrap"></div>
@@ -2212,15 +2212,20 @@ function normalizePlayersFromRows(rows) {
         return '';
     };
 
-    return rows.map((row, index) => ({
+    return rows.map((row, index) => {
+        const firstName = getValue(row, ['First Name', 'FirstName', 'First']);
+        const lastName = getValue(row, ['Last Name', 'LastName', 'Last']);
+        const combinedName = `${firstName} ${lastName}`.trim();
+        return ({
         id: row.id || `${Date.now()}-${index}`,
-        name: getValue(row, ['Name', 'Player Name', 'Player', 'Full Name']),
+        name: combinedName || getValue(row, ['Name', 'Player Name', 'Player', 'Full Name']),
         position: getValue(row, ['Position', 'Positions', 'Pos', 'Position Played', 'Primary Position']) || 'TBA',
-        phone: getValue(row, ['Phone', 'Phone Number', 'Contact Phone', 'Cell', 'Cell Phone']),
+        phone: getValue(row, ['Cell Number', 'Cell', 'Cell Phone', 'Phone', 'Phone Number', 'Contact Phone']),
         email: getValue(row, ['Email', 'Email Address', 'E-mail']),
         gamesPlayed: Number(getValue(row, ['Games Played', 'GamesPlayed', 'Games']) || 0) || 0,
         photo: String(row.Photo || row.photo || '').trim()
-    })).filter(player => player.name);
+    });
+    }).filter(player => player.name);
 }
 
 function capRosterPlayers(players) {
@@ -2509,17 +2514,28 @@ function getPlayerKey(player) {
 }
 
 function normalizeRosterRow(row) {
-    const getValue = key => {
-        const keys = Object.keys(row);
-        const match = keys.find(k => k.toLowerCase() === key.toLowerCase());
-        return match ? String(row[match] || '').trim() : '';
+    const getValue = (candidates) => {
+        const keys = Object.keys(row || {});
+        const normalizedMap = keys.reduce((map, key) => {
+            map[key.toLowerCase().replace(/[^a-z0-9]/g, '')] = key;
+            return map;
+        }, {});
+        for (const candidate of candidates) {
+            const normalizedCandidate = String(candidate || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const sourceKey = normalizedMap[normalizedCandidate];
+            if (sourceKey) return String(row[sourceKey] || '').trim();
+        }
+        return '';
     };
+    const firstName = getValue(['First Name', 'FirstName', 'First']);
+    const lastName = getValue(['Last Name', 'LastName', 'Last']);
+    const combinedName = `${firstName} ${lastName}`.trim();
     return {
-        Team: getValue('Team').replace(/\s+Regular$/i, ''),
-        Name: getValue('Name'),
-        Position: getValue('Position'),
-        Phone: getValue('Phone'),
-        Email: getValue('Email')
+        Team: getValue(['Team', 'Team Name']).replace(/\s+Regular$/i, ''),
+        Name: combinedName || getValue(['Name', 'Player Name', 'Player', 'Full Name']),
+        Position: getValue(['Position', 'Positions', 'Pos', 'Position Played', 'Primary Position']),
+        Phone: getValue(['Cell Number', 'Cell', 'Cell Phone', 'Phone', 'Phone Number', 'Contact Phone']),
+        Email: getValue(['Email', 'Email Address', 'E-mail'])
     };
 }
 

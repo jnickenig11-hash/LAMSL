@@ -1499,6 +1499,7 @@ const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
 const TEAM_CHECKIN_KEY = 'lamslTeamGameCheckinsV1';
 const TEAM_EMAIL_SUBSCRIBERS_KEY = 'lamslTeamEmailSubscribersV1';
 const MAX_TEAM_ROSTER_PLAYERS = 16;
+window.__lamslPrimaryTeamScriptActive = true;
 
 // Populate rosters from spreadsheet data
 (function() {
@@ -2188,13 +2189,27 @@ function clearCheckinSelection() {
 }
 
 function normalizePlayersFromRows(rows) {
+    const getValue = (row, candidates) => {
+        const rowKeys = Object.keys(row || {});
+        const normalizedMap = rowKeys.reduce((map, key) => {
+            map[key.toLowerCase().replace(/[^a-z0-9]/g, '')] = key;
+            return map;
+        }, {});
+        for (const candidate of candidates) {
+            const normalizedCandidate = String(candidate || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const sourceKey = normalizedMap[normalizedCandidate];
+            if (sourceKey) return String(row[sourceKey] || '').trim();
+        }
+        return '';
+    };
+
     return rows.map((row, index) => ({
         id: row.id || `${Date.now()}-${index}`,
-        name: String(row.Name || row.name || row['Player Name'] || row.Player || '').trim(),
-        position: String(row.Position || row.position || row.Positions || row.Pos || '').trim(),
-        phone: String(row.Phone || row.phone || row['Phone Number'] || row['Contact Phone'] || '').trim(),
-        email: String(row.Email || row.email || row['Email Address'] || '').trim(),
-        gamesPlayed: Number(row['Games Played'] || row.GamesPlayed || row['Games'] || 0) || 0,
+        name: getValue(row, ['Name', 'Player Name', 'Player', 'Full Name']),
+        position: getValue(row, ['Position', 'Positions', 'Pos', 'Position Played', 'Primary Position']) || 'TBA',
+        phone: getValue(row, ['Phone', 'Phone Number', 'Contact Phone', 'Cell', 'Cell Phone']),
+        email: getValue(row, ['Email', 'Email Address', 'E-mail']),
+        gamesPlayed: Number(getValue(row, ['Games Played', 'GamesPlayed', 'Games']) || 0) || 0,
         photo: String(row.Photo || row.photo || '').trim()
     })).filter(player => player.name);
 }
@@ -2995,6 +3010,28 @@ playerList.addEventListener('click', event => {
     }
 });
 
+const profilesWrap = document.getElementById('player-profiles-wrap');
+if (profilesWrap) {
+    profilesWrap.addEventListener('click', event => {
+        const button = event.target.closest('button[data-action]');
+        if (!button) return;
+        const action = button.dataset.action;
+        const playerId = button.dataset.playerId;
+        if (!action || !playerId) return;
+        if (action === 'edit') {
+            modalTitle.textContent = 'Edit Player';
+            playerFormSection.style.display = 'block';
+            playerProfilesSection.style.display = 'none';
+            editPlayer(playerId);
+            playerModal.style.display = 'flex';
+            return;
+        }
+        if (action === 'remove') {
+            removePlayer(playerId);
+        }
+    });
+}
+
 
 if (rosterGridWrap) {
     rosterGridWrap.addEventListener('click', event => {
@@ -3255,6 +3292,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 <script id="team-manager-roster-photo-access-final">
 // Final Team Manager/Admin roster, check-in, and team photo controls.
 (function(){
+  if (window.__lamslPrimaryTeamScriptActive) return;
   const SESSION_KEY = 'lamslSessionV1';
   const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
   const CHECKINS_KEY = 'lamslGameCheckinsV1';
@@ -3555,6 +3593,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 <script id="team-manager-access-self-heal">
 (function(){
+  if (window.__lamslPrimaryTeamScriptActive) return;
   function readSession(){ try { return JSON.parse(localStorage.getItem('lamslSessionV1') || 'null') || {}; } catch(e){ return {}; } }
   function norm(v){ return String(v || '').trim().toLowerCase().replace(/[_\s]+/g,'-'); }
   function cleanDiv(v){ return String(v || '').replace(/^division\s*/i,'').trim().toUpperCase(); }
@@ -3587,6 +3626,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 <script id="team-manager-visible-save-hotfix">
 (function(){
+  if (window.__lamslPrimaryTeamScriptActive) return;
   const SESSION_KEY='lamslSessionV1';
   const TEAM_PLAYERS_KEY='lamslTeamPlayersV1';
   const MAX_TEAM_ROSTER_PLAYERS = 16;

@@ -2078,6 +2078,11 @@ function showCheckinPanel(game) {
         hideCheckinPanel();
         return;
     }
+    if (!canCheckInForGame(game)) {
+        hideCheckinPanel();
+        updateCheckinStatus('Check-in is only available for upcoming games without final scores.', true);
+        return;
+    }
 
     selectedGame = game;
     const gameLabel = `${game.date} ${game.time || ''} — ${game.team1} vs ${game.team2}`;
@@ -2138,6 +2143,10 @@ function saveCheckinSelections() {
 
     if (!selectedGame || !team) {
         updateCheckinStatus('No game selected for check-in.', true);
+        return;
+    }
+    if (!canCheckInForGame(selectedGame)) {
+        updateCheckinStatus('Cannot save check-in for past or already scored games.', true);
         return;
     }
 
@@ -2583,6 +2592,10 @@ function applyRosterUploadAccess() {
         setRosterStatus('Sign in as team manager or admin to upload roster spreadsheets.', true);
     }
 
+    document.querySelectorAll('.manager-only,.small-manager-panel,.team-photo-controls,.roster-controls').forEach(el => {
+        el.style.display = allowed ? 'block' : 'none';
+    });
+
     rosterFileInput.disabled = !allowed || !team;
     const chooseRosterFileBtn = document.getElementById('choose-roster-file-btn');
     if (chooseRosterFileBtn) chooseRosterFileBtn.disabled = !allowed || !team;
@@ -2630,6 +2643,12 @@ function isScoredGame(game) {
     return game && game.score1 !== '' && game.score2 !== '' && game.score1 != null && game.score2 != null;
 }
 
+function canCheckInForGame(game) {
+    if (!game) return false;
+    if (isScoredGame(game)) return false;
+    return String(game.date || '') >= formatDateKey(new Date());
+}
+
 function formatTeamResult(game) {
     const homeSide = game.team1 === team;
     const teamScore = homeSide ? game.score1 : game.score2;
@@ -2673,7 +2692,10 @@ function renderScheduleTable(games) {
                     <td>${game.park || ''}</td>
                     <td>${opponent || ''}</td>
                     <td>${result}</td>
-                    <td><button type="button" class="checkin-game-btn" data-game-id="${getGameId(game)}">Check In Players</button></td>
+                    <td>${canCheckInForGame(game)
+                        ? `<button type="button" class="checkin-game-btn" data-game-id="${getGameId(game)}">Check In Players</button>`
+                        : `<button type="button" class="checkin-game-btn" data-game-id="${getGameId(game)}" disabled>Check-In Closed</button>`
+                    }</td>
                 </tr>`;
             }).join('')}</tbody>
         </table>`;
@@ -3070,7 +3092,7 @@ teamScheduleWrap.addEventListener('click', event => {
     const checkinButton = event.target.closest('.checkin-game-btn');
     if (checkinButton) {
         const selected = getTeamGames().find(game => getGameId(game) === checkinButton.dataset.gameId);
-        if (selected) showCheckinPanel(selected);
+        if (selected && canCheckInForGame(selected)) showCheckinPanel(selected);
         return;
     }
     const row = event.target.closest('tr[data-game-id]');
@@ -3080,7 +3102,7 @@ teamScheduleWrap.addEventListener('click', event => {
     const gameId = row.dataset.gameId;
     const games = getTeamGames();
     const selected = games.find(game => getGameId(game) === gameId);
-    if (selected) {
+    if (selected && canCheckInForGame(selected)) {
         showCheckinPanel(selected);
     }
 });
@@ -3093,7 +3115,7 @@ upcomingGameSelect.addEventListener('change', event => {
     }
     const games = getTeamGames();
     const selected = games.find(game => getGameId(game) === gameId);
-    if (selected) {
+    if (selected && canCheckInForGame(selected)) {
         showCheckinPanel(selected);
     }
 });
@@ -3111,7 +3133,7 @@ teamScheduleWrap.addEventListener('click', event => {
     const checkinButton = event.target.closest('.checkin-game-btn');
     if (checkinButton) {
         const selected = getTeamGames().find(game => getGameId(game) === checkinButton.dataset.gameId);
-        if (selected) showCheckinPanel(selected);
+        if (selected && canCheckInForGame(selected)) showCheckinPanel(selected);
         return;
     }
     const btn = event.target.closest('.check-in-game-btn');
@@ -3120,7 +3142,7 @@ teamScheduleWrap.addEventListener('click', event => {
     const gameId = btn.dataset.gameId;
     const games = getTeamGames();
     const selected = games.find(game => getGameId(game) === gameId);
-    if (selected) {
+    if (selected && canCheckInForGame(selected)) {
         upcomingGameSelect.value = gameId;
         showCheckinPanel(selected);
         playerCheckinPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -3218,7 +3240,7 @@ if (upcomingGameSelect && games.length) {
 
 if (gameIdParam && games.length) {
     const selected = games.find(game => getGameId(game) === gameIdParam);
-    if (selected) {
+    if (selected && canCheckInForGame(selected)) {
         if (upcomingGameSelect) {
             upcomingGameSelect.value = gameIdParam;
         }

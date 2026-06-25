@@ -2733,6 +2733,35 @@ function setTeamPlayers(record) {
     if (team) lamslTeamBackend.teamPlayers[team] = safeRecord;
 }
 
+function getTeamGameCheckins() {
+    const key = getTeamPlayerBucketKey();
+    const store = readJson(TEAM_CHECKIN_KEY, {});
+    const bucket = (key && store[key]) || (team && store[team]) || {};
+    return bucket && typeof bucket === 'object' && !Array.isArray(bucket) ? bucket : {};
+}
+
+function setTeamGameCheckins(checkins) {
+    const key = getTeamPlayerBucketKey();
+    if (!key) return;
+    const safeCheckins = checkins && typeof checkins === 'object' && !Array.isArray(checkins) ? checkins : {};
+    const store = readJson(TEAM_CHECKIN_KEY, {});
+    store[key] = safeCheckins;
+    if (team) store[team] = safeCheckins;
+    writeJson(TEAM_CHECKIN_KEY, store);
+}
+
+function getCheckinPlayers() {
+    const data = getTeamPlayers();
+    const players = Array.isArray(data.players) ? data.players : [];
+    return players
+        .map((player, index) => ({
+            ...player,
+            id: String(player.id || `player-${index}`),
+            name: String(player.name || '').trim()
+        }))
+        .filter(player => player.name);
+}
+
 
 function getTeamSubscriberKeys() {
     const divKey = String(division || '').trim() || 'Unassigned';

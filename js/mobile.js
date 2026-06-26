@@ -54,18 +54,12 @@
 
 
   function renderNextGames(){
-    const games = sortedGamesAsc().filter(g => g && g.date && g.team1 && g.team2 && String(g.status || 'scheduled').toLowerCase() !== 'cancelled');
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const upcomingDate = games.map(g => g.date).filter(date => {
-      const parsed = parseDate(date);
-      return parsed && parsed >= today;
-    }).sort()[0];
-    const selectedDate = upcomingDate || (games.length ? games[games.length - 1].date : '');
+    const games = sortedGamesDesc().filter(g => g && g.date && g.team1 && g.team2 && String(g.status || 'scheduled').toLowerCase() !== 'cancelled');
+    const selectedDate = games.length ? games[0].date : '';
     const nextGames = selectedDate ? games.filter(g => g.date === selectedDate) : [];
     const badge = $('nextGamesDate');
     if (badge) badge.textContent = selectedDate ? dateLabel(selectedDate) : 'No games';
-    $('nextGamesList').innerHTML = nextGames.length ? nextGames.map(gameCard).join('') : '<div class="empty-state">No upcoming games are currently scheduled.</div>';
+    $('nextGamesList').innerHTML = nextGames.length ? nextGames.map(gameCard).join('') : '<div class="empty-state">No games are currently scheduled.</div>';
   }
 
   function renderSchedule(){

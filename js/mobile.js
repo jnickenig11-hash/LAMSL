@@ -3,6 +3,7 @@
 
   const CONTENT_CACHE_KEY = 'lamslMobileContentV1';
   const SESSION_KEY = 'lamslSessionV1';
+  const INSTALL_STATE_KEY = 'lamslAppInstalled';
   const DIVISIONS = ['All','A','B','C','D','E'];
   const state = { content: {}, session: null, deferredInstallPrompt: null };
 
@@ -247,7 +248,14 @@
   function setupInstall(){
     const installBtn = $('installBtn');
     const installHelp = $('installHelp');
+    const isAppInstalled = localStorage.getItem(INSTALL_STATE_KEY) === 'true';
     let installPromptDeferred = false;
+
+    if (isAppInstalled) {
+      installBtn.hidden = true;
+      if (installHelp) installHelp.hidden = true;
+      return;
+    }
 
     window.addEventListener('beforeinstallprompt', event => {
       event.preventDefault();
@@ -259,6 +267,7 @@
 
     window.addEventListener('appinstalled', () => {
       state.deferredInstallPrompt = null;
+      localStorage.setItem(INSTALL_STATE_KEY, 'true');
       installBtn.hidden = true;
       if (installHelp) installHelp.hidden = true;
     });
@@ -270,9 +279,12 @@
       }
       if (!state.deferredInstallPrompt) return;
       state.deferredInstallPrompt.prompt();
-      await state.deferredInstallPrompt.userChoice;
+      const { outcome } = await state.deferredInstallPrompt.userChoice;
+      if (outcome === 'accepted') {
+        localStorage.setItem(INSTALL_STATE_KEY, 'true');
+        installBtn.hidden = true;
+      }
       state.deferredInstallPrompt = null;
-      installBtn.hidden = true;
     });
 
     if (!installPromptDeferred) {

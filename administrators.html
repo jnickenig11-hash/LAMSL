@@ -838,18 +838,20 @@ input[type="submit"]:disabled{
               </div>
             </div>
 
-            <div class="admin-inline" id="login-row">
-                <input id="login-username" type="text" placeholder="Username" value="">
-                <div class="password-input-group">
-                    <input id="login-password" type="password" placeholder="Password" value="">
-                    <button type="button" id="login-password-toggle" class="password-toggle" title="Show/Hide Password">👁️</button>
+            <div class="admin-inline" id="auth-row">
+                <div id="login-row" style="display:flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                    <input id="login-username" type="text" placeholder="Username" value="">
+                    <div class="password-input-group">
+                        <input id="login-password" type="password" placeholder="Password" value="">
+                        <button type="button" id="login-password-toggle" class="password-toggle" title="Show/Hide Password">👁️</button>
+                    </div>
+                    <button id="login-btn" type="button">Sign In</button>
+                    <button type="button" id="forgot-password-btn">Forgot Password?</button>
                 </div>
-                <button id="login-btn" type="button">Sign In</button>
-                <button type="button" id="forgot-password-btn">Forgot Password?</button>
-            </div>
-
-            <div class="admin-inline" id="logout-row" style="display:none;">
-                <button id="logout-btn" type="button">Sign Out</button>
+                <div id="logout-row" style="display:none; gap: 12px; flex-wrap: wrap; align-items: center;">
+                    <span id="logged-in-user" style="font-weight: 600; color: #12324A;"></span>
+                    <button id="logout-btn" type="button">Sign Out</button>
+                </div>
             </div>
 
             <div class="admin-only" id="admin-tools" style="display:none;">
@@ -1009,7 +1011,11 @@ input[type="submit"]:disabled{
                 <h3>Create Additional User</h3>
                 <div class="admin-inline">
                     <input id="new-admin-username" type="text" placeholder="New username">
-                    <input id="new-admin-password" type="password" placeholder="New user password">
+                    <input id="new-admin-email" type="email" placeholder="Email address">
+                    <div class="password-input-group">
+                        <input id="new-admin-password" type="password" placeholder="New user password">
+                        <button type="button" id="new-admin-password-toggle" class="password-toggle" title="Show/Hide Password" onclick="togglePasswordVisibility('new-admin-password')">👁️</button>
+                    </div>
                     <select id="new-user-role" aria-label="Select role">
                         <option value="">Select role</option>
                         <option value="admin">Admin</option>
@@ -1337,6 +1343,7 @@ const announcementMessage = document.getElementById('announcement-message');
 const activeAnnouncementsList = document.getElementById('active-announcements');
 const createAdminButton = document.getElementById('create-admin-btn');
 const newAdminUsername = document.getElementById('new-admin-username');
+const newAdminEmail = document.getElementById('new-admin-email');
 const newAdminPassword = document.getElementById('new-admin-password');
 const newUserRole = document.getElementById('new-user-role');
 const userAccountsList = document.getElementById('user-accounts-list');
@@ -1723,6 +1730,14 @@ function renderAuthState() {
 
     loginRow.style.display = loggedIn ? 'none' : 'flex';
     logoutRow.style.display = loggedIn ? 'flex' : 'none';
+    
+    if (loggedIn) {
+        const loggedInUser = document.getElementById('logged-in-user');
+        if (loggedInUser) {
+            loggedInUser.textContent = `Signed in as: ${session.username}`;
+        }
+    }
+    
     adminTools.style.display = isAdmin ? 'block' : 'none';
     document.getElementById('content-tools').style.display = isAdmin ? 'block' : 'none';
 
@@ -2225,6 +2240,7 @@ createAdminButton.addEventListener('click', async () => {
     }
 
     const username = newAdminUsername.value.trim();
+    const email = newAdminEmail.value.trim();
     const password = newAdminPassword.value;
     const role = newUserRole.value;
     if (!username || !role || (!editingUsername && !password)) {
@@ -2241,16 +2257,17 @@ createAdminButton.addEventListener('click', async () => {
     const wasEditingUser = !!editingUsername;
     let nextUsers;
     if (editingUsername) {
-        nextUsers = users.map(user => user.username === editingUsername ? { ...user, username, role, password: password || user.password || '', assignedTeam: (role === 'team-manager' ? (document.getElementById('manager-team-select')?.value || '') : ''), assignedDivision: (role === 'team-manager' ? (document.getElementById('manager-division-select')?.value || '') : '') } : user);
+        nextUsers = users.map(user => user.username === editingUsername ? { ...user, username, email, role, password: password || user.password || '', assignedTeam: (role === 'team-manager' ? (document.getElementById('manager-team-select')?.value || '') : ''), assignedDivision: (role === 'team-manager' ? (document.getElementById('manager-division-select')?.value || '') : '') } : user);
         logAdminAction('user_updated', { originalUsername: editingUsername, username, role });
     } else {
-        nextUsers = [...users, { username, password, role, assignedTeam: (role === 'team-manager' ? (document.getElementById('manager-team-select')?.value || '') : ''), assignedDivision: (role === 'team-manager' ? (document.getElementById('manager-division-select')?.value || '') : '') }];
+        nextUsers = [...users, { username, email, password, role, assignedTeam: (role === 'team-manager' ? (document.getElementById('manager-team-select')?.value || '') : ''), assignedDivision: (role === 'team-manager' ? (document.getElementById('manager-division-select')?.value || '') : '') }];
         logAdminAction('user_created', { newUsername: username, role });
     }
     writeJson(USERS_KEY, nextUsers);
-    const backendSaveResult = await saveUserToBackend({ username, password, role, assignedTeam: (role === 'team-manager' ? (document.getElementById('manager-team-select')?.value || '') : ''), assignedDivision: (role === 'team-manager' ? (document.getElementById('manager-division-select')?.value || '') : '') });
+    const backendSaveResult = await saveUserToBackend({ username, email, password, role, assignedTeam: (role === 'team-manager' ? (document.getElementById('manager-team-select')?.value || '') : ''), assignedDivision: (role === 'team-manager' ? (document.getElementById('manager-division-select')?.value || '') : '') });
 
     newAdminUsername.value = '';
+    newAdminEmail.value = '';
     newAdminPassword.value = '';
     newAdminPassword.placeholder = 'New user password';
     newUserRole.value = '';
@@ -4046,6 +4063,7 @@ async function saveUserToBackend(user){
   const localUsers = readJson(USERS_KEY, []);
   const normalizedUser = {
     username: user.username,
+    email: user.email || '',
     password: user.password || (localUsers.find(localUser => localUser.username === originalUsername || localUser.username === user.username)?.password || ''),
     role: user.role || 'user',
     assignedTeam: user.assignedTeam || '',
@@ -4107,6 +4125,7 @@ function renderUserAccounts() {
       if (!isAdminLoggedIn()) { authStatus.textContent = 'Sign in as admin to edit users.'; return; }
       editingUsername = user.username;
       newAdminUsername.value = user.username;
+      newAdminEmail.value = user.email || '';
       newAdminPassword.value = '';
       newAdminPassword.placeholder = 'Enter new password to change it';
       newUserRole.value = user.role || 'user';

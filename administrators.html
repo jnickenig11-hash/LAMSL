@@ -262,23 +262,74 @@ header {
     padding: 0;
     margin: 0;
     display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 12px;
 }
 
 .admin-list li {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 12px;
-    align-items: center;
+    flex-direction: column;
+    gap: 8px;
     background: #fff;
     border: 1px solid #dbe2ea;
     border-radius: 10px;
-    padding: 14px 16px;
+    padding: 12px 14px;
+    transition: all 0.15s ease;
 }
 
-.admin-list li button {
-    min-width: 96px;
+.admin-list li:hover {
+    border-color: #C86A2F;
+    box-shadow: 0 2px 8px rgba(200, 106, 47, 0.1);
+}
+
+.user-card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.user-card-name {
+    font-weight: 700;
+    color: #12324A;
+    font-size: 15px;
+}
+
+.user-card-email {
+    font-size: 13px;
+    color: #666;
+    word-break: break-all;
+    font-style: italic;
+}
+
+.user-card-role {
+    font-size: 12px;
+    color: #fff;
+    font-weight: 600;
+    background: #12324A;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    width: fit-content;
+}
+
+.user-card-team {
+    font-size: 12px;
+    color: #0066cc;
+    margin-top: 2px;
+}
+
+.user-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.user-card-actions button {
+    flex: 1;
+    min-width: 70px;
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: 6px;
 }
 
 .division-team-list {
@@ -1643,11 +1694,39 @@ function renderUserAccounts() {
 
     users.forEach(user => {
         const li = document.createElement('li');
-        li.style.display = 'flex';
-        li.style.justifyContent = 'space-between';
-        li.style.alignItems = 'center';
-        li.style.gap = '12px';
-        li.innerHTML = `<span>${user.username} • <strong>${user.role}</strong>${user.role === 'team-manager' && user.assignedTeam ? ` • Team: ${user.assignedTeam}${user.assignedDivision ? ' (Division ' + user.assignedDivision + ')' : ''}` : ''} • Password: ********</span>`;
+        
+        // User header with name and email
+        const header = document.createElement('div');
+        header.className = 'user-card-header';
+        
+        const nameEl = document.createElement('div');
+        nameEl.className = 'user-card-name';
+        nameEl.textContent = user.username;
+        header.appendChild(nameEl);
+        
+        const emailEl = document.createElement('div');
+        emailEl.className = 'user-card-email';
+        emailEl.textContent = user.email || '(no email)';
+        header.appendChild(emailEl);
+        
+        li.appendChild(header);
+        
+        // User role and team info
+        const roleEl = document.createElement('div');
+        roleEl.className = 'user-card-role';
+        roleEl.textContent = `${(user.role || 'user').toUpperCase()}`;
+        li.appendChild(roleEl);
+        
+        if (user.role === 'team-manager' && user.assignedTeam) {
+            const teamEl = document.createElement('div');
+            teamEl.className = 'user-card-team';
+            teamEl.textContent = `📍 Team: ${user.assignedTeam}${user.assignedDivision ? ' (Division ' + user.assignedDivision + ')' : ''}`;
+            li.appendChild(teamEl);
+        }
+        
+        // Action buttons
+        const actions = document.createElement('div');
+        actions.className = 'user-card-actions';
 
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
@@ -1672,7 +1751,8 @@ function renderUserAccounts() {
             authStatus.textContent = `User ${user.username} removed.`;
         });
 
-        li.appendChild(removeButton);
+        actions.appendChild(removeButton);
+        li.appendChild(actions);
         userAccountsList.appendChild(li);
     });
     populateAssignManagerSelect();
@@ -4117,10 +4197,43 @@ function renderUserAccounts() {
   if (!users.length) { userAccountsList.innerHTML = '<li>No users found.</li>'; return; }
   users.forEach(user => {
     const li = document.createElement('li');
-    li.style.display = 'flex'; li.style.justifyContent = 'space-between'; li.style.alignItems = 'center'; li.style.gap = '12px';
-    li.innerHTML = `<span><strong>${user.username}</strong> • ${user.role || 'user'}${user.role === 'team-manager' && user.assignedTeam ? ` • Team: ${user.assignedTeam}${user.assignedDivision ? ' (Division ' + user.assignedDivision + ')' : ''}` : ''} • Password: ********</span>`;
-    const actions = document.createElement('span');
-    const editButton = document.createElement('button'); editButton.type='button'; editButton.textContent='Edit';
+    
+    // User header with name and email
+    const header = document.createElement('div');
+    header.className = 'user-card-header';
+    
+    const nameEl = document.createElement('div');
+    nameEl.className = 'user-card-name';
+    nameEl.textContent = user.username;
+    header.appendChild(nameEl);
+    
+    const emailEl = document.createElement('div');
+    emailEl.className = 'user-card-email';
+    emailEl.textContent = user.email || '(no email)';
+    header.appendChild(emailEl);
+    
+    li.appendChild(header);
+    
+    // User role and team info
+    const roleEl = document.createElement('div');
+    roleEl.className = 'user-card-role';
+    roleEl.textContent = `${(user.role || 'user').toUpperCase()}`;
+    li.appendChild(roleEl);
+    
+    if (user.role === 'team-manager' && user.assignedTeam) {
+      const teamEl = document.createElement('div');
+      teamEl.className = 'user-card-team';
+      teamEl.textContent = `📍 Team: ${user.assignedTeam}${user.assignedDivision ? ' (Division ' + user.assignedDivision + ')' : ''}`;
+      li.appendChild(teamEl);
+    }
+    
+    // Action buttons
+    const actions = document.createElement('div');
+    actions.className = 'user-card-actions';
+    
+    const editButton = document.createElement('button'); 
+    editButton.type = 'button'; 
+    editButton.textContent = 'Edit';
     editButton.addEventListener('click', () => {
       if (!isAdminLoggedIn()) { authStatus.textContent = 'Sign in as admin to edit users.'; return; }
       editingUsername = user.username;
@@ -4141,15 +4254,26 @@ function renderUserAccounts() {
       createAdminButton.textContent = 'Save User';
       authStatus.textContent = `Editing user ${user.username}. Password remains hidden.`;
     });
-    const removeButton = document.createElement('button'); removeButton.type='button'; removeButton.className='archive-btn'; removeButton.textContent='Remove';
+    
+    const removeButton = document.createElement('button'); 
+    removeButton.type = 'button'; 
+    removeButton.className = 'archive-btn'; 
+    removeButton.textContent = 'Remove';
     removeButton.addEventListener('click', () => {
       if (!isAdminLoggedIn()) { authStatus.textContent = 'Sign in as admin to remove users.'; return; }
       if (user.username === 'admin') { authStatus.textContent = 'Cannot remove the default admin user.'; return; }
       const remaining = readJson(USERS_KEY, []).filter(item => item.username !== user.username);
-      writeJson(USERS_KEY, remaining); deleteUserFromBackend(user.username); logAdminAction('user_deleted', { deletedUsername: user.username });
-      renderUserAccounts(); authStatus.textContent = `User ${user.username} removed.`;
+      writeJson(USERS_KEY, remaining); 
+      deleteUserFromBackend(user.username); 
+      logAdminAction('user_deleted', { deletedUsername: user.username });
+      renderUserAccounts(); 
+      authStatus.textContent = `User ${user.username} removed.`;
     });
-    actions.appendChild(editButton); actions.appendChild(removeButton); li.appendChild(actions); userAccountsList.appendChild(li);
+    
+    actions.appendChild(editButton); 
+    actions.appendChild(removeButton); 
+    li.appendChild(actions); 
+    userAccountsList.appendChild(li);
   });
   populateAssignManagerSelect();
 }

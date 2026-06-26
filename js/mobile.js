@@ -257,11 +257,15 @@
       return;
     }
 
+    const iosDevice = isIOS();
+    const safariBrowser = isSafari();
+
     window.addEventListener('beforeinstallprompt', event => {
       event.preventDefault();
       state.deferredInstallPrompt = event;
       installPromptDeferred = true;
       installBtn.hidden = false;
+      installBtn.textContent = 'Save App';
       if (installHelp) installHelp.hidden = true;
     });
 
@@ -274,28 +278,47 @@
 
     installBtn.addEventListener('click', async (e) => {
       e.preventDefault();
-      if (isIOS() && isSafari()) {
-        if (installHelp) installHelp.hidden = false;
+      e.stopPropagation();
+      
+      if (iosDevice && safariBrowser) {
+        if (installHelp) {
+          installHelp.hidden = !installHelp.hidden;
+          if (!installHelp.hidden) {
+            setTimeout(() => {
+              installHelp.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+            installBtn.classList.add('active');
+            setTimeout(() => installBtn.classList.remove('active'), 300);
+          }
+        }
         return;
       }
+      
       if (!state.deferredInstallPrompt) {
         return;
       }
-      state.deferredInstallPrompt.prompt();
-      const { outcome } = await state.deferredInstallPrompt.userChoice;
-      if (outcome === 'accepted') {
-        localStorage.setItem(INSTALL_STATE_KEY, 'true');
-        installBtn.hidden = true;
+      
+      try {
+        state.deferredInstallPrompt.prompt();
+        const { outcome } = await state.deferredInstallPrompt.userChoice;
+        if (outcome === 'accepted') {
+          localStorage.setItem(INSTALL_STATE_KEY, 'true');
+          installBtn.hidden = true;
+        }
+      } catch (err) {
+        console.error('Install error:', err);
+      } finally {
+        state.deferredInstallPrompt = null;
       }
-      state.deferredInstallPrompt = null;
     });
 
-    if (!installPromptDeferred) {
-      if (isIOS() && isSafari()) {
-        installBtn.textContent = 'Add to Home Screen';
-        installBtn.hidden = false;
-        if (installHelp) installHelp.hidden = false;
-      }
+    if (iosDevice && safariBrowser) {
+      installBtn.textContent = 'Add to Home Screen';
+      installBtn.hidden = false;
+      if (installHelp) installHelp.hidden = true;
+    } else if (!installPromptDeferred) {
+      installBtn.hidden = true;
+      if (installHelp) installHelp.hidden = true;
     }
 
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});

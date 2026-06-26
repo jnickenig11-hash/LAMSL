@@ -2,12 +2,14 @@
   {
     "username": "admin",
     "password": "admin",
-    "role": "admin"
+    "role": "admin",
+    "email": "admin@lamsl.local"
   },
   {
     "username": "u1",
     "password": "p1",
     "role": "umpire",
+    "email": "umpire1@lamsl.local",
     "assignedTeam": "",
     "assignedDivision": ""
   },
@@ -15,6 +17,7 @@
     "username": "u2",
     "password": "p2",
     "role": "umpire",
+    "email": "umpire2@lamsl.local",
     "assignedTeam": "",
     "assignedDivision": ""
   },
@@ -22,6 +25,7 @@
     "username": "u3",
     "password": "p3",
     "role": "umpire",
+    "email": "umpire3@lamsl.local",
     "assignedTeam": "",
     "assignedDivision": ""
   },
@@ -29,6 +33,7 @@
     "username": "u4",
     "password": "p4",
     "role": "umpire",
+    "email": "umpire4@lamsl.local",
     "assignedTeam": "",
     "assignedDivision": ""
   },
@@ -36,6 +41,7 @@
     "username": "u5",
     "password": "p5",
     "role": "umpire",
+    "email": "umpire5@lamsl.local",
     "assignedTeam": "",
     "assignedDivision": ""
   },
@@ -43,6 +49,7 @@
     "username": "u6",
     "password": "p6",
     "role": "umpire",
+    "email": "umpire6@lamsl.local",
     "assignedTeam": "",
     "assignedDivision": ""
   },
@@ -50,6 +57,7 @@
     "username": "u7",
     "password": "p7",
     "role": "umpire",
+    "email": "umpire7@lamsl.local",
     "assignedTeam": "",
     "assignedDivision": ""
   },
@@ -57,6 +65,7 @@
     "username": "u8",
     "password": "p8",
     "role": "umpire",
+    "email": "umpire8@lamsl.local",
     "assignedTeam": "",
     "assignedDivision": ""
   }

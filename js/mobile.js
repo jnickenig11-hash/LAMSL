@@ -24,6 +24,7 @@
   function sortedGamesAsc(){ return [...(state.content.gameSchedules || [])].sort((a,b) => String(a.date||'').localeCompare(String(b.date||'')) || String(a.time||'').localeCompare(String(b.time||'')) || String(a.park||'').localeCompare(String(b.park||''))); }
   function sortedGamesDesc(){ return [...(state.content.gameSchedules || [])].sort((a,b) => String(b.date||'').localeCompare(String(a.date||'')) || String(a.time||'').localeCompare(String(b.time||'')) || String(a.park||'').localeCompare(String(b.park||''))); }
   function gameHasScore(game){ return game && game.score1 !== '' && game.score2 !== '' && game.score1 != null && game.score2 != null; }
+  function debounce(fn, delay){ let timeout; return function(...args){ clearTimeout(timeout); timeout = setTimeout(() => fn(...args), delay); }; }
 
   function populateFilters(){
     ['scheduleDivisionFilter','standingsDivisionFilter'].forEach(id => {
@@ -229,6 +230,10 @@
     catch(e){ $('adminMessage').textContent = e.message; }
   }
 
+  function isIOS(){ return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream; }
+  function isAndroid(){ return /Android/.test(navigator.userAgent); }
+  function isSafari(){ return /^((?!chrome|android).)*safari/i.test(navigator.userAgent); }
+
   function setupTabs(){
     document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -240,16 +245,57 @@
   }
 
   function setupInstall(){
-    window.addEventListener('beforeinstallprompt', event => { event.preventDefault(); state.deferredInstallPrompt = event; $('installBtn').hidden = false; });
-    $('installBtn').addEventListener('click', async () => { if (!state.deferredInstallPrompt) return; state.deferredInstallPrompt.prompt(); await state.deferredInstallPrompt.userChoice; state.deferredInstallPrompt = null; $('installBtn').hidden = true; });
+    const installBtn = $('installBtn');
+    const installHelp = $('installHelp');
+    let installPromptDeferred = false;
+
+    window.addEventListener('beforeinstallprompt', event => {
+      event.preventDefault();
+      state.deferredInstallPrompt = event;
+      installPromptDeferred = true;
+      installBtn.hidden = false;
+      if (installHelp) installHelp.hidden = true;
+    });
+
+    window.addEventListener('appinstalled', () => {
+      state.deferredInstallPrompt = null;
+      installBtn.hidden = true;
+      if (installHelp) installHelp.hidden = true;
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (isIOS() && isSafari()) {
+        if (installHelp) installHelp.hidden = false;
+        return;
+      }
+      if (!state.deferredInstallPrompt) return;
+      state.deferredInstallPrompt.prompt();
+      await state.deferredInstallPrompt.userChoice;
+      state.deferredInstallPrompt = null;
+      installBtn.hidden = true;
+    });
+
+    if (!installPromptDeferred) {
+      if (isIOS() && isSafari()) {
+        installBtn.textContent = 'Add to Home Screen';
+        installBtn.hidden = false;
+        if (installHelp) installHelp.hidden = false;
+      } else {
+        installBtn.hidden = true;
+        if (installHelp) installHelp.hidden = true;
+      }
+    }
+
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 
   document.addEventListener('DOMContentLoaded', () => {
     setupTabs(); setupInstall();
+    const debouncedScheduleRender = debounce(renderSchedule, 150);
+    const debouncedStandingsRender = debounce(renderStandings, 150);
     $('refreshBtn').addEventListener('click', loadContent);
-    $('scheduleDivisionFilter').addEventListener('change', renderSchedule);
-    $('standingsDivisionFilter').addEventListener('change', renderStandings);
+    $('scheduleDivisionFilter').addEventListener('change', debouncedScheduleRender);
+    $('standingsDivisionFilter').addEventListener('change', debouncedStandingsRender);
     $('loginForm').addEventListener('submit', login);
     $('scoreGameSelect').addEventListener('change', syncSelectedGameScore);
     $('saveScoreBtn').addEventListener('click', saveScore);

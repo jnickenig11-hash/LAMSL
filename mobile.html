@@ -8,7 +8,8 @@
 <meta name="apple-mobile-web-app-title" content="LAMSL Mobile">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="Images/LAMSLLogo.jpg">
+<link rel="apple-touch-icon" href="Images/LAMSLLogo.jpg" media="(prefers-color-scheme: light)">
+<link rel="icon" href="Images/LAMSLLogo.jpg" type="image/jpeg">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
 <title>LAMSL Mobile</title>
 <link rel="stylesheet" href="css/mobile.css">
@@ -18,7 +19,7 @@
 <header class="mobile-topbar">
   <a class="full-site-link" href="LAMSL.html?fullsite=1">Full Site</a>
   <div class="brand">
-    <img src="Images/LAMSLLogo.jpg" alt="LAMSL logo">
+    <img src="Images/LAMSLLogo.jpg" alt="LAMSL logo" loading="lazy" width="42" height="42">
     <div>
       <strong>LAMSL Mobile</strong>
       <span>Schedules • Scores • Standings</span>
@@ -42,8 +43,8 @@
     <h1>Park-day mobile dashboard</h1>
     <p id="lastUpdated">Loading latest league content...</p>
     <button id="refreshBtn" type="button" class="primary-btn">Refresh</button>
-    <div id="installHelp" class="install-help" aria-live="polite">
-      <strong>Install or bookmark:</strong> Tap <b>Save App</b>. On iPhone/Safari, tap Share, then <b>Add to Home Screen</b>. On Android/Chrome, tap <b>Install app</b> or menu, then <b>Add to Home screen</b>.
+    <div id="installHelp" class="install-help" aria-live="polite" hidden>
+      <strong>Add to Home Screen:</strong> Tap the <b>Share</b> button, then tap <b>Add to Home Screen</b> to install this app.
     </div>
   </section>
 

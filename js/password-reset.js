@@ -178,6 +178,112 @@ async function submitResetPassword() {
     }
 }
 
+// Switch between tabs in forgot password modal
+function switchForgotPasswordTab(tab) {
+    const resetForm = document.getElementById('forgot-password-form');
+    const claimForm = document.getElementById('claim-account-form');
+    const resetTab = document.getElementById('reset-tab');
+    const claimTab = document.getElementById('claim-tab');
+    const submitBtn = document.getElementById('forgot-password-submit-btn');
+    
+    if (tab === 'reset') {
+        resetForm.style.display = 'block';
+        claimForm.style.display = 'none';
+        resetTab.style.background = '#12324A';
+        resetTab.style.color = 'white';
+        claimTab.style.background = '#e4ebf1';
+        claimTab.style.color = '#12324A';
+        submitBtn.textContent = 'Send Temporary Password';
+        submitBtn.onclick = submitForgotPassword;
+    } else {
+        resetForm.style.display = 'none';
+        claimForm.style.display = 'block';
+        resetTab.style.background = '#e4ebf1';
+        resetTab.style.color = '#12324A';
+        claimTab.style.background = '#12324A';
+        claimTab.style.color = 'white';
+        submitBtn.textContent = 'Claim Account & Set Password';
+        submitBtn.onclick = submitClaimAccount;
+        populateAccountsForClaiming();
+    }
+}
+
+function populateAccountsForClaiming() {
+    const select = document.getElementById('claim-username');
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">Choose an account...</option>';
+    
+    // Get users from localStorage
+    const usersJson = localStorage.getItem('lamslUsersV1');
+    if (usersJson) {
+        const users = JSON.parse(usersJson);
+        users.forEach(user => {
+            if (!user.email || user.email === '') {
+                const option = document.createElement('option');
+                option.value = user.username;
+                option.textContent = `${user.username} (${user.role || 'user'})`;
+                select.appendChild(option);
+            }
+        });
+    }
+}
+
+async function submitClaimAccount() {
+    const username = document.getElementById('claim-username').value.trim();
+    const email = document.getElementById('claim-email').value.trim();
+    const password = document.getElementById('claim-password').value;
+    const confirmPassword = document.getElementById('claim-password-confirm').value;
+    
+    if (!username || !email || !password || !confirmPassword) {
+        showModalMessage('forgot-password-modal', 'Please fill in all fields.', 'error');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showModalMessage('forgot-password-modal', 'Passwords do not match.', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showModalMessage('forgot-password-modal', 'Password must be at least 6 characters.', 'error');
+        return;
+    }
+    
+    try {
+        showModalMessage('forgot-password-modal', 'Claiming account and setting password...', 'info');
+        
+        const response = await fetch(getPasswordResetApiUrl('/api/claim-account'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, email, password })
+        });
+        
+        const result = await response.json().catch(() => ({}));
+        
+        if (!response.ok || result.success === false) {
+            throw new Error(result.error || result.message || `HTTP ${response.status}`);
+        }
+        
+        showModalMessage(
+            'forgot-password-modal',
+            `✓ Account claimed successfully! You can now log in with your username and new password.`,
+            'success'
+        );
+        
+        // Close modal after 2 seconds
+        setTimeout(() => {
+            closeForgotPasswordModal();
+            document.getElementById('login-username').value = username;
+            document.getElementById('login-password').value = '';
+            document.getElementById('login-password').focus();
+        }, 2000);
+        
+    } catch (error) {
+        showModalMessage('forgot-password-modal', `Error: ${error.message}`, 'error');
+    }
+}
+
 // Initialize password reset module
 document.addEventListener('DOMContentLoaded', function() {
     // Add event listeners for password toggle buttons

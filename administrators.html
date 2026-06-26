@@ -257,79 +257,147 @@ header {
     color: #12324A;
 }
 
+.admin-list-toolbar {
+    display: flex;
+    gap: 8px;
+    padding: 12px 14px;
+    background: #f8fbfd;
+    border-bottom: 1px solid #d8e0e8;
+    border-radius: 10px 10px 0 0;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.admin-list-toolbar button {
+    padding: 8px 16px;
+    font-size: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.admin-list-toolbar button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.admin-list-toolbar .edit-btn {
+    background: #0066cc;
+    color: white;
+}
+
+.admin-list-toolbar .edit-btn:hover:not(:disabled) {
+    background: #0052a3;
+}
+
+.admin-list-toolbar .remove-btn {
+    background: #cc3333;
+    color: white;
+}
+
+.admin-list-toolbar .remove-btn:hover:not(:disabled) {
+    background: #aa2222;
+}
+
+.admin-list-toolbar .select-all-btn {
+    background: #12324A;
+    color: white;
+}
+
+.admin-list-toolbar .select-all-btn:hover:not(:disabled) {
+    background: #0e1f35;
+}
+
 .admin-list {
     list-style: none;
     padding: 0;
     margin: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 12px;
+    display: block;
+    width: 100%;
+    border: 1px solid #d8e0e8;
+    border-radius: 10px;
+    overflow: auto;
 }
 
-.admin-list li {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.admin-list-table {
+    width: 100%;
+    border-collapse: collapse;
     background: #fff;
-    border: 1px solid #dbe2ea;
-    border-radius: 10px;
+}
+
+.admin-list-header {
+    background: #12324A;
+    color: white;
+    font-weight: 600;
+    text-align: left;
+    border-bottom: 2px solid #d8e0e8;
+}
+
+.admin-list-header th {
     padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.admin-list-header th:first-child {
+    width: 50px;
+}
+
+.admin-list-row {
+    border-bottom: 1px solid #e4ebf1;
     transition: all 0.15s ease;
 }
 
-.admin-list li:hover {
-    border-color: #C86A2F;
-    box-shadow: 0 2px 8px rgba(200, 106, 47, 0.1);
+.admin-list-row:hover {
+    background: #f8fbfd;
 }
 
-.user-card-header {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+.admin-list-row.selected {
+    background: #e8f1f7;
+    border-left: 4px solid #C86A2F;
 }
 
-.user-card-name {
-    font-weight: 700;
-    color: #12324A;
-    font-size: 15px;
-}
-
-.user-card-email {
+.admin-list-cell {
+    padding: 12px 14px;
+    vertical-align: middle;
     font-size: 13px;
-    color: #666;
-    word-break: break-all;
-    font-style: italic;
 }
 
-.user-card-role {
-    font-size: 12px;
-    color: #fff;
+.admin-list-cell input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.admin-user-name {
     font-weight: 600;
-    background: #12324A;
-    padding: 4px 8px;
-    border-radius: 4px;
-    display: inline-block;
-    width: fit-content;
+    color: #12324A;
 }
 
-.user-card-team {
+.admin-user-email {
+    color: #666;
     font-size: 12px;
+}
+
+.admin-user-role {
+    display: inline-block;
+    background: #12324A;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.admin-user-team {
     color: #0066cc;
-    margin-top: 2px;
-}
-
-.user-card-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 4px;
-}
-
-.user-card-actions button {
-    flex: 1;
-    min-width: 70px;
-    padding: 6px 10px;
-    font-size: 13px;
-    border-radius: 6px;
+    font-size: 12px;
 }
 
 .division-team-list {
@@ -1162,12 +1230,20 @@ input[type="submit"]:disabled{
 <div id="forgot-password-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Reset Password</h3>
+            <h3>Password Recovery</h3>
             <button type="button" class="modal-close" onclick="closeForgotPasswordModal()">&times;</button>
         </div>
         <div class="modal-body">
             <div id="forgot-password-message"></div>
-            <form class="modal-form" id="forgot-password-form">
+            
+            <!-- Tabs for different flows -->
+            <div style="display: flex; gap: 8px; margin-bottom: 12px; border-bottom: 2px solid #e4ebf1;">
+                <button type="button" class="modal-tab" id="reset-tab" style="padding: 10px 16px; background: #12324A; color: white; border: none; cursor: pointer; font-weight: 600;" onclick="switchForgotPasswordTab('reset')">Reset Password</button>
+                <button type="button" class="modal-tab" id="claim-tab" style="padding: 10px 16px; background: #e4ebf1; color: #12324A; border: none; cursor: pointer; font-weight: 600;" onclick="switchForgotPasswordTab('claim')">Claim Account</button>
+            </div>
+            
+            <!-- Reset Password Tab -->
+            <form class="modal-form" id="forgot-password-form" style="display: block;">
                 <div class="modal-form-group">
                     <label for="forgot-username">Username:</label>
                     <input type="text" id="forgot-username" placeholder="Enter your username" required>
@@ -1177,10 +1253,39 @@ input[type="submit"]:disabled{
                     <input type="email" id="forgot-email" placeholder="Enter your email address" required>
                 </div>
             </form>
+            
+            <!-- Claim Account Tab -->
+            <form class="modal-form" id="claim-account-form" style="display: none;">
+                <p style="font-size: 13px; color: #666; margin: 0 0 12px 0;">Don't have an email set up? Claim an account and set your password now.</p>
+                <div class="modal-form-group">
+                    <label for="claim-username">Select Account:</label>
+                    <select id="claim-username" required style="width: 100%; padding: 10px; border: 1px solid #dbe2ea; border-radius: 6px;">
+                        <option value="">Choose an account...</option>
+                    </select>
+                </div>
+                <div class="modal-form-group">
+                    <label for="claim-email">Email Address:</label>
+                    <input type="email" id="claim-email" placeholder="Enter your email address" required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="claim-password">New Password:</label>
+                    <div class="password-input-group">
+                        <input type="password" id="claim-password" placeholder="Enter password" required>
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('claim-password')" title="Show/Hide Password">👁️</button>
+                    </div>
+                </div>
+                <div class="modal-form-group">
+                    <label for="claim-password-confirm">Confirm Password:</label>
+                    <div class="password-input-group">
+                        <input type="password" id="claim-password-confirm" placeholder="Confirm password" required>
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('claim-password-confirm')" title="Show/Hide Password">👁️</button>
+                    </div>
+                </div>
+            </form>
         </div>
         <div class="modal-actions">
             <button type="button" class="secondary" onclick="closeForgotPasswordModal()">Cancel</button>
-            <button type="button" class="primary" onclick="submitForgotPassword()">Send Temporary Password</button>
+            <button type="button" class="primary" id="forgot-password-submit-btn" onclick="submitForgotPassword()">Send Temporary Password</button>
         </div>
     </div>
 </div>
@@ -1692,70 +1797,245 @@ function renderUserAccounts() {
         return;
     }
 
-    users.forEach(user => {
-        const li = document.createElement('li');
-        
-        // User header with name and email
-        const header = document.createElement('div');
-        header.className = 'user-card-header';
-        
-        const nameEl = document.createElement('div');
-        nameEl.className = 'user-card-name';
-        nameEl.textContent = user.username;
-        header.appendChild(nameEl);
-        
-        const emailEl = document.createElement('div');
-        emailEl.className = 'user-card-email';
-        emailEl.textContent = user.email || '(no email)';
-        header.appendChild(emailEl);
-        
-        li.appendChild(header);
-        
-        // User role and team info
-        const roleEl = document.createElement('div');
-        roleEl.className = 'user-card-role';
-        roleEl.textContent = `${(user.role || 'user').toUpperCase()}`;
-        li.appendChild(roleEl);
-        
-        if (user.role === 'team-manager' && user.assignedTeam) {
-            const teamEl = document.createElement('div');
-            teamEl.className = 'user-card-team';
-            teamEl.textContent = `📍 Team: ${user.assignedTeam}${user.assignedDivision ? ' (Division ' + user.assignedDivision + ')' : ''}`;
-            li.appendChild(teamEl);
-        }
-        
-        // Action buttons
-        const actions = document.createElement('div');
-        actions.className = 'user-card-actions';
-
-        const removeButton = document.createElement('button');
-        removeButton.type = 'button';
-        removeButton.className = 'archive-btn';
-        removeButton.textContent = 'Remove';
-        removeButton.addEventListener('click', () => {
-            if (!isAdminLoggedIn()) {
-                authStatus.textContent = 'Sign in as admin to remove users.';
-                return;
-            }
-            if (user.username === 'admin') {
-                authStatus.textContent = 'Cannot remove the default admin user.';
-                return;
-            }
-            const remaining = readJson(USERS_KEY, []).filter(item => item.username !== user.username);
-            writeJson(USERS_KEY, remaining);
-            
-            // Log user deletion
-            logAdminAction('user_deleted', { deletedUsername: user.username });
-            
-            renderUserAccounts();
-            authStatus.textContent = `User ${user.username} removed.`;
-        });
-
-        actions.appendChild(removeButton);
-        li.appendChild(actions);
-        userAccountsList.appendChild(li);
+    // Create toolbar with buttons
+    const toolbar = document.createElement('div');
+    toolbar.className = 'admin-list-toolbar';
+    
+    const selectAllBtn = document.createElement('button');
+    selectAllBtn.className = 'select-all-btn';
+    selectAllBtn.textContent = 'Select All';
+    selectAllBtn.addEventListener('click', () => {
+        document.querySelectorAll('.user-checkbox').forEach(cb => cb.checked = true);
+        updateUserSelectionState();
     });
+    toolbar.appendChild(selectAllBtn);
+    
+    const clearSelectBtn = document.createElement('button');
+    clearSelectBtn.className = 'select-all-btn';
+    clearSelectBtn.textContent = 'Clear Selection';
+    clearSelectBtn.addEventListener('click', () => {
+        document.querySelectorAll('.user-checkbox').forEach(cb => cb.checked = false);
+        updateUserSelectionState();
+    });
+    toolbar.appendChild(clearSelectBtn);
+    
+    const editBtn = document.createElement('button');
+    editBtn.id = 'user-edit-btn';
+    editBtn.className = 'edit-btn';
+    editBtn.textContent = 'Edit Selected';
+    editBtn.disabled = true;
+    editBtn.addEventListener('click', editSelectedUser);
+    toolbar.appendChild(editBtn);
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.id = 'user-remove-btn';
+    removeBtn.className = 'remove-btn';
+    removeBtn.textContent = 'Remove Selected';
+    removeBtn.disabled = true;
+    removeBtn.addEventListener('click', removeSelectedUsers);
+    toolbar.appendChild(removeBtn);
+    
+    userAccountsList.appendChild(toolbar);
+
+    // Create table structure
+    const table = document.createElement('table');
+    table.className = 'admin-list-table';
+    
+    // Create header row
+    const thead = document.createElement('thead');
+    thead.className = 'admin-list-header';
+    const headerRow = document.createElement('tr');
+    
+    const checkboxHeader = document.createElement('th');
+    checkboxHeader.innerHTML = '<input type="checkbox" id="select-all-checkbox" />';
+    headerRow.appendChild(checkboxHeader);
+    
+    const headerCells = ['Username', 'Email', 'Role', 'Team / Division'];
+    headerCells.forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        headerRow.appendChild(th);
+    });
+    
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    
+    // Create table body
+    const tbody = document.createElement('tbody');
+    
+    users.forEach((user, index) => {
+        const row = document.createElement('tr');
+        row.className = 'admin-list-row';
+        row.dataset.username = user.username;
+        
+        // Checkbox cell
+        const checkboxCell = document.createElement('td');
+        checkboxCell.className = 'admin-list-cell';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'user-checkbox';
+        checkbox.dataset.username = user.username;
+        checkbox.addEventListener('change', updateUserSelectionState);
+        checkboxCell.appendChild(checkbox);
+        row.appendChild(checkboxCell);
+        
+        // Username cell
+        const usernameCell = document.createElement('td');
+        usernameCell.className = 'admin-list-cell';
+        const usernameDiv = document.createElement('div');
+        usernameDiv.className = 'admin-user-name';
+        usernameDiv.textContent = user.username;
+        usernameCell.appendChild(usernameDiv);
+        row.appendChild(usernameCell);
+        
+        // Email cell
+        const emailCell = document.createElement('td');
+        emailCell.className = 'admin-list-cell';
+        const emailDiv = document.createElement('div');
+        emailDiv.className = 'admin-user-email';
+        emailDiv.textContent = user.email || '(no email)';
+        emailCell.appendChild(emailDiv);
+        row.appendChild(emailCell);
+        
+        // Role cell
+        const roleCell = document.createElement('td');
+        roleCell.className = 'admin-list-cell';
+        const roleBadge = document.createElement('span');
+        roleBadge.className = 'admin-user-role';
+        roleBadge.textContent = (user.role || 'user').toUpperCase();
+        roleCell.appendChild(roleBadge);
+        row.appendChild(roleCell);
+        
+        // Team/Division cell
+        const teamCell = document.createElement('td');
+        teamCell.className = 'admin-list-cell';
+        if (user.role === 'team-manager' && user.assignedTeam) {
+            const teamDiv = document.createElement('div');
+            teamDiv.className = 'admin-user-team';
+            teamDiv.textContent = `${user.assignedTeam}${user.assignedDivision ? ' (Div ' + user.assignedDivision + ')' : ''}`;
+            teamCell.appendChild(teamDiv);
+        }
+        row.appendChild(teamCell);
+        
+        // Add row selection on checkbox change
+        checkbox.addEventListener('change', () => {
+            if (checkbox.checked) {
+                row.classList.add('selected');
+            } else {
+                row.classList.remove('selected');
+            }
+        });
+        
+        tbody.appendChild(row);
+    });
+    
+    table.appendChild(tbody);
+    userAccountsList.appendChild(table);
+    
+    // Setup select all checkbox
+    const selectAllCheckbox = document.getElementById('select-all-checkbox');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', () => {
+            document.querySelectorAll('.user-checkbox').forEach(cb => cb.checked = selectAllCheckbox.checked);
+            updateUserSelectionState();
+        });
+    }
+    
     populateAssignManagerSelect();
+}
+
+function updateUserSelectionState() {
+    const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+    const editBtn = document.getElementById('user-edit-btn');
+    const removeBtn = document.getElementById('user-remove-btn');
+    
+    const hasSelection = checkboxes.length > 0;
+    if (editBtn) editBtn.disabled = checkboxes.length !== 1;
+    if (removeBtn) removeBtn.disabled = !hasSelection;
+    
+    // Update row highlighting
+    document.querySelectorAll('.admin-list-row').forEach(row => {
+        const cb = row.querySelector('.user-checkbox');
+        if (cb && cb.checked) {
+            row.classList.add('selected');
+        } else {
+            row.classList.remove('selected');
+        }
+    });
+}
+
+function editSelectedUser() {
+    const checked = document.querySelectorAll('.user-checkbox:checked');
+    if (checked.length !== 1) {
+        authStatus.textContent = 'Please select exactly one user to edit.';
+        return;
+    }
+    
+    if (!isAdminLoggedIn()) {
+        authStatus.textContent = 'Sign in as admin to edit users.';
+        return;
+    }
+    
+    const username = checked[0].dataset.username;
+    const users = readJson(USERS_KEY, []);
+    const user = users.find(u => u.username === username);
+    
+    if (!user) return;
+    
+    editingUsername = user.username;
+    newAdminUsername.value = user.username;
+    newAdminEmail.value = user.email || '';
+    newAdminPassword.value = '';
+    newAdminPassword.placeholder = 'Enter new password to change it';
+    newUserRole.value = user.role || 'user';
+    
+    const divSel = document.getElementById('manager-division-select');
+    const teamSel = document.getElementById('manager-team-select');
+    if (divSel && teamSel) {
+        divSel.style.display = user.role === 'team-manager' ? '' : 'none';
+        teamSel.style.display = user.role === 'team-manager' ? '' : 'none';
+        divSel.value = user.assignedDivision || '';
+        divSel.dispatchEvent(new Event('change'));
+        setTimeout(() => { teamSel.value = user.assignedTeam || ''; }, 0);
+    }
+    
+    createAdminButton.textContent = 'Save User';
+    authStatus.textContent = `Editing user ${user.username}. Password remains hidden.`;
+}
+
+function removeSelectedUsers() {
+    const checked = document.querySelectorAll('.user-checkbox:checked');
+    if (checked.length === 0) {
+        authStatus.textContent = 'Please select at least one user to remove.';
+        return;
+    }
+    
+    if (!isAdminLoggedIn()) {
+        authStatus.textContent = 'Sign in as admin to remove users.';
+        return;
+    }
+    
+    const usernames = Array.from(checked).map(cb => cb.dataset.username);
+    if (usernames.includes('admin')) {
+        authStatus.textContent = 'Cannot remove the default admin user.';
+        return;
+    }
+    
+    if (!confirm(`Remove ${usernames.length} user(s)? This action cannot be undone.`)) {
+        return;
+    }
+    
+    const users = readJson(USERS_KEY, []);
+    const remaining = users.filter(u => !usernames.includes(u.username));
+    writeJson(USERS_KEY, remaining);
+    
+    usernames.forEach(u => {
+        deleteUserFromBackend(u);
+        logAdminAction('user_deleted', { deletedUsername: u });
+    });
+    
+    renderUserAccounts();
+    authStatus.textContent = `Removed ${usernames.length} user(s).`;
 }
 
 function renderAnnouncements() {
@@ -4191,91 +4471,7 @@ async function deleteUserFromBackend(username){
 }
 
 function renderUserAccounts() {
-  if (!userAccountsList) return;
-  const users = readJson(USERS_KEY, []);
-  userAccountsList.innerHTML = '';
-  if (!users.length) { userAccountsList.innerHTML = '<li>No users found.</li>'; return; }
-  users.forEach(user => {
-    const li = document.createElement('li');
-    
-    // User header with name and email
-    const header = document.createElement('div');
-    header.className = 'user-card-header';
-    
-    const nameEl = document.createElement('div');
-    nameEl.className = 'user-card-name';
-    nameEl.textContent = user.username;
-    header.appendChild(nameEl);
-    
-    const emailEl = document.createElement('div');
-    emailEl.className = 'user-card-email';
-    emailEl.textContent = user.email || '(no email)';
-    header.appendChild(emailEl);
-    
-    li.appendChild(header);
-    
-    // User role and team info
-    const roleEl = document.createElement('div');
-    roleEl.className = 'user-card-role';
-    roleEl.textContent = `${(user.role || 'user').toUpperCase()}`;
-    li.appendChild(roleEl);
-    
-    if (user.role === 'team-manager' && user.assignedTeam) {
-      const teamEl = document.createElement('div');
-      teamEl.className = 'user-card-team';
-      teamEl.textContent = `📍 Team: ${user.assignedTeam}${user.assignedDivision ? ' (Division ' + user.assignedDivision + ')' : ''}`;
-      li.appendChild(teamEl);
-    }
-    
-    // Action buttons
-    const actions = document.createElement('div');
-    actions.className = 'user-card-actions';
-    
-    const editButton = document.createElement('button'); 
-    editButton.type = 'button'; 
-    editButton.textContent = 'Edit';
-    editButton.addEventListener('click', () => {
-      if (!isAdminLoggedIn()) { authStatus.textContent = 'Sign in as admin to edit users.'; return; }
-      editingUsername = user.username;
-      newAdminUsername.value = user.username;
-      newAdminEmail.value = user.email || '';
-      newAdminPassword.value = '';
-      newAdminPassword.placeholder = 'Enter new password to change it';
-      newUserRole.value = user.role || 'user';
-      const divSel = document.getElementById('manager-division-select');
-      const teamSel = document.getElementById('manager-team-select');
-      if (divSel && teamSel) {
-        divSel.style.display = user.role === 'team-manager' ? '' : 'none';
-        teamSel.style.display = user.role === 'team-manager' ? '' : 'none';
-        divSel.value = user.assignedDivision || '';
-        divSel.dispatchEvent(new Event('change'));
-        setTimeout(() => { teamSel.value = user.assignedTeam || ''; }, 0);
-      }
-      createAdminButton.textContent = 'Save User';
-      authStatus.textContent = `Editing user ${user.username}. Password remains hidden.`;
-    });
-    
-    const removeButton = document.createElement('button'); 
-    removeButton.type = 'button'; 
-    removeButton.className = 'archive-btn'; 
-    removeButton.textContent = 'Remove';
-    removeButton.addEventListener('click', () => {
-      if (!isAdminLoggedIn()) { authStatus.textContent = 'Sign in as admin to remove users.'; return; }
-      if (user.username === 'admin') { authStatus.textContent = 'Cannot remove the default admin user.'; return; }
-      const remaining = readJson(USERS_KEY, []).filter(item => item.username !== user.username);
-      writeJson(USERS_KEY, remaining); 
-      deleteUserFromBackend(user.username); 
-      logAdminAction('user_deleted', { deletedUsername: user.username });
-      renderUserAccounts(); 
-      authStatus.textContent = `User ${user.username} removed.`;
-    });
-    
-    actions.appendChild(editButton); 
-    actions.appendChild(removeButton); 
-    li.appendChild(actions); 
-    userAccountsList.appendChild(li);
-  });
-  populateAssignManagerSelect();
+  // This function is now implemented earlier in the code - no duplicate needed
 }
 
 document.addEventListener('DOMContentLoaded', ()=> setTimeout(syncUsersFromBackend,1000));

@@ -68,5 +68,20 @@
     "email": "umpire8@lamsl.local",
     "assignedTeam": "",
     "assignedDivision": ""
+  },
+  {
+    "username": "manager1",
+    "password": "NewPassword123",
+    "role": "team-manager",
+    "email": "manager1@example.com",
+    "assignedTeam": "",
+    "assignedDivision": "",
+    "claimedAt": "2026-06-26T03:21:55.748Z"
+  },
+  {
+    "username": "umpire_noemail",
+    "password": "umpire_noemail",
+    "role": "umpire",
+    "email": ""
   }
 ]

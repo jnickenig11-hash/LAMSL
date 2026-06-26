@@ -46,7 +46,7 @@ h1, h2, h3 {
 .container {
     max-width: 1200px;
     margin: auto;
-    padding: 16px;
+    padding: 8px;
 }
 
 /* ===== BANNER ===== */
@@ -308,7 +308,7 @@ header {
     justify-content: flex-start;
     align-items: center;
     gap: 20px;
-    padding: 15px 20px;
+    padding: 8px 12px;
 }
 
 .navbar-brand {
@@ -388,7 +388,7 @@ header {
     grid-template-areas:
         "schedule announcements rightstack"
         "slideshow slideshow rightstack";
-    gap: 14px;
+    gap: 8px;
     align-items: start;
 }
 
@@ -404,6 +404,9 @@ header {
 
 .region-schedule {
     grid-area: schedule;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .region-announcements {
@@ -426,7 +429,7 @@ header {
     grid-area: rightstack;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 8px;
 }
 
 .region-rightstack > .home-region {
@@ -448,7 +451,7 @@ header {
 .mini-schedule-panel {
     background: white;
     border-radius: 10px;
-    padding: 12px;
+    padding: 8px;
 }
 
 .founder-region img + img {
@@ -471,15 +474,15 @@ header {
     font-size: 12pt;
     color: #C86A2F;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     border-bottom: 2px solid #C86A2F;
-    padding-bottom: 4px;
+    padding-bottom: 2px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .mini-park-section {
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .mini-park-name {
@@ -490,14 +493,14 @@ header {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    padding: 3px 7px;
+    padding: 2px 5px;
     border-radius: 4px;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .mini-game-row {
     font-size: 12pt;
-    padding: 3px 2px;
+    padding: 2px 1px;
     border-bottom: 1px solid #f0f0f0;
     display: grid;
     grid-template-columns: 58px 38px 1fr;
@@ -535,17 +538,57 @@ header {
 .mini-schedule-link {
     display: block;
     text-align: center;
-    margin-top: 8px;
+    margin-top: 4px;
     font-size: 12px;
     color: #C86A2F;
     text-decoration: none;
     font-weight: 600;
     border-top: 1px solid #eee;
-    padding-top: 8px;
+    padding-top: 4px;
 }
 
 .mini-schedule-link:hover {
     color: #12324A;
+}
+
+/* ===== TEAMS ON BYE ===== */
+.teams-on-bye-panel {
+    background: white;
+    border-radius: 10px;
+    padding: 8px;
+    margin-top: 8px;
+}
+
+.teams-on-bye-panel h3 {
+    color: #12324A;
+    font-size: 12pt;
+    margin: 0 0 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.teams-on-bye-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.bye-team-badge {
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: #12324A;
+    font-weight: 600;
+}
+
+.teams-on-bye-empty {
+    font-size: 12pt;
+    color: #888;
+    font-style: italic;
+    text-align: center;
+    margin: 8px 0 0;
 }
 
 /* ===== BANNER ===== */
@@ -553,7 +596,7 @@ header {
     position: relative;
     background: #12324A;
     color: white;
-    padding: 24px 20px;
+    padding: 12px 10px;
     border-bottom: 4px solid #C86A2F;
     display: grid;
     grid-template-columns: 240px minmax(0, 1fr);
@@ -746,11 +789,17 @@ input[type="submit"]:disabled{
 <div class="container home-grid">
 
     <!-- TOP ROW: Next Games | Announcements | Payment -->
-    <section class="card mini-schedule-panel home-region region-schedule">
-        <h3>&#9918; Next Games</h3>
-        <div id="mini-schedule-content"></div>
-        <a class="mini-schedule-link" href="schedule.html">&#8594; Full Schedule</a>
-    </section>
+    <div class="home-region region-schedule">
+        <section class="card mini-schedule-panel">
+            <h3>&#9918; Next Games</h3>
+            <div id="mini-schedule-content"></div>
+            <a class="mini-schedule-link" href="schedule.html">&#8594; Full Schedule</a>
+        </section>
+        <section class="card teams-on-bye-panel">
+            <h3>Teams on Bye</h3>
+            <div id="teams-on-bye-content"></div>
+        </section>
+    </div>
 <section class="card home-region region-announcements">
         <h2>LAMSL Announcements</h2>
         <p>League updates are managed in the Administrators section.</p>
@@ -1351,6 +1400,72 @@ function renderMiniSchedule(sourceSchedule) {
     });
 }
 
+// ===== TEAMS ON BYE =====
+function renderTeamsOnBye(sourceSchedule) {
+    const SCHEDULE_KEY = 'lamslWeeklyScheduleV3';
+    const container = document.getElementById('teams-on-bye-content');
+    if (!container) return;
+
+    const schedule = Array.isArray(sourceSchedule)
+        ? sourceSchedule
+        : (typeof getSchedule === 'function'
+            ? getSchedule()
+            : readJson(SCHEDULE_KEY, []));
+
+    const pad = n => String(n).padStart(2, '0');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayKey = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+
+    // Get the next 7 days
+    const weekFromToday = new Date(today);
+    weekFromToday.setDate(weekFromToday.getDate() + 7);
+    const weekKey = `${weekFromToday.getFullYear()}-${pad(weekFromToday.getMonth() + 1)}-${pad(weekFromToday.getDate())}`;
+
+    // Get all teams that have games in the next 7 days
+    const teamsWithGames = new Set();
+    schedule
+        .filter(g => g.date >= todayKey && g.date <= weekKey && (g.status || 'scheduled') !== 'cancelled')
+        .forEach(g => {
+            if (g.team1) teamsWithGames.add(g.team1);
+            if (g.team2) teamsWithGames.add(g.team2);
+        });
+
+    // Get all unique teams from the entire schedule
+    const allTeams = new Set();
+    schedule.forEach(g => {
+        if (g.team1) allTeams.add(g.team1);
+        if (g.team2) allTeams.add(g.team2);
+    });
+
+    // Teams on bye are those not in the teamsWithGames set
+    const teamsOnBye = Array.from(allTeams)
+        .filter(team => !teamsWithGames.has(team))
+        .sort();
+
+    container.innerHTML = '';
+
+    if (!teamsOnBye.length) {
+        const empty = document.createElement('p');
+        empty.className = 'teams-on-bye-empty';
+        empty.textContent = 'All teams have games scheduled.';
+        container.appendChild(empty);
+        return;
+    }
+
+    const listDiv = document.createElement('div');
+    listDiv.className = 'teams-on-bye-list';
+
+    teamsOnBye.forEach(team => {
+        const badge = document.createElement('span');
+        badge.className = 'bye-team-badge';
+        badge.textContent = team;
+        listDiv.appendChild(badge);
+    });
+
+    container.appendChild(listDiv);
+}
+
 // ===== SEASON BANNER =====
 (function () {
     try {
@@ -1394,6 +1509,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const miniScheduleContainer = document.getElementById('mini-schedule-content');
   if (miniScheduleContainer) miniScheduleContainer.innerHTML = '<p class="mini-schedule-empty">Loading upcoming games...</p>';
+  const teamsOnByeContainer = document.getElementById('teams-on-bye-content');
+  if (teamsOnByeContainer) teamsOnByeContainer.innerHTML = '<p class="teams-on-bye-empty">Loading...</p>';
   if (announcementsList) announcementsList.innerHTML = '<div class="card">Loading announcements...</div>';
 
   let backendSchedule = null;
@@ -1446,6 +1563,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   renderMiniSchedule(backendSchedule || undefined);
+  renderTeamsOnBye(backendSchedule || undefined);
 
   if (!backendLoaded) {
     console.warn('LAMSL homepage is using local fallback content because backend content did not load.');
@@ -1590,6 +1708,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (typeof renderMiniSchedule === 'function') {
       renderMiniSchedule(window.lamslData.schedules);
+      if (typeof renderTeamsOnBye === 'function') {
+        renderTeamsOnBye(window.lamslData.schedules);
+      }
     }
 
     let slidesShown = renderHomeSlideshow(window.lamslData.slideshow);

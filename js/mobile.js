@@ -272,12 +272,15 @@
       if (installHelp) installHelp.hidden = true;
     });
 
-    installBtn.addEventListener('click', async () => {
+    installBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
       if (isIOS() && isSafari()) {
         if (installHelp) installHelp.hidden = false;
         return;
       }
-      if (!state.deferredInstallPrompt) return;
+      if (!state.deferredInstallPrompt) {
+        return;
+      }
       state.deferredInstallPrompt.prompt();
       const { outcome } = await state.deferredInstallPrompt.userChoice;
       if (outcome === 'accepted') {
@@ -292,9 +295,6 @@
         installBtn.textContent = 'Add to Home Screen';
         installBtn.hidden = false;
         if (installHelp) installHelp.hidden = false;
-      } else {
-        installBtn.hidden = true;
-        if (installHelp) installHelp.hidden = true;
       }
     }
 

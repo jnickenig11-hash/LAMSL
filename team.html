@@ -1492,7 +1492,7 @@ const ROSTER_KEY = 'lamslTeamRostersV1';
 const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
 const TEAM_CHECKIN_KEY = 'lamslTeamGameCheckinsV1';
 const TEAM_EMAIL_SUBSCRIBERS_KEY = 'lamslTeamEmailSubscribersV1';
-const MAX_TEAM_ROSTER_PLAYERS = 16;
+const MAX_TEAM_ROSTER_PLAYERS = 18;
 window.__lamslPrimaryTeamScriptActive = true;
 
 // Populate rosters from spreadsheet data
@@ -3345,7 +3345,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const SESSION_KEY = 'lamslSessionV1';
   const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
   const CHECKINS_KEY = 'lamslGameCheckinsV1';
-  const MAX_TEAM_ROSTER_PLAYERS = 16;
+  const MAX_TEAM_ROSTER_PLAYERS = 18;
 
   function readJson(key, fallback){
     try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch(e){ return fallback; }
@@ -3678,7 +3678,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (window.__lamslPrimaryTeamScriptActive) return;
   const SESSION_KEY='lamslSessionV1';
   const TEAM_PLAYERS_KEY='lamslTeamPlayersV1';
-  const MAX_TEAM_ROSTER_PLAYERS = 16;
+  const MAX_TEAM_ROSTER_PLAYERS = 18;
   function readJson(k,f){try{const r=localStorage.getItem(k);return r?JSON.parse(r):f;}catch(e){return f;}}
   function writeJson(k,v){localStorage.setItem(k,JSON.stringify(v));}
   function norm(v){return String(v||'').trim().toLowerCase().replace(/[_\s]+/g,'-');}

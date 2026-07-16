@@ -489,6 +489,7 @@ footer {
 
 
 .management-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}.admin-panel{border:1px solid #d8e0e8;border-radius:10px;padding:15px;background:#f8fbfd}.admin-panel form{display:grid;gap:8px}.admin-panel input,.admin-panel select,.admin-panel textarea{padding:8px;border:1px solid #b7c3cc;border-radius:6px}.score-actions{display:flex;gap:8px;flex-wrap:wrap}.practice-layout{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}.practice-body{border:1px solid #d8e0e8;border-radius:10px;padding:15px;background:#f8fbfd}
+.time-slot-picker{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.time-slot-picker select{min-width:0;flex:1 1 80px}.time-slot-picker .time-slot-sep{font-weight:700;color:#12324A}
 
 .dashboard-hero{background:linear-gradient(135deg,#12324A 0%,#0b2538 100%);color:#fff;border-left:6px solid #C86A2F;display:grid;grid-template-columns:1.4fr .8fr;gap:18px;align-items:center}
 .dashboard-hero h2{margin:0 0 6px;color:#fff}.dashboard-hero p{margin:0;color:#dfeaf1;font-size:18px}.dashboard-badge{justify-self:end;background:#F1D27A;color:#12324A;border-radius:999px;padding:10px 16px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
@@ -984,13 +985,45 @@ input[type="submit"]:disabled{
 
                 <form id="schedule-form">
                     <input id="game-date" type="date" required>
-                    <select id="game-time" required>
-                        <option value="">Select Time Slot</option>
-                        <option value="08:00am">08:00am</option>
-                        <option value="09:50am">09:50am</option>
-                        <option value="11:45am">11:45am</option>
-                        <option value="01:45pm">01:45pm</option>
-                    </select>
+                    <div class="time-slot-picker" id="game-time-picker">
+                        <select id="game-time-hour" required aria-label="Game hour">
+                            <option value="">Hour</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                        </select>
+                        <span class="time-slot-sep">:</span>
+                        <select id="game-time-minute" required aria-label="Game minute">
+                            <option value="">Min</option>
+                            <option value="00">00</option>
+                            <option value="05">05</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                            <option value="25">25</option>
+                            <option value="30">30</option>
+                            <option value="35">35</option>
+                            <option value="40">40</option>
+                            <option value="45">45</option>
+                            <option value="50">50</option>
+                            <option value="55">55</option>
+                        </select>
+                        <select id="game-time-ampm" required aria-label="AM or PM">
+                            <option value="">AM/PM</option>
+                            <option value="am">AM</option>
+                            <option value="pm">PM</option>
+                        </select>
+                    </div>
+                    <input type="hidden" id="game-time">
                     <select id="game-park" required>
                         <option value="">Select Park</option>
                         <option value="Bell Gardens - Ford Park">Bell Gardens - Ford Park</option>
@@ -1022,7 +1055,7 @@ input[type="submit"]:disabled{
                     <button id="save-schedule-btn" type="submit">Save Scheduled Game</button>
                 </form>
                 <p class="admin-status" style="margin-top:10px;">
-                    Manual scheduling rules: Sundays only, 8:00AM, 9:50AM, 11:45AM, 1:45PM time slots, one game per field/time slot, max 3 games per field/day.
+                    Manual scheduling rules: Sundays only, any hour/minute/AM-PM time, one game per field/time slot, max 4 games per field/day.
                 </p>
                 <div class="admin-panel" style="margin-top:14px;">
                     <h3>Schedule Upload & Preview</h3>
@@ -1396,9 +1429,27 @@ const DEFAULT_TEAMS_BY_DIVISION = {
     E: []
 };
 let scheduleContent = null;
-const GAME_TIME_SLOTS = ['08:00am', '09:50am', '11:45am', '01:45pm'];
+const MAX_GAMES_PER_FIELD_PER_DAY = 4;
 const ALLOWED_GAME_DAYS = [0];
 let teamsByDivision = JSON.parse(JSON.stringify(DEFAULT_TEAMS_BY_DIVISION));
+
+// Combines the Hour/Minute/AM-PM game-time selects into the "hh:mmam" string
+// format the rest of the app stores/compares (e.g. "08:00am"), and keeps the
+// hidden #game-time input in sync so every existing read of game-time.value
+// keeps working unchanged.
+function computeGameTimeValue() {
+    const hour = document.getElementById('game-time-hour')?.value;
+    const minute = document.getElementById('game-time-minute')?.value;
+    const ampm = document.getElementById('game-time-ampm')?.value;
+    if (!hour || !minute || !ampm) return '';
+    return `${hour.padStart(2, '0')}:${minute}${ampm}`;
+}
+document.addEventListener('change', e => {
+    if (e.target && ['game-time-hour', 'game-time-minute', 'game-time-ampm'].includes(e.target.id)) {
+        const hidden = document.getElementById('game-time');
+        if (hidden) hidden.value = computeGameTimeValue();
+    }
+});
 
 function getDefaultBackendContent() {
     return { homepageMessage:'', zelle:{}, gameSchedules:[], gameScores:[], practiceSchedules:[], standings:{}, slideshow:[], rosters:{}, teamPlayers:{} };
@@ -1423,12 +1474,12 @@ function buildStandingsFromGames(games) {
 
 function validateSchedulingConstraints({ date, time, park, team1, team2, existingGames, ignoreId }) {
     if (!ALLOWED_GAME_DAYS.includes(parseDateKey(date).getDay())) return 'Games can only be scheduled on Sundays.';
-    if (!GAME_TIME_SLOTS.includes(time)) return `Invalid time slot. Allowed slots: ${GAME_TIME_SLOTS.join(', ')}.`;
+    if (!/^\d{2}:\d{2}(am|pm)$/.test(time || '')) return 'Select a valid time (hour, minute, and AM/PM).';
     const comparable = (existingGames || []).filter(game => game.id !== ignoreId);
-    if (comparable.some(game => game.date === date && game.park === park && game.time === time)) return 'This field/time slot is already occupied. Choose another slot.';
-    if (comparable.some(game => game.date === date && game.time === time && ([game.team1, game.team2].includes(team1) || [game.team1, game.team2].includes(team2)))) return 'A selected team is already scheduled for this date/time slot.';
+    if (comparable.some(game => game.date === date && game.park === park && game.time === time)) return 'This field/time slot is already occupied. Choose another time.';
+    if (comparable.some(game => game.date === date && game.time === time && ([game.team1, game.team2].includes(team1) || [game.team1, game.team2].includes(team2)))) return 'A selected team is already scheduled for this date/time.';
     if (comparable.some(game => game.date === date && game.park !== park && ([game.team1, game.team2].includes(team1) || [game.team1, game.team2].includes(team2)))) return 'A selected team is already assigned to a different park on this day.';
-    if (comparable.filter(game => game.date === date && game.park === park).length >= GAME_TIME_SLOTS.length) return `This field already has ${GAME_TIME_SLOTS.length} games for the day.`;
+    if (comparable.filter(game => game.date === date && game.park === park).length >= MAX_GAMES_PER_FIELD_PER_DAY) return `This field already has ${MAX_GAMES_PER_FIELD_PER_DAY} games for the day.`;
     return '';
 }
 

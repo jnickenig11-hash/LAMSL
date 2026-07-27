@@ -6,7 +6,7 @@
 - Backend normalization uses the same rule so manually maintained standings are not overwritten prematurely.
 
 ## Email notifications
-- Automatic schedule update emails now send only on Wednesdays at 9:00 AM and Fridays at 9:00 AM, America/Los_Angeles time.
+- Automatic schedule update emails now send only on Thursdays at 9:00 AM, America/Los_Angeles time.
 - Immediate automatic sends on every schedule update were disabled.
 - Manual admin email send/preview buttons remain available.
 

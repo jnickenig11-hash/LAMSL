@@ -433,26 +433,28 @@ async function persistBackendContent() {
     }
 }
 
-function saveSchedule(games) {
+async function saveSchedule(games) {
     if (scheduleContent) {
         scheduleContent.gameSchedules = games;
         scheduleContent.gameScores = games.filter(game => game.score1 !== '' && game.score2 !== '');
         updateStoredStandings(games);
         writeBackendCache();
-        persistBackendContent();
+        return await persistBackendContent();
     } else {
         writeJson(SCHEDULE_KEY, games);
         updateStoredStandings(games);
+        return true;
     }
 }
 
-function savePracticeSchedule(games) {
+async function savePracticeSchedule(games) {
     if (scheduleContent) {
         scheduleContent.practiceSchedules = games;
         writeBackendCache();
-        persistBackendContent();
+        return await persistBackendContent();
     } else {
         writeJson(PRACTICE_KEY, games);
+        return true;
     }
 }
 

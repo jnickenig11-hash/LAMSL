@@ -700,11 +700,17 @@ function isAdminLoggedIn() {
 }
 
 function backendBase() {
-    return String(window.BACKEND_BASE || 'https://lamsl-backend.onrender.com').replace(/\/$/, '');
+    const configured = String(window.BACKEND_BASE || '').trim();
+    const fallback = 'https://lamsl-backend.onrender.com';
+    const raw = configured || fallback;
+    // In file-preview mode, ignore localhost overrides so events gallery still resolves to Render.
+    if (isFilePreview() && /^(https?:\/\/)?(localhost|127\.0\.0\.1)(:\d+)?$/i.test(raw.replace(/\/$/, ''))) {
+        return fallback;
+    }
+    return raw.replace(/\/$/, '');
 }
 
 function apiUrl(path) {
-    if (window.apiUrl) return window.apiUrl(path);
     return backendBase() + (String(path || '').startsWith('/') ? path : '/' + path);
 }
 

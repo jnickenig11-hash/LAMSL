@@ -613,20 +613,6 @@ input[type="submit"]:disabled{
                 </form>
             </div>
 
-            <section class="card instagram-card">
-                <h3>Instagram</h3>
-                <p class="instagram-copy">Follow <strong>@lamsl_league</strong> for league photos, event highlights, and game-day updates.</p>
-                <div class="instagram-preview-grid">
-                    <a href="https://www.instagram.com/lamsl_league/" target="_blank" rel="noopener noreferrer" aria-label="Open LAMSL Instagram profile">
-                        <img src="Images/LAMSLClubhouseCartoonPic.jpg" alt="LAMSL Instagram preview showing clubhouse artwork.">
-                    </a>
-                </div>
-                <a class="instagram-link" href="https://www.instagram.com/lamsl_league/" target="_blank" rel="noopener noreferrer">View IG: lamsl_league</a>
-            </section>
-        </div>
-
-        <!-- RIGHT: SLIDESHOW -->
-        <div class="slideshow-panel">
             <h2 class="section-title">Photo Gallery</h2>
             <div class="slideshow-box">
                 <div class="slides" id="ef-slides">
@@ -641,6 +627,21 @@ input[type="submit"]:disabled{
                 </div>
                 <!-- Event photos are uploaded and managed from administrators.html only. -->
             </div>
+        </div>
+
+        <!-- RIGHT: SLIDESHOW -->
+        <div class="slideshow-panel">
+            <h2 class="section-title">Instagram</h2>
+            <section class="card instagram-card">
+                <h3>Instagram</h3>
+                <p class="instagram-copy">Follow <strong>@lamsl_league</strong> for league photos, event highlights, and game-day updates.</p>
+                <div class="instagram-preview-grid">
+                    <a href="https://www.instagram.com/lamsl_league/" target="_blank" rel="noopener noreferrer" aria-label="Open LAMSL Instagram profile">
+                        <img src="Images/LAMSLClubhouseCartoonPic.jpg" alt="LAMSL Instagram preview showing clubhouse artwork.">
+                    </a>
+                </div>
+                <a class="instagram-link" href="https://www.instagram.com/lamsl_league/" target="_blank" rel="noopener noreferrer">View IG: lamsl_league</a>
+            </section>
         </div>
 
     </div>
@@ -722,6 +723,13 @@ function fetchJsonNoStore(url, ms = 3500) {
     return withTimeout(fetch(url + (url.includes('?') ? '&' : '?') + '_=' + Date.now(), { cache: 'no-store' }), ms)
         .then(response => response.json().catch(() => ({})).then(json => ({ response, json })))
         .then(({ response, json }) => response.ok ? json : {});
+}
+
+function withCacheBust(url) {
+    const value = String(url || '').trim();
+    if (!value) return '';
+    if (/^(data:|blob:)/i.test(value)) return value;
+    return value + (value.includes('?') ? '&' : '?') + 'v=' + Date.now();
 }
 
 function escapeHtml(value) {
@@ -889,12 +897,12 @@ function normalizeEFImage(item) {
 function resolveEFImageSrc(rawPath) {
     const raw = String(rawPath || '').trim();
     if (!raw) return '';
-    if (/^(data:|blob:|https?:\/\/)/i.test(raw)) return raw;
-    if (/^\/?EF_Images\//i.test(raw)) return '/' + raw.replace(/^\/+/, '');
-    if (/^\/?EFimages\//i.test(raw)) return apiUrl('/' + raw.replace(/^\/+/, ''));
-    if (/^\/?(uploads|uploaded-images|EventImages|SlideshowImages)\//i.test(raw)) return apiUrl('/' + raw.replace(/^\/+/, ''));
-    if (/\.(png|jpe?g|gif|webp|svg)$/i.test(raw)) return apiUrl('/EFimages/' + raw.replace(/^.*\//, ''));
-    return raw;
+    if (/^(data:|blob:|https?:\/\/)/i.test(raw)) return withCacheBust(raw);
+    if (/^\/?EF_Images\//i.test(raw)) return withCacheBust('/' + raw.replace(/^\/+/, ''));
+    if (/^\/?EFimages\//i.test(raw)) return withCacheBust(apiUrl('/' + raw.replace(/^\/+/, '')));
+    if (/^\/?(uploads|uploaded-images|EventImages|SlideshowImages)\//i.test(raw)) return withCacheBust(apiUrl('/' + raw.replace(/^\/+/, '')));
+    if (/\.(png|jpe?g|gif|webp|svg)$/i.test(raw)) return withCacheBust(apiUrl('/EFimages/' + raw.replace(/^.*\//, '')));
+    return withCacheBust(raw);
 }
 
 function createEFSlideElement(image) {
@@ -918,7 +926,7 @@ function createEFSlideElement(image) {
         const index = Number(img.dataset.retryIndex || '0');
         if (index < candidates.length) {
             img.dataset.retryIndex = String(index + 1);
-            img.src = candidates[index] + (candidates[index].includes('?') ? '&' : '?') + 'v=' + Date.now();
+            img.src = withCacheBust(candidates[index]);
         }
     };
     slide.appendChild(img);
@@ -1010,9 +1018,7 @@ function extractEFImagesFromPayload(payload) {
 }
 
 async function loadEFImages() {
-    // Immediate bundled render first. This fixes the blank gallery when backend/API calls are slow or unavailable.
-    buildEFSlides(LAMSL_BUNDLED_EF_IMAGES);
-
+    // Backend is the source of truth for Events/Fundraiser gallery.
     const urls = [];
     const samePaths = ['/api/content', '/ef-images', '/api/ef-images'];
     samePaths.forEach(path => {
@@ -1021,7 +1027,7 @@ async function loadEFImages() {
         urls.push(apiUrl(path));
     });
 
-    let collected = [...LAMSL_BUNDLED_EF_IMAGES];
+    let collected = [];
     await Promise.allSettled(Array.from(new Set(urls)).map(async url => {
         try {
             const data = await fetchJsonNoStore(url, 3500);
@@ -1029,9 +1035,22 @@ async function loadEFImages() {
         } catch (e) {}
     }));
 
+    const backendImages = dedupeEFImages(collected);
+    if (backendImages.length) {
+        buildEFSlides(backendImages);
+        return;
+    }
+
+    // Local cache is fallback only when backend returns no gallery images.
     const localContent = readJson('lamslBackendContentV1', null) || readJson('lamslContentV1', null) || null;
-    collected = collected.concat(extractEFImagesFromPayload(localContent));
-    buildEFSlides(collected);
+    const fallbackImages = dedupeEFImages(extractEFImagesFromPayload(localContent));
+    if (fallbackImages.length) {
+        buildEFSlides(fallbackImages);
+        return;
+    }
+
+    // Final static fallback so the page is never empty when all dynamic sources fail.
+    buildEFSlides(LAMSL_BUNDLED_EF_IMAGES);
 }
 
 efPrevBtn?.addEventListener('click', () => {

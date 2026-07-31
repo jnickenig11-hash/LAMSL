@@ -2149,7 +2149,7 @@ function hideCheckinPanel() {
     updateCheckinStatus('');
 }
 
-function saveCheckinSelections() {
+async function saveCheckinSelections() {
     if (!canCheckInPlayers()) {
         updateCheckinStatus('Sign in with umpire, team manager, or admin access to save check-ins.', true);
         return;

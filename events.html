@@ -712,6 +712,10 @@ function sameOriginApiUrl(path) {
     return origin ? origin + (String(path || '').startsWith('/') ? path : '/' + path) : '';
 }
 
+function isFilePreview() {
+    return String(window.location.protocol || '').toLowerCase() === 'file:';
+}
+
 function withTimeout(promise, ms = 3500) {
     return Promise.race([
         promise,
@@ -898,9 +902,18 @@ function resolveEFImageSrc(rawPath) {
     const raw = String(rawPath || '').trim();
     if (!raw) return '';
     if (/^(data:|blob:|https?:\/\/)/i.test(raw)) return withCacheBust(raw);
-    if (/^\/?EF_Images\//i.test(raw)) return withCacheBust('/' + raw.replace(/^\/+/, ''));
-    if (/^\/?EFimages\//i.test(raw)) return withCacheBust(apiUrl('/' + raw.replace(/^\/+/, '')));
-    if (/^\/?(uploads|uploaded-images|EventImages|SlideshowImages)\//i.test(raw)) return withCacheBust(apiUrl('/' + raw.replace(/^\/+/, '')));
+    if (/^\/?EF_Images\//i.test(raw)) {
+        const normalized = raw.replace(/^\/+/, '');
+        return withCacheBust(isFilePreview() ? normalized : '/' + normalized);
+    }
+    if (/^\/?EFimages\//i.test(raw)) {
+        const normalized = raw.replace(/^\/+/, '');
+        return withCacheBust(isFilePreview() ? normalized : apiUrl('/' + normalized));
+    }
+    if (/^\/?(uploads|uploaded-images|EventImages|SlideshowImages)\//i.test(raw)) {
+        const normalized = raw.replace(/^\/+/, '');
+        return withCacheBust(isFilePreview() ? normalized : apiUrl('/' + normalized));
+    }
     if (/\.(png|jpe?g|gif|webp|svg)$/i.test(raw)) return withCacheBust(apiUrl('/EFimages/' + raw.replace(/^.*\//, '')));
     return withCacheBust(raw);
 }
@@ -917,11 +930,17 @@ function createEFSlideElement(image) {
     img.src = resolveEFImageSrc(normalized?.path || normalized?.url);
     img.onerror = () => {
         const filename = normalized?.name || '';
+        const fileCandidates = [
+            filename ? ('EFimages/' + filename) : '',
+            filename ? ('EF_Images/' + filename) : '',
+            filename ? ('uploads/' + filename) : ''
+        ].filter(Boolean);
         const candidates = [
             filename ? apiUrl('/EFimages/' + filename) : '',
-            filename ? '/EF_Images/' + filename : '',
+            filename ? (isFilePreview() ? ('EF_Images/' + filename) : ('/EF_Images/' + filename)) : '',
             filename ? apiUrl('/uploads/' + filename) : '',
-            filename ? '/uploads/' + filename : ''
+            filename ? (isFilePreview() ? ('uploads/' + filename) : ('/uploads/' + filename)) : '',
+            ...(isFilePreview() ? fileCandidates : [])
         ].filter(Boolean);
         const index = Number(img.dataset.retryIndex || '0');
         if (index < candidates.length) {
@@ -1018,7 +1037,10 @@ function extractEFImagesFromPayload(payload) {
 }
 
 async function loadEFImages() {
-    // Backend is the source of truth for Events/Fundraiser gallery.
+    // Render a guaranteed local fallback first so file-preview users never see a blank gallery.
+    buildEFSlides(LAMSL_BUNDLED_EF_IMAGES);
+
+    // Backend is still the source of truth for Events/Fundraiser gallery.
     const urls = [];
     const samePaths = ['/api/content', '/ef-images', '/api/ef-images'];
     samePaths.forEach(path => {

@@ -481,7 +481,20 @@ function deleteManagedImageHandler(req, res) {
       removedReference = before !== content.slideshow.length;
     }
 
-    if (fs.existsSync(fullPath)) {
+    if (info.destination === 'events') {
+      // Event/fundraiser uploads may exist in multiple compatibility folders.
+      [efDir, legacyEfDir, uploadDir].forEach(folder => {
+        try {
+          const target = path.resolve(folder, info.filename);
+          const root = path.resolve(folder) + path.sep;
+          if (!target.startsWith(root)) return;
+          if (fs.existsSync(target)) {
+            fs.unlinkSync(target);
+            removedFile = true;
+          }
+        } catch (e) {}
+      });
+    } else if (fs.existsSync(fullPath)) {
       fs.unlinkSync(fullPath);
       removedFile = true;
     }
@@ -722,31 +735,47 @@ function getMergedHomepageSlideshow(content) {
 
 
 function getMergedEventFundraiserImages(content) {
-  const contentImages = Array.isArray(content.eventFundraiserImages) ? content.eventFundraiserImages : [];
-  const metaImages = readEfMeta();
-  const diskImages = [];
-  const scanDirs = [
-    { dir: efDir, prefix: '/EFimages/' },
-    { dir: legacyEfDir, prefix: '/EF_Images/' },
-    { dir: bundledEfDir, prefix: '/EF_Images/' },
-    { dir: uploadDir, prefix: '/uploads/' }
+  const contentImages = (Array.isArray(content.eventFundraiserImages) ? content.eventFundraiserImages : []).map(item => ({
+    ...item,
+    source: item?.source || 'content'
+  }));
+  const metaImages = readEfMeta().map(item => ({ ...item, source: 'metadata' }));
+  const diskManagedImages = [];
+  const diskBundledImages = [];
+  const managedScanDirs = [
+    { dir: efDir, prefix: '/EFimages/', source: 'disk-efimages' },
+    { dir: legacyEfDir, prefix: '/EF_Images/', source: 'disk-legacy-ef-images' },
+    { dir: uploadDir, prefix: '/uploads/', source: 'disk-uploads' }
   ];
-  scanDirs.forEach(({ dir, prefix }) => {
+  managedScanDirs.forEach(({ dir, prefix, source }) => {
     try {
       if (!fs.existsSync(dir)) return;
       fs.readdirSync(dir)
         .filter(name => /\.(jpe?g|png|gif|webp|bmp|svg|apng|avif|ico|jfif|tiff?|heic|heif)$/i.test(name))
-        .forEach(name => diskImages.push({ filename: name, name, url: prefix + name, path: prefix + name, caption: '' }));
+        .forEach(name => diskManagedImages.push({ filename: name, name, url: prefix + name, path: prefix + name, caption: '', source }));
     } catch (e) {}
   });
+  try {
+    if (fs.existsSync(bundledEfDir)) {
+      fs.readdirSync(bundledEfDir)
+        .filter(name => /\.(jpe?g|png|gif|webp|bmp|svg|apng|avif|ico|jfif|tiff?|heic|heif)$/i.test(name))
+        .forEach(name => diskBundledImages.push({ filename: name, name, url: '/EF_Images/' + name, path: '/EF_Images/' + name, caption: '', source: 'bundled-fallback' }));
+    }
+  } catch (e) {}
+
+  // Prefer managed uploads + metadata. Only include bundled fallback when no managed images exist.
+  const primaryImages = [...contentImages, ...metaImages, ...diskManagedImages];
   const seen = new Set();
-  return [...contentImages, ...metaImages, ...diskImages].filter(img => {
+  const dedupe = arr => arr.filter(img => {
     const raw = img?.filename || img?.name || img?.url || img?.src || img?.path || '';
     const key = path.basename(String(raw).replace(/\\/g, '/')).toLowerCase();
     if (!key || seen.has(key)) return false;
     seen.add(key);
     return true;
   });
+  const managedUnique = dedupe(primaryImages);
+  if (managedUnique.length) return managedUnique;
+  return dedupe(diskBundledImages);
 }
 
 app.get('/api/content', (req, res) => {
@@ -868,8 +897,11 @@ app.post('/remove-ef-photo', requireAdminKey, express.json(), (req, res) => {
     const { filename } = req.body || {};
     if (!filename) return res.status(400).json({ success: false, error: 'No filename' });
     const info = getManagedImageInfo({ filename, destination: 'events' });
-    const full = path.resolve(info.folder, info.filename);
-    if (fs.existsSync(full)) fs.unlinkSync(full);
+    [efDir, legacyEfDir, uploadDir].forEach(folder => {
+      const full = path.resolve(folder, info.filename);
+      const root = path.resolve(folder) + path.sep;
+      if (full.startsWith(root) && fs.existsSync(full)) fs.unlinkSync(full);
+    });
     const meta = readEfMeta().filter(i => !sameManagedImage(i, info));
     writeEfMeta(meta);
     const content = readContent();

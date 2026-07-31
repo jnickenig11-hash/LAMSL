@@ -2425,6 +2425,15 @@ function getImageFileName(item) {
     const raw = item?.filename || item?.name || item?.url || item?.src || item?.path || '';
     return String(raw).split('/').pop();
 }
+
+function isManagedEventImage(item) {
+    const source = String(item?.source || '').toLowerCase();
+    const raw = String(item?.url || item?.src || item?.path || '');
+    const destination = String(item?.destination || '').toLowerCase();
+    if (destination === 'events') return true;
+    if (source.startsWith('disk-') || source === 'content' || source === 'metadata') return true;
+    return raw.startsWith('/EFimages/') || raw.startsWith('/uploads/');
+}
 function renderManagedImageItem(item, destination, index) {
     const url = item.url || item.src || item.path || '';
     const filename = getImageFileName(item);
@@ -2442,7 +2451,8 @@ function renderManagedImageItem(item, destination, index) {
 function renderAdminSlideshowList() {
     if (!adminSlideshowList) return;
     const homepageItems = (scheduleContent && Array.isArray(scheduleContent.slideshow)) ? scheduleContent.slideshow : [];
-    const eventItems = (scheduleContent && Array.isArray(scheduleContent.eventFundraiserImages)) ? scheduleContent.eventFundraiserImages : [];
+    const eventItemsRaw = (scheduleContent && Array.isArray(scheduleContent.eventFundraiserImages)) ? scheduleContent.eventFundraiserImages : [];
+    const eventItems = eventItemsRaw.filter(isManagedEventImage);
     const lines = [];
     lines.push(`<li><strong>Homepage slideshow:</strong> ${homepageItems.length} image(s)</li>`);
     homepageItems.forEach((item, index) => lines.push(renderManagedImageItem(item, 'homepage', index)));

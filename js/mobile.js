@@ -221,16 +221,21 @@
     $('lastUpdated').textContent = `Last updated: ${updated}`;
   }
 
+  function contentWithCacheBust(){
+    const sep = api('/api/content').includes('?') ? '&' : '?';
+    return api('/api/content') + sep + '_=' + Date.now();
+  }
+
   async function loadContent(){
-    state.content = readJson(CONTENT_CACHE_KEY, {});
-    if (Object.keys(state.content).length) renderAll();
+    $('lastUpdated').textContent = 'Loading latest league content from backend...';
     try {
-      const res = await fetch(api('/api/content'), { cache: 'no-store' });
+      const res = await fetch(contentWithCacheBust(), { cache: 'no-store' });
       if (!res.ok) throw new Error('Content unavailable');
       state.content = await res.json();
       writeJson(CONTENT_CACHE_KEY, state.content);
       renderAll();
     } catch(e){
+      state.content = readJson(CONTENT_CACHE_KEY, {});
       if (!Object.keys(state.content).length) state.content = { gameSchedules: [], standings: {}, announcements: [] };
       renderAll();
       $('lastUpdated').textContent = 'Offline mode: showing saved mobile content.';
@@ -381,7 +386,11 @@
       if (installHelp) installHelp.hidden = true;
     }
 
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js?v=2')
+        .then(reg => reg.update())
+        .catch(() => {});
+    }
   }
 
   document.addEventListener('DOMContentLoaded', () => {

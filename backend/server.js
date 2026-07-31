@@ -622,6 +622,20 @@ function sanitizeTeamPlayersList(players) {
     id: String(p.id || `${Date.now()}-${index}`),
     name: String(p.name || p.Name || '').trim(),
     position: String(p.position || p.Position || '').trim() || 'TBA',
+    playerNumber: String(
+      p.playerNumber ||
+      p.PlayerNumber ||
+      p['Player Number'] ||
+      p['Player #'] ||
+      p.number ||
+      p.Number ||
+      p.jerseyNumber ||
+      p.JerseyNumber ||
+      p['Jersey Number'] ||
+      p['Jersey #'] ||
+      p.Jersey ||
+      ''
+    ).trim(),
     phone: String(p.phone || p.Phone || '').trim(),
     email: String(p.email || p.Email || '').trim(),
     gamesPlayed: Number(p.gamesPlayed || p.GamesPlayed || 0) || 0,

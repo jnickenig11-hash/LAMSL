@@ -1495,7 +1495,7 @@ input[type="submit"]:disabled{
                     <button id="choose-roster-file-btn" type="button" class="secondary">Choose Roster File</button>
                     <button id="upload-roster-btn" type="button">Upload Roster Spreadsheet</button>
                     <p id="roster-file-name" class="muted">No file selected.</p>
-                    <p class="muted">Spreadsheet tip: .xls, .xlsx, .xlsm, .xlsb, and .csv files are supported. Use headers like First Name, Last Name, Cell Number (or Phone Number), Email Address, and Position. Team rosters are limited to 16 players.</p>
+                    <p class="muted">Spreadsheet tip: .xls, .xlsx, .xlsm, .xlsb, and .csv files are supported. Use headers like First Name, Last Name, Player Number, Position, and optionally Email Address. Team rosters are limited to 16 players.</p>
                 </div>
                 <div id="roster-grid-wrap" class="roster-grid"></div>
                 <div id="player-profiles-wrap"></div>
@@ -1798,7 +1798,7 @@ if (!division && team) {
 let teamTitle, teamSubtitle, teamDivisionChip, teamPhoto, teamPhotoPlaceholder, teamPhotoStatus, teamPhotoFileInput, uploadTeamPhotoBtn,
     standingsSummary, latestResults, teamScheduleWrap, schedulePeriodFilter, scheduleSeasonFilter, scheduleAnchorDate,
     rosterAdminStatus, rosterFileInput, uploadRosterBtn, rosterGridWrap, addPlayerBtn, removePlayerBtn,
-    formInstruction, playerIdInput, playerNameInput, playerPositionInput, playerPhoneInput, playerEmailInput, playerPhotoInput,
+    formInstruction, playerIdInput, playerNameInput, playerPositionInput, playerNumberInput, playerPhotoInput,
     savePlayerBtn, cancelPlayerBtn, upcomingGameSelect, checkinPlayerSelect, addPlayerCheckinBtn, checkinSelectedPlayers,
     playerCheckinPanel, checkinGameLabel, checkinPlayerList, saveCheckinBtn, clearCheckinBtn, checkinStatus,
     playerModal, modalTitle, closeModalBtn, playerFormSection, playerProfilesSection, playerList;
@@ -1891,8 +1891,7 @@ function initDOMReferences() {
     playerIdInput = document.getElementById('player-id');
     playerNameInput = document.getElementById('player-name');
     playerPositionInput = document.getElementById('player-position');
-    playerPhoneInput = document.getElementById('player-phone');
-    playerEmailInput = document.getElementById('player-email');
+    playerNumberInput = document.getElementById('player-number');
     playerPhotoInput = document.getElementById('player-photo-file');
     savePlayerBtn = document.getElementById('save-player-btn');
     cancelPlayerBtn = document.getElementById('cancel-player-btn');
@@ -2164,25 +2163,7 @@ function saveCheckinSelections() {
 
     const gameId = getGameId(selectedGame);
     const allPlayers = getCheckinPlayers();
-    const playerMap = Object.fromEntries(allPlayers.map(player => [player.id, player]));
-    const previousCheckins = Array.isArray(getTeamGameCheckins()[gameId]?.checkedIds) ? getTeamGameCheckins()[gameId].checkedIds : [];
-
-    const toAdd = selectedGameCheckins.filter(id => !previousCheckins.includes(id));
-    const toRemove = previousCheckins.filter(id => !selectedGameCheckins.includes(id));
-
-    const players = allPlayers.map(player => {
-        const current = Number(player.gamesPlayed) || 0;
-        if (toAdd.includes(player.id)) {
-            return { ...player, gamesPlayed: current + 1 };
-        }
-        if (toRemove.includes(player.id)) {
-            return { ...player, gamesPlayed: Math.max(0, current - 1) };
-        }
-        return player;
-    });
-
-    setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
-
+    const savedCheckedIds = Array.from(new Set(selectedGameCheckins.map(String)));
     const checkins = getTeamGameCheckins();
     checkins[gameId] = {
         gameId,
@@ -2190,14 +2171,24 @@ function saveCheckinSelections() {
         time: selectedGame.time,
         team1: selectedGame.team1,
         team2: selectedGame.team2,
-        checkedIds: selectedGameCheckins
+        checkedIds: savedCheckedIds
     };
     setTeamGameCheckins(checkins);
+    const players = applySavedGamesPlayedToPlayers(allPlayers, checkins);
+    setTeamPlayers({ players, updatedAt: new Date().toLocaleString() });
+
+    let statusMessage = `Check-in saved for ${savedCheckedIds.length} player(s).`;
+    try {
+        await saveBackendTeamData();
+    } catch (error) {
+        console.warn('Check-in backend save failed', error);
+        statusMessage = `${statusMessage} Saved locally, but backend save failed: ${error.message}`;
+    }
 
     renderPlayerProfiles();
     renderRoster();
     renderTeamPlayerProfiles();
-    updateCheckinStatus(`Check-in saved for ${selectedGameCheckins.length} player(s).`);
+    updateCheckinStatus(statusMessage, statusMessage.includes('backend save failed'));
 }
 
 function clearCheckinSelection() {
@@ -2232,6 +2223,7 @@ function normalizePlayersFromRows(rows) {
         id: row.id || `${Date.now()}-${index}`,
         name: combinedName || getValue(row, ['Name', 'Player Name', 'Player', 'Full Name']),
         position: getValue(row, ['Position', 'Positions', 'Pos', 'Position Played', 'Primary Position']) || 'TBA',
+        playerNumber: getValue(row, ['Player Number', 'Player #', 'Number', 'Jersey Number', 'Jersey #', 'Jersey']),
         phone: getValue(row, ['Cell Number', 'Cell', 'Cell Phone', 'Phone', 'Phone Number', 'Contact Phone']),
         email: getValue(row, ['Email', 'Email Address', 'E-mail']),
         gamesPlayed: Number(getValue(row, ['Games Played', 'GamesPlayed', 'Games']) || 0) || 0,
@@ -2243,6 +2235,69 @@ function normalizePlayersFromRows(rows) {
 function capRosterPlayers(players) {
     const list = Array.isArray(players) ? players : [];
     return list.slice(0, MAX_TEAM_ROSTER_PLAYERS);
+}
+
+function normalizePlayerNumber(value) {
+    return String(value == null ? '' : value).trim();
+}
+
+function getStoredPlayerNumber(player) {
+    return normalizePlayerNumber(
+        player.playerNumber ||
+        player.PlayerNumber ||
+        player['Player Number'] ||
+        player['Player #'] ||
+        player.number ||
+        player.Number ||
+        player.jerseyNumber ||
+        player.JerseyNumber ||
+        player['Jersey Number'] ||
+        player['Jersey #'] ||
+        player.Jersey
+    );
+}
+
+function getCheckinPlayerIds(record) {
+    if (!record || typeof record !== 'object') return [];
+    if (Array.isArray(record.checkedIds)) return record.checkedIds.map(String).filter(Boolean);
+    if (Array.isArray(record.players)) {
+        return record.players.map(player => String((player && player.id) || '')).filter(Boolean);
+    }
+    return [];
+}
+
+function buildGamesPlayedCountMap(checkins) {
+    const safeCheckins = checkins && typeof checkins === 'object' && !Array.isArray(checkins) ? checkins : {};
+    return Object.values(safeCheckins).reduce((counts, record) => {
+        Array.from(new Set(getCheckinPlayerIds(record))).forEach(playerId => {
+            counts[playerId] = (counts[playerId] || 0) + 1;
+        });
+        return counts;
+    }, {});
+}
+
+function normalizeTeamPlayerRecord(player, index, gamesPlayedById, hasSavedCheckins) {
+    const id = String(player.id || `player-${Date.now()}-${index}`);
+    const fallbackGamesPlayed = Number(player.gamesPlayed || player.GamesPlayed || 0) || 0;
+    return {
+        id,
+        name: String(player.name || player.Name || '').trim(),
+        position: String(player.position || player.Position || '').trim() || 'TBA',
+        playerNumber: getStoredPlayerNumber(player),
+        phone: String(player.phone || player.Phone || '').trim(),
+        email: String(player.email || player.Email || '').trim(),
+        gamesPlayed: hasSavedCheckins ? (gamesPlayedById[id] || 0) : fallbackGamesPlayed,
+        photo: String(player.photo || player.Photo || '').trim()
+    };
+}
+
+function applySavedGamesPlayedToPlayers(players, checkins = getTeamGameCheckins()) {
+    const safeCheckins = checkins && typeof checkins === 'object' && !Array.isArray(checkins) ? checkins : {};
+    const hasSavedCheckins = Object.keys(safeCheckins).length > 0;
+    const gamesPlayedById = hasSavedCheckins ? buildGamesPlayedCountMap(safeCheckins) : {};
+    return capRosterPlayers((Array.isArray(players) ? players : [])
+        .map((player, index) => normalizeTeamPlayerRecord(player, index, gamesPlayedById, hasSavedCheckins))
+        .filter(player => player.name));
 }
 
 
@@ -2275,8 +2330,7 @@ function renderRoster() {
         <div class="roster-card" data-player-id="${escapeHtml(player.id)}">
             <h4>${escapeHtml(player.name)}</h4>
             <p><strong>Position:</strong> ${escapeHtml(player.position || 'TBA')}</p>
-            <p><strong>Phone:</strong> ${escapeHtml(player.phone || 'N/A')}</p>
-            <p><strong>Email:</strong> ${escapeHtml(player.email || 'N/A')}</p>
+            <p><strong>Player Number:</strong> ${escapeHtml(player.playerNumber || 'N/A')}</p>
             <p class="checkin-count"><strong>Games Played:</strong> ${Number(player.gamesPlayed || 0)}</p>
             ${canManage ? `<button type="button" class="danger roster-remove-btn" data-player-id="${escapeHtml(player.id)}">Remove</button>` : ''}
         </div>
@@ -2312,13 +2366,12 @@ function renderPlayerProfiles(filterPlayers = null) {
             </div>
         `;
         card.innerHTML = `
-            <img src="${player.photo || 'Images/LAMSLLogo.jpg'}" alt="${player.name}">
+            <img src="${escapeHtml(player.photo || 'Images/LAMSLLogo.jpg')}" alt="${escapeHtml(player.name)}">
             <div class="player-card-content">
-                <h4>${player.name}</h4>
-                <p><strong>Position:</strong> ${player.position || 'TBA'}</p>
-                <p><strong>Phone:</strong> ${player.phone || 'N/A'}</p>
-                <p><strong>Email:</strong> ${player.email || 'N/A'}</p>
-                <p><strong>Games Played:</strong> ${player.gamesPlayed}</p>
+                <h4>${escapeHtml(player.name)}</h4>
+                <p><strong>Position:</strong> ${escapeHtml(player.position || 'TBA')}</p>
+                <p><strong>Player Number:</strong> ${escapeHtml(player.playerNumber || 'N/A')}</p>
+                <p><strong>Games Played:</strong> ${Number(player.gamesPlayed || 0)}</p>
             </div>
             ${actionsHtml}
         `;
@@ -2345,8 +2398,7 @@ function clearPlayerForm() {
     playerIdInput.value = '';
     playerNameInput.value = '';
     playerPositionInput.value = '';
-    playerPhoneInput.value = '';
-    playerEmailInput.value = '';
+    playerNumberInput.value = '';
     playerPhotoInput.value = '';
 }
 
@@ -2354,8 +2406,7 @@ function populatePlayerForm(player) {
     playerIdInput.value = player.id;
     playerNameInput.value = player.name || '';
     playerPositionInput.value = player.position || '';
-    playerPhoneInput.value = player.phone || '';
-    playerEmailInput.value = player.email || '';
+    playerNumberInput.value = player.playerNumber || '';
     playerPhotoInput.value = '';
 }
 
@@ -2433,8 +2484,9 @@ async function savePlayer() {
         id,
         name,
         position,
-        phone: playerPhoneInput.value.trim(),
-        email: playerEmailInput.value.trim(),
+        playerNumber: normalizePlayerNumber(playerNumberInput.value),
+        phone: existingIndex >= 0 ? String(players[existingIndex].phone || '') : '',
+        email: existingIndex >= 0 ? String(players[existingIndex].email || '') : '',
         gamesPlayed: existingIndex >= 0 ? (players[existingIndex].gamesPlayed || 0) : 0,
         photo: photoValue
     };
@@ -2492,9 +2544,10 @@ function showPlayerProfile(playerName) {
 
 function getPlayerKey(player) {
     const name = String(player.name || player.Name || '').trim().toLowerCase();
+    const playerNumber = getStoredPlayerNumber(player).toLowerCase();
     const email = String(player.email || player.Email || '').trim().toLowerCase();
     const phone = String(player.phone || player.Phone || '').trim().toLowerCase();
-    return `${name}|${email || phone}`;
+    return `${name}|${playerNumber || email || phone}`;
 }
 
 function normalizeRosterRow(row) {
@@ -2518,6 +2571,7 @@ function normalizeRosterRow(row) {
         Team: getValue(['Team', 'Team Name']).replace(/\s+Regular$/i, ''),
         Name: combinedName || getValue(['Name', 'Player Name', 'Player', 'Full Name']),
         Position: getValue(['Position', 'Positions', 'Pos', 'Position Played', 'Primary Position']),
+        PlayerNumber: getValue(['Player Number', 'Player #', 'Number', 'Jersey Number', 'Jersey #', 'Jersey']),
         Phone: getValue(['Cell Number', 'Cell', 'Cell Phone', 'Phone', 'Phone Number', 'Contact Phone']),
         Email: getValue(['Email', 'Email Address', 'E-mail'])
     };
@@ -2610,8 +2664,7 @@ function applyRosterUploadAccess() {
 
     playerNameInput.disabled = !allowed || !team;
     playerPositionInput.disabled = !allowed || !team;
-    playerPhoneInput.disabled = !allowed || !team;
-    playerEmailInput.disabled = !allowed || !team;
+    playerNumberInput.disabled = !allowed || !team;
     playerPhotoInput.disabled = !allowed || !team;
     savePlayerBtn.disabled = !allowed || !team;
     cancelPlayerBtn.disabled = !team;
@@ -2733,7 +2786,7 @@ function getTeamPlayers() {
     const localStore = readJson(TEAM_PLAYERS_KEY, {});
     const record = (key && backendStore[key]) || (team && backendStore[team]) || (key && localStore[key]) || (team && localStore[team]) || { players: [], updatedAt: '' };
     return {
-        players: Array.isArray(record.players) ? record.players : [],
+        players: applySavedGamesPlayedToPlayers(Array.isArray(record.players) ? record.players : []),
         updatedAt: record.updatedAt || ''
     };
 }
@@ -2741,7 +2794,7 @@ function getTeamPlayers() {
 function setTeamPlayers(record) {
     const key = getTeamPlayerBucketKey();
     if (!key) return;
-    const players = capRosterPlayers(Array.isArray(record && record.players) ? record.players : []);
+    const players = applySavedGamesPlayedToPlayers(Array.isArray(record && record.players) ? record.players : []);
     const safeRecord = {
         players,
         updatedAt: (record && record.updatedAt) || new Date().toLocaleString()
@@ -2948,13 +3001,13 @@ function setupEventListeners() {
             return;
         }
 
-        const headers = ['Team', 'Name', 'Position', 'Phone', 'Email'];
+        const headers = ['Team', 'Name', 'Position', 'Player Number', 'Phone', 'Email'];
         const store = readJson(ROSTER_KEY, {});
         const existing = store[team] || { headers, rows: [] };
         const existingRows = Array.isArray(existing) ? existing : (Array.isArray(existing.rows) ? existing.rows : []);
         const seenRowKeys = new Set(existingRows.map(row => {
             const normalized = normalizeRosterRow(row);
-            return `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
+            return `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.PlayerNumber}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
         }));
 
         const currentPlayers = Array.isArray(getTeamPlayers().players) ? [...getTeamPlayers().players] : [];
@@ -2977,7 +3030,7 @@ function setupEventListeners() {
                 return;
             }
 
-            const rowKey = `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
+            const rowKey = `${normalized.Team}|${normalized.Name}|${normalized.Position}|${normalized.PlayerNumber}|${normalized.Email}|${normalized.Phone}`.toLowerCase();
             if (seenRowKeys.has(rowKey)) {
                 rowStats.duplicateRow.push(sheetRowNumber);
                 return;
@@ -3037,7 +3090,7 @@ function setupEventListeners() {
 addPlayerBtn.addEventListener('click', () => {
     clearPlayerForm();
     modalTitle.textContent = 'Add Player';
-    formInstruction.textContent = 'Enter the player information below.';
+    formInstruction.textContent = 'Enter the player information below. Player number and photo are optional.';
     savePlayerBtn.textContent = 'Save Player';
     playerFormSection.style.display = 'block';
     playerProfilesSection.style.display = 'none';
@@ -3340,11 +3393,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <option value="C">C (Catcher)</option>
                     </select>
 
-                    <label for="player-phone">Phone Number</label>
-                    <input id="player-phone" type="tel" placeholder="(555) 123-4567">
-
-                    <label for="player-email">Email Address</label>
-                    <input id="player-email" type="email" placeholder="name@example.com">
+                    <label for="player-number">Player Number</label>
+                    <input id="player-number" type="text" placeholder="24">
 
                     <label for="player-photo-file">Player Photo</label>
                     <input id="player-photo-file" type="file" accept="*/*">
@@ -3367,6 +3417,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Final Team Manager/Admin roster, check-in, and team photo controls.
 (function(){
   if (window.__lamslPrimaryTeamScriptActive) return;
+  window.__lamslPrimaryTeamScriptActive = true;
   const SESSION_KEY = 'lamslSessionV1';
   const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
   const CHECKINS_KEY = 'lamslGameCheckinsV1';
@@ -3407,24 +3458,70 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function teamKey(){ return `${pageDivision() || 'NA'}|${pageTeam()}`; }
   function getStore(){ return readJson(TEAM_PLAYERS_KEY, {}); }
+  function normalizePlayerNumber(value){ return String(value == null ? '' : value).trim(); }
+  function getPlayerNumber(player){
+    return normalizePlayerNumber(
+      player.playerNumber ||
+      player.PlayerNumber ||
+      player['Player Number'] ||
+      player['Player #'] ||
+      player.number ||
+      player.Number ||
+      player.jerseyNumber ||
+      player.JerseyNumber ||
+      player['Jersey Number'] ||
+      player['Jersey #'] ||
+      player.Jersey ||
+      ''
+    );
+  }
+  function getSavedCheckins(){
+    const store = readJson(CHECKINS_KEY, {});
+    return store && typeof store === 'object' && !Array.isArray(store) ? store : {};
+  }
+  function checkedIdsFrom(record){
+    if (!record || typeof record !== 'object') return [];
+    if (Array.isArray(record.checkedIds)) return record.checkedIds.map(String).filter(Boolean);
+    if (Array.isArray(record.players)) return record.players.map(player => String((player && player.id) || '')).filter(Boolean);
+    return [];
+  }
+  function gamesPlayedCounts(checkins){
+    return Object.values(checkins || {}).reduce((counts, record) => {
+      Array.from(new Set(checkedIdsFrom(record))).forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+      return counts;
+    }, {});
+  }
+  function normalizePlayerRecord(player, index, countMap, hasSavedCheckins){
+    const id = String(player.id || `${Date.now()}-${index}`);
+    return {
+      id,
+      name: String(player.name || player.Name || '').trim(),
+      position: String(player.position || player.Position || '').trim() || 'TBA',
+      playerNumber: getPlayerNumber(player),
+      phone: String(player.phone || player.Phone || '').trim(),
+      email: String(player.email || player.Email || '').trim(),
+      gamesPlayed: hasSavedCheckins ? (countMap[id] || 0) : (Number(player.gamesPlayed || player.GamesPlayed || 0) || 0),
+      photo: String(player.photo || player.Photo || '').trim()
+    };
+  }
+  function reconcilePlayers(players, checkins = getSavedCheckins()){
+    const hasSavedCheckins = Object.keys(checkins || {}).length > 0;
+    const countMap = hasSavedCheckins ? gamesPlayedCounts(checkins) : {};
+    return (Array.isArray(players) ? players : [])
+      .map((player, index) => normalizePlayerRecord(player, index, countMap, hasSavedCheckins))
+      .filter(player => player.name && player.position)
+      .slice(0, MAX_TEAM_ROSTER_PLAYERS);
+  }
   function getEntry(){
     const store = getStore();
     return store[teamKey()] || store[pageTeam()] || store[norm(pageTeam())] || { team: pageTeam(), division: pageDivision(), players: [] };
   }
   function getPlayers(){
     const entry = getEntry();
-    return Array.isArray(entry.players) ? entry.players : [];
+    return reconcilePlayers(Array.isArray(entry.players) ? entry.players : []);
   }
   function setPlayers(players){
-    const cleaned = players.map((p, i) => ({
-      id: String(p.id || `${Date.now()}-${i}`),
-      name: String(p.name || p.Name || '').trim(),
-      position: String(p.position || p.Position || '').trim(),
-      phone: String(p.phone || p.Phone || '').trim(),
-      email: String(p.email || p.Email || '').trim(),
-      gamesPlayed: Number(p.gamesPlayed || p.GamesPlayed || 0) || 0,
-      photo: String(p.photo || p.Photo || '').trim()
-    })).filter(p => p.name && p.position).slice(0, MAX_TEAM_ROSTER_PLAYERS);
+    const cleaned = reconcilePlayers(players);
     const entry = { team: pageTeam(), division: pageDivision(), players: cleaned, updatedAt: new Date().toISOString() };
     const store = getStore();
     store[teamKey()] = entry;
@@ -3489,8 +3586,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     wrap.innerHTML = players.map(p => `<div class="roster-card" data-player-id="${esc(p.id)}">
       <h4>${esc(p.name)}</h4>
       <p><strong>Position:</strong> ${esc(p.position || 'N/A')}</p>
-      <p><strong>Phone:</strong> ${esc(p.phone || 'N/A')}</p>
-      <p><strong>Email:</strong> ${esc(p.email || 'N/A')}</p>
+      <p><strong>Player Number:</strong> ${esc(p.playerNumber || 'N/A')}</p>
       <p class="checkin-count"><strong>Games Played:</strong> ${Number(p.gamesPlayed || 0)}</p>
       ${canManage() ? `<button type="button" class="danger roster-remove-btn" data-player-id="${esc(p.id)}">Remove</button>` : ''}
     </div>`).join('');
@@ -3499,7 +3595,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.renderRoster = renderRoster;
 
   function clearPlayerForm(){
-    ['player-id','player-name','player-phone','player-email'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    ['player-id','player-name','player-number'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     const pos = document.getElementById('player-position'); if (pos) pos.value = '';
     const file = document.getElementById('player-photo-file'); if (file) file.value = '';
   }
@@ -3508,7 +3604,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const modal = document.getElementById('player-modal'); if (!modal) return;
     clearPlayerForm();
     document.getElementById('modal-title').textContent = mode === 'remove' ? 'Remove Player' : 'Add Player';
-    document.getElementById('form-instruction').textContent = mode === 'remove' ? 'Select a roster card Remove button below, or choose a player profile to remove.' : 'Enter player first and last name and position played. Phone, email, and photo are optional.';
+    document.getElementById('form-instruction').textContent = mode === 'remove' ? 'Select a roster card Remove button below, or choose a player profile to remove.' : 'Enter player first and last name and position played. Player number and photo are optional.';
     document.getElementById('save-player-btn').textContent = 'Save Player';
     const form = document.getElementById('player-form-section'); if (form) form.style.display = mode === 'remove' ? 'none' : 'block';
     const profiles = document.getElementById('player-profiles-section'); if (profiles) profiles.style.display = mode === 'remove' ? 'block' : 'none';
@@ -3536,8 +3632,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     const record = {
       id, name, position,
-      phone: (document.getElementById('player-phone')?.value || '').trim(),
-      email: (document.getElementById('player-email')?.value || '').trim(),
+      playerNumber: normalizePlayerNumber(document.getElementById('player-number')?.value || ''),
+      phone: ix >= 0 ? String(players[ix].phone || '') : '',
+      email: ix >= 0 ? String(players[ix].email || '') : '',
       gamesPlayed: ix >= 0 ? Number(players[ix].gamesPlayed || 0) : 0,
       photo: ix >= 0 ? (players[ix].photo || '') : ''
     };
@@ -3569,7 +3666,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const panel = document.getElementById('player-checkin-panel'); if (panel) panel.style.display = 'block';
     const label = document.getElementById('checkin-game-label'); if (label) label.textContent = `Check in players for: ${game.date || ''} ${game.time || ''} — ${game.team1 || ''} vs ${game.team2 || ''}`;
     const select = document.getElementById('upcoming-game-select'); if (select) select.value = gameId(game);
-    const list = document.getElementById('checkin-selected-players'); if (list) list.innerHTML = '';
+    const list = document.getElementById('checkin-selected-players');
+    if (list) {
+      const savedIds = checkedIdsFrom(getSavedCheckins()[gameId(game)]);
+      const savedPlayers = getPlayers().filter(player => savedIds.includes(String(player.id)));
+      list.innerHTML = savedPlayers.map(player => `<div data-player-id="${esc(player.id)}">${esc(player.name)}${player.position ? ' - ' + esc(player.position) : ''} <button type="button" class="remove-player-checkin">Remove</button></div>`).join('') || '<p class="muted">No players selected yet.</p>';
+    }
     populateCheckinSelect();
   }
   window.showCheckinPanel = showCheckin;
@@ -3592,20 +3694,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const status = document.getElementById('checkin-status');
     const selected = window.selectedGame || allGames().find(g => gameId(g) === (document.getElementById('upcoming-game-select')?.value || ''));
     if (!selected) { if (status) status.textContent = 'Select a game first.'; return; }
-    const ids = [...document.querySelectorAll('#checkin-selected-players [data-player-id]')].map(x => String(x.dataset.playerId));
-    if (!ids.length) { if (status) status.textContent = 'Select at least one roster player.'; return; }
+    const ids = Array.from(new Set([...document.querySelectorAll('#checkin-selected-players [data-player-id]')].map(x => String(x.dataset.playerId)).filter(Boolean)));
     const gid = gameId(selected);
-    const checkins = readJson(CHECKINS_KEY, {});
-    const previousIds = (checkins[gid]?.checkedIds || checkins[gid]?.players?.map(p => p.id) || []).map(String);
-    const players = getPlayers().map(p => {
-      const id = String(p.id); let gp = Number(p.gamesPlayed || 0);
-      if (ids.includes(id) && !previousIds.includes(id)) gp += 1;
-      if (!ids.includes(id) && previousIds.includes(id)) gp = Math.max(0, gp - 1);
-      return { ...p, gamesPlayed: gp };
-    });
-    checkins[gid] = { gameId: gid, team: pageTeam(), division: pageDivision(), date: selected.date, time: selected.time, team1: selected.team1, team2: selected.team2, checkedIds: ids, players: ids.map(id => { const p = players.find(x => String(x.id) === id); return p ? { id:p.id, name:p.name, position:p.position } : null; }).filter(Boolean), updatedAt: new Date().toISOString() };
+    const checkins = getSavedCheckins();
+    const basePlayers = getPlayers();
+    checkins[gid] = { gameId: gid, team: pageTeam(), division: pageDivision(), date: selected.date, time: selected.time, team1: selected.team1, team2: selected.team2, checkedIds: ids, players: ids.map(id => { const p = basePlayers.find(x => String(x.id) === id); return p ? { id:p.id, name:p.name, position:p.position } : null; }).filter(Boolean), updatedAt: new Date().toISOString() };
     writeJson(CHECKINS_KEY, checkins);
-    const saved = setPlayers(players); renderRoster();
+    const saved = setPlayers(basePlayers); renderRoster();
     try { await savePlayersBackend(saved); if (status) status.textContent = `Check-in saved for ${ids.length} player(s).`; }
     catch(err) { if (status) status.textContent = `Check-in saved locally. Backend save failed: ${err.message}`; }
   }

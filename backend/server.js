@@ -1397,6 +1397,51 @@ const teamMetaFile = path.join(dataDir, 'team_profile_metadata.json');
 function readTeamMeta() { try { return fs.existsSync(teamMetaFile) ? JSON.parse(fs.readFileSync(teamMetaFile, 'utf8')) : {}; } catch (e) { return {}; } }
 function writeTeamMeta(m) { try { fs.writeFileSync(teamMetaFile, JSON.stringify(m, null, 2)); } catch (e) {} }
 
+function normalizeTeamPhotoRecord(record) {
+  if (!record || typeof record !== 'object') return null;
+  const raw = String(record.url || record.path || '').trim();
+  if (!raw) return null;
+
+  if (/^https?:\/\//i.test(raw)) {
+    return { ...record, url: raw, path: raw };
+  }
+
+  const cleaned = raw.startsWith('/') ? raw : `/${raw}`;
+  return {
+    ...record,
+    url: cleaned,
+    path: cleaned
+  };
+}
+
+function normalizeLegacyTeamPhotoRecord(record) {
+  if (!record || typeof record !== 'object') return null;
+  const legacyRelativePath = String(record.relative_path || '').trim().replace(/^\/+/, '');
+  if (!legacyRelativePath) return normalizeTeamPhotoRecord(record);
+
+  const cleaned = `/teamProfile images/${legacyRelativePath}`;
+  return {
+    ...record,
+    url: cleaned,
+    path: cleaned
+  };
+}
+
+function getTeamPhotoKeys(team, division) {
+  const keys = [];
+  const normalizedTeam = String(team || '').trim();
+  const lowerTeam = normalizedTeam.toLowerCase();
+  const normalizedDivision = String(division || '').trim().toUpperCase();
+  const compositeKey = normalizedDivision && lowerTeam ? `${normalizedDivision}__${lowerTeam}` : '';
+
+  [normalizedTeam, lowerTeam, compositeKey, compositeKey.replace(/__+$/g, '')].forEach(key => {
+    const value = String(key || '').trim();
+    if (value && !keys.includes(value)) keys.push(value);
+  });
+
+  return keys;
+}
+
 function handleTeamPhotoUpload(req, res) {
   uploadTeam.single('photo')(req, res, (uploadError) => {
     try {
@@ -1419,8 +1464,14 @@ function handleTeamPhotoUpload(req, res) {
       };
 
       const meta = readTeamMeta();
-      meta[team] = Array.isArray(meta[team]) ? meta[team] : [];
-      meta[team].unshift(record);
+      const lookupKeys = getTeamPhotoKeys(team, division);
+      lookupKeys.forEach((key) => {
+        const existing = meta[key];
+        const existingList = Array.isArray(existing)
+          ? existing
+          : (existing ? [existing] : []);
+        meta[key] = [record, ...existingList.map(item => normalizeLegacyTeamPhotoRecord(item) || normalizeTeamPhotoRecord(item)).filter(Boolean)];
+      });
       writeTeamMeta(meta);
 
       const content = readContent();
@@ -1440,25 +1491,31 @@ app.post('/upload-team-photo', requireTeamContentAuth, handleTeamPhotoUpload);
 app.post('/api/upload-team-photo', requireTeamContentAuth, handleTeamPhotoUpload);
 
 
-function getTeamPhotoRecord(team) {
+function getTeamPhotoRecord(team, division) {
   const content = readContent();
-  if (content.teamPhotos && content.teamPhotos[team]) return normalizeTeamPhotoUrl(content.teamPhotos[team]);
+  if (content.teamPhotos && content.teamPhotos[team]) return normalizeLegacyTeamPhotoRecord(content.teamPhotos[team]) || normalizeTeamPhotoRecord(content.teamPhotos[team]);
   const meta = readTeamMeta();
-  const list = meta[team];
-  if (Array.isArray(list) && list.length) return normalizeTeamPhotoUrl(list[0]);
+  const lookupKeys = getTeamPhotoKeys(team, division);
+  for (const key of lookupKeys) {
+    const list = meta[key];
+    if (Array.isArray(list) && list.length) return normalizeLegacyTeamPhotoRecord(list[0]) || normalizeTeamPhotoRecord(list[0]);
+    if (list && typeof list === 'object') return normalizeLegacyTeamPhotoRecord(list) || normalizeTeamPhotoRecord(list);
+  }
   return null;
 }
 
 app.get('/team-profile-photo', (req, res) => {
   const team = String(req.query.team || '').trim();
+  const division = String(req.query.division || '').trim();
   if (!team) return res.status(400).json({ success: false, error: 'Missing team.' });
-  res.json({ success: true, photo: getTeamPhotoRecord(team) });
+  res.json({ success: true, photo: getTeamPhotoRecord(team, division) });
 });
 
 app.get('/api/team-profile-photo', (req, res) => {
   const team = String(req.query.team || '').trim();
+  const division = String(req.query.division || '').trim();
   if (!team) return res.status(400).json({ success: false, error: 'Missing team.' });
-  res.json({ success: true, photo: getTeamPhotoRecord(team) });
+  res.json({ success: true, photo: getTeamPhotoRecord(team, division) });
 });
 
 app.get('/api/team-metadata', (req, res) => {

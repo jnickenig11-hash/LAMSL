@@ -1,7 +1,7 @@
 {
   "name": "LAMSL Mobile",
   "short_name": "LAMSL",
-  "description": "Mobile dashboard for Latino & American Men's Softball League schedules, scores, standings and announcements.",
+  "description": "Mobile dashboard for Latin & American Men's Softball League schedules, scores, standings and announcements.",
   "start_url": "mobile.html",
   "scope": "./",
   "display": "standalone",

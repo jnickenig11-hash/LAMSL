@@ -3248,6 +3248,16 @@ if (addPlayerCheckinBtn) addPlayerCheckinBtn.addEventListener('click', () => {
     updateCheckinStatus('Player added to check-in list.');
 });
 
+if (saveCheckinBtn) saveCheckinBtn.addEventListener('click', event => {
+    event.preventDefault();
+    saveCheckinSelections();
+});
+
+if (clearCheckinBtn) clearCheckinBtn.addEventListener('click', event => {
+    event.preventDefault();
+    clearCheckinSelection();
+});
+
 if (checkinSelectedPlayers) checkinSelectedPlayers.addEventListener('click', event => {
     const btn = event.target.closest('.remove-player-checkin');
     if (!btn) return;

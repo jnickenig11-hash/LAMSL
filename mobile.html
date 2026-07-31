@@ -29,11 +29,11 @@
 </header>
 
 <nav class="quick-tabs" aria-label="Mobile sections">
-  <button class="tab-btn active" data-target="nextGamesPanel" type="button">Next Games</button>
+  <button class="tab-btn active" data-target="announcementsPanel" type="button">Announcements</button>
+  <button class="tab-btn" data-target="nextGamesPanel" type="button">Next Games</button>
   <button class="tab-btn" data-target="schedulePanel" type="button">Schedule</button>
   <button class="tab-btn" data-target="scoresPanel" type="button">Scores</button>
   <button class="tab-btn" data-target="standingsPanel" type="button">Standings</button>
-  <button class="tab-btn" data-target="announcementsPanel" type="button">News</button>
   <button class="tab-btn" data-target="adminPanel" type="button">Admin</button>
 </nav>
 
@@ -57,7 +57,14 @@
     </div>
   </section>
 
-  <section id="nextGamesPanel" class="panel active-panel">
+  <section id="announcementsPanel" class="panel active-panel">
+    <div class="section-heading">
+      <h2>Announcements</h2>
+    </div>
+    <div id="announcementsList" class="card-list"></div>
+  </section>
+
+  <section id="nextGamesPanel" class="panel">
     <div class="section-heading">
       <h2>Next Games</h2>
       <span id="nextGamesDate" class="pill">Loading</span>
@@ -87,13 +94,6 @@
       <select id="standingsDivisionFilter" aria-label="Filter standings by division"></select>
     </div>
     <div id="standingsList" class="standings-wrap"></div>
-  </section>
-
-  <section id="announcementsPanel" class="panel">
-    <div class="section-heading">
-      <h2>Announcements</h2>
-    </div>
-    <div id="announcementsList" class="card-list"></div>
   </section>
 
   <section id="adminPanel" class="panel">

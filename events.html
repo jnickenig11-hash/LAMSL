@@ -673,6 +673,7 @@ const efAnnMessage = document.getElementById('ef-ann-message');
 const efAnnStatus = document.getElementById('ef-ann-status');
 const efPrevBtn = document.getElementById('ef-prev');
 const efNextBtn = document.getElementById('ef-next');
+const RENDER_BACKEND_BASE = 'https://lamsl-backend.onrender.com';
 
 // Static files already deployed with the website. These render immediately so the gallery is not blocked by backend calls.
 const LAMSL_BUNDLED_EF_IMAGES = [
@@ -723,10 +724,41 @@ function withTimeout(promise, ms = 3500) {
     ]);
 }
 
+function renderApiUrl(path) {
+    const p = String(path || '').startsWith('/') ? String(path || '') : '/' + String(path || '');
+    return RENDER_BACKEND_BASE + p;
+}
+
+function uniqueUrls(urls) {
+    return Array.from(new Set((urls || []).filter(Boolean)));
+}
+
+function backendCandidates(path) {
+    const urls = [];
+    const p = String(path || '').startsWith('/') ? String(path || '') : '/' + String(path || '');
+    const same = sameOriginApiUrl(p);
+    if (same) urls.push(same);
+    urls.push(renderApiUrl(p));
+    urls.push(apiUrl(p));
+    return uniqueUrls(urls);
+}
+
 function fetchJsonNoStore(url, ms = 3500) {
     return withTimeout(fetch(url + (url.includes('?') ? '&' : '?') + '_=' + Date.now(), { cache: 'no-store' }), ms)
         .then(response => response.json().catch(() => ({})).then(json => ({ response, json })))
         .then(({ response, json }) => response.ok ? json : {});
+}
+
+async function fetchJsonNoStoreWithRetry(url, attempts = 2, timeoutMs = 10000) {
+    let last = {};
+    for (let i = 0; i < attempts; i++) {
+        try {
+            const data = await fetchJsonNoStore(url, timeoutMs + (i * 3000));
+            if (data && Object.keys(data).length) return data;
+            last = data || {};
+        } catch (e) {}
+    }
+    return last;
 }
 
 function withCacheBust(url) {
@@ -820,13 +852,9 @@ function renderEFAnnouncements(items = efAnnouncements) {
 }
 
 async function fetchBackendContent() {
-    const urls = [];
-    const same = sameOriginApiUrl('/api/content');
-    if (same) urls.push(same);
-    urls.push(apiUrl('/api/content'));
-    for (const url of Array.from(new Set(urls))) {
+    for (const url of backendCandidates('/api/content')) {
         try {
-            const data = await fetchJsonNoStore(url, 3500);
+            const data = await fetchJsonNoStoreWithRetry(url, 2, 10000);
             const content = data.content || data;
             if (content && typeof content === 'object') return content;
         } catch (e) {}
@@ -908,11 +936,11 @@ function resolveEFImageSrc(rawPath) {
     }
     if (/^\/?EFimages\//i.test(raw)) {
         const normalized = raw.replace(/^\/+/, '');
-        return withCacheBust(isFilePreview() ? normalized : apiUrl('/' + normalized));
+        return withCacheBust(apiUrl('/' + normalized));
     }
     if (/^\/?(uploads|uploaded-images|EventImages|SlideshowImages)\//i.test(raw)) {
         const normalized = raw.replace(/^\/+/, '');
-        return withCacheBust(isFilePreview() ? normalized : apiUrl('/' + normalized));
+        return withCacheBust(apiUrl('/' + normalized));
     }
     if (/\.(png|jpe?g|gif|webp|svg)$/i.test(raw)) return withCacheBust(apiUrl('/EFimages/' + raw.replace(/^.*\//, '')));
     return withCacheBust(raw);
@@ -1041,18 +1069,16 @@ async function loadEFImages() {
     buildEFSlides(LAMSL_BUNDLED_EF_IMAGES);
 
     // Backend is still the source of truth for Events/Fundraiser gallery.
-    const urls = [];
-    const samePaths = ['/api/content', '/ef-images', '/api/ef-images'];
-    samePaths.forEach(path => {
-        const same = sameOriginApiUrl(path);
-        if (same) urls.push(same);
-        urls.push(apiUrl(path));
-    });
+    const urls = uniqueUrls([
+        ...backendCandidates('/api/content'),
+        ...backendCandidates('/ef-images'),
+        ...backendCandidates('/api/ef-images')
+    ]);
 
     let collected = [];
-    await Promise.allSettled(Array.from(new Set(urls)).map(async url => {
+    await Promise.allSettled(urls.map(async url => {
         try {
-            const data = await fetchJsonNoStore(url, 3500);
+            const data = await fetchJsonNoStoreWithRetry(url, 2, 10000);
             collected = collected.concat(extractEFImagesFromPayload(data));
         } catch (e) {}
     }));

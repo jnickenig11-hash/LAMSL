@@ -1392,7 +1392,7 @@ function renderMiniSchedule(sourceSchedule) {
                 ? ' <span style="font-size:9px;color:#C86A2F;font-weight:700;">PPD</span>' : '';
             const checkinBit = checkins[game.id]
                 ? ' <span style="font-size:9px;background:#1a8f1a;color:white;padding:1px 4px;border-radius:3px;font-weight:700;">✓ IN</span>' : '';
-            row.innerHTML = `<span class="mini-time">${timeStr}</span><span class="mini-div">Div ${game.division}</span><span class="mini-teams">H: <a class="team-link" href="${getTeamPageUrl(game.team1, game.division, getGameId(game))}">${game.team1}</a> | V: <a class="team-link" href="${getTeamPageUrl(game.team2, game.division, getGameId(game))}">${game.team2}</a>${statusBit}${checkinBit}</span>`;
+            row.innerHTML = `<span class="mini-time">${timeStr}</span><span class="mini-div">Div ${game.division}</span><span class="mini-teams">Team 1: <a class="team-link" href="${getTeamPageUrl(game.team1, game.division, getGameId(game))}">${game.team1}</a> | Team 2: <a class="team-link" href="${getTeamPageUrl(game.team2, game.division, getGameId(game))}">${game.team2}</a>${statusBit}${checkinBit}</span>`;
             section.appendChild(row);
         });
 

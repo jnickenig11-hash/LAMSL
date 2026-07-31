@@ -2149,7 +2149,7 @@ function hideCheckinPanel() {
     updateCheckinStatus('');
 }
 
-function saveCheckinSelections() {
+async function saveCheckinSelections() {
     if (!canCheckInPlayers()) {
         updateCheckinStatus('Sign in with umpire, team manager, or admin access to save check-ins.', true);
         return;
@@ -2650,24 +2650,26 @@ function applyRosterUploadAccess() {
         el.style.display = allowed ? 'block' : 'none';
     });
 
-    rosterFileInput.disabled = !allowed || !team;
+    if (rosterFileInput) rosterFileInput.disabled = !allowed || !team;
     const chooseRosterFileBtn = document.getElementById('choose-roster-file-btn');
     if (chooseRosterFileBtn) chooseRosterFileBtn.disabled = !allowed || !team;
     updateRosterFileSelectionUI();
     updateUploadRosterButtonState();
 
-    teamPhotoStatus.textContent = allowed
-        ? 'Manager access confirmed. Upload a team profile image.'
-        : 'Team profile photos are visible to all users. Team manager or admin sign-in required to upload.';
-    teamPhotoFileInput.disabled = !allowed || !team;
-    uploadTeamPhotoBtn.disabled = !allowed || !team;
+    if (teamPhotoStatus) {
+        teamPhotoStatus.textContent = allowed
+            ? 'Manager access confirmed. Upload a team profile image.'
+            : 'Team profile photos are visible to all users. Team manager or admin sign-in required to upload.';
+    }
+    if (teamPhotoFileInput) teamPhotoFileInput.disabled = !allowed || !team;
+    if (uploadTeamPhotoBtn) uploadTeamPhotoBtn.disabled = !allowed || !team;
 
-    playerNameInput.disabled = !allowed || !team;
-    playerPositionInput.disabled = !allowed || !team;
-    playerNumberInput.disabled = !allowed || !team;
-    playerPhotoInput.disabled = !allowed || !team;
-    savePlayerBtn.disabled = !allowed || !team;
-    cancelPlayerBtn.disabled = !team;
+    if (playerNameInput) playerNameInput.disabled = !allowed || !team;
+    if (playerPositionInput) playerPositionInput.disabled = !allowed || !team;
+    if (playerNumberInput) playerNumberInput.disabled = !allowed || !team;
+    if (playerPhotoInput) playerPhotoInput.disabled = !allowed || !team;
+    if (savePlayerBtn) savePlayerBtn.disabled = !allowed || !team;
+    if (cancelPlayerBtn) cancelPlayerBtn.disabled = !team;
 }
 
 
@@ -2950,14 +2952,14 @@ function setupEventListeners() {
             updateUploadRosterButtonState();
         });
     }
-    uploadRosterBtn.addEventListener('click', event => {
+    if (uploadRosterBtn) uploadRosterBtn.addEventListener('click', event => {
     const file = getSelectedRosterFile();
     if (file) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     setRosterStatus('Choose an Excel/CSV roster file first.', true);
 }, true);
-    uploadRosterBtn.addEventListener('click', async (event) => {
+    if (uploadRosterBtn) uploadRosterBtn.addEventListener('click', async (event) => {
     event.preventDefault();
     if (!canManageTeamContent()) {
         rosterAdminStatus.textContent = 'Sign in as team manager or admin first.';
@@ -3087,7 +3089,7 @@ function setupEventListeners() {
     }
 });
 
-addPlayerBtn.addEventListener('click', () => {
+if (addPlayerBtn) addPlayerBtn.addEventListener('click', () => {
     clearPlayerForm();
     modalTitle.textContent = 'Add Player';
     formInstruction.textContent = 'Enter the player information below. Player number and photo are optional.';
@@ -3097,7 +3099,7 @@ addPlayerBtn.addEventListener('click', () => {
     playerModal.style.display = 'flex';
 });
 
-removePlayerBtn.addEventListener('click', () => {
+if (removePlayerBtn) removePlayerBtn.addEventListener('click', () => {
     clearPlayerForm();
     modalTitle.textContent = 'Remove Player';
     formInstruction.textContent = 'Select a player from the roster list below, then confirm removal.';
@@ -3108,17 +3110,17 @@ removePlayerBtn.addEventListener('click', () => {
     playerModal.style.display = 'flex';
 });
 
-savePlayerBtn.addEventListener('click', savePlayer);
-cancelPlayerBtn.addEventListener('click', clearPlayerForm);
-closeModalBtn.addEventListener('click', () => {
+if (savePlayerBtn) savePlayerBtn.addEventListener('click', savePlayer);
+if (cancelPlayerBtn) cancelPlayerBtn.addEventListener('click', clearPlayerForm);
+if (closeModalBtn) closeModalBtn.addEventListener('click', () => {
     playerModal.style.display = 'none';
 });
-playerModal.addEventListener('click', (event) => {
+if (playerModal) playerModal.addEventListener('click', (event) => {
     if (event.target === playerModal) {
         playerModal.style.display = 'none';
     }
 });
-playerList.addEventListener('click', event => {
+if (playerList) playerList.addEventListener('click', event => {
     const button = event.target.closest('button');
     if (!button) return;
     const action = button.dataset.action;
@@ -3168,7 +3170,7 @@ if (rosterGridWrap) {
     });
 }
 
-teamScheduleWrap.addEventListener('click', event => {
+if (teamScheduleWrap) teamScheduleWrap.addEventListener('click', event => {
     const checkinButton = event.target.closest('.checkin-game-btn');
     if (checkinButton) {
         const selected = getTeamGames().find(game => getGameId(game) === checkinButton.dataset.gameId);
@@ -3187,7 +3189,7 @@ teamScheduleWrap.addEventListener('click', event => {
     }
 });
 
-upcomingGameSelect.addEventListener('change', event => {
+if (upcomingGameSelect) upcomingGameSelect.addEventListener('change', event => {
     const gameId = event.target.value;
     if (!gameId) {
         hideCheckinPanel();
@@ -3209,7 +3211,7 @@ if (rosterGridWrap) {
     });
 }
 
-teamScheduleWrap.addEventListener('click', event => {
+if (teamScheduleWrap) teamScheduleWrap.addEventListener('click', event => {
     const checkinButton = event.target.closest('.checkin-game-btn');
     if (checkinButton) {
         const selected = getTeamGames().find(game => getGameId(game) === checkinButton.dataset.gameId);
@@ -3229,7 +3231,7 @@ teamScheduleWrap.addEventListener('click', event => {
     }
 });
 
-addPlayerCheckinBtn.addEventListener('click', () => {
+if (addPlayerCheckinBtn) addPlayerCheckinBtn.addEventListener('click', () => {
     if (!checkinPlayerSelect || !checkinPlayerSelect.value) {
         updateCheckinStatus('Select a player first.', true);
         return;
@@ -3246,7 +3248,7 @@ addPlayerCheckinBtn.addEventListener('click', () => {
     updateCheckinStatus('Player added to check-in list.');
 });
 
-checkinSelectedPlayers.addEventListener('click', event => {
+if (checkinSelectedPlayers) checkinSelectedPlayers.addEventListener('click', event => {
     const btn = event.target.closest('.remove-player-checkin');
     if (!btn) return;
     const playerId = btn.dataset.playerId;
@@ -3257,7 +3259,7 @@ checkinSelectedPlayers.addEventListener('click', event => {
 });
 
 
-uploadTeamPhotoBtn.addEventListener('click', async () => {
+if (uploadTeamPhotoBtn) uploadTeamPhotoBtn.addEventListener('click', async () => {
     if (!canManageTeamContent()) {
         teamPhotoStatus.textContent = 'Sign in as team manager or admin first.';
         return;

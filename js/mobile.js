@@ -27,6 +27,48 @@
   function gameHasScore(game){ return game && game.score1 !== '' && game.score2 !== '' && game.score1 != null && game.score2 != null; }
   function debounce(fn, delay){ let timeout; return function(...args){ clearTimeout(timeout); timeout = setTimeout(() => fn(...args), delay); }; }
 
+  const ALL_PARKS = ['Carson - Stevenson Park','Carson - Dolphin Park','Carson - Calas Park','Carson - Veterans Park','Bell Gardens - Ford Park'];
+
+  function parkSortKey(park){ const i = ALL_PARKS.indexOf(park); return i >= 0 ? String(i).padStart(2,'0') : 'zz' + park; }
+
+  function groupByPark(games){
+    const byPark = {};
+    games.forEach(g => {
+      const park = g.park || 'Park TBD';
+      if (!byPark[park]) byPark[park] = [];
+      byPark[park].push(g);
+    });
+    return byPark;
+  }
+
+  function parkGroupHtml(byPark){
+    return Object.keys(byPark).sort((a,b) => parkSortKey(a).localeCompare(parkSortKey(b))).map(park => {
+      const parkGames = byPark[park];
+      return `<div class="park-group"><div class="park-group-header">${escapeHtml(park)}</div><div class="park-group-games">${parkGames.map(gameCard).join('')}</div></div>`;
+    }).join('');
+  }
+
+  function lastMonthRange(){
+    const now = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    const ago = new Date(now); ago.setDate(ago.getDate()-30);
+    const startKey = `${ago.getFullYear()}-${pad(ago.getMonth()+1)}-${pad(ago.getDate())}`;
+    const endKey = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+    return { startKey, endKey };
+  }
+
+  function renderBannerTagline(){
+    const el = $('bannerTagline');
+    if (!el) return;
+    try {
+      const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null');
+      if (s && s.name) {
+        const fd = key => new Date(key+'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+        el.textContent = `${s.name} ${s.year || ''} Season \u2022 ${fd(s.start)} \u2013 ${fd(s.end)}`.trim();
+      }
+    } catch(e){}
+  }
+
   function populateFilters(){
     ['scheduleDivisionFilter','standingsDivisionFilter'].forEach(id => {
       const sel = $(id); if (!sel) return;
@@ -58,22 +100,39 @@
   function renderNextGames(){
     const games = sortedGamesDesc().filter(g => g && g.date && g.team1 && g.team2 && String(g.status || 'scheduled').toLowerCase() !== 'cancelled');
     const selectedDate = games.length ? games[0].date : '';
-    const nextGames = selectedDate ? games.filter(g => g.date === selectedDate) : [];
+    const nextGames = selectedDate ? games.filter(g => g.date === selectedDate).sort((a,b) => parkSortKey(a.park||'').localeCompare(parkSortKey(b.park||'')) || String(a.time||'').localeCompare(String(b.time||''))) : [];
     const badge = $('nextGamesDate');
     if (badge) badge.textContent = selectedDate ? dateLabel(selectedDate) : 'No games';
-    $('nextGamesList').innerHTML = nextGames.length ? nextGames.map(gameCard).join('') : '<div class="empty-state">No games are currently scheduled.</div>';
+    if (!nextGames.length) {
+      $('nextGamesList').innerHTML = '<div class="empty-state">No games are currently scheduled.</div>';
+      return;
+    }
+    $('nextGamesList').innerHTML = parkGroupHtml(groupByPark(nextGames));
   }
 
   function renderSchedule(){
     const division = $('scheduleDivisionFilter').value || 'All';
-    const games = sortedGamesDesc().filter(g => division === 'All' || String(g.division || 'All') === division);
-    $('scheduleList').innerHTML = games.length ? games.map(gameCard).join('') : '<div class="empty-state">No games are currently scheduled for this division.</div>';
+    const { startKey, endKey } = lastMonthRange();
+    const games = sortedGamesAsc().filter(g =>
+      g.date >= startKey && g.date <= endKey &&
+      (division === 'All' || String(g.division || 'All') === division)
+    );
+    if (!games.length) {
+      $('scheduleList').innerHTML = '<div class="empty-state">No games scheduled in the past month for this division.</div>';
+      return;
+    }
+    $('scheduleList').innerHTML = parkGroupHtml(groupByPark(games));
   }
 
   function renderScores(){
-    const scored = sortedGames().filter(gameHasScore).reverse();
+    const { startKey, endKey } = lastMonthRange();
+    const scored = sortedGamesAsc().filter(g => gameHasScore(g) && g.date >= startKey && g.date <= endKey);
     $('scoreCount').textContent = `${scored.length} final`;
-    $('scoresList').innerHTML = scored.length ? scored.map(gameCard).join('') : '<div class="empty-state">No final scores have been posted yet.</div>';
+    if (!scored.length) {
+      $('scoresList').innerHTML = '<div class="empty-state">No final scores posted for the past month.</div>';
+      return;
+    }
+    $('scoresList').innerHTML = parkGroupHtml(groupByPark(scored));
   }
 
   function hasFinalScore(game){ return game && game.score1 !== '' && game.score2 !== '' && game.score1 != null && game.score2 != null && Number.isFinite(Number(game.score1)) && Number.isFinite(Number(game.score2)); }
@@ -156,6 +215,7 @@
 
   function renderAll(){
     populateFilters();
+    renderBannerTagline();
     renderNextGames(); renderSchedule(); renderScores(); renderStandings(); renderAnnouncements(); renderAdmin();
     const updated = state.content.updatedAt ? new Date(state.content.updatedAt).toLocaleString() : 'local content loaded';
     $('lastUpdated').textContent = `Last updated: ${updated}`;

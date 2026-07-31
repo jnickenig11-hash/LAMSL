@@ -39,10 +39,19 @@
 
 <main class="mobile-shell">
   <section class="hero-card">
-    <p class="eyebrow">Latino & American Men's Softball League</p>
-    <h1>Park-day mobile dashboard</h1>
-    <p id="lastUpdated">Loading latest league content...</p>
-    <button id="refreshBtn" type="button" class="primary-btn">Refresh</button>
+    <div class="lamsl-mobile-banner">
+      <img src="Images/LAMSLLogo.jpg" alt="LAMSL Logo" class="banner-logo-mobile" loading="eager" width="62" height="62">
+      <div class="banner-info-mobile">
+        <p class="eyebrow">Latin &amp; American Men's Softball League</p>
+        <h1>LAMSL</h1>
+        <p class="banner-est-mobile">Established 1976</p>
+      </div>
+    </div>
+    <p id="bannerTagline" class="banner-tagline-mobile">California's Top Modified-Pitch League</p>
+    <p id="lastUpdated" class="hero-updated">Loading latest league content...</p>
+    <div class="hero-action-row">
+      <button id="refreshBtn" type="button" class="primary-btn">↻ Refresh</button>
+    </div>
     <div id="installHelp" class="install-help" aria-live="polite" hidden>
       <strong>Add to Home Screen:</strong> Tap the <b>Share</b> button, then tap <b>Add to Home Screen</b> to install this app.
     </div>
@@ -58,7 +67,7 @@
 
   <section id="schedulePanel" class="panel">
     <div class="section-heading">
-      <h2>Game Schedule</h2>
+      <h2>Schedule — Last Month</h2>
       <select id="scheduleDivisionFilter" aria-label="Filter schedule by division"></select>
     </div>
     <div id="scheduleList" class="card-list"></div>
@@ -66,7 +75,7 @@
 
   <section id="scoresPanel" class="panel">
     <div class="section-heading">
-      <h2>Team Scores</h2>
+      <h2>Scores — Last Month</h2>
       <span id="scoreCount" class="pill">0 final</span>
     </div>
     <div id="scoresList" class="card-list"></div>

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -338,9 +338,13 @@ footer {
     padding: 24px 20px;
     border-bottom: 4px solid #C86A2F;
     display: grid;
-    grid-template-columns: 160px minmax(0, 1fr);
+    grid-template-columns: 160px auto;
+    grid-template-rows: auto auto auto;
     align-items: center;
-    gap: 12px;
+    justify-content: center;
+    column-gap: 20px;
+    row-gap: 2px;
+    text-align: center;
 }
 .banner h1 {
     margin: 0;
@@ -360,13 +364,16 @@ footer {
     max-width: 620px;
 }
 .banner-logo {
+    grid-row: 1 / span 3;
     width: 150px;
-    height: 160px;
+    height: auto;
     object-fit: contain;
+    align-self: center;
 }
 @media (max-width: 700px) {
     .banner {
         grid-template-columns: 1fr;
+        grid-template-rows: auto;
         text-align: center;
     }
     .banner h1 {
@@ -377,6 +384,7 @@ footer {
         font-size: 14px;
     }
     .banner-logo {
+        grid-row: auto;
         width: 180px;
         height: auto;
     }

@@ -27,6 +27,16 @@ const SESSION_SECRET = process.env.LAMSL_SESSION_SECRET || ADMIN_API_KEY || 'lam
 const MAX_TEAM_ROSTER_PLAYERS = 18;
 console.log('ADMIN_API_KEY loaded:', !!ADMIN_API_KEY);
 
+function normalizeRoleName(role) {
+  return String(role || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[_\s]+/g, '-')
+    .replace(/^administrator$/, 'admin')
+    .replace(/^manager$/, 'team-manager')
+    .replace(/^team manager$/, 'team-manager');
+}
+
 function getBearerToken(req) {
   const auth = String(req.headers.authorization || '');
   if (auth.toLowerCase().startsWith('bearer ')) return auth.slice(7).trim();
@@ -58,7 +68,7 @@ function verifySessionToken(token) {
 }
 
 function getStaticSession(req) {
-  const role = String(req.headers['x-lamsl-role'] || '').toLowerCase();
+  const role = normalizeRoleName(req.headers['x-lamsl-role']);
   const sessionActive = req.headers['x-lamsl-session'] === 'active';
   const username = String(req.headers['x-lamsl-username'] || 'admin');
   const assignedTeam = String(req.headers['x-lamsl-assigned-team'] || '');
@@ -82,7 +92,7 @@ function requireTeamContentAuth(req, res, next) {
   const token = req.headers['x-admin-key'] || getBearerToken(req);
   if (ADMIN_API_KEY && token === ADMIN_API_KEY) return next();
   if (verifySessionToken(token)) return next();
-  const role = String(req.headers['x-lamsl-role'] || '').toLowerCase();
+  const role = normalizeRoleName(req.headers['x-lamsl-role']);
   const sessionActive = req.headers['x-lamsl-session'] === 'active';
   if (sessionActive && ['admin', 'umpire', 'team-manager'].includes(role)) return next();
   return res.status(403).json({ success: false, error: 'Forbidden: team manager/admin login or API key required' });

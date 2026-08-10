@@ -1758,18 +1758,42 @@ function writeJson(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
 }
 
-function isAdminLoggedIn() {
+function normalizeRole(role) {
+    return String(role || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[_\s]+/g, '-')
+        .replace(/^administrator$/, 'admin')
+        .replace(/^manager$/, 'team-manager')
+        .replace(/^team manager$/, 'team-manager');
+}
+
+function getSessionRole() {
     const session = readJson(SESSION_KEY, null);
-    return !!(session && session.role === 'admin');
+    return normalizeRole(session && session.role);
+}
+
+function isAdminLoggedIn() {
+    return getSessionRole() === 'admin';
 }
 
 function hasRole(...roles) {
-    const session = readJson(SESSION_KEY, null);
-    return !!(session && roles.includes(session.role));
+    const activeRole = getSessionRole();
+    return roles.some(role => normalizeRole(role) === activeRole);
 }
 
 function canManageTeamContent() {
-    return !!team && hasRole('admin', 'team-manager');
+    if (!team) return false;
+    if (hasRole('admin')) return true;
+    if (!hasRole('team-manager')) return false;
+
+    const session = readJson(SESSION_KEY, null) || {};
+    const assignedTeam = String(session.assignedTeam || session.team || session.teamName || '').trim().toLowerCase();
+    const assignedDivision = String(session.assignedDivision || session.division || '').replace(/^division\s*/i, '').trim().toUpperCase();
+    const targetTeam = String(team || '').trim().toLowerCase();
+    const targetDivision = String(division || '').replace(/^division\s*/i, '').trim().toUpperCase();
+
+    return !!assignedTeam && assignedTeam === targetTeam && (!assignedDivision || assignedDivision === targetDivision || !targetDivision);
 }
 
 function canCheckInPlayers() {
@@ -1933,8 +1957,15 @@ if (typeof window.apiHeaders !== 'function') {
         try {
             const session = JSON.parse(localStorage.getItem('lamslSessionV1') || 'null');
             if (session && session.username && session.role) {
+                const normalizedRole = String(session.role || '')
+                    .trim()
+                    .toLowerCase()
+                    .replace(/[_\s]+/g, '-')
+                    .replace(/^administrator$/, 'admin')
+                    .replace(/^manager$/, 'team-manager')
+                    .replace(/^team manager$/, 'team-manager');
                 headers['x-lamsl-username'] = session.username;
-                headers['x-lamsl-role'] = String(session.role || '').toLowerCase().replace(/[_\s]+/g, '-');
+                headers['x-lamsl-role'] = normalizedRole;
                 headers['x-lamsl-session'] = 'active';
                 if (session.assignedTeam || session.team || session.teamName) headers['x-lamsl-assigned-team'] = session.assignedTeam || session.team || session.teamName;
                 if (session.assignedDivision || session.division) headers['x-lamsl-assigned-division'] = session.assignedDivision || session.division;

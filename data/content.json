@@ -954,9 +954,22 @@
   },
   "slideshow": [],
   "announcements": [],
-  "updatedAt": "2026-07-31T04:07:49.478Z",
+  "updatedAt": "2026-08-10T00:08:48.076Z",
   "eventFundraiserImages": [],
   "rosters": {},
-  "teamPlayers": {},
+  "teamPlayers": {
+    "A::Titans": {
+      "players": [],
+      "updatedAt": "2026-08-10T00:08:48.076Z",
+      "team": "Titans",
+      "division": "A"
+    },
+    "Titans": {
+      "players": [],
+      "updatedAt": "2026-08-10T00:08:48.076Z",
+      "team": "Titans",
+      "division": "A"
+    }
+  },
   "teamPhotos": {}
 }

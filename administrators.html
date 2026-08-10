@@ -2238,7 +2238,7 @@ logoutButton.addEventListener('click', () => {
     renderAuthState();
 });
 
-announcementForm.addEventListener('submit', event => {
+announcementForm.addEventListener('submit', async event => {
     event.preventDefault();
 
 
@@ -2266,11 +2266,18 @@ announcementForm.addEventListener('submit', event => {
     });
     writeJson(ANNOUNCEMENTS_KEY, announcements);
     content = Object.assign({}, content || {}, { announcements });
-    saveAnnouncementsToBackend(announcements).catch(err => console.warn('Announcement backend sync failed:', err));
-    announcementForm.reset();
-    renderAnnouncements();
-    updateDashboardSummary?.();
-    authStatus.textContent = 'Announcement published.';
+    try {
+        await saveAnnouncementsToBackend(announcements);
+        announcementForm.reset();
+        renderAnnouncements();
+        updateDashboardSummary?.();
+        authStatus.textContent = 'Announcement published.';
+    } catch (err) {
+        console.warn('Announcement backend sync failed:', err);
+        renderAnnouncements();
+        updateDashboardSummary?.();
+        authStatus.textContent = 'Announcement saved locally, but backend sync failed: ' + err.message;
+    }
 });
 
 // === Step 8: Administrator Dashboard / Site Content Management Logic ===
@@ -2387,17 +2394,18 @@ async function migrateLocalContentToBackend() {
 
 async function saveAnnouncementsToBackend(announcements, archivedAnnouncements) {
     if (!isAdminLoggedIn()) return false;
-    const current = Object.assign(getDefaultBackendContent(), content || {}, scheduleContent || {});
-    current.announcements = Array.isArray(announcements) ? announcements : readJson(ANNOUNCEMENTS_KEY, []);
-    if (Array.isArray(archivedAnnouncements)) current.archivedAnnouncements = archivedAnnouncements;
+    const payload = {
+        announcements: Array.isArray(announcements) ? announcements : readJson(ANNOUNCEMENTS_KEY, [])
+    };
+    if (Array.isArray(archivedAnnouncements)) payload.archivedAnnouncements = archivedAnnouncements;
     const response = await fetch(apiUrl('/api/update'), {
         method: 'POST',
         headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(current)
+        body: JSON.stringify(payload)
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok || result.success === false) throw new Error(result.error || result.message || `HTTP ${response.status}`);
-    content = Object.assign({}, current, result.content || {});
+    content = Object.assign({}, content || {}, payload, result.content || {});
     scheduleContent = Object.assign(getDefaultBackendContent(), content);
     return true;
 }

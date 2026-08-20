@@ -496,7 +496,8 @@ footer {
 }
 
 
-.management-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}.admin-panel{border:1px solid #d8e0e8;border-radius:10px;padding:15px;background:#f8fbfd}.admin-panel form{display:grid;gap:8px}.admin-panel input,.admin-panel select,.admin-panel textarea{padding:8px;border:1px solid #b7c3cc;border-radius:6px}.score-actions{display:flex;gap:8px;flex-wrap:wrap}.practice-layout{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}.practice-body{border:1px solid #d8e0e8;border-radius:10px;padding:15px;background:#f8fbfd}
+.management-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}.admin-panel{border:1px solid #d8e0e8;border-radius:10px;padding:15px;background:#f8fbfd;min-width:0;overflow:hidden}.admin-panel form{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}.admin-panel input,.admin-panel select,.admin-panel textarea{padding:8px;border:1px solid #b7c3cc;border-radius:6px;width:100%;min-width:0;box-sizing:border-box}.score-actions{display:flex;gap:8px;flex-wrap:wrap}.practice-layout{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}.practice-body{border:1px solid #d8e0e8;border-radius:10px;padding:15px;background:#f8fbfd}
+.score-report{margin-top:14px;padding-top:12px;border-top:1px dashed #b7c3cc;min-width:0}.score-report h4{margin:0 0 8px;font-size:13px;color:#12324A;text-transform:uppercase;letter-spacing:.03em}.score-report-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.score-report-filters input,.score-report-filters select{padding:5px 6px;font-size:12px;border:1px solid #b7c3cc;border-radius:6px;width:100%;min-width:0;box-sizing:border-box}.score-report-filters button{grid-column:1/-1;padding:5px;font-size:12px;border:1px solid #b7c3cc;border-radius:6px;background:#fff;cursor:pointer}.score-report-summary{margin:8px 0 4px;font-size:12px;color:#5a6b78}.score-report-results{list-style:none;margin:0;padding:0;max-height:170px;overflow-y:auto;display:grid;gap:4px}.score-report-results li{font-size:11.5px;line-height:1.3;padding:5px 7px;background:#fff;border:1px solid #e2e8ee;border-radius:6px}.score-report-results li span{display:block;color:#12324A;font-weight:600}
 .time-slot-picker{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.time-slot-picker select{min-width:0;flex:1 1 80px}.time-slot-picker .time-slot-sep{font-weight:700;color:#12324A}
 
 .dashboard-hero{background:linear-gradient(135deg,#12324A 0%,#0b2538 100%);color:#fff;border-left:6px solid #C86A2F;display:grid;grid-template-columns:1.4fr .8fr;gap:18px;align-items:center}
@@ -1093,6 +1094,24 @@ input[type="submit"]:disabled{
                     </div>
                 </form>
                 <ul id="scores-list"></ul>
+                <div class="score-report">
+                    <h4>Games Report</h4>
+                    <div class="score-report-filters">
+                        <input id="report-filter-week" type="week" title="Filter by week">
+                        <select id="report-filter-month" title="Filter by month">
+                            <option value="">Month</option>
+                            <option value="1">Jan</option><option value="2">Feb</option><option value="3">Mar</option>
+                            <option value="4">Apr</option><option value="5">May</option><option value="6">Jun</option>
+                            <option value="7">Jul</option><option value="8">Aug</option><option value="9">Sep</option>
+                            <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
+                        </select>
+                        <select id="report-filter-year" title="Filter by year"><option value="">Year</option></select>
+                        <select id="report-filter-park" title="Filter by park"><option value="">Park</option></select>
+                        <button id="report-filter-clear" type="button">Clear</button>
+                    </div>
+                    <p id="report-summary" class="score-report-summary">No filters applied.</p>
+                    <ul id="report-results" class="score-report-results"></ul>
+                </div>
             </div>
         </section>
 
@@ -4213,6 +4232,55 @@ initializeAdminScheduleDashboard();
     const del = $('delete-scheduled-game-btn'); if (del && gs) del.disabled = !gs.value;
     const adminStatus = $('admin-status'); if (adminStatus && gameTeams.length) adminStatus.textContent = `Loaded ${gameTeams.length} teams. Backend is primary; local storage is fallback only.`;
     const scoreStatus = $('score-admin-status'); if (scoreStatus && state.games.length) scoreStatus.textContent = `Loaded ${state.games.length} existing scheduled games.`;
+    renderScoreReport();
+  }
+  function isoWeek(d){
+    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const day = date.getUTCDay() || 7;
+    date.setUTCDate(date.getUTCDate() + 4 - day);
+    const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+    const week = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    return date.getUTCFullYear() + '-W' + String(week).padStart(2, '0');
+  }
+  function previousIsoWeek(){
+    const d = new Date(); d.setDate(d.getDate() - 7);
+    return isoWeek(d);
+  }
+  function renderScoreReport(){
+    const yearSel = $('report-filter-year'), parkSel = $('report-filter-park'), results = $('report-results'), summary = $('report-summary');
+    if (!results || !summary) return;
+    const weekInput = $('report-filter-week');
+    if (weekInput && !weekInput.dataset.defaulted) { weekInput.value = previousIsoWeek(); weekInput.dataset.defaulted = '1'; }
+    const games = (state.games || []).filter(g => g && g.date && g.team1 && g.team2);
+    if (yearSel) {
+      const years = uniq(games.map(g => String(g.date).slice(0, 4)).filter(Boolean)).sort();
+      const old = yearSel.value;
+      yearSel.innerHTML = '<option value="">Year</option>' + years.map(y => `<option value="${esc(y)}">${esc(y)}</option>`).join('');
+      if (years.includes(old)) yearSel.value = old;
+    }
+    if (parkSel) {
+      const parks = uniq(games.map(g => g.park).filter(Boolean)).sort();
+      const old = parkSel.value;
+      parkSel.innerHTML = '<option value="">Park</option>' + parks.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
+      if (parks.includes(old)) parkSel.value = old;
+    }
+    const week = $('report-filter-week')?.value || '';
+    const month = $('report-filter-month')?.value || '';
+    const year = yearSel?.value || '';
+    const park = parkSel?.value || '';
+    const filtered = games.filter(g => {
+      const d = new Date(g.date + 'T00:00:00');
+      if (Number.isNaN(d.getTime())) return false;
+      if (week && isoWeek(d) !== week) return false;
+      if (month && String(d.getMonth() + 1) !== month) return false;
+      if (year && String(g.date).slice(0, 4) !== year) return false;
+      if (park && g.park !== park) return false;
+      return true;
+    }).sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.time || '').localeCompare(String(b.time || '')));
+    const anyFilter = week || month || year || park;
+    summary.textContent = anyFilter ? `${filtered.length} game(s) match the selected filters.` : `${games.length} total scheduled game(s). Apply a filter to narrow the list.`;
+    const shown = anyFilter ? filtered : filtered.slice(0, 0);
+    results.innerHTML = shown.map(g => `<li><span>${esc(g.date)} ${esc(g.time || '')} - ${esc(g.park || 'TBD')}</span>${esc(g.team1)} vs ${esc(g.team2)}${hasFinalScore(g) ? ` (${esc(g.score1)}-${esc(g.score2)})` : ''}</li>`).join('');
   }
   function rebuildStandings(games){
     const standings = {};
@@ -4255,6 +4323,11 @@ initializeAdminScheduleDashboard();
   }
   function bindAuthoritativeHandlers(){
     ['game-division','practice-div1','practice-div2'].forEach(id => $(id)?.addEventListener('change', renderSelects));
+    ['report-filter-week','report-filter-month','report-filter-year','report-filter-park'].forEach(id => $(id)?.addEventListener('change', renderScoreReport));
+    $('report-filter-clear')?.addEventListener('click', () => {
+      ['report-filter-week','report-filter-month','report-filter-year','report-filter-park'].forEach(id => { const el = $(id); if (el) el.value = ''; });
+      renderScoreReport();
+    });
     $('scheduled-game-select')?.addEventListener('change', () => {
       const id = $('scheduled-game-select')?.value;
       const g = state.games.find(x => String(x.id) === String(id));

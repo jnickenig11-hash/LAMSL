@@ -710,6 +710,15 @@ class UploadHandler(SimpleHTTPRequestHandler):
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         route = parsed.path.rstrip("/") or "/"
+
+        if route in {"/LASML.html", "/LAMSL.html"}:
+            target = "/LAMSL.html"
+            if route != target:
+                self.send_response(302)
+                self.send_header("Location", target)
+                self.end_headers()
+                return
+
         if route == "/slideshow-images":
             images = _build_image_payload(SLIDESHOW_DIR, SLIDESHOW_META_FILE, "SlideshowImages")
             self._json_response(200, {"success": True, "images": images})
@@ -765,7 +774,7 @@ class UploadHandler(SimpleHTTPRequestHandler):
 
 def run_server(port: int = 8000) -> None:
     server = ThreadingHTTPServer(("", port), UploadHandler)
-    print(f"LAMSL server running at http://localhost:{port}/LASML.html")
+    print(f"LAMSL server running at http://localhost:{port}/LAMSL.html")
     print("Upload endpoint active: POST /upload")
     try:
         server.serve_forever()

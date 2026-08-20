@@ -634,6 +634,8 @@ function normalizeContent(raw) {
   if (!content.teamPlayers || typeof content.teamPlayers !== 'object' || Array.isArray(content.teamPlayers)) content.teamPlayers = {};
   if (!content.teamPhotos || typeof content.teamPhotos !== 'object' || Array.isArray(content.teamPhotos)) content.teamPhotos = {};
   content.standings = chooseStandings(content.gameSchedules, content.standings);
+  if (!content.manualStandings || typeof content.manualStandings !== 'object' || Array.isArray(content.manualStandings)) content.manualStandings = {};
+  content.manualStandingsEnabled = Boolean(content.manualStandingsEnabled);
   if (!content.zelle || typeof content.zelle !== 'object' || Array.isArray(content.zelle)) content.zelle = {};
   if (typeof content.homepageMessage !== 'string') content.homepageMessage = '';
   return content;

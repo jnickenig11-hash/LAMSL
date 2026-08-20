@@ -541,7 +541,7 @@ footer {
 .management-grid,
 .practice-layout,
 .division-manager-grid {
-    align-items: stretch;
+    align-items: start;
 }
 .admin-panel,
 .practice-body,
@@ -553,6 +553,7 @@ footer {
     border-top: 4px solid #12324A;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(18, 50, 74, 0.06);
+    align-self: start;
 }
 .admin-panel h3,
 .practice-body h3,
@@ -770,6 +771,81 @@ button:hover,
     border: 1px solid #d0e1ed;
 }
 
+.manual-standings-toggle {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-top: 12px;
+    font-weight: 600;
+    color: #12324A;
+}
+
+.manual-standings-toggle input {
+    margin-top: 2px;
+    flex: 0 0 auto;
+}
+
+.manual-standings-form,
+.manual-standings-fields {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.manual-standings-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.manual-standings-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.manual-standings-field {
+    display: grid;
+    gap: 4px;
+}
+
+.manual-standings-field span {
+    color: #12324A;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.manual-standings-preview {
+    margin-top: 12px;
+    max-height: 240px;
+    overflow: auto;
+    background: #fff;
+    border: 1px solid #d8e0e8;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.manual-standings-preview table {
+    margin: 0;
+    font-size: 13px;
+}
+
+.manual-standings-preview th,
+.manual-standings-preview td {
+    padding: 8px 6px;
+}
+
+.manual-standings-meta {
+    margin: 0 0 8px;
+    color: #5c6f7f;
+    font-size: 12px;
+}
+
+@media (max-width: 560px) {
+    .manual-standings-form,
+    .manual-standings-fields {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 .forgot-password-btn-wrapper {
     display: flex;
     gap: 8px;
@@ -957,6 +1033,7 @@ input[type="submit"]:disabled{
               <div class="management-grid">
                 <div class="admin-panel"><h3>Backend Connection</h3><p class="admin-status" id="backend-dashboard-status">Logged-in admin users save directly to the backend. Manual API key entry is optional.</p><input id="backend-base-input" type="text" placeholder="Backend URL"><input id="admin-api-key-input" type="password" placeholder="Optional fallback API key"><div class="score-actions"><button type="button" id="save-admin-settings-btn">Save Settings</button><button type="button" id="check-backend-btn">Check Backend</button></div></div>
                 <div class="admin-panel"><h3>Content Summary</h3><p id="dashboard-summary">Loading content counts...</p><p class="admin-status">Schedules, practices, scores, announcements, teams, divisions, payment info, and homepage slideshow media are managed in their dedicated dashboard sections.</p></div>
+                <div class="admin-panel" id="manual-standings-panel"><h3>Manual Standings Backup</h3><p class="admin-status" id="manual-standings-status">Create a manual standings backup here when backend standings updates are unavailable.</p><label class="manual-standings-toggle" for="manual-standings-enabled"><input id="manual-standings-enabled" type="checkbox"><span>Use this manual backup on the standings pages</span></label><div class="manual-standings-form"><select id="manual-standings-division" aria-label="Manual standings division"></select><select id="manual-standings-team" aria-label="Manual standings team"></select></div><div class="manual-standings-fields"><label class="manual-standings-field"><span>Wins</span><input id="manual-standings-w" type="number" min="0" step="1" inputmode="numeric"></label><label class="manual-standings-field"><span>Losses</span><input id="manual-standings-l" type="number" min="0" step="1" inputmode="numeric"></label><label class="manual-standings-field"><span>Ties</span><input id="manual-standings-t" type="number" min="0" step="1" inputmode="numeric"></label><label class="manual-standings-field"><span>Games Played</span><input id="manual-standings-gp" type="number" min="0" step="1" inputmode="numeric"></label><label class="manual-standings-field"><span>Runs For</span><input id="manual-standings-rf" type="number" min="0" step="1" inputmode="numeric"></label><label class="manual-standings-field"><span>Runs Against</span><input id="manual-standings-ra" type="number" min="0" step="1" inputmode="numeric"></label></div><div class="score-actions"><button type="button" id="manual-standings-save-btn">Save Backup</button><button type="button" id="manual-standings-sync-btn">Sync to Backend</button><button type="button" id="manual-standings-reset-btn" class="secondary">Reset to Current</button></div><div id="manual-standings-preview" class="manual-standings-preview"></div></div>
                 <div class="admin-panel"><h3>One-Time Data Migration</h3><p class="admin-status" id="migration-status">Copies existing browser-saved schedule and announcement data to the Render backend without deleting local data.</p><div class="score-actions"><button type="button" id="migrate-local-content-btn">Migrate Local Schedule & Announcements</button><button type="button" id="preview-local-content-btn">Preview Local Data</button></div></div>
                 <div class="admin-panel"><h3>Zelle / Payment Info</h3><textarea id="zelle" rows="5" placeholder="Zelle JSON"></textarea><button type="button" id="saveZelleBtn" class="admin-form-btn">Save Zelle Info</button></div>
                 <div class="admin-panel image-management-panel"><h3>Image Uploads</h3><p class="admin-status" id="slideshow-upload-status">Choose where to save the image. Homepage images display in the homepage slideshow. Event/fundraiser images save to EFimages.</p><label for="admin-image-destination"><strong>Image Destination</strong></label><select id="admin-image-destination"><option value="homepage">Homepage slideshow</option><option value="events">Events / Fundraisers</option></select><input id="admin-slideshow-file" type="file" accept="image/*"><input id="admin-slideshow-caption" type="text" placeholder="Optional caption"><div class="score-actions"><button type="button" id="upload-slideshow-btn">Upload Image</button><button type="button" id="refresh-slideshow-btn">Refresh Image Lists</button></div></div>
@@ -1396,6 +1473,8 @@ const PRACTICE_KEY = 'lamslPracticeScheduleV1';
 const ROSTER_KEY = 'lamslTeamRostersV1';
 const TEAM_PLAYERS_KEY = 'lamslTeamPlayersV1';
 const STANDINGS_KEY = 'lamslStandingsV1';
+const MANUAL_STANDINGS_KEY = 'lamslManualStandingsV1';
+const MANUAL_STANDINGS_ENABLED_KEY = 'lamslManualStandingsEnabledV1';
 
 // Backend base URL: always use Render-hosted backend for development
 function apiUrl(path) {
@@ -1479,7 +1558,7 @@ document.addEventListener('change', e => {
 });
 
 function getDefaultBackendContent() {
-    return { homepageMessage:'', zelle:{}, gameSchedules:[], gameScores:[], practiceSchedules:[], standings:{}, slideshow:[], rosters:{}, teamPlayers:{} };
+    return { homepageMessage:'', zelle:{}, gameSchedules:[], gameScores:[], practiceSchedules:[], standings:{}, manualStandings:{}, manualStandingsEnabled:false, slideshow:[], rosters:{}, teamPlayers:{} };
 }
 
 function formatDateKey(date) {
@@ -1527,12 +1606,14 @@ async function loadBackendSchedule() {
             gameScores: Array.isArray(data.gameScores) ? data.gameScores : selectedSchedules.filter(g => g.score1 !== '' && g.score2 !== ''),
             standings: data.standings || buildStandingsFromGames(selectedSchedules)
         });
+        manualStandingsDraft = null;
         writeJson(SCHEDULE_KEY, scheduleContent.gameSchedules || []);
         writeJson(PRACTICE_KEY, scheduleContent.practiceSchedules || []);
         writeJson(STANDINGS_KEY, scheduleContent.standings || buildStandingsFromGames(scheduleContent.gameSchedules || []));
         if (typeof content === 'object' && content) content = Object.assign({}, content, scheduleContent);
         updateDashboardSummary?.();
         renderAdminSlideshowList?.();
+        renderManualStandingsEditor?.();
     } catch(e) { console.warn('Backend schedule load failed', e); scheduleContent = null; }
 }
 
@@ -1608,6 +1689,21 @@ const notificationSmtpStatus = document.getElementById('notification-smtp-status
 const notificationPreview = document.getElementById('schedule-notification-preview');
 const previewScheduleNotificationBtn = document.getElementById('preview-schedule-notification-btn');
 const sendScheduleNotificationBtn = document.getElementById('send-schedule-notification-btn');
+const manualStandingsStatus = document.getElementById('manual-standings-status');
+const manualStandingsEnabled = document.getElementById('manual-standings-enabled');
+const manualStandingsDivision = document.getElementById('manual-standings-division');
+const manualStandingsTeam = document.getElementById('manual-standings-team');
+const manualStandingsWins = document.getElementById('manual-standings-w');
+const manualStandingsLosses = document.getElementById('manual-standings-l');
+const manualStandingsTies = document.getElementById('manual-standings-t');
+const manualStandingsGamesPlayed = document.getElementById('manual-standings-gp');
+const manualStandingsRunsFor = document.getElementById('manual-standings-rf');
+const manualStandingsRunsAgainst = document.getElementById('manual-standings-ra');
+const manualStandingsSaveBtn = document.getElementById('manual-standings-save-btn');
+const manualStandingsSyncBtn = document.getElementById('manual-standings-sync-btn');
+const manualStandingsResetBtn = document.getElementById('manual-standings-reset-btn');
+const manualStandingsPreview = document.getElementById('manual-standings-preview');
+let manualStandingsDraft = null;
 
 function readJson(key, fallback) {
     try {
@@ -1709,6 +1805,7 @@ function getDivisionMap() {
 function saveDivisionMap(map) {
     writeJson(DIVISIONS_KEY, map);
     teamsByDivision = map;
+    renderManualStandingsEditor();
 }
 
 function getSchedule() {
@@ -1738,6 +1835,235 @@ async function savePracticeSchedule(games) {
     scheduleContent = Object.assign(getDefaultBackendContent(), content || {}, scheduleContent || {}, { practiceSchedules: normalized });
     content = Object.assign({}, content || {}, scheduleContent);
     return await persistBackendContent();
+}
+
+function createEmptyStandingRow() {
+    return { w: 0, l: 0, t: 0, rf: 0, ra: 0, gp: 0 };
+}
+
+function normalizeStandingRow(row) {
+    const normalized = createEmptyStandingRow();
+    ['w', 'l', 't', 'rf', 'ra', 'gp'].forEach(key => {
+        const value = Number(row && row[key]);
+        normalized[key] = Number.isFinite(value) && value >= 0 ? Math.trunc(value) : 0;
+    });
+    const minimumGames = normalized.w + normalized.l + normalized.t;
+    if (normalized.gp < minimumGames) normalized.gp = minimumGames;
+    return normalized;
+}
+
+function normalizeStandingsMap(source) {
+    const normalized = buildStandingsFromGames([]);
+    Object.entries(source && typeof source === 'object' ? source : {}).forEach(([division, teams]) => {
+        normalized[division] = normalized[division] || {};
+        Object.entries(teams && typeof teams === 'object' ? teams : {}).forEach(([team, row]) => {
+            if (!team) return;
+            normalized[division][team] = normalizeStandingRow(row);
+        });
+    });
+    return normalized;
+}
+
+function hasStandingsData(standings) {
+    return Object.values(standings || {}).some(teams => Object.values(teams || {}).some(row => ['w', 'l', 't', 'rf', 'ra', 'gp'].some(key => Number(row && row[key] || 0) !== 0)));
+}
+
+function mergeStandingsMaps(base, override) {
+    const merged = normalizeStandingsMap(base);
+    Object.entries(override && typeof override === 'object' ? override : {}).forEach(([division, teams]) => {
+        merged[division] = merged[division] || {};
+        Object.entries(teams && typeof teams === 'object' ? teams : {}).forEach(([team, row]) => {
+            if (!team) return;
+            merged[division][team] = normalizeStandingRow(row);
+        });
+    });
+    return merged;
+}
+
+function getCurrentStandingsSnapshot() {
+    const source = (scheduleContent && scheduleContent.standings && Object.keys(scheduleContent.standings).length)
+        ? scheduleContent.standings
+        : ((content && content.standings && Object.keys(content.standings).length)
+            ? content.standings
+            : buildStandingsFromGames((scheduleContent && scheduleContent.gameSchedules) || (content && content.gameSchedules) || readJson(SCHEDULE_KEY, [])));
+    return normalizeStandingsMap(source);
+}
+
+function getStoredManualStandingsEnabled() {
+    const stored = readJson(MANUAL_STANDINGS_ENABLED_KEY, null);
+    if (typeof stored === 'boolean') return stored;
+    return Boolean((scheduleContent && scheduleContent.manualStandingsEnabled) || (content && content.manualStandingsEnabled));
+}
+
+function ensureManualStandingsDraft(forceRefresh) {
+    if (forceRefresh || !manualStandingsDraft) {
+        const local = readJson(MANUAL_STANDINGS_KEY, null);
+        const backend = (scheduleContent && scheduleContent.manualStandings) || (content && content.manualStandings) || null;
+        const current = getCurrentStandingsSnapshot();
+        const backendManual = normalizeStandingsMap(backend);
+        const localManual = normalizeStandingsMap(local);
+        let nextDraft = current;
+        if (hasStandingsData(backendManual)) nextDraft = mergeStandingsMaps(nextDraft, backendManual);
+        if (hasStandingsData(localManual)) nextDraft = mergeStandingsMaps(nextDraft, localManual);
+        manualStandingsDraft = nextDraft;
+    }
+    return manualStandingsDraft;
+}
+
+function updateLocalStandingsCache() {
+    const useManual = getStoredManualStandingsEnabled();
+    writeJson(STANDINGS_KEY, useManual ? ensureManualStandingsDraft() : getCurrentStandingsSnapshot());
+}
+
+function setManualStandingsStatus(message) {
+    if (manualStandingsStatus) manualStandingsStatus.textContent = message;
+}
+
+function getManualDivisionList() {
+    const divisionMap = getDivisionMap();
+    const draft = ensureManualStandingsDraft();
+    return Array.from(new Set([...Object.keys(divisionMap || {}), ...Object.keys(draft || {})])).filter(Boolean).sort();
+}
+
+function getManualTeamsForDivision(division) {
+    const divisionMap = getDivisionMap();
+    const draft = ensureManualStandingsDraft();
+    return Array.from(new Set([...(divisionMap[division] || []), ...Object.keys((draft && draft[division]) || {})])).filter(Boolean).sort();
+}
+
+function populateManualStandingsFields() {
+    if (!manualStandingsDivision || !manualStandingsTeam) return;
+    const division = manualStandingsDivision.value;
+    const team = manualStandingsTeam.value;
+    const row = (((ensureManualStandingsDraft() || {})[division] || {})[team]) || createEmptyStandingRow();
+    if (manualStandingsWins) manualStandingsWins.value = row.w;
+    if (manualStandingsLosses) manualStandingsLosses.value = row.l;
+    if (manualStandingsTies) manualStandingsTies.value = row.t;
+    if (manualStandingsGamesPlayed) manualStandingsGamesPlayed.value = row.gp;
+    if (manualStandingsRunsFor) manualStandingsRunsFor.value = row.rf;
+    if (manualStandingsRunsAgainst) manualStandingsRunsAgainst.value = row.ra;
+}
+
+function renderManualStandingsPreview() {
+    if (!manualStandingsPreview || !manualStandingsDivision) return;
+    const division = manualStandingsDivision.value;
+    const rows = Object.entries((ensureManualStandingsDraft()[division] || {})).sort((a, b) => {
+        const rowA = a[1] || createEmptyStandingRow();
+        const rowB = b[1] || createEmptyStandingRow();
+        return (rowB.w - rowA.w) || (rowA.l - rowB.l) || ((rowB.rf - rowB.ra) - (rowA.rf - rowA.ra)) || a[0].localeCompare(b[0]);
+    });
+    if (!division || !rows.length) {
+        manualStandingsPreview.innerHTML = '<p class="manual-standings-meta">Select a division to review the current backup.</p>';
+        return;
+    }
+    manualStandingsPreview.innerHTML = `<p class="manual-standings-meta">Division ${escapeAdminHtml(division)} manual backup preview.</p><table><thead><tr><th>Team</th><th>W</th><th>L</th><th>T</th><th>GP</th></tr></thead><tbody>${rows.map(([team, row]) => `<tr><td>${escapeAdminHtml(team)}</td><td>${row.w}</td><td>${row.l}</td><td>${row.t}</td><td>${row.gp}</td></tr>`).join('')}</tbody></table>`;
+}
+
+function renderManualStandingsEditor(preferredDivision, preferredTeam) {
+    if (!manualStandingsDivision || !manualStandingsTeam) return;
+    const divisions = getManualDivisionList();
+    const nextDivision = divisions.includes(preferredDivision) ? preferredDivision : (manualStandingsDivision.value && divisions.includes(manualStandingsDivision.value) ? manualStandingsDivision.value : (divisions[0] || ''));
+    manualStandingsDivision.innerHTML = divisions.length
+        ? divisions.map(division => `<option value="${escapeAdminHtml(division)}">Division ${escapeAdminHtml(division)}</option>`).join('')
+        : '<option value="">No divisions available</option>';
+    if (nextDivision) manualStandingsDivision.value = nextDivision;
+    const teams = nextDivision ? getManualTeamsForDivision(nextDivision) : [];
+    const nextTeam = teams.includes(preferredTeam) ? preferredTeam : (manualStandingsTeam.value && teams.includes(manualStandingsTeam.value) ? manualStandingsTeam.value : (teams[0] || ''));
+    manualStandingsTeam.innerHTML = teams.length
+        ? teams.map(team => `<option value="${escapeAdminHtml(team)}">${escapeAdminHtml(team)}</option>`).join('')
+        : '<option value="">No teams available</option>';
+    if (nextTeam) manualStandingsTeam.value = nextTeam;
+    if (manualStandingsEnabled) manualStandingsEnabled.checked = getStoredManualStandingsEnabled();
+    populateManualStandingsFields();
+    renderManualStandingsPreview();
+}
+
+function readManualStandingInputs() {
+    const row = normalizeStandingRow({
+        w: manualStandingsWins && manualStandingsWins.value,
+        l: manualStandingsLosses && manualStandingsLosses.value,
+        t: manualStandingsTies && manualStandingsTies.value,
+        gp: manualStandingsGamesPlayed && manualStandingsGamesPlayed.value,
+        rf: manualStandingsRunsFor && manualStandingsRunsFor.value,
+        ra: manualStandingsRunsAgainst && manualStandingsRunsAgainst.value
+    });
+    return row;
+}
+
+function commitManualStandingSelection() {
+    if (!manualStandingsDivision || !manualStandingsTeam || !manualStandingsDivision.value || !manualStandingsTeam.value) {
+        setManualStandingsStatus('Select a division and team before saving the manual backup.');
+        return false;
+    }
+    const draft = ensureManualStandingsDraft();
+    draft[manualStandingsDivision.value] = draft[manualStandingsDivision.value] || {};
+    draft[manualStandingsDivision.value][manualStandingsTeam.value] = readManualStandingInputs();
+    manualStandingsDraft = draft;
+    return true;
+}
+
+function persistManualStandingsLocally(message) {
+    writeJson(MANUAL_STANDINGS_KEY, ensureManualStandingsDraft());
+    writeJson(MANUAL_STANDINGS_ENABLED_KEY, Boolean(manualStandingsEnabled && manualStandingsEnabled.checked));
+    updateLocalStandingsCache();
+    setManualStandingsStatus(message);
+}
+
+function saveManualStandingsBackup() {
+    if (!commitManualStandingSelection()) return;
+    persistManualStandingsLocally(
+        manualStandingsEnabled && manualStandingsEnabled.checked
+            ? 'Manual standings backup saved locally and enabled for standings-page fallback.'
+            : 'Manual standings backup saved locally. Turn on the checkbox when you want standings pages to use it.'
+    );
+    renderManualStandingsEditor(manualStandingsDivision.value, manualStandingsTeam.value);
+}
+
+async function syncManualStandingsToBackend() {
+    if (!commitManualStandingSelection()) return;
+    if (!isAdminLoggedIn()) {
+        persistManualStandingsLocally('Manual standings backup saved locally. Sign in as admin to sync it to the backend.');
+        renderManualStandingsEditor(manualStandingsDivision.value, manualStandingsTeam.value);
+        return;
+    }
+    persistManualStandingsLocally('Syncing manual standings backup to the backend...');
+    try {
+        await ensureBackendSessionToken();
+        const next = Object.assign(getDefaultBackendContent(), content || {}, scheduleContent || {});
+        next.manualStandings = normalizeStandingsMap(ensureManualStandingsDraft());
+        next.manualStandingsEnabled = Boolean(manualStandingsEnabled && manualStandingsEnabled.checked);
+        const response = await fetch(apiUrl('/api/update'), {
+            method: 'POST',
+            headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify(next)
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.success === false) throw new Error(result.error || result.message || `HTTP ${response.status}`);
+        content = Object.assign({}, next, result.content || {});
+        scheduleContent = Object.assign(getDefaultBackendContent(), content);
+        persistManualStandingsLocally(
+            next.manualStandingsEnabled
+                ? 'Manual standings backup synced to the backend and enabled for standings pages.'
+                : 'Manual standings backup synced to the backend. It will stay idle until the manual toggle is enabled.'
+        );
+        renderManualStandingsEditor(manualStandingsDivision.value, manualStandingsTeam.value);
+        logAdminAction('sync_manual_standings_backup', {
+            enabled: next.manualStandingsEnabled,
+            division: manualStandingsDivision && manualStandingsDivision.value,
+            team: manualStandingsTeam && manualStandingsTeam.value
+        });
+    } catch (error) {
+        persistManualStandingsLocally('Backend sync failed, but the manual standings backup is still saved locally: ' + error.message);
+        renderManualStandingsEditor(manualStandingsDivision.value, manualStandingsTeam.value);
+    }
+}
+
+function resetManualStandingsBackup() {
+    if (!confirm('Reset the manual standings backup to the current standings snapshot?')) return;
+    manualStandingsDraft = getCurrentStandingsSnapshot();
+    if (manualStandingsEnabled) manualStandingsEnabled.checked = false;
+    persistManualStandingsLocally('Manual standings backup reset to the current standings snapshot. Sync again if you want the backend copy updated.');
+    renderManualStandingsEditor();
 }
 
 function renderDivisionManager(selectedDivision = '') {
@@ -2434,13 +2760,16 @@ async function loadAdminContentDashboard() {
         const res = await fetch(apiUrl('/api/content'));
         const data = res.ok ? await res.json() : {};
         content = data || {};
+        manualStandingsDraft = null;
         if (Array.isArray(content.announcements)) writeJson(ANNOUNCEMENTS_KEY, content.announcements);
         const zelleEl = document.getElementById('zelle');
         if (zelleEl) zelleEl.value = JSON.stringify(content.zelle || {}, null, 2);
         updateDashboardSummary();
         renderAnnouncements?.();
+        renderManualStandingsEditor();
     } catch (err) {
         console.warn('Failed to load site content from backend:', err);
+        renderManualStandingsEditor();
     }
 }
 
@@ -2680,6 +3009,17 @@ refreshImageManagementBtn?.addEventListener('click', async () => { await loadBac
 previewScheduleNotificationBtn?.addEventListener('click', previewScheduleNotification);
 sendScheduleNotificationBtn?.addEventListener('click', sendScheduleNotification);
 loadNotificationStatus?.();
+renderManualStandingsEditor();
+manualStandingsDivision?.addEventListener('change', () => renderManualStandingsEditor(manualStandingsDivision.value));
+manualStandingsTeam?.addEventListener('change', populateManualStandingsFields);
+manualStandingsEnabled?.addEventListener('change', () => {
+    writeJson(MANUAL_STANDINGS_ENABLED_KEY, Boolean(manualStandingsEnabled.checked));
+    updateLocalStandingsCache();
+    setManualStandingsStatus(manualStandingsEnabled.checked ? 'Manual standings fallback is enabled in this browser.' : 'Manual standings fallback is disabled in this browser until you turn it back on.');
+});
+manualStandingsSaveBtn?.addEventListener('click', saveManualStandingsBackup);
+manualStandingsSyncBtn?.addEventListener('click', syncManualStandingsToBackend);
+manualStandingsResetBtn?.addEventListener('click', resetManualStandingsBackup);
 
 document.getElementById('backend-base-input') && (document.getElementById('backend-base-input').value = window.BACKEND_BASE || '');
 document.getElementById('admin-api-key-input') && (document.getElementById('admin-api-key-input').value = localStorage.getItem('LAMSL_ADMIN_KEY') || '');

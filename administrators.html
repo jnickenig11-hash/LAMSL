@@ -219,6 +219,18 @@ header {
     gap: 12px;
 }
 
+.park-list-editor {
+    display: grid;
+    gap: 10px;
+}
+
+.park-list-editor textarea {
+    min-height: 130px;
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
 .admin-form textarea {
     grid-column: span 2;
     min-height: 120px;
@@ -1033,6 +1045,7 @@ input[type="submit"]:disabled{
               <div class="management-grid">
                 <div class="admin-panel"><h3>Backend Connection</h3><p class="admin-status" id="backend-dashboard-status">Logged-in admin users save directly to the backend. Manual API key entry is optional.</p><input id="backend-base-input" type="text" placeholder="Backend URL"><input id="admin-api-key-input" type="password" placeholder="Optional fallback API key"><div class="score-actions"><button type="button" id="save-admin-settings-btn">Save Settings</button><button type="button" id="check-backend-btn">Check Backend</button></div></div>
                 <div class="admin-panel"><h3>Content Summary</h3><p id="dashboard-summary">Loading content counts...</p><p class="admin-status">Schedules, practices, scores, announcements, teams, divisions, payment info, and homepage slideshow media are managed in their dedicated dashboard sections.</p></div>
+                <div class="admin-panel"><h3>Park List</h3><p class="admin-status">Maintain the parks available in the game and practice scheduling forms. Enter one park per line.</p><div class="park-list-editor"><textarea id="parks-list-editor" aria-label="Park list" placeholder="One park per line"></textarea><button type="button" id="save-parks-btn" class="admin-form-btn">Save Park List</button></div><p id="parks-status" class="admin-status" aria-live="polite"></p></div>
                 <div class="admin-panel" id="manual-standings-panel"><h3>Manual Standings Backup</h3><p class="admin-status" id="manual-standings-status">Create a manual standings backup here when backend standings updates are unavailable.</p><label class="manual-standings-toggle" for="manual-standings-enabled"><input id="manual-standings-enabled" type="checkbox"><span>Use this manual backup on the standings pages</span></label><div class="manual-standings-form"><select id="manual-standings-division" aria-label="Manual standings division"></select><select id="manual-standings-team" aria-label="Manual standings team"></select></div><div class="manual-standings-fields"><label class="manual-standings-field"><span>Wins</span><input id="manual-standings-w" type="number" min="0" step="1" inputmode="numeric"></label><label class="manual-standings-field"><span>Losses</span><input id="manual-standings-l" type="number" min="0" step="1" inputmode="numeric"></label><label class="manual-standings-field"><span>Ties</span><input id="manual-standings-t" type="number" min="0" step="1" inputmode="numeric"></label><label class="manual-standings-field"><span>Games Played</span><input id="manual-standings-gp" type="number" min="0" step="1" inputmode="numeric"></label><label class="manual-standings-field"><span>Runs For</span><input id="manual-standings-rf" type="number" min="0" step="1" inputmode="numeric"></label><label class="manual-standings-field"><span>Runs Against</span><input id="manual-standings-ra" type="number" min="0" step="1" inputmode="numeric"></label></div><div class="score-actions"><button type="button" id="manual-standings-save-btn">Save Backup</button><button type="button" id="manual-standings-sync-btn">Sync to Backend</button><button type="button" id="manual-standings-reset-btn" class="secondary">Reset to Current</button></div><div id="manual-standings-preview" class="manual-standings-preview"></div></div>
                 <div class="admin-panel"><h3>One-Time Data Migration</h3><p class="admin-status" id="migration-status">Copies existing browser-saved schedule and announcement data to the Render backend without deleting local data.</p><div class="score-actions"><button type="button" id="migrate-local-content-btn">Migrate Local Schedule & Announcements</button><button type="button" id="preview-local-content-btn">Preview Local Data</button></div></div>
                 <div class="admin-panel"><h3>Zelle / Payment Info</h3><textarea id="zelle" rows="5" placeholder="Zelle JSON"></textarea><button type="button" id="saveZelleBtn" class="admin-form-btn">Save Zelle Info</button></div>
@@ -1112,12 +1125,6 @@ input[type="submit"]:disabled{
                     <input type="hidden" id="game-time">
                     <select id="game-park" required>
                         <option value="">Select Park</option>
-                        <option value="Bell Gardens - Ford Park">Bell Gardens - Ford Park</option>
-                        <option value="Carson - Stevenson Park">Carson - Stevenson Park</option>
-                        <option value="Carson - Dolphin Park">Carson - Dolphin Park</option>
-                        <option value="Carson - Calas Park">Carson - Calas Park</option>
-                        <option value="Carson - Veterans Park">Carson - Veterans Park</option>
-                        <option value="Whittier - Sorensen Park">Whittier - Sorensen Park</option>
                     </select>
                     <select id="game-division" required>
                         <option value="">Select Division</option>
@@ -1209,12 +1216,6 @@ input[type="submit"]:disabled{
                             <input id="practice-time" type="time" required>
                             <select id="practice-park" required>
                                 <option value="">Select Park</option>
-                                <option value="Bell Gardens - Ford Park">Bell Gardens - Ford Park</option>
-                                <option value="Carson - Stevenson Park">Carson - Stevenson Park</option>
-                                <option value="Carson - Dolphin Park">Carson - Dolphin Park</option>
-                                <option value="Carson - Calas Park">Carson - Calas Park</option>
-                                <option value="Carson - Veterans Park">Carson - Veterans Park</option>
-                                <option value="Whittier - Sorensen Park">Whittier - Sorensen Park</option>
                             </select>
                             <select id="practice-div1">
                                 <option value="">Team 1 Division</option>
@@ -1560,7 +1561,28 @@ document.addEventListener('change', e => {
 });
 
 function getDefaultBackendContent() {
-    return { homepageMessage:'', zelle:{}, gameSchedules:[], gameScores:[], practiceSchedules:[], standings:{}, manualStandings:{}, manualStandingsEnabled:false, slideshow:[], rosters:{}, teamPlayers:{} };
+    return { homepageMessage:'', zelle:{}, parks:['Bell Gardens - Ford Park','Carson - Stevenson Park','Carson - Dolphin Park','Carson - Calas Park','Carson - Veterans Park','Whittier - Sorensen Park'], gameSchedules:[], gameScores:[], practiceSchedules:[], standings:{}, manualStandings:{}, manualStandingsEnabled:false, slideshow:[], rosters:{}, teamPlayers:{} };
+}
+
+function getConfiguredParks() {
+    const source = scheduleContent?.parks || content?.parks || getDefaultBackendContent().parks;
+    return [...new Set((Array.isArray(source) ? source : []).map(park => String(park || '').trim()).filter(Boolean))];
+}
+
+function renderParkListEditor() {
+    const parks = getConfiguredParks();
+    const editor = document.getElementById('parks-list-editor');
+    if (editor && document.activeElement !== editor) editor.value = parks.join('\n');
+    ['game-park', 'practice-park', 'report-filter-park'].forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        const selected = select.value;
+        const label = id === 'report-filter-park' ? 'Park' : 'Select Park';
+        select.innerHTML = `<option value="">${label}</option>` + parks.map(park => `<option value="${escapeAdminHtml(park)}">${escapeAdminHtml(park)}</option>`).join('');
+        if (parks.includes(selected)) select.value = selected;
+    });
+    const status = document.getElementById('parks-status');
+    if (status && parks.length) status.textContent = `${parks.length} park${parks.length === 1 ? '' : 's'} available.`;
 }
 
 function formatDateKey(date) {
@@ -2762,11 +2784,13 @@ async function loadAdminContentDashboard() {
         const res = await fetch(apiUrl('/api/content'));
         const data = res.ok ? await res.json() : {};
         content = data || {};
+        scheduleContent = Object.assign(getDefaultBackendContent(), content);
         manualStandingsDraft = null;
         if (Array.isArray(content.announcements)) writeJson(ANNOUNCEMENTS_KEY, content.announcements);
         const zelleEl = document.getElementById('zelle');
         if (zelleEl) zelleEl.value = JSON.stringify(content.zelle || {}, null, 2);
         updateDashboardSummary();
+        renderParkListEditor();
         renderAnnouncements?.();
         renderManualStandingsEditor();
     } catch (err) {
@@ -2983,6 +3007,10 @@ async function saveDashboardContent(fields) {
     try {
         const current = Object.assign(getDefaultBackendContent(), content || {}, scheduleContent || {});
         if (fields.includes('zelle')) current.zelle = JSON.parse(document.getElementById('zelle')?.value || '{}');
+        if (fields.includes('parks')) {
+            current.parks = [...new Set((document.getElementById('parks-list-editor')?.value || '').split(/\r?\n/).map(park => park.trim()).filter(Boolean))];
+            if (!current.parks.length) throw new Error('Add at least one park before saving.');
+        }
         current.gameScores = (current.gameSchedules || []).filter(g => g.score1 !== '' && g.score2 !== '' && g.score1 != null && g.score2 != null);
         current.standings = buildStandingsFromGames(current.gameSchedules || []);
         const response = await fetch(apiUrl('/api/update'), { method: 'POST', headers: window.apiHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(current) });
@@ -2994,6 +3022,9 @@ async function saveDashboardContent(fields) {
         writeJson(PRACTICE_KEY, scheduleContent.practiceSchedules || []);
         writeJson(STANDINGS_KEY, scheduleContent.standings || {});
         updateDashboardSummary();
+        renderParkListEditor();
+        const parksStatus = document.getElementById('parks-status');
+        if (parksStatus) parksStatus.textContent = `${scheduleContent.parks.length} parks saved.`;
         alert('Content saved to backend successfully.');
         logAdminAction('update_site_content', { fields, by: getSession()?.username || 'unknown' });
     } catch (err) {
@@ -3002,6 +3033,7 @@ async function saveDashboardContent(fields) {
 }
 loadAdminContentDashboard();
 document.getElementById('saveZelleBtn')?.addEventListener('click', () => saveDashboardContent(['zelle']));
+document.getElementById('save-parks-btn')?.addEventListener('click', () => saveDashboardContent(['parks']));
 previewLocalContentBtn?.addEventListener('click', previewLocalMigrationData);
 migrateLocalContentBtn?.addEventListener('click', migrateLocalContentToBackend);
 

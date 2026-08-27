@@ -13,7 +13,7 @@ const DEFAULT_TEAMS_BY_DIVISION = {
     E: []
 };
 let teamsByDivision = {};
-const ALL_PARKS = ['Carson - Stevenson Park','Bell Gardens - Ford Park', 'Carson - Dolphin Park', 'Carson - Calas Park', 'Carson - Veterans Park'];
+const ALL_PARKS = ['Carson - Stevenson Park','Bell Gardens - Ford Park', 'Carson - Dolphin Park', 'Carson - Calas Park', 'Carson - Veterans Park', 'Whittier - Sorensen Park'];
 const GAME_TIME_SLOTS = ['08:00am', '09:50am', '11:45am','01:45pm'];
 const ALLOWED_GAME_DAYS = [0]; // Sundays only
 const CHECKINS_KEY = 'lamslGameCheckinsV1';

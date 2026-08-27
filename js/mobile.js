@@ -27,7 +27,7 @@
   function gameHasScore(game){ return game && game.score1 !== '' && game.score2 !== '' && game.score1 != null && game.score2 != null; }
   function debounce(fn, delay){ let timeout; return function(...args){ clearTimeout(timeout); timeout = setTimeout(() => fn(...args), delay); }; }
 
-  const ALL_PARKS = ['Carson - Stevenson Park','Carson - Dolphin Park','Carson - Calas Park','Carson - Veterans Park','Bell Gardens - Ford Park'];
+  const ALL_PARKS = ['Carson - Stevenson Park','Carson - Dolphin Park','Carson - Calas Park','Carson - Veterans Park','Bell Gardens - Ford Park','Whittier - Sorensen Park'];
 
   function parkSortKey(park){ const i = ALL_PARKS.indexOf(park); return i >= 0 ? String(i).padStart(2,'0') : 'zz' + park; }
 

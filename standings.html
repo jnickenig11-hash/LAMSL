@@ -479,7 +479,10 @@ function getActiveDivisionLabel() {
     return active ? active.textContent.trim() : 'Division A';
 }
 function getDisplayedTeams() {
-    return Array.from(contentPanel.querySelectorAll('table tr td:first-child')).map(td => td.textContent.trim()).filter(Boolean);
+    const standingsTable = contentPanel.querySelector('table');
+    return standingsTable
+        ? Array.from(standingsTable.querySelectorAll('tbody tr td:first-child')).map(td => td.textContent.trim()).filter(Boolean)
+        : [];
 }
 function isScored(game) {
     return game && game.score1 !== '' && game.score2 !== '' && game.score1 != null && game.score2 != null;

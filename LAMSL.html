@@ -1068,7 +1068,10 @@ function renderAnnouncements(sourceItems) {
     announcements.forEach(item => {
         const card = document.createElement('div');
         card.className = 'card announcement-card';
-        card.innerHTML = `<h3>${escapeHtml(item.title || 'League Announcement')}</h3><p><strong>${escapeHtml(item.date || '')}</strong></p><p>${escapeHtml(item.message || item.body || '')}</p>`;
+        const attachment = item.attachment && item.attachment.url
+            ? `<p><a href="${escapeHtml(resolveAssetUrl(item.attachment.url))}" target="_blank" rel="noopener">View attachment: ${escapeHtml(item.attachment.name || 'Download file')}</a></p>`
+            : '';
+        card.innerHTML = `<h3>${escapeHtml(item.title || 'League Announcement')}</h3><p><strong>${escapeHtml(item.date || '')}</strong></p><p>${escapeHtml(item.message || item.body || '')}</p>${attachment}`;
         announcementsList.appendChild(card);
     });
 }
@@ -1635,7 +1638,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     items.forEach(item => {
       const card = document.createElement('div');
       card.className = 'card announcement-card';
-      card.innerHTML = `<h3>${htmlEscape(item.title || 'League Announcement')}</h3><p><strong>${htmlEscape(item.date || '')}</strong></p><p>${htmlEscape(item.message || item.body || item.text || '')}</p>`;
+      const attachment = item.attachment && item.attachment.url
+        ? `<p><a href="${htmlEscape(absoluteAsset(item.attachment.url))}" target="_blank" rel="noopener">View attachment: ${htmlEscape(item.attachment.name || 'Download file')}</a></p>`
+        : '';
+      card.innerHTML = `<h3>${htmlEscape(item.title || 'League Announcement')}</h3><p><strong>${htmlEscape(item.date || '')}</strong></p><p>${htmlEscape(item.message || item.body || item.text || '')}</p>${attachment}`;
       el.appendChild(card);
     });
   }
@@ -1738,4 +1744,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
-

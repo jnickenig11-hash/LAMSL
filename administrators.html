@@ -1259,6 +1259,8 @@ input[type="submit"]:disabled{
                     <input id="announcement-title" type="text" placeholder="Announcement title" required>
                     <input id="announcement-date" type="date" required>
                     <textarea id="announcement-message" placeholder="Announcement details" required></textarea>
+                    <label for="announcement-attachment">Attachment (PDF, XLS, DOC, or TXT; optional)</label>
+                    <input id="announcement-attachment" type="file" accept=".pdf,.xls,.doc,.txt">
                     <button type="submit">Publish Announcement</button>
                 </form>
 
@@ -1677,6 +1679,7 @@ const announcementForm = document.getElementById('announcement-form');
 const announcementTitle = document.getElementById('announcement-title');
 const announcementDate = document.getElementById('announcement-date');
 const announcementMessage = document.getElementById('announcement-message');
+const announcementAttachment = document.getElementById('announcement-attachment');
 const activeAnnouncementsList = document.getElementById('active-announcements');
 const createAdminButton = document.getElementById('create-admin-btn');
 const newAdminUsername = document.getElementById('new-admin-username');
@@ -2480,7 +2483,10 @@ function renderAnnouncements() {
     announcements.forEach(item => {
         const li = document.createElement('li');
         const text = document.createElement('div');
-        text.innerHTML = `<strong>${item.title}</strong><br>${item.date}<br>${item.message}`;
+        const attachment = item.attachment && item.attachment.url
+            ? `<br><a href="${escapeAdminHtml(apiUrl(item.attachment.url))}" target="_blank" rel="noopener">View attachment: ${escapeAdminHtml(item.attachment.name || 'Download file')}</a>`
+            : '';
+        text.innerHTML = `<strong>${escapeAdminHtml(item.title)}</strong><br>${escapeAdminHtml(item.date)}<br>${escapeAdminHtml(item.message)}${attachment}`;
 
         const archiveButton = document.createElement('button');
         archiveButton.type = 'button';
@@ -2626,12 +2632,32 @@ announcementForm.addEventListener('submit', async event => {
         return;
     }
 
+    let attachment = null;
+    const selectedFile = announcementAttachment.files[0];
+    if (selectedFile) {
+        authStatus.textContent = 'Uploading attachment...';
+        const formData = new FormData();
+        formData.append('attachment', selectedFile);
+        const uploadResponse = await fetch(apiUrl('/api/upload-announcement-file'), {
+            method: 'POST',
+            headers: window.apiHeaders(),
+            body: formData
+        });
+        const uploadResult = await uploadResponse.json().catch(() => ({}));
+        if (!uploadResponse.ok || uploadResult.success === false || !uploadResult.attachment) {
+            authStatus.textContent = uploadResult.error || uploadResult.message || `Attachment upload failed (HTTP ${uploadResponse.status}).`;
+            return;
+        }
+        attachment = uploadResult.attachment;
+    }
+
     const announcements = readJson(ANNOUNCEMENTS_KEY, []);
     announcements.unshift({
         id: `ann-${Date.now()}`,
         title,
         date,
-        message
+        message,
+        ...(attachment ? { attachment } : {})
     });
     writeJson(ANNOUNCEMENTS_KEY, announcements);
     content = Object.assign({}, content || {}, { announcements });

@@ -116,6 +116,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..');
 const persistentRoot = process.env.LAMSL_STORAGE_DIR || process.env.RENDER_DISK_MOUNT || projectRoot;
 const uploadDir = path.join(persistentRoot, 'uploads');
+const announcementFilesDir = path.join(persistentRoot, 'AnnouncementFiles');
 const slideshowDir = path.join(persistentRoot, 'SlideshowImages');
 const logsDir = path.join(persistentRoot, 'logs');
 const efDir = path.join(persistentRoot, 'EFimages');
@@ -127,6 +128,9 @@ const legacyTeamProfileDir = path.join(persistentRoot, 'teamProfile images');
 const bundledDataDir = path.join(projectRoot, 'data');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
+}
+if (!fs.existsSync(announcementFilesDir)) {
+  fs.mkdirSync(announcementFilesDir, { recursive: true });
 }
 if (!fs.existsSync(slideshowDir)) {
   fs.mkdirSync(slideshowDir, { recursive: true });
@@ -393,6 +397,50 @@ function writeUploadedImage(buffer, folder, filename) {
 // being accidentally saved to the homepage slideshow folder when multipart field order changes.
 const upload = multer({ storage: multer.memoryStorage() });
 
+const announcementUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const extension = path.extname(file.originalname || '').toLowerCase();
+    if (!['.pdf', '.xls', '.doc', '.txt'].includes(extension)) {
+      return cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', 'attachment'));
+    }
+    cb(null, true);
+  }
+});
+
+app.post('/api/upload-announcement-file', requireAdminKey, announcementUpload.single('attachment'), (req, res) => {
+  try {
+    if (!req.file || !req.file.buffer) {
+      return res.status(400).json({ success: false, error: 'No attachment uploaded.' });
+    }
+
+    const extension = path.extname(req.file.originalname || '').toLowerCase();
+    const filename = safeUploadName(req.file.originalname || `attachment${extension}`);
+    writeUploadedImage(req.file.buffer, announcementFilesDir, filename);
+    res.json({
+      success: true,
+      attachment: {
+        name: req.file.originalname,
+        url: `/AnnouncementFiles/${filename}`,
+        contentType: req.file.mimetype || 'application/octet-stream',
+        size: req.file.size
+      }
+    });
+  } catch (error) {
+    console.error('Announcement attachment upload failed:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+}, (error, req, res, next) => {
+  if (error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ success: false, error: 'Announcement attachments must be 10 MB or smaller.' });
+  }
+  if (error instanceof multer.MulterError) {
+    return res.status(400).json({ success: false, error: 'Only PDF, XLS, DOC, and TXT announcement attachments are allowed.' });
+  }
+  next(error);
+});
+
 app.post('/api/upload-image', requireAdminKey, upload.single('image'), (req, res) => {
   try {
     if (!req.file || !req.file.buffer) return res.status(400).json({ success: false, message: 'No file uploaded' });
@@ -524,6 +572,7 @@ app.post('/api/uploaded-images/delete', requireAdminKey, express.json(), deleteM
 
 // Serve uploaded images
 app.use('/uploads', express.static(uploadDir));
+app.use('/AnnouncementFiles', express.static(announcementFilesDir));
 app.use('/SlideshowImages', express.static(slideshowDir));
 app.get('/slideshow-images', (req, res) => {
   try {

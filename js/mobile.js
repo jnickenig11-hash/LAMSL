@@ -10,6 +10,11 @@
   const $ = id => document.getElementById(id);
   const api = path => (window.apiUrl ? window.apiUrl(path) : path);
   const headers = extra => (window.apiHeaders ? window.apiHeaders(extra) : (extra || {}));
+  const assetUrl = path => {
+    const value = String(path || '').trim();
+    if (!value || /^https?:\/\//i.test(value)) return value;
+    return api(value);
+  };
 
   function readJson(key, fallback){ try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch(e){ return fallback; } }
   function writeJson(key, value){ try { localStorage.setItem(key, JSON.stringify(value)); } catch(e){} }
@@ -185,7 +190,12 @@
 
   function renderAnnouncements(){
     const announcements = [...(state.content.announcements || [])].reverse();
-    $('announcementsList').innerHTML = announcements.length ? announcements.map(a => `<article class="announcement-card"><h3>${escapeHtml(a.title || 'League Announcement')}</h3><p>${escapeHtml(a.body || a.message || '')}</p><span class="pill">${escapeHtml(a.date ? fullDateLabel(String(a.date).slice(0,10)) : 'Posted')}</span></article>`).join('') : '<div class="empty-state">No announcements have been posted.</div>';
+    $('announcementsList').innerHTML = announcements.length ? announcements.map(a => {
+      const attachment = a.attachment && a.attachment.url
+        ? `<p><a href="${escapeHtml(assetUrl(a.attachment.url))}" target="_blank" rel="noopener">View attachment: ${escapeHtml(a.attachment.name || 'Download file')}</a></p>`
+        : '';
+      return `<article class="announcement-card"><h3>${escapeHtml(a.title || 'League Announcement')}</h3><p>${escapeHtml(a.body || a.message || '')}</p>${attachment}<span class="pill">${escapeHtml(a.date ? fullDateLabel(String(a.date).slice(0,10)) : 'Posted')}</span></article>`;
+    }).join('') : '<div class="empty-state">No announcements have been posted.</div>';
   }
 
   function populateAdminGameSelect(){
@@ -290,9 +300,35 @@
     const title = $('announcementTitle').value.trim();
     const body = $('announcementBody').value.trim();
     if (!title || !body) { $('adminMessage').textContent = 'Announcement title and message are required.'; return; }
-    const announcements = [...(state.content.announcements || []), { id:'mobile-' + Date.now(), title, body, date:new Date().toISOString() }];
+
+    let attachment = null;
+    const selectedFile = $('announcementAttachment').files[0];
+    if (selectedFile) {
+      $('adminMessage').textContent = 'Uploading attachment...';
+      const formData = new FormData();
+      formData.append('attachment', selectedFile);
+      const uploadResponse = await fetch(api('/api/upload-announcement-file'), {
+        method: 'POST',
+        headers: headers(),
+        body: formData
+      });
+      const uploadResult = await uploadResponse.json().catch(() => ({}));
+      if (!uploadResponse.ok || uploadResult.success === false || !uploadResult.attachment) {
+        $('adminMessage').textContent = uploadResult.error || uploadResult.message || `Attachment upload failed (HTTP ${uploadResponse.status}).`;
+        return;
+      }
+      attachment = uploadResult.attachment;
+    }
+
+    const announcements = [...(state.content.announcements || []), { id:'mobile-' + Date.now(), title, body, date:new Date().toISOString(), ...(attachment ? { attachment } : {}) }];
     $('adminMessage').textContent = 'Publishing announcement...';
-    try { await saveContent({ ...state.content, announcements }); $('announcementTitle').value=''; $('announcementBody').value=''; $('adminMessage').textContent = 'Announcement published.'; }
+    try {
+      await saveContent({ ...state.content, announcements });
+      $('announcementTitle').value='';
+      $('announcementBody').value='';
+      $('announcementAttachment').value='';
+      $('adminMessage').textContent = 'Announcement published.';
+    }
     catch(e){ $('adminMessage').textContent = e.message; }
   }
 

@@ -608,6 +608,8 @@ input[type="submit"]:disabled{
                     <input id="ef-ann-title" type="text" placeholder="Announcement title" required>
                     <input id="ef-ann-date" type="date" required>
                     <textarea id="ef-ann-message" placeholder="Announcement details" required></textarea>
+                    <label for="ef-ann-attachment">Attachment (PDF, XLS, DOC, or TXT; optional)</label>
+                    <input id="ef-ann-attachment" type="file" accept=".pdf,.xls,.doc,.txt">
                     <button type="submit">Publish Announcement</button>
                     <p id="ef-ann-status" style="margin-top:0.75rem;color:#1f4e79;font-size:0.95rem;"></p>
                 </form>
@@ -796,7 +798,8 @@ function normalizeAnnouncement(item) {
         id: String(item.id || item.createdAt || item.date || `${title}-${message}`).slice(0, 120),
         title: String(title || 'Announcement'),
         date: String(item.date || item.eventDate || item.createdAt || ''),
-        message: String(message || '')
+        message: String(message || ''),
+        attachment: item.attachment && item.attachment.url ? item.attachment : null
     };
 }
 
@@ -836,6 +839,7 @@ function renderEFAnnouncements(items = efAnnouncements) {
             <h3>${escapeHtml(item.title)}</h3>
             <div class="ann-date">${escapeHtml(normalizeDateLabel(item.date))}</div>
             <p>${escapeHtml(item.message)}</p>
+            ${item.attachment ? `<p><a href="${escapeHtml(apiUrl(item.attachment.url))}" target="_blank" rel="noopener">View attachment: ${escapeHtml(item.attachment.name || 'Download file')}</a></p>` : ''}
             ${isAdminLoggedIn() ? `<button class="archive-btn" data-id="${escapeHtml(item.id)}">Archive</button>` : ''}
         `;
         efAnnList.appendChild(div);
@@ -1131,7 +1135,26 @@ efAnnForm?.addEventListener('submit', async event => {
     const message = efAnnMessage.value.trim();
     if (!title || !date || !message) return;
 
-    const newItem = { id: 'ef-ann-' + Date.now(), title, date, message };
+    let attachment = null;
+    const selectedFile = document.getElementById('ef-ann-attachment').files[0];
+    if (selectedFile) {
+        setAnnouncementStatus('Uploading attachment...');
+        const formData = new FormData();
+        formData.append('attachment', selectedFile);
+        const response = await fetch(apiUrl('/api/upload-announcement-file'), {
+            method: 'POST',
+            headers: typeof window.apiHeaders === 'function' ? window.apiHeaders() : {},
+            body: formData
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.success === false || !result.attachment) {
+            setAnnouncementStatus(result.error || result.message || `Attachment upload failed (HTTP ${response.status}).`, true);
+            return;
+        }
+        attachment = result.attachment;
+    }
+
+    const newItem = { id: 'ef-ann-' + Date.now(), title, date, message, ...(attachment ? { attachment } : {}) };
     const merged = dedupeAnnouncements([newItem, ...efAnnouncements]);
     writeJson(EF_ANN_KEY, merged);
     renderEFAnnouncements(merged);

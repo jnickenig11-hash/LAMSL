@@ -818,6 +818,7 @@ input[type="submit"]:disabled{
         <section class="payment-section home-region region-payment">
             <h2>League Registration Fee &mdash; Click Link to Submit Payment</h2>
             <div class="payment-links" id="payment-links-display"></div>
+            <div id="payment-qr-display" style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:12px;"></div>
             <div class="payment-edit-form" id="payment-edit-form" style="display:none;">
                 <label>Zelle</label>
                 <input id="pay-zelle" type="url" placeholder="Zelle link or phone/email...">
@@ -1553,6 +1554,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const backendAnnouncements = getBackendAnnouncements(data);
     writeJson(ANNOUNCEMENTS_KEY, backendAnnouncements);
     renderAnnouncements(backendAnnouncements);
+
+    const qrDisplay = document.getElementById('payment-qr-display');
+    const qrCodes = (data.zelle && data.zelle.qrCodes) || {};
+    if (qrDisplay) {
+      qrDisplay.innerHTML = [['paypal', 'PayPal'], ['zelle', 'Zelle'], ['venmo', 'Venmo']]
+        .filter(([key]) => qrCodes[key])
+        .map(([key, label]) => `<figure style="margin:0;text-align:center;"><img src="${escapeHtml(resolveAssetUrl(qrCodes[key]))}" alt="${label} QR code" style="width:150px;max-width:100%;"><figcaption>${label}</figcaption></figure>`)
+        .join('');
+    }
 
     const zelleInfo = document.getElementById('zelleInfo');
     if (zelleInfo && data.zelle) {

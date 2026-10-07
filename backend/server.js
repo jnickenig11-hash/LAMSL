@@ -493,6 +493,33 @@ app.post('/api/upload-image', requireAdminKey, upload.single('image'), (req, res
   }
 });
 
+const paymentQrDir = path.join(persistentRoot, 'PaymentQR');
+app.use('/PaymentQR', express.static(paymentQrDir));
+const paymentQrUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => cb(null, /^image\/(png|jpe?g|gif|webp)$/i.test(file.mimetype))
+});
+
+app.post('/api/upload-payment-qr', requireAdminKey, paymentQrUpload.single('qr'), (req, res) => {
+  try {
+    const provider = String(req.body.provider || '').toLowerCase();
+    if (!['paypal', 'zelle', 'venmo'].includes(provider)) return res.status(400).json({ success: false, error: 'Invalid provider' });
+    if (!req.file || !req.file.buffer) return res.status(400).json({ success: false, error: 'No valid image uploaded' });
+    const ext = (path.extname(req.file.originalname || '').toLowerCase().replace(/[^.a-z0-9]/g, '')) || '.png';
+    const filename = `${provider}-${Date.now()}${ext}`;
+    writeUploadedImage(req.file.buffer, paymentQrDir, filename);
+    const url = '/PaymentQR/' + filename;
+    const content = readContent();
+    if (!content.zelle || typeof content.zelle !== 'object' || Array.isArray(content.zelle)) content.zelle = {};
+    content.zelle.qrCodes = Object.assign({}, content.zelle.qrCodes, { [provider]: url });
+    content.updatedAt = new Date().toISOString();
+    writeContent(content);
+    res.json({ success: true, provider, url, zelle: content.zelle });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 function getManagedImageInfo(body = {}) {
   const destination = getImageDestination({ body });

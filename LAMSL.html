@@ -774,8 +774,8 @@ input[type="submit"]:disabled{
 
     <div class="home-region region-rightstack">
         <section class="payment-section home-region region-payment">
-            <h2>League Registration Fee &mdash; Click Link to Submit Payment</h2>
-            <div class="payment-links" id="payment-links-display"></div>
+            <h2>League Registration Fee &mdash; Payment Information</h2>
+            <div id="payment-info-display"></div>
             <div id="payment-qr-display" style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:12px;"></div>
         </section>
 
@@ -849,7 +849,6 @@ const announcementsList = document.getElementById('announcements-list');
 const emailSignupForm = document.getElementById('email-signup-form');
 const emailInput = document.getElementById('email-input');
 const messageBox = document.getElementById('email-signup-message');
-const paymentLinksDisplay = document.getElementById('payment-links-display');
 
 function readJson(key, fallback) {
     try {
@@ -939,40 +938,17 @@ function isAdminLoggedIn() {
     return !!(session && session.role === 'admin');
 }
 
-// ===== PAYMENT LINKS =====
-const PAYMENT_PROVIDERS = [
-    { key: 'zelle',     label: '💸 Zelle'      },
-    { key: 'paypal',    label: '🅿 PayPal'     },
-    { key: 'googlepay', label: '🇬 Google Pay' },
-    { key: 'venmo',     label: '✔ Venmo'      },
-];
 const PAYMENT_QR_UPDATE_KEY = 'lamslPaymentQrUpdateV1';
 
-function renderPaymentLinks(links = {}) {
-    links = links && typeof links === 'object' ? links : {};
-    links = links && typeof links === 'object' ? links : {};
-    paymentLinksDisplay.innerHTML = '';
-    let hasAny = false;
-    PAYMENT_PROVIDERS.forEach(p => {
-        const url = links[p.key];
-        if (url) {
-            hasAny = true;
-            const a = document.createElement('a');
-            a.href = url;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            a.className = 'payment-link-btn';
-            a.textContent = p.label;
-            paymentLinksDisplay.appendChild(a);
-        }
-    });
-    if (!hasAny) {
-        paymentLinksDisplay.innerHTML = '<em style="color:#888;font-size:14px;">Payment links not yet configured by admin.</em>';
-    }
-}
-
-function renderPaymentQrCodes(zelleData = {}) {
+function renderPaymentInfo(zelleData = {}) {
+    const paymentInfo = document.getElementById('payment-info-display');
     const qrDisplay = document.getElementById('payment-qr-display');
+    if (paymentInfo) {
+        const details = [zelleData.name, zelleData.email, zelleData.phone].filter(Boolean);
+        paymentInfo.innerHTML = details.map((value, index) => index === 0
+            ? `<p><strong>${escapeHtml(value)}</strong></p>`
+            : `<p>${escapeHtml(value)}</p>`).join('');
+    }
     if (!qrDisplay) return;
     const qrCodes = zelleData.qrCodes && typeof zelleData.qrCodes === 'object' ? zelleData.qrCodes : {};
     const images = [
@@ -1239,7 +1215,7 @@ window.addEventListener('storage', (event) => {
             homeContent.zelle = homeContent.zelle && typeof homeContent.zelle === 'object' ? homeContent.zelle : {};
             homeContent.zelle.qrCodes = Object.assign({}, homeContent.zelle.qrCodes, { [update.provider]: update.url });
             window.lamslContent = homeContent;
-            renderPaymentQrCodes(homeContent.zelle);
+            renderPaymentInfo(homeContent.zelle);
         } catch (error) {}
     }
 });
@@ -1250,7 +1226,7 @@ window.addEventListener('focus', () => {
 
 ensureDefaults();
 if (announcementsList) announcementsList.innerHTML = '<div class="card">Loading announcements...</div>';
-renderPaymentLinks();
+renderPaymentInfo();
 applyUploadPermissions();
 
 // Autoplay every 20 seconds
@@ -1485,7 +1461,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const data = await res.json();
     backendLoaded = true;
         window.lamslContent = data || {};
-        renderPaymentLinks(data.paymentLinks || {});
+        renderPaymentInfo(data.zelle || {});
 
     backendSchedule = getBackendSchedule(data);
     if (Array.isArray(backendSchedule) && backendSchedule.length > 0) {
@@ -1508,7 +1484,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     writeJson(ANNOUNCEMENTS_KEY, backendAnnouncements);
     renderAnnouncements(backendAnnouncements);
 
-        renderPaymentQrCodes(data.zelle || {});
+        renderPaymentInfo(data.zelle || {});
 
     const zelleInfo = document.getElementById('zelleInfo');
     if (zelleInfo && data.zelle) {

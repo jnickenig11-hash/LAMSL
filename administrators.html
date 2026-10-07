@@ -1043,7 +1043,6 @@ input[type="submit"]:disabled{
                 <div class="dashboard-tile"><strong>Scores</strong><span id="dash-score-count">--</span></div>
               </div>
               <div class="management-grid">
-                                <div class="admin-panel"><h3>Payment Links</h3><label for="admin-pay-zelle">Zelle link, phone, or email</label><input id="admin-pay-zelle" type="text" placeholder="Zelle link or phone/email"><label for="admin-pay-paypal">PayPal link</label><input id="admin-pay-paypal" type="url" placeholder="https://paypal.me/.../"><label for="admin-pay-googlepay">Google Pay link</label><input id="admin-pay-googlepay" type="url" placeholder="https://pay.google.com/..."><label for="admin-pay-venmo">Venmo link</label><input id="admin-pay-venmo" type="url" placeholder="https://venmo.com/..."><button type="button" id="save-payment-links-admin" class="admin-form-btn">Save Payment Links</button></div>
                 <div class="admin-panel"><h3>Backend Connection</h3><p class="admin-status" id="backend-dashboard-status">Logged-in admin users save directly to the backend. Manual API key entry is optional.</p><input id="backend-base-input" type="text" placeholder="Backend URL"><input id="admin-api-key-input" type="password" placeholder="Optional fallback API key"><div class="score-actions"><button type="button" id="save-admin-settings-btn">Save Settings</button><button type="button" id="check-backend-btn">Check Backend</button></div></div>
                 <div class="admin-panel"><h3>Content Summary</h3><p id="dashboard-summary">Loading content counts...</p><p class="admin-status">Schedules, practices, scores, announcements, teams, divisions, payment info, and homepage slideshow media are managed in their dedicated dashboard sections.</p></div>
                 <div class="admin-panel"><h3>Park List</h3><p class="admin-status">Maintain the parks available in the game and practice scheduling forms. Enter one park per line.</p><div class="park-list-editor"><textarea id="parks-list-editor" aria-label="Park list" placeholder="One park per line"></textarea><button type="button" id="save-parks-btn" class="admin-form-btn">Save Park List</button></div><p id="parks-status" class="admin-status" aria-live="polite"></p></div>
@@ -2816,11 +2815,6 @@ async function loadAdminContentDashboard() {
         if (Array.isArray(content.announcements)) writeJson(ANNOUNCEMENTS_KEY, content.announcements);
         const zelleEl = document.getElementById('zelle');
         if (zelleEl) zelleEl.value = JSON.stringify(content.zelle || {}, null, 2);
-        const paymentLinks = content.paymentLinks || {};
-        [['zelle', 'admin-pay-zelle'], ['paypal', 'admin-pay-paypal'], ['googlepay', 'admin-pay-googlepay'], ['venmo', 'admin-pay-venmo']].forEach(([key, id]) => {
-            const input = document.getElementById(id);
-            if (input) input.value = paymentLinks[key] || '';
-        });
         updateDashboardSummary();
         renderParkListEditor();
         renderAnnouncements?.();
@@ -3039,13 +3033,6 @@ async function saveDashboardContent(fields) {
     try {
         const current = Object.assign(getDefaultBackendContent(), content || {}, scheduleContent || {});
         if (fields.includes('zelle')) current.zelle = JSON.parse(document.getElementById('zelle')?.value || '{}');
-        if (fields.includes('paymentLinks')) {
-            current.paymentLinks = {};
-            [['zelle', 'admin-pay-zelle'], ['paypal', 'admin-pay-paypal'], ['googlepay', 'admin-pay-googlepay'], ['venmo', 'admin-pay-venmo']].forEach(([key, id]) => {
-                const value = document.getElementById(id)?.value.trim();
-                if (value) current.paymentLinks[key] = value;
-            });
-        }
         if (fields.includes('parks')) {
             current.parks = [...new Set((document.getElementById('parks-list-editor')?.value || '').split(/\r?\n/).map(park => park.trim()).filter(Boolean))];
             if (!current.parks.length) throw new Error('Add at least one park before saving.');
@@ -3072,7 +3059,6 @@ async function saveDashboardContent(fields) {
 }
 loadAdminContentDashboard();
 document.getElementById('saveZelleBtn')?.addEventListener('click', () => saveDashboardContent(['zelle']));
-document.getElementById('save-payment-links-admin')?.addEventListener('click', () => saveDashboardContent(['paymentLinks']));
 document.querySelectorAll('[data-qr-provider]').forEach(input => {
     input.addEventListener('change', async () => {
         const provider = input.dataset.qrProvider;

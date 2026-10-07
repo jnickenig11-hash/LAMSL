@@ -946,6 +946,7 @@ const PAYMENT_PROVIDERS = [
     { key: 'googlepay', label: '🇬 Google Pay' },
     { key: 'venmo',     label: '✔ Venmo'      },
 ];
+const PAYMENT_QR_UPDATE_KEY = 'lamslPaymentQrUpdateV1';
 
 function renderPaymentLinks(links = {}) {
     links = links && typeof links === 'object' ? links : {};
@@ -968,6 +969,20 @@ function renderPaymentLinks(links = {}) {
     if (!hasAny) {
         paymentLinksDisplay.innerHTML = '<em style="color:#888;font-size:14px;">Payment links not yet configured by admin.</em>';
     }
+}
+
+function renderPaymentQrCodes(zelleData = {}) {
+    const qrDisplay = document.getElementById('payment-qr-display');
+    if (!qrDisplay) return;
+    const qrCodes = zelleData.qrCodes && typeof zelleData.qrCodes === 'object' ? zelleData.qrCodes : {};
+    const images = [
+        ['paypal', 'PayPal', qrCodes.paypal],
+        ['zelle', 'Zelle', qrCodes.zelle || zelleData.qrImage],
+        ['venmo', 'Venmo', qrCodes.venmo]
+    ].filter(([, , url]) => url);
+    qrDisplay.innerHTML = images.map(([key, label, url]) =>
+        `<figure style="margin:0;text-align:center;"><img src="${escapeHtml(resolveAssetUrl(url))}" alt="${label} QR code" style="width:150px;max-width:100%;"><figcaption>${label}</figcaption></figure>`
+    ).join('');
 }
 
 function escapeHtml(value) {
@@ -1215,6 +1230,17 @@ if (uploadForm) uploadForm.addEventListener("submit", async (e) => {
 window.addEventListener('storage', (event) => {
     if (event.key === SESSION_KEY) {
         applyUploadPermissions();
+    }
+    if (event.key === PAYMENT_QR_UPDATE_KEY && event.newValue) {
+        try {
+            const update = JSON.parse(event.newValue);
+            if (!['paypal', 'zelle', 'venmo'].includes(update.provider) || !update.url) return;
+            const homeContent = window.lamslContent || {};
+            homeContent.zelle = homeContent.zelle && typeof homeContent.zelle === 'object' ? homeContent.zelle : {};
+            homeContent.zelle.qrCodes = Object.assign({}, homeContent.zelle.qrCodes, { [update.provider]: update.url });
+            window.lamslContent = homeContent;
+            renderPaymentQrCodes(homeContent.zelle);
+        } catch (error) {}
     }
 });
 
@@ -1482,14 +1508,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     writeJson(ANNOUNCEMENTS_KEY, backendAnnouncements);
     renderAnnouncements(backendAnnouncements);
 
-    const qrDisplay = document.getElementById('payment-qr-display');
-    const qrCodes = (data.zelle && data.zelle.qrCodes) || {};
-    if (qrDisplay) {
-      qrDisplay.innerHTML = [['paypal', 'PayPal'], ['zelle', 'Zelle'], ['venmo', 'Venmo']]
-        .filter(([key]) => qrCodes[key])
-        .map(([key, label]) => `<figure style="margin:0;text-align:center;"><img src="${escapeHtml(resolveAssetUrl(qrCodes[key]))}" alt="${label} QR code" style="width:150px;max-width:100%;"><figcaption>${label}</figcaption></figure>`)
-        .join('');
-    }
+        renderPaymentQrCodes(data.zelle || {});
 
     const zelleInfo = document.getElementById('zelleInfo');
     if (zelleInfo && data.zelle) {

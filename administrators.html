@@ -3092,6 +3092,7 @@ document.querySelectorAll('[data-qr-provider]').forEach(input => {
             zelleData.qrCodes = Object.assign({}, zelleData.qrCodes, { [provider]: result.url });
             document.getElementById('zelle').value = JSON.stringify(zelleData, null, 2);
             if (content) content.zelle = zelleData;
+            localStorage.setItem('lamslPaymentQrUpdateV1', JSON.stringify({ provider, url: result.url, uploadedAt: Date.now() }));
             if (status) status.textContent = 'Uploaded: ' + result.url;
         } catch (err) {
             if (status) status.textContent = 'Upload failed: ' + err.message;

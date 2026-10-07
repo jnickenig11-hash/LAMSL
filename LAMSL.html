@@ -1209,10 +1209,18 @@ window.addEventListener('storage', (event) => {
     if (event.key === PAYMENT_QR_UPDATE_KEY && event.newValue) {
         try {
             const update = JSON.parse(event.newValue);
-            if (!['paypal', 'zelle', 'venmo'].includes(update.provider) || !update.url) return;
+            if (!['paypal', 'zelle', 'venmo'].includes(update.provider)) return;
             const homeContent = window.lamslContent || {};
             homeContent.zelle = homeContent.zelle && typeof homeContent.zelle === 'object' ? homeContent.zelle : {};
-            homeContent.zelle.qrCodes = Object.assign({}, homeContent.zelle.qrCodes, { [update.provider]: update.url });
+            homeContent.zelle.qrCodes = Object.assign({}, homeContent.zelle.qrCodes);
+            if (update.deleted) {
+                delete homeContent.zelle.qrCodes[update.provider];
+                if (update.provider === 'zelle') delete homeContent.zelle.qrImage;
+            } else if (update.url) {
+                homeContent.zelle.qrCodes[update.provider] = update.url;
+            } else {
+                return;
+            }
             window.lamslContent = homeContent;
             renderPaymentInfo(homeContent.zelle);
         } catch (error) {}

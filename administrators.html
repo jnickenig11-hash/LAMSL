@@ -519,6 +519,11 @@ footer {
 
 .uploaded-image-management-list { list-style: none; padding-left: 0; }
 .uploaded-image-management-list li { margin: 8px 0; }
+.payment-qr-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 10px 0; border-bottom: 1px solid #d8e0e8; }
+.payment-qr-row > label { min-width: 80px; font-weight: 700; }
+.payment-qr-row > input[type="file"] { flex: 1 1 220px; }
+.payment-qr-preview img { display: block; width: 76px; height: 76px; object-fit: contain; padding: 3px; border: 1px solid #d8e0e8; border-radius: 6px; background: #fff; }
+.payment-qr-empty { color: #667784; font-size: 12px; }
 .managed-image-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px; border: 1px solid rgba(255,255,255,.25); border-radius: 8px; background: rgba(255,255,255,.08); }
 .managed-image-meta { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .managed-image-meta span { overflow-wrap: anywhere; }
@@ -1048,7 +1053,14 @@ input[type="submit"]:disabled{
                 <div class="admin-panel"><h3>Park List</h3><p class="admin-status">Maintain the parks available in the game and practice scheduling forms. Enter one park per line.</p><div class="park-list-editor"><textarea id="parks-list-editor" aria-label="Park list" placeholder="One park per line"></textarea><button type="button" id="save-parks-btn" class="admin-form-btn">Save Park List</button></div><p id="parks-status" class="admin-status" aria-live="polite"></p></div>
                 <div class="admin-panel" id="manual-standings-panel"><h3>Manual Standings Backup</h3><p class="admin-status" id="manual-standings-status">Create a manual standings backup here when backend standings updates are unavailable.</p><label class="manual-standings-toggle" for="manual-standings-enabled"><input id="manual-standings-enabled" type="checkbox"><span>Use this manual backup on the standings pages</span></label><div class="manual-standings-form"><select id="manual-standings-division" aria-label="Manual standings division"></select><select id="manual-standings-team" aria-label="Manual standings team"></select></div><div class="manual-standings-fields"><label class="manual-standings-field"><span>Wins</span><input id="manual-standings-w" type="number" min="0" step="1" inputmode="numeric"></label><label class="manual-standings-field"><span>Losses</span><input id="manual-standings-l" type="number" min="0" step="1" inputmode="numeric"></label><label class="manual-standings-field"><span>Ties</span><input id="manual-standings-t" type="number" min="0" step="1" inputmode="numeric"></label><label class="manual-standings-field"><span>Games Played</span><input id="manual-standings-gp" type="number" min="0" step="1" inputmode="numeric"></label><label class="manual-standings-field"><span>Runs For</span><input id="manual-standings-rf" type="number" min="0" step="1" inputmode="numeric"></label><label class="manual-standings-field"><span>Runs Against</span><input id="manual-standings-ra" type="number" min="0" step="1" inputmode="numeric"></label></div><div class="score-actions"><button type="button" id="manual-standings-save-btn">Save Backup</button><button type="button" id="manual-standings-sync-btn">Sync to Backend</button><button type="button" id="manual-standings-reset-btn" class="secondary">Reset to Current</button></div><div id="manual-standings-preview" class="manual-standings-preview"></div></div>
                 <div class="admin-panel"><h3>One-Time Data Migration</h3><p class="admin-status" id="migration-status">Copies existing browser-saved schedule and announcement data to the Render backend without deleting local data.</p><div class="score-actions"><button type="button" id="migrate-local-content-btn">Migrate Local Schedule & Announcements</button><button type="button" id="preview-local-content-btn">Preview Local Data</button></div></div>
-                <div class="admin-panel"><h3>Zelle / Payment Info</h3><textarea id="zelle" rows="5" placeholder="Zelle JSON"></textarea><div id="paymentQrUploads"><p><strong>Payment QR Codes</strong></p><div><label>PayPal QR <input type="file" accept="image/*" data-qr-provider="paypal"></label> <span data-qr-status="paypal"></span></div><div><label>Zelle QR <input type="file" accept="image/*" data-qr-provider="zelle"></label> <span data-qr-status="zelle"></span></div><div><label>Venmo QR <input type="file" accept="image/*" data-qr-provider="venmo"></label> <span data-qr-status="venmo"></span></div></div><button type="button" id="saveZelleBtn" class="admin-form-btn">Save Zelle Info</button></div>
+                                <div class="admin-panel">
+                                    <h3>Zelle / Payment Info</h3>
+                                    <div id="paymentQrUploads">
+                                        <div class="payment-qr-row"><label for="payment-qr-paypal">PayPal QR</label><input id="payment-qr-paypal" type="file" accept="image/*" data-qr-provider="paypal"><div class="payment-qr-preview" data-qr-preview="paypal"></div><span data-qr-status="paypal"></span><button type="button" data-qr-delete-provider="paypal" class="secondary">Delete QR</button></div>
+                                        <div class="payment-qr-row"><label for="payment-qr-zelle">Zelle QR</label><input id="payment-qr-zelle" type="file" accept="image/*" data-qr-provider="zelle"><div class="payment-qr-preview" data-qr-preview="zelle"></div><span data-qr-status="zelle"></span><button type="button" data-qr-delete-provider="zelle" class="secondary">Delete QR</button></div>
+                                        <div class="payment-qr-row"><label for="payment-qr-venmo">Venmo QR</label><input id="payment-qr-venmo" type="file" accept="image/*" data-qr-provider="venmo"><div class="payment-qr-preview" data-qr-preview="venmo"></div><span data-qr-status="venmo"></span><button type="button" data-qr-delete-provider="venmo" class="secondary">Delete QR</button></div>
+                                    </div>
+                                </div>
                 <div class="admin-panel image-management-panel"><h3>Image Uploads</h3><p class="admin-status" id="slideshow-upload-status">Choose where to save the image. Homepage images display in the homepage slideshow. Event/fundraiser images save to EFimages.</p><label for="admin-image-destination"><strong>Image Destination</strong></label><select id="admin-image-destination"><option value="homepage">Homepage slideshow</option><option value="events">Events / Fundraisers</option></select><input id="admin-slideshow-file" type="file" accept="image/*"><input id="admin-slideshow-caption" type="text" placeholder="Optional caption"><div class="score-actions"><button type="button" id="upload-slideshow-btn">Upload Image</button><button type="button" id="refresh-slideshow-btn">Refresh Image Lists</button></div></div>
                 <div class="admin-panel image-management-panel"><h3>Uploaded Image Management</h3><p class="admin-status">Delete uploaded homepage slideshow or event/fundraiser files here. Deleting removes the storage file and the backend content reference.</p><div class="score-actions"><button type="button" id="refresh-image-management-btn">Reload Uploaded Images</button></div><ul id="admin-slideshow-list" class="admin-list uploaded-image-management-list"></ul></div>
                 <div class="admin-panel" id="schedule-notification-panel"><h3>Email Schedule Notifications</h3><p class="admin-status" id="notification-status">Send schedule update emails to users who subscribed through the homepage email subscription region.</p><div class="dashboard-grid"><div class="dashboard-tile"><strong>Subscribers</strong><span id="notification-subscriber-count">--</span></div><div class="dashboard-tile"><strong>Email Service</strong><span id="notification-smtp-status">--</span></div></div><div class="score-actions"><button type="button" id="preview-schedule-notification-btn">Preview Email Snapshot</button><button type="button" id="send-schedule-notification-btn">Send Schedule Update Email</button></div><div id="schedule-notification-preview" class="admin-status" style="margin-top:10px;max-height:260px;overflow:auto;background:#fff;border:1px solid #d8e0e8;border-radius:8px;padding:10px;"></div></div>
@@ -2805,6 +2817,25 @@ async function saveAnnouncementsToBackend(announcements, archivedAnnouncements) 
     return true;
 }
 
+function getPaymentQrImageUrl(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    if (/^https?:\/\//i.test(raw)) return raw;
+    return apiUrl(raw.startsWith('/') ? raw : '/' + raw);
+}
+
+function renderPaymentQrPreviews(zelleData = {}) {
+    const qrCodes = zelleData.qrCodes && typeof zelleData.qrCodes === 'object' ? zelleData.qrCodes : {};
+    [['paypal', 'PayPal'], ['zelle', 'Zelle'], ['venmo', 'Venmo']].forEach(([provider, label]) => {
+        const preview = document.querySelector(`[data-qr-preview="${provider}"]`);
+        if (!preview) return;
+        const url = qrCodes[provider] || (provider === 'zelle' ? zelleData.qrImage : '');
+        preview.innerHTML = url
+            ? `<img src="${escapeAdminHtml(getPaymentQrImageUrl(url))}" alt="${label} QR code thumbnail">`
+            : '<span class="payment-qr-empty">No QR uploaded</span>';
+    });
+}
+
 async function loadAdminContentDashboard() {
     try {
         const res = await fetch(apiUrl('/api/content'));
@@ -2813,8 +2844,7 @@ async function loadAdminContentDashboard() {
         scheduleContent = Object.assign(getDefaultBackendContent(), content);
         manualStandingsDraft = null;
         if (Array.isArray(content.announcements)) writeJson(ANNOUNCEMENTS_KEY, content.announcements);
-        const zelleEl = document.getElementById('zelle');
-        if (zelleEl) zelleEl.value = JSON.stringify(content.zelle || {}, null, 2);
+        renderPaymentQrPreviews(content.zelle || {});
         updateDashboardSummary();
         renderParkListEditor();
         renderAnnouncements?.();
@@ -3032,7 +3062,6 @@ async function sendScheduleNotification() {
 async function saveDashboardContent(fields) {
     try {
         const current = Object.assign(getDefaultBackendContent(), content || {}, scheduleContent || {});
-        if (fields.includes('zelle')) current.zelle = JSON.parse(document.getElementById('zelle')?.value || '{}');
         if (fields.includes('parks')) {
             current.parks = [...new Set((document.getElementById('parks-list-editor')?.value || '').split(/\r?\n/).map(park => park.trim()).filter(Boolean))];
             if (!current.parks.length) throw new Error('Add at least one park before saving.');
@@ -3058,7 +3087,6 @@ async function saveDashboardContent(fields) {
     }
 }
 loadAdminContentDashboard();
-document.getElementById('saveZelleBtn')?.addEventListener('click', () => saveDashboardContent(['zelle']));
 document.querySelectorAll('[data-qr-provider]').forEach(input => {
     input.addEventListener('change', async () => {
         const provider = input.dataset.qrProvider;
@@ -3074,12 +3102,10 @@ document.querySelectorAll('[data-qr-provider]').forEach(input => {
             const response = await fetch(uploadUrl, { method: 'POST', headers: window.apiHeaders(), body: formData });
             const result = await response.json().catch(() => ({}));
             if (!response.ok || result.success === false) throw new Error(result.error || `HTTP ${response.status}`);
-            let zelleData = {};
-            try { zelleData = JSON.parse(document.getElementById('zelle')?.value || '{}'); } catch (e) { zelleData = {}; }
-            zelleData.qrCodes = Object.assign({}, zelleData.qrCodes, { [provider]: result.url });
-            document.getElementById('zelle').value = JSON.stringify(zelleData, null, 2);
+            const zelleData = result.zelle || (content && content.zelle) || {};
             if (content) content.zelle = zelleData;
             if (scheduleContent) scheduleContent.zelle = zelleData;
+            renderPaymentQrPreviews(zelleData);
             localStorage.setItem('lamslPaymentQrUpdateV1', JSON.stringify({ provider, url: result.url, uploadedAt: Date.now() }));
             if (status) status.textContent = 'Uploaded: ' + result.url;
         } catch (err) {
@@ -3090,6 +3116,33 @@ document.querySelectorAll('[data-qr-provider]').forEach(input => {
                 : 'Upload failed: ' + err.message;
         }
         input.value = '';
+    });
+});
+document.querySelectorAll('[data-qr-delete-provider]').forEach(button => {
+    button.addEventListener('click', async () => {
+        const provider = button.dataset.qrDeleteProvider;
+        if (!window.confirm(`Delete the ${provider} QR code?`)) return;
+        const status = document.querySelector(`[data-qr-status="${provider}"]`);
+        button.disabled = true;
+        try {
+            const response = await fetch(apiUrl('/api/delete-payment-qr'), {
+                method: 'POST',
+                headers: window.apiHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify({ provider })
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok || result.success === false) throw new Error(result.error || `HTTP ${response.status}`);
+            const zelleData = result.zelle || {};
+            if (content) content.zelle = zelleData;
+            if (scheduleContent) scheduleContent.zelle = zelleData;
+            renderPaymentQrPreviews(zelleData);
+            localStorage.setItem('lamslPaymentQrUpdateV1', JSON.stringify({ provider, deleted: true, updatedAt: Date.now() }));
+            if (status) status.textContent = result.deletedFiles ? 'QR code deleted.' : 'No QR code was saved.';
+        } catch (error) {
+            if (status) status.textContent = 'Delete failed: ' + error.message;
+        } finally {
+            button.disabled = false;
+        }
     });
 });
 document.getElementById('save-parks-btn')?.addEventListener('click', () => saveDashboardContent(['parks']));

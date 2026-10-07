@@ -255,48 +255,6 @@ h1, h2, h3 {
 .payment-link-btn:hover {
     background: #C86A2F;
 }
-.payment-edit-form {
-    margin-top: 12px;
-    display: grid;
-    grid-template-columns: 120px 1fr;
-    gap: 6px 10px;
-    align-items: center;
-    border-top: 1px solid #ddd;
-    padding-top: 10px;
-}
-.payment-edit-form label {
-    font-weight: 700;
-    font-size: 13px;
-    color: #12324A;
-    text-transform: uppercase;
-}
-.payment-edit-form input {
-    padding: 7px 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
-    width: 100%;
-    box-sizing: border-box;
-}
-.payment-save-btn {
-    grid-column: 1 / -1;
-    background: #C86A2F;
-    color: white;
-    border: none;
-    border-radius: 7px;
-    padding: 8px 14px;
-    cursor: pointer;
-    font-family: 'Oswald', 'Barlow Condensed', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    margin-top: 4px;
-    transition: background 0.2s;
-}
-.payment-save-btn:hover {
-    background: #12324A;
-}
-
 /* ===== NAVBAR ===== */
 header {
     background: #12324A;
@@ -819,16 +777,6 @@ input[type="submit"]:disabled{
             <h2>League Registration Fee &mdash; Click Link to Submit Payment</h2>
             <div class="payment-links" id="payment-links-display"></div>
             <div id="payment-qr-display" style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:12px;"></div>
-            <div class="payment-edit-form" id="payment-edit-form" style="display:none;">
-                <label>Zelle</label>
-                <input id="pay-zelle" type="url" placeholder="Zelle link or phone/email...">
-                <label>PayPal</label>
-                <input id="pay-paypal" type="url" placeholder="https://paypal.me...">
-                <label>Google Pay</label>
-                <input id="pay-googlepay" type="url" placeholder="https://pay.google.com/..."></input>
-                <label>Venmo</label>
-                <input id="pay-venmo" type="url" placeholder="https://venmo.com/..."></input>
-            </div>
         </section>
 
         <section class="card home-region region-notifications">
@@ -885,7 +833,6 @@ input[type="submit"]:disabled{
 const USERS_KEY = 'lamslUsersV1';
 const SESSION_KEY = 'lamslSessionV1';
 const ANNOUNCEMENTS_KEY = 'lamslAnnouncementsV1';
-const PAYMENT_KEY = 'lamslPaymentLinksV1';
 // Use central backend base (can be overridden via localStorage LAMSL_BACKEND)
 const BACKEND_URL = window.BACKEND_BASE || 'https://lamsl-backend.onrender.com';
 
@@ -903,7 +850,6 @@ const emailSignupForm = document.getElementById('email-signup-form');
 const emailInput = document.getElementById('email-input');
 const messageBox = document.getElementById('email-signup-message');
 const paymentLinksDisplay = document.getElementById('payment-links-display');
-const paymentEditForm = document.getElementById('payment-edit-form');
 
 function readJson(key, fallback) {
     try {
@@ -995,14 +941,15 @@ function isAdminLoggedIn() {
 
 // ===== PAYMENT LINKS =====
 const PAYMENT_PROVIDERS = [
-    { key: 'zelle',     inputId: 'pay-zelle',     label: '💸 Zelle'      },
-    { key: 'paypal',    inputId: 'pay-paypal',    label: '🅿 PayPal'     },
-    { key: 'googlepay', inputId: 'pay-googlepay', label: '🇬 Google Pay' },
-    { key: 'venmo',     inputId: 'pay-venmo',     label: '✔ Venmo'      },
+    { key: 'zelle',     label: '💸 Zelle'      },
+    { key: 'paypal',    label: '🅿 PayPal'     },
+    { key: 'googlepay', label: '🇬 Google Pay' },
+    { key: 'venmo',     label: '✔ Venmo'      },
 ];
 
-function renderPaymentLinks() {
-    const links = readJson(PAYMENT_KEY, {});
+function renderPaymentLinks(links = {}) {
+    links = links && typeof links === 'object' ? links : {};
+    links = links && typeof links === 'object' ? links : {};
     paymentLinksDisplay.innerHTML = '';
     let hasAny = false;
     PAYMENT_PROVIDERS.forEach(p => {
@@ -1021,26 +968,6 @@ function renderPaymentLinks() {
     if (!hasAny) {
         paymentLinksDisplay.innerHTML = '<em style="color:#888;font-size:14px;">Payment links not yet configured by admin.</em>';
     }
-    // Populate edit inputs
-    PAYMENT_PROVIDERS.forEach(p => {
-        const input = document.getElementById(p.inputId);
-        if (input) input.value = links[p.key] || '';
-    });
-}
-
-function savePaymentLinks() {
-    if (!isAdminLoggedIn()) return;
-    const links = {};
-    PAYMENT_PROVIDERS.forEach(p => {
-        const input = document.getElementById(p.inputId);
-        if (input && input.value.trim()) links[p.key] = input.value.trim();
-    });
-    writeJson(PAYMENT_KEY, links);
-    renderPaymentLinks();
-}
-
-function applyPaymentSection() {
-    paymentEditForm.style.display = isAdminLoggedIn() ? 'grid' : 'none';
 }
 
 function escapeHtml(value) {
@@ -1298,7 +1225,6 @@ window.addEventListener('focus', () => {
 ensureDefaults();
 if (announcementsList) announcementsList.innerHTML = '<div class="card">Loading announcements...</div>';
 renderPaymentLinks();
-applyPaymentSection();
 applyUploadPermissions();
 
 // Autoplay every 20 seconds
@@ -1532,7 +1458,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!res.ok) throw new Error(`Backend content fetch failed ${res.status}`);
     const data = await res.json();
     backendLoaded = true;
-    window.lamslContent = data || {};
+        window.lamslContent = data || {};
+        renderPaymentLinks(data.paymentLinks || {});
 
     backendSchedule = getBackendSchedule(data);
     if (Array.isArray(backendSchedule) && backendSchedule.length > 0) {

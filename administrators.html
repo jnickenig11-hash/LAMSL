@@ -3079,12 +3079,13 @@ document.querySelectorAll('[data-qr-provider]').forEach(input => {
         const status = document.querySelector(`[data-qr-status="${provider}"]`);
         const file = input.files && input.files[0];
         if (!file) return;
+        const uploadUrl = apiUrl('/api/upload-payment-qr');
         try {
             if (status) status.textContent = 'Uploading...';
             const formData = new FormData();
             formData.append('provider', provider);
             formData.append('qr', file);
-            const response = await fetch(apiUrl('/api/upload-payment-qr'), { method: 'POST', headers: window.apiHeaders(), body: formData });
+            const response = await fetch(uploadUrl, { method: 'POST', headers: window.apiHeaders(), body: formData });
             const result = await response.json().catch(() => ({}));
             if (!response.ok || result.success === false) throw new Error(result.error || `HTTP ${response.status}`);
             let zelleData = {};
@@ -3095,7 +3096,11 @@ document.querySelectorAll('[data-qr-provider]').forEach(input => {
             localStorage.setItem('lamslPaymentQrUpdateV1', JSON.stringify({ provider, url: result.url, uploadedAt: Date.now() }));
             if (status) status.textContent = 'Uploaded: ' + result.url;
         } catch (err) {
-            if (status) status.textContent = 'Upload failed: ' + err.message;
+            console.error('Payment QR upload failed', { provider, uploadUrl, fileName: file.name, fileSize: file.size }, err);
+            const networkFailure = err.message === 'Failed to fetch';
+            if (status) status.textContent = networkFailure
+                ? `Could not reach ${uploadUrl} for ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB). Check the backend URL and browser Network/Console details.`
+                : 'Upload failed: ' + err.message;
         }
         input.value = '';
     });

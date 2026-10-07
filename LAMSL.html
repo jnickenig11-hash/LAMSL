@@ -864,7 +864,6 @@ function writeJson(key, value) {
 }
 
 function apiUrl(path) {
-    if (window.apiUrl) return window.apiUrl(path);
     if (path && (path.startsWith('http://') || path.startsWith('https://'))) return path;
     return BACKEND_URL.replace(/\/$/, '') + (path.startsWith('/') ? path : '/' + path);
 }

@@ -1146,6 +1146,8 @@ input[type="submit"]:disabled{
                         <option value="C">Division C</option>
                         <option value="D">Division D</option>
                         <option value="E">Division E</option>
+                        <option value="W1" data-winter-only="1">Winter Division 1</option>
+                        <option value="W2" data-winter-only="1">Winter Division 2</option>
                     </select>
                     <select id="game-team1" required disabled>
                         <option value="">Select Team 1</option>
@@ -1236,6 +1238,8 @@ input[type="submit"]:disabled{
                                 <option value="C">Division C</option>
                                 <option value="D">Division D</option>
                                 <option value="E">Division E</option>
+                                <option value="W1" data-winter-only="1">Winter Division 1</option>
+                                <option value="W2" data-winter-only="1">Winter Division 2</option>
                             </select>
                             <select id="practice-team1" required disabled>
                                 <option value="">Select Team 1</option>
@@ -1247,6 +1251,8 @@ input[type="submit"]:disabled{
                                 <option value="C">Division C</option>
                                 <option value="D">Division D</option>
                                 <option value="E">Division E</option>
+                                <option value="W1" data-winter-only="1">Winter Division 1</option>
+                                <option value="W2" data-winter-only="1">Winter Division 2</option>
                             </select>
                             <select id="practice-team2" required disabled>
                                 <option value="">Select Team 2</option>
@@ -4016,6 +4022,8 @@ initializeAdminScheduleDashboard();
         const raw = String(value || '').trim();
         const upper = raw.toUpperCase();
         if (upper === 'ALL' || raw === 'All') return 'ALL';
+        if (['WINTER DIV 1','WINTER DIVISION 1','WINTER1','WINTER 1','DIVISION W1','W1'].includes(upper)) return 'W1';
+        if (['WINTER DIV 2','WINTER DIVISION 2','WINTER2','WINTER 2','DIVISION W2','W2'].includes(upper)) return 'W2';
         const match = upper.match(/DIVISION\s*([A-E])|^([A-E])$/);
         return match ? (match[1] || match[2]) : '';
     }
@@ -5375,6 +5383,36 @@ document.addEventListener('DOMContentLoaded', ()=> setTimeout(syncUsersFromBacke
     document.getElementById('manager-division-select')?.addEventListener('change', populateManagerAssignmentFields);
   });
   window.addEventListener('storage', enforceAdminOnlyRegions);
+})();
+</script>
+
+<script id="winter-division-season-toggle">
+(function(){
+  const ids = ['game-division','practice-div1','practice-div2'];
+  const stash = {};
+  function isWinter(){
+    try { const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null'); return !!s && String(s.name || '').trim().toLowerCase() === 'winter'; } catch(e) { return false; }
+  }
+  function sync(){
+    const winter = isWinter();
+    ids.forEach(id => {
+      const sel = document.getElementById(id); if (!sel) return;
+      if (!stash[id]) stash[id] = [...sel.querySelectorAll('option[data-winter-only]')].map(o => o.cloneNode(true));
+      const present = sel.querySelectorAll('option[data-winter-only]');
+      if (winter && !present.length) {
+        stash[id].forEach(o => sel.appendChild(o.cloneNode(true)));
+      } else if (!winter && present.length) {
+        const hadWinter = /^W[12]$/.test(sel.value);
+        present.forEach(o => o.remove());
+        if (hadWinter) { sel.value = ''; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+      }
+    });
+  }
+  document.addEventListener('DOMContentLoaded', sync);
+  window.addEventListener('storage', sync);
+  document.addEventListener('submit', () => setTimeout(sync, 0));
+  setInterval(sync, 1000);
+  sync();
 })();
 </script>
 

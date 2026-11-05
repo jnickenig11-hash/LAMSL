@@ -1555,7 +1555,9 @@ const DEFAULT_TEAMS_BY_DIVISION = {
     B: ['Cubs','Primos','Dodgers','Diablos','Charros','Doom Squad'],
     C: ['Demons', 'Naranjeros', 'Caballeros', 'Salvajes', 'Coyotes', 'Bandits', 'Orioles', 'Goodfellas'],
     D: ['Strokes', 'Dirt Bags', 'Camaradas', 'Wild Hogz', 'Los Pericos', 'Xolos', 'Desvelados'],
-    E: []
+    E: [],
+    W1: ['Titans','La Tribu','Legends',"LAMSL OG's",'Charros','Goodfellas'],
+    W2: ['Wild Hogz','Showtime','Diablos','Balls Out','Peloteros','Hitmen','Bastards','Coyotes']
 };
 let scheduleContent = null;
 const MAX_GAMES_PER_FIELD_PER_DAY = 4;
@@ -1900,11 +1902,36 @@ function confirmWithButtons(message, confirmLabel) {
     });
 }
 
+const WINTER_DIVISIONS = ['W1', 'W2'];
+
+function isWinterSeasonActive() {
+    const sources = [readJson(SEASON_KEY, null)];
+    [window.scheduleContent, typeof scheduleContent !== 'undefined' ? scheduleContent : null, window.lamslContentCache].forEach(c => {
+        if (c && typeof c === 'object') sources.push(c.season, c.activeSeason, c.seasonSettings);
+    });
+    const season = sources.find(s => s && typeof s === 'object' && s.name);
+    return !!season && /winter/i.test(String(season.name));
+}
+window.isWinterSeasonActive = isWinterSeasonActive;
+
+// Hides winter divisions (and their teams) unless Winter is the active season.
+function filterSeasonDivisions(map) {
+    if (isWinterSeasonActive() || !map) return map;
+    const out = {};
+    Object.keys(map).forEach(key => { if (!WINTER_DIVISIONS.includes(key)) out[key] = map[key]; });
+    return out;
+}
+window.filterSeasonDivisions = filterSeasonDivisions;
+
 function getDivisionMap() {
-    return applyDeletedTeams(readJson(DIVISIONS_KEY, JSON.parse(JSON.stringify(DEFAULT_TEAMS_BY_DIVISION))));
+    return filterSeasonDivisions(applyDeletedTeams(readJson(DIVISIONS_KEY, JSON.parse(JSON.stringify(DEFAULT_TEAMS_BY_DIVISION)))));
 }
 
 function saveDivisionMap(map) {
+    if (!isWinterSeasonActive()) {
+        const stored = readJson(DIVISIONS_KEY, {}) || {};
+        WINTER_DIVISIONS.forEach(key => { if (stored[key] && !map[key]) map[key] = stored[key]; });
+    }
     writeJson(DIVISIONS_KEY, map);
     teamsByDivision = map;
     renderManualStandingsEditor();
@@ -2024,7 +2051,8 @@ function setManualStandingsStatus(message) {
 function getManualDivisionList() {
     const divisionMap = getDivisionMap();
     const draft = ensureManualStandingsDraft();
-    return Array.from(new Set([...Object.keys(divisionMap || {}), ...Object.keys(draft || {})])).filter(Boolean).sort();
+    const winter = isWinterSeasonActive();
+    return Array.from(new Set([...Object.keys(divisionMap || {}), ...Object.keys(draft || {})])).filter(key => key && (winter || !WINTER_DIVISIONS.includes(key))).sort();
 }
 
 function getManualTeamsForDivision(division) {
@@ -4578,7 +4606,7 @@ initializeAdminScheduleDashboard();
     try{localStorage.setItem('lamslDivisionsV1',JSON.stringify(map)); localStorage.setItem('lamslWeeklyScheduleV3',JSON.stringify(games)); localStorage.setItem('lamslPracticeScheduleV1',JSON.stringify(practices));}catch(e){}
     return {map,games,practices};
   }
-  function teamsFor(div){const d=normDiv(div); return d==='ALL'||!d?uniq(Object.values(lastTeamMap).flat()):uniq(lastTeamMap[d]||[]);}
+  function teamsFor(div){const d=normDiv(div); const m=window.filterSeasonDivisions?window.filterSeasonDivisions(lastTeamMap):lastTeamMap; return d==='ALL'||!d?uniq(Object.values(m).flat()):uniq(m[d]||[]);}
   function fillSelect(id,label,items,previous){
     const sel=document.getElementById(id); if(!sel) return;
     const keep=previous ?? sel.value;
@@ -4781,7 +4809,7 @@ initializeAdminScheduleDashboard();
     writeJson(LS.divisions, state.teams); writeJson(LS.schedule, games); writeJson(LS.practice, practices);
     return state;
   }
-  function teamsFor(div){ const d = normDiv(div); return d === 'ALL' ? uniq(Object.values(state.teams).flat()) : uniq(state.teams[d] || []); }
+  function teamsFor(div){ const d = normDiv(div); const m = window.filterSeasonDivisions ? window.filterSeasonDivisions(state.teams) : state.teams; return d === 'ALL' ? uniq(Object.values(m).flat()) : uniq(m[d] || []); }
   function fillSelect(id, label, items){
     const el = $(id); if (!el) return;
     const old = el.value;
@@ -5271,7 +5299,8 @@ document.addEventListener('DOMContentLoaded', ()=> setTimeout(syncUsersFromBacke
   function teamsByDivision(){
     const fallback = {A:['Titans','La Tribu','Nasty Boyz','Toxic','White Sox','Legends'],B:['Cubs','Primos','Dodgers','Diablos','Charros','Doom Squad'],C:['Demons','Naranjeros','Caballeros','Salvajes','Coyotes','Bandits','Orioles','Goodfellas'],D:['Strokes','Dirt Bags','Camaradas','Wild Hogz','Los Pericos','Xolos','Desvelados'],E:[]};
     const saved = readJson(DIVISIONS_KEY, null);
-    return saved && typeof saved === 'object' ? {...fallback, ...saved} : fallback;
+    const all = saved && typeof saved === 'object' ? {...fallback, ...saved} : fallback;
+    return window.filterSeasonDivisions ? window.filterSeasonDivisions(all) : all;
   }
   function initManagerAssignmentFields(){
     const role = document.getElementById('new-user-role');
@@ -5391,10 +5420,19 @@ document.addEventListener('DOMContentLoaded', ()=> setTimeout(syncUsersFromBacke
   const ids = ['game-division','practice-div1','practice-div2'];
   const stash = {};
   function isWinter(){
-    try { const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null'); return !!s && String(s.name || '').trim().toLowerCase() === 'winter'; } catch(e) { return false; }
+    if (window.isWinterSeasonActive) return window.isWinterSeasonActive();
+    try { const s = JSON.parse(localStorage.getItem('lamslSeasonV1') || 'null'); return !!s && /winter/i.test(String(s.name || '')); } catch(e) { return false; }
   }
+  let lastWinter = null;
   function sync(){
     const winter = isWinter();
+    if (lastWinter !== null && lastWinter !== winter) {
+      try { renderDivisionManager(); } catch(e) {}
+      try { renderManualStandingsEditor(); } catch(e) {}
+      const mgr = document.getElementById('manager-division-select');
+      if (mgr) mgr.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    lastWinter = winter;
     ids.forEach(id => {
       const sel = document.getElementById(id); if (!sel) return;
       if (!stash[id]) stash[id] = [...sel.querySelectorAll('option[data-winter-only]')].map(o => o.cloneNode(true));

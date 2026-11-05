@@ -1837,8 +1837,65 @@ function ensureDefaults() {
     }
 }
 
+const DELETED_TEAMS_KEY = 'lamslDeletedTeamsV1';
+
+function getDeletedTeams() {
+    const list = readJson(DELETED_TEAMS_KEY, []);
+    const remote = (typeof scheduleContent !== 'undefined' && scheduleContent && Array.isArray(scheduleContent.deletedTeams)) ? scheduleContent.deletedTeams : [];
+    return [...(Array.isArray(list) ? list : []), ...remote].filter(item => item && item.division && item.team);
+}
+
+function recordDeletedTeam(division, team) {
+    const list = getDeletedTeams().filter(item => !(item.division === division && String(item.team).toLowerCase() === String(team).toLowerCase()));
+    list.push({ division, team });
+    writeJson(DELETED_TEAMS_KEY, list);
+    return list;
+}
+
+// Removes deleted teams from a division map so rebuilds from defaults/pages/games don't resurrect them.
+function applyDeletedTeams(map) {
+    const deleted = getDeletedTeams();
+    if (!map || !deleted.length) return map;
+    deleted.forEach(({ division, team }) => {
+        if (Array.isArray(map[division])) {
+            map[division] = map[division].filter(t => String(t).toLowerCase() !== String(team).toLowerCase());
+        }
+    });
+    return map;
+}
+window.applyDeletedTeams = applyDeletedTeams;
+
+function confirmWithButtons(message, confirmLabel) {
+    return new Promise(resolve => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100000;display:flex;align-items:center;justify-content:center;';
+        const box = document.createElement('div');
+        box.style.cssText = 'background:#fff;color:#111;padding:20px;border-radius:8px;max-width:420px;width:90%;box-shadow:0 8px 30px rgba(0,0,0,.4);';
+        const text = document.createElement('p');
+        text.textContent = message;
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;margin-top:16px;';
+        const finish = result => { overlay.remove(); resolve(result); };
+        const cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.addEventListener('click', () => finish(false));
+        const okBtn = document.createElement('button');
+        okBtn.type = 'button';
+        okBtn.textContent = confirmLabel || 'Confirm';
+        okBtn.style.cssText = 'background:#9b1c1c;color:#fff;border:0;border-radius:6px;padding:8px 12px;cursor:pointer;';
+        okBtn.addEventListener('click', () => finish(true));
+        row.append(cancelBtn, okBtn);
+        box.append(text, row);
+        overlay.appendChild(box);
+        overlay.addEventListener('click', e => { if (e.target === overlay) finish(false); });
+        document.body.appendChild(overlay);
+        cancelBtn.focus();
+    });
+}
+
 function getDivisionMap() {
-    return readJson(DIVISIONS_KEY, JSON.parse(JSON.stringify(DEFAULT_TEAMS_BY_DIVISION)));
+    return applyDeletedTeams(readJson(DIVISIONS_KEY, JSON.parse(JSON.stringify(DEFAULT_TEAMS_BY_DIVISION))));
 }
 
 function saveDivisionMap(map) {
@@ -2172,7 +2229,7 @@ function renderDivisionTeamList() {
         removeBtn.type = 'button';
         removeBtn.className = 'remove-btn';
         removeBtn.textContent = 'Remove';
-        removeBtn.addEventListener('click', () => {
+        removeBtn.addEventListener('click', async () => {
             if (!isAdminLoggedIn()) {
                 divisionManagerStatus.textContent = 'Sign in as admin first.';
                 return;
@@ -2184,23 +2241,45 @@ function renderDivisionTeamList() {
                 return;
             }
 
-            const token = prompt(`Type DELETE TEAM to confirm removing ${team}.`);
-            if (token !== 'DELETE TEAM') {
-                divisionManagerStatus.textContent = 'Confirmation text did not match. Team was not deleted.';
+            const confirmed = await confirmWithButtons(`Final confirmation: permanently delete ${team} from Division ${selectedDivision}?`, 'Yes, Delete Team');
+            if (!confirmed) {
+                divisionManagerStatus.textContent = 'Team delete canceled.';
                 return;
             }
 
             const latestMap = getDivisionMap();
             latestMap[selectedDivision] = (latestMap[selectedDivision] || []).filter(item => item !== team);
+            recordDeletedTeam(selectedDivision, team);
             saveDivisionMap(latestMap);
+            if (typeof scheduleContent !== 'undefined' && scheduleContent) {
+                scheduleContent.divisions = latestMap;
+                scheduleContent.deletedTeams = getDeletedTeams();
+            }
+
+            const normDivKey = value => {
+                const up = String(value || '').trim().toUpperCase().replace(/^DIVISION\s+/, '').replace(/^DIV\s+/, '');
+                if (['WINTER DIV 1', 'WINTER DIVISION 1', 'WINTER1', 'WINTER 1'].includes(up)) return 'W1';
+                if (['WINTER DIV 2', 'WINTER DIVISION 2', 'WINTER2', 'WINTER 2'].includes(up)) return 'W2';
+                if (up === 'ALL DIVISIONS') return 'ALL';
+                return up;
+            };
+            const inOtherDivision = Object.entries(latestMap).some(([div, list]) => div !== selectedDivision && (list || []).some(t => String(t).toLowerCase() === team.toLowerCase()));
+            const belongsToDivision = div => {
+                const key = normDivKey(div);
+                return key === selectedDivision || ((!key || key === 'ALL') && !inOtherDivision);
+            };
 
             const existingGames = getSchedule();
-            const updatedGames = existingGames.filter(game => game.team1 !== team && game.team2 !== team);
-            saveSchedule(updatedGames);
+            const updatedGames = existingGames.filter(game => !((game.team1 === team || game.team2 === team) && belongsToDivision(game.division)));
+            await saveSchedule(updatedGames);
 
             const existingPractice = getPracticeSchedule();
-            const updatedPractice = existingPractice.filter(game => game.team1 !== team && game.team2 !== team);
-            savePracticeSchedule(updatedPractice);
+            const updatedPractice = existingPractice.filter(game => {
+                const involvesTeam1 = game.team1 === team && belongsToDivision(game.div1 || game.division1 || game.division);
+                const involvesTeam2 = game.team2 === team && belongsToDivision(game.div2 || game.division2 || game.division);
+                return !(involvesTeam1 || involvesTeam2);
+            });
+            await savePracticeSchedule(updatedPractice);
 
             const removedGameCount = existingGames.length - updatedGames.length;
             const removedPracticeCount = existingPractice.length - updatedPractice.length;
@@ -3313,7 +3392,7 @@ if (renameDivisionButton) {
 }
 
 if (deleteDivisionButton) {
-    deleteDivisionButton.addEventListener('click', () => {
+    deleteDivisionButton.addEventListener('click', async () => {
         if (!isAdminLoggedIn()) {
             divisionManagerStatus.textContent = 'Sign in as admin first.';
             return;
@@ -3331,9 +3410,9 @@ if (deleteDivisionButton) {
             return;
         }
 
-        const token = prompt(`Type DELETE DIVISION ${selectedDivision} to confirm.`);
-        if (token !== `DELETE DIVISION ${selectedDivision}`) {
-            divisionManagerStatus.textContent = 'Confirmation text did not match. Division was not deleted.';
+        const confirmed = await confirmWithButtons(`Final confirmation: permanently delete Division ${selectedDivision}?`, 'Yes, Delete Division');
+        if (!confirmed) {
+            divisionManagerStatus.textContent = 'Division delete canceled.';
             return;
         }
 
@@ -3391,6 +3470,8 @@ if (addTeamButton) {
         }
 
         divisionMap[selectedDivision].push(teamName);
+        writeJson(DELETED_TEAMS_KEY, getDeletedTeams().filter(item => !(item.division === selectedDivision && String(item.team).toLowerCase() === teamName.toLowerCase())));
+        if (typeof scheduleContent !== 'undefined' && scheduleContent) scheduleContent.deletedTeams = readJson(DELETED_TEAMS_KEY, []);
         saveDivisionMap(divisionMap);
         newTeamInput.value = '';
         renderDivisionManager(selectedDivision);
@@ -3654,6 +3735,7 @@ function adminBuildTeamMapFromAllSources() {
     });
 
     Object.keys(map).forEach(div => map[div].sort((a,b) => String(a).localeCompare(String(b))));
+    applyDeletedTeams(map);
     teamsByDivision = map;
     writeJson(DIVISIONS_KEY, map);
     return map;
@@ -4024,6 +4106,7 @@ initializeAdminScheduleDashboard();
         });
 
         Object.keys(map).forEach(key => map[key] = [...new Set(map[key].filter(Boolean))].sort((a,b) => a.localeCompare(b)));
+        if (window.applyDeletedTeams) window.applyDeletedTeams(map);
         window.teamsByDivision = map;
         if (typeof teamsByDivision !== 'undefined') teamsByDivision = map;
         try { localStorage.setItem('lamslDivisionsV1', JSON.stringify(map)); } catch (e) {}
@@ -4234,6 +4317,7 @@ initializeAdminScheduleDashboard();
             add(game.div2 || game.division2 || game.division, game.team2);
         });
         Object.keys(map).forEach(key => map[key] = [...new Set(map[key].filter(Boolean))].sort((a,b) => a.localeCompare(b)));
+        if (window.applyDeletedTeams) window.applyDeletedTeams(map);
         window.teamsByDivision = map;
         try { teamsByDivision = map; } catch (e) {}
         writeLS('lamslDivisionsV1', map);
@@ -4479,6 +4563,7 @@ initializeAdminScheduleDashboard();
     games.forEach(g=>{mergeTeam(map,g.division,g.team1); mergeTeam(map,g.division,g.team2);});
     practices.forEach(g=>{mergeTeam(map,g.div1||g.division1||g.division,g.team1); mergeTeam(map,g.div2||g.division2||g.division,g.team2);});
     Object.keys(map).forEach(k=>map[k]=uniq(map[k]));
+    if(window.applyDeletedTeams) window.applyDeletedTeams(map);
     lastTeamMap=map; lastGames=games;
     window.teamsByDivision=map; window.scheduleContent=Object.assign({},content,{gameSchedules:games,practiceSchedules:practices,divisions:map});
     try{ teamsByDivision=map; scheduleContent=window.scheduleContent; }catch(e){}
@@ -4678,6 +4763,7 @@ initializeAdminScheduleDashboard();
     games.forEach(g => { mergeTeam(state.teams, g.division, g.team1); mergeTeam(state.teams, g.division, g.team2); });
     practices.forEach(g => { mergeTeam(state.teams, g.div1 || g.division1 || g.division, g.team1); mergeTeam(state.teams, g.div2 || g.division2 || g.division, g.team2); });
     Object.keys(state.teams).forEach(k => state.teams[k] = uniq(state.teams[k]));
+    if (window.applyDeletedTeams) window.applyDeletedTeams(state.teams);
     state.content = Object.assign({}, content, { divisions: state.teams, gameSchedules: games, practiceSchedules: practices });
     state.games = games;
     state.practices = practices;

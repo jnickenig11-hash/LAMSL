@@ -519,6 +519,27 @@ function validateSchedulingConstraints({ date, time, park, team1, team2, existin
     return '';
 }
 
+function isWinterSeason(data) {
+    const season = (data && (data.season || data.activeSeason || data.seasonSettings)) || readJson('lamslSeasonV1', null);
+    return !!season && /winter/i.test(String(season.name || ''));
+}
+
+// Backend divisions are authoritative; winter divisions only appear during the Winter season.
+function applyBackendDivisions(divisions, data) {
+    if (!divisions || typeof divisions !== 'object') return;
+    const winter = isWinterSeason(data);
+    const next = Object.assign({}, teamsByDivision);
+    Object.entries(divisions).forEach(([division, teams]) => {
+        if (Array.isArray(teams)) next[division] = teams.slice();
+    });
+    if (!winter) {
+        delete next.W1;
+        delete next.W2;
+    }
+    teamsByDivision = next;
+    writeJson(DIVISIONS_KEY, Object.assign({}, readJson(DIVISIONS_KEY, {}), divisions));
+}
+
 async function loadBackendSchedule() {
     try {
         ensureDefaults();
@@ -538,6 +559,7 @@ async function loadBackendSchedule() {
                 ? data.practiceSchedules
                 : localPracticeSchedules
         });
+        applyBackendDivisions(data.divisions, data);
         writeBackendCache();
         updateStoredStandings(scheduleContent.gameSchedules || []);
     } catch (error) {

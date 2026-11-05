@@ -1935,6 +1935,40 @@ function saveDivisionMap(map) {
     writeJson(DIVISIONS_KEY, map);
     teamsByDivision = map;
     renderManualStandingsEditor();
+    syncDivisionsToBackend(map);
+}
+
+// Saves the division/team list to the backend and keeps standings rows in step so
+// the schedule and standings pages pick up added or removed teams.
+async function syncDivisionsToBackend(map) {
+    const status = document.getElementById('division-manager-status');
+    try {
+        if (!isAdminLoggedIn()) return false;
+        if (!scheduleContent) await loadBackendSchedule();
+        if (!scheduleContent) throw new Error('backend content unavailable');
+        const standings = JSON.parse(JSON.stringify(scheduleContent.standings || {}));
+        Object.entries(map).forEach(([division, teams]) => {
+            const rows = standings[division] || {};
+            const next = {};
+            (teams || []).forEach(team => { next[team] = rows[team] || createEmptyStandingRow(); });
+            standings[division] = next;
+        });
+        Object.keys(standings).forEach(division => { if (!map[division]) delete standings[division]; });
+        scheduleContent.divisions = JSON.parse(JSON.stringify(map));
+        scheduleContent.deletedTeams = getDeletedTeams();
+        scheduleContent.standings = standings;
+        const response = await fetch(apiUrl('/api/update'), { method: 'POST', headers: window.apiHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(scheduleContent) });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.success === false) throw new Error(result.error || `HTTP ${response.status}`);
+        if (result.content) scheduleContent = Object.assign(getDefaultBackendContent(), result.content);
+        writeJson(STANDINGS_KEY, scheduleContent.standings || standings);
+        if (status) status.textContent = (status.textContent ? status.textContent + ' ' : '') + 'Saved to backend.';
+        return true;
+    } catch (e) {
+        console.warn('Division backend save failed', e);
+        if (status) status.textContent = (status.textContent ? status.textContent + ' ' : '') + 'Backend save failed: ' + e.message;
+        return false;
+    }
 }
 
 function getSchedule() {

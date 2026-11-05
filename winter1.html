@@ -391,5 +391,50 @@ input[type="submit"]:disabled{
     } catch (e) {}
 })();
 </script>
+<script src="js/backend-config.js"></script>
+<script>
+// ===== BACKEND TEAM LIST SYNC =====
+(function () {
+    const DIVISION = 'W1';
+    function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    async function syncTeams() {
+        try {
+            const base = (window.BACKEND_BASE || 'https://lamsl-backend.onrender.com').replace(/\/$/, '');
+            const res = await fetch(window.apiUrl ? window.apiUrl('/api/content') : base + '/api/content', { cache: 'no-store' });
+            if (!res.ok) return;
+            const data = await res.json();
+            const content = (data && data.content && typeof data.content === 'object') ? data.content : data;
+            const teams = content && content.divisions && content.divisions[DIVISION];
+            if (!Array.isArray(teams)) return;
+            const table = document.querySelector('main table');
+            if (!table) return;
+            const body = table.tBodies[0] || table;
+            const standings = (content.standings && content.standings[DIVISION]) || {};
+            const wanted = new Set(teams.map(t => String(t).toLowerCase()));
+            const shown = new Set();
+            [...body.querySelectorAll('tr')].forEach(tr => {
+                const link = tr.querySelector('td a');
+                if (!link) return;
+                const name = link.textContent.trim();
+                if (!wanted.has(name.toLowerCase())) { tr.remove(); return; }
+                shown.add(name.toLowerCase());
+                const s = standings[name];
+                const tds = tr.querySelectorAll('td');
+                if (s && (Number(s.gp) || Number(s.w) || Number(s.l) || Number(s.t)) && tds.length >= 4) {
+                    tds[1].textContent = s.w || 0; tds[2].textContent = s.l || 0; tds[3].textContent = s.t || 0;
+                }
+            });
+            teams.forEach(team => {
+                if (shown.has(String(team).toLowerCase())) return;
+                const s = standings[team] || {};
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td><a href="team.html?team=${encodeURIComponent(team)}&amp;division=${DIVISION}">${esc(team)}</a></td><td>${s.w || 0}</td><td>${s.l || 0}</td><td>${s.t || 0}</td><td></td>`;
+                body.appendChild(tr);
+            });
+        } catch (e) { console.warn('Could not sync division teams from backend', e); }
+    }
+    syncTeams();
+})();
+</script>
 </body>
 </html>
